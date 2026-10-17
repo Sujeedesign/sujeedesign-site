@@ -22,6 +22,7 @@ import re
 import time
 import uuid
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import httpx
 import pytest
@@ -30,6 +31,12 @@ from app import repo
 from app.security import SESSION_COOKIE
 
 pytestmark = pytest.mark.e2e
+
+
+def _normalise(path: str) -> str:
+    """Chemin comparable : sans barre oblique finale, la racine restant '/'."""
+    return urlsplit(path).path.rstrip("/") or "/"
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SEED_FILE = ROOT / "seed" / "content.json"
@@ -94,9 +101,8 @@ def test_public_pages_and_legacy_urls(client: httpx.Client) -> None:
     for rule in _seed_redirections():
         response = client.get(rule["path"])
         assert response.status_code == rule["code"], f"{rule['path']} -> {response.status_code}"
-        target = rule["target"].split("?")[0].rstrip("/") or "/"
-        location = response.headers.get("location", "")
-        assert location.split("?")[0].rstrip("/").endswith(target), f"{rule['path']} -> {location}"
+        location = urlsplit(response.headers.get("location", "")).path
+        assert _normalise(location) == _normalise(rule["target"]), f"{rule['path']} -> {location}"
 
 
 def test_sitemap_and_health_are_served(client: httpx.Client) -> None:
