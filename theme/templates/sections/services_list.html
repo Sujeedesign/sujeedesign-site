@@ -11,8 +11,8 @@
 {% endif %}
 <section class="section{% if d.get('dense') %} section--dense{% endif %}" id="prestations">
   <div class="container">
-    {% if d.get('label') %}<p class="section-label reveal" style="--d:.05s">{{ d.get('label') }}</p>{% endif %}
-    {% if d.get('title') %}<h2 class="prestations-heading reveal">{{ d.get('title','')|inline }}</h2>{% endif %}
+    <p class="section-label reveal" style="--d:.05s" data-field="label">{{ d.get('label') or '' }}</p>
+    <h2 class="prestations-heading reveal" data-field="title">{{ (d.get('title') or '')|inline }}</h2>
     <div class="reveal" style="--d:.1s">
       {% for item in rows %}
       <a class="svc-row" href="{{ item.href }}">

@@ -434,3 +434,25 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Nœuds de l'éditeur laissés vides.
+   Les gabarits de blocs rendent désormais toujours les nœuds éditables en place,
+   pour que le canevas puisse les cibler (data-field). Quand la valeur est vide,
+   ces nœuds ne doivent rien réserver à l'écran : sans cette règle, un titre ou
+   un libellé vide laisserait sa marge (28 px à 48 px) sur la page publique,
+   alors qu'avant ils n'étaient pas rendus du tout. Aucun effet sur le design :
+   seuls des éléments strictement vides sont masqués.
+--------------------------------------------------------------------------- */
+.bloc-title:empty,
+.page-label:empty,
+.section-label:empty,
+.grid-more:empty,
+.p-intro:empty,
+.prestations-heading:empty,
+.contact-form-label:empty,
+.contact-form-title:empty,
+.contact-form-intro:empty,
+figcaption:empty {
+  display: none;
+}

@@ -11,15 +11,13 @@
 {% if limit %}{% set cards = cards[:limit] %}{% endif %}
 <section class="section{% if d.get('dense') %} section--dense{% endif %}" id="travaux">
   <div class="container">
-    {% if d.get('label') %}<p class="section-label reveal" style="--d:.05s">{{ d.get('label') }}</p>{% endif %}
+    <p class="section-label reveal" style="--d:.05s" data-field="label">{{ d.get('label') or '' }}</p>
     {{ heading_lines(d.get('heading_lines', []), 'travaux-heading reveal') }}
   </div>
   <div class="container">
     <div class="work-grid">
       {% for item in cards %}{{ work_card(item, loop.index0) }}{% endfor %}
     </div>
-    {% if d.get('all_label') %}
-    <div class="grid-more reveal"><a class="text-link" href="/realisations">{{ d.get('all_label') }}</a></div>
-    {% endif %}
+    <div class="grid-more reveal" data-field="all_label">{% if d.get('all_label') %}<a class="text-link" href="/realisations">{{ d.get('all_label') }}</a>{% endif %}</div>
   </div>
 </section>

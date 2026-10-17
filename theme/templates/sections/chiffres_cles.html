@@ -1,10 +1,9 @@
 {% set d = s.data %}
 {% set items = d.get('items', []) %}
-{% if items %}
 <section class="stats reveal">
   <div class="container">
-    {% if d.get('label') %}<p class="section-label reveal">{{ d.get('label') }}</p>{% endif %}
-    {% if d.get('title') %}<h2 class="stats-title">{{ d.get('title')|inline }}</h2>{% endif %}
+    <p class="section-label reveal" data-field="label">{{ d.get('label') or '' }}</p>
+    <h2 class="stats-title" data-field="title">{{ (d.get('title') or '')|inline }}</h2>
     <dl class="stats-grid">
       {% for item in items %}
       <div class="stat">
@@ -15,4 +14,3 @@
     </dl>
   </div>
 </section>
-{% endif %}

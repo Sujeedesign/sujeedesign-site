@@ -1,9 +1,8 @@
 {% set d = s.data %}
 {% set logos = d.get('logos', []) %}
-{% if logos %}
 <section class="logos reveal">
   <div class="container">
-    {% if d.get('label') %}<p class="section-label reveal">{{ d.get('label') }}</p>{% endif %}
+    <p class="section-label reveal" data-field="label">{{ d.get('label') or '' }}</p>
     <ul class="logos-grid">
       {% for logo in logos %}
       <li class="logo-item"><img src="{{ logo.get('src','') }}" alt="{{ logo.get('alt','') }}" loading="lazy" decoding="async"></li>
@@ -11,4 +10,3 @@
     </ul>
   </div>
 </section>
-{% endif %}

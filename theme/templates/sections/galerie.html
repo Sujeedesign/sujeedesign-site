@@ -1,10 +1,9 @@
 {% set d = s.data %}
 {% set images = d.get('images', []) %}
 {% set columns = d.get('columns')|int if d.get('columns') else 3 %}
-{% if images %}
 <section class="gallery reveal">
   <div class="container">
-    {% if d.get('label') %}<p class="gallery-label">{{ d.get('label') }}</p>{% endif %}
+    <p class="gallery-label" data-field="label">{{ d.get('label') or '' }}</p>
     <div class="gallery-grid" style="--cols:{{ columns }}">
       {% for image in images %}
       <figure class="gallery-item">
@@ -15,4 +14,3 @@
     </div>
   </div>
 </section>
-{% endif %}

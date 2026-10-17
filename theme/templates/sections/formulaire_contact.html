@@ -1,16 +1,17 @@
 {% set d = s.data %}
 {# Contact : formulaire groupé en carte (deux colonnes de champs au large) et
    colonne d'informations pratiques en regard. Le contenu de la colonne vient du
-   back office ; sans données, elle ne s'affiche pas. #}
+   back office ; sans titre ni colonne, elle ne s'affiche pas, et le titre reste
+   marqué pour l'édition en place dès qu'il est renseigné. #}
 <section class="page-body section p-final p-final--contact reveal" id="contact">
   <div class="hero-bg" id="pFinalBg" aria-hidden="true"></div>
   <canvas class="hero-shader" id="pFinalShader" aria-hidden="true"></canvas>
   <div class="container">
     <div class="grid-2 contact-grid">
       <div class="contact-form-wrap reveal">
-        {% if d.get('label') %}<p class="page-label contact-form-label">{{ d.get('label') }}</p>{% endif %}
-        {% if d.get('title') %}<h2 class="contact-form-title">{{ d.get('title')|inline }}</h2>{% endif %}
-        {% if d.get('intro') %}<p class="contact-form-intro">{{ d.get('intro') }}</p>{% endif %}
+        <p class="page-label contact-form-label" data-field="label">{{ d.get('label') or '' }}</p>
+        <h2 class="contact-form-title" data-field="title">{{ (d.get('title') or '')|inline }}</h2>
+        <p class="contact-form-intro" data-field="intro">{{ d.get('intro') or '' }}</p>
 
         <form class="contact-form" id="contactForm" method="post" action="/api/contact" novalidate>
           <input type="hidden" name="form_token" value="{{ form_token|default('') }}">
@@ -85,9 +86,12 @@
       </div>
 
       {% set columns = d.get('columns', []) %}
-      {% if columns %}
+      {# Le titre de la colonne est éditable en place : la colonne s'affiche dès
+         qu'elle a un titre ou des colonnes, jamais vide de tout (pas de colonne
+         fantôme à côté du formulaire). #}
+      {% if columns or d.get('aside_title') %}
       <aside class="contact-aside" aria-labelledby="contact-aside-title">
-        <h2 class="contact-aside-title reveal" id="contact-aside-title">{{ d.get('aside_title') or "Infos pratiques" }}</h2>
+        <h2 class="contact-aside-title reveal" id="contact-aside-title" data-field="aside_title">{{ d.get('aside_title') or "Infos pratiques" }}</h2>
         {% for column in columns %}
         <div class="contact-aside-block reveal" style="--d:{{ '%.2f'|format(0.05 * (loop.index + 1)) }}s">
           <h3>{{ column.get('title','') }}</h3>

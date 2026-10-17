@@ -5,8 +5,8 @@
 <section class="section contact p-final p-final--home reveal" id="contact">
   {% if d.get('shader', true) %}<canvas class="hero-shader" id="contactShader" aria-hidden="true"></canvas>{% endif %}
   <div class="container">
-    <p class="section-label contact-label reveal" style="--d:.05s">{{ d.get('kicker','Contact') }}</p>
-    <h2 class="contact-heading reveal">
+    <p class="section-label contact-label reveal" style="--d:.05s" data-field="kicker">{{ d.get('kicker','Contact') }}</p>
+    <h2 class="contact-heading reveal" data-field="title">
       {% set lines = d.get('title_lines', []) %}
       {% if lines %}
         {% for line in lines %}<span class="reveal-line"><span>{{ line|inline }}</span></span>{% endfor %}
@@ -14,7 +14,7 @@
         <span class="reveal-line"><span>{{ d.get('title','')|inline }}</span></span>
       {% endif %}
     </h2>
-    {% if d.get('intro') %}<p class="p-intro reveal" style="--d:.16s">{{ d.get('intro') }}</p>{% endif %}
+    <p class="p-intro reveal" style="--d:.16s" data-field="intro">{{ d.get('intro') or '' }}</p>
     {{ ctas(d.get('ctas', []), 'contact-links p-final-cta reveal', 'style="--d:.2s"') }}
   </div>
 </section>
@@ -26,9 +26,9 @@
   <canvas class="hero-shader" id="pFinalShader" aria-hidden="true"></canvas>
   {% endif %}
   <div class="container">
-    {% if d.get('kicker') %}<p class="p-kicker reveal" style="color:var(--color-paper-solid);--d:.05s">{{ d.get('kicker') }}</p>{% endif %}
-    <h2 class="p-title reveal" style="--d:.08s">{{ d.get('title','')|inline }}</h2>
-    {% if d.get('intro') %}<p class="p-intro reveal" style="margin-inline:auto;text-align:center;max-width:44ch;--d:.16s">{{ d.get('intro') }}</p>{% endif %}
+    <p class="p-kicker reveal" style="color:var(--color-paper-solid);--d:.05s" data-field="kicker">{{ d.get('kicker') or '' }}</p>
+    <h2 class="p-title reveal" style="--d:.08s" data-field="title">{{ d.get('title','')|inline }}</h2>
+    <p class="p-intro reveal" style="margin-inline:auto;text-align:center;max-width:44ch;--d:.16s" data-field="intro">{{ d.get('intro') or '' }}</p>
     {{ ctas(d.get('ctas', []), 'p-final-cta reveal') }}
   </div>
 </section>

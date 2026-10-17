@@ -1,10 +1,9 @@
 {% set d = s.data %}
 {% set steps = d.get('steps', []) %}
-{% if steps %}
 <section class="process reveal">
   <div class="container">
-    {% if d.get('label') %}<p class="section-label reveal">{{ d.get('label') }}</p>{% endif %}
-    {% if d.get('title') %}<h2 class="bloc-title">{{ d.get('title')|inline }}</h2>{% endif %}
+    <p class="section-label reveal" data-field="label">{{ d.get('label') or '' }}</p>
+    <h2 class="bloc-title" data-field="title">{{ (d.get('title') or '')|inline }}</h2>
     <ol class="process-grid">
       {% for step in steps %}
       <li class="process-step">
@@ -16,4 +15,3 @@
     </ol>
   </div>
 </section>
-{% endif %}

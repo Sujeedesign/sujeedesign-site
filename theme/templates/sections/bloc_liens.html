@@ -1,7 +1,7 @@
 {% set d = s.data %}
 <section class="related reveal">
   <div class="container">
-    {% if d.get('label') %}<p class="related-label">{{ d.get('label') }}</p>{% endif %}
+    <p class="related-label" data-field="label">{{ d.get('label') or '' }}</p>
     <div class="related-grid">
       {% for item in items|default([]) %}
       <a class="rel-card" href="{{ item.href }}">

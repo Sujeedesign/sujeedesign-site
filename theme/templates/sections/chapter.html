@@ -3,10 +3,10 @@
   <div class="container">
     <div class="chap">
       <div class="chap-head">
-        {% if d.get('kicker') %}<span class="type">{{ d.get('kicker') }}</span>{% endif %}
-        {% if d.get('title') %}<h2 class="chap-title">{{ d.get('title')|inline }}</h2>{% endif %}
+        <span class="type" data-field="kicker">{{ d.get('kicker') or '' }}</span>
+        <h2 class="chap-title" data-field="title">{{ (d.get('title') or '')|inline }}</h2>
       </div>
-      <div class="chap-body">
+      <div class="chap-body" data-field="body">
         {{ d.get('body','')|rich }}
         {% set items = d.get('list', []) %}
         {% if items %}

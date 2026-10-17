@@ -2,8 +2,8 @@
 {% set d = s.data %}
 <section class="section" id="manifeste">
   <div class="container">
-    {% if d.get('label') %}<p class="section-label reveal">{{ d.get('label') }}</p>{% endif %}
+    <p class="section-label reveal" data-field="label">{{ d.get('label') or '' }}</p>
     {{ heading_lines(d.get('heading_lines', []), 'manifeste-heading reveal') }}
-    {% if d.get('text') %}<p class="manifeste-text" id="manifesteText">{{ d.get('text') }}</p>{% endif %}
+    <p class="manifeste-text" id="manifesteText" data-field="text">{{ d.get('text') or '' }}</p>
   </div>
 </section>

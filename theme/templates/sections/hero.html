@@ -32,11 +32,11 @@
 {% elif variant == 'page' %}
 <section class="p-hero">
   <div class="container">
-    {% if d.get('kicker') %}<p class="p-kicker">{{ d.get('kicker') }}</p>{% endif %}
-    <h1 class="p-title">{{ d.get('title','')|inline }}</h1>
+    <p class="p-kicker" data-field="kicker">{{ d.get('kicker') or '' }}</p>
+    <h1 class="p-title" data-field="title">{{ d.get('title','')|inline }}</h1>
     {% set meta = d.get('meta', []) %}
     {% if meta %}<div class="p-meta">{% for item in meta %}<span>{{ item }}</span>{% endfor %}</div>{% endif %}
-    {% if d.get('intro') %}<p class="p-intro">{{ d.get('intro') }}</p>{% endif %}
+    <p class="p-intro" data-field="intro">{{ d.get('intro') or '' }}</p>
     {# L'emplacement des actions est toujours rendu : la bande garde la même
        hauteur que les pages qui, elles, portent un bouton. #}
     {% if d.get('ctas') %}{{ ctas(d.get('ctas')) }}{% else %}<div class="hero-ctas" aria-hidden="true"></div>{% endif %}
@@ -55,11 +55,11 @@
   {% endif %}
   <div class="project-cover__shade" aria-hidden="true"></div>
   <div class="container project-cover__inner">
-    <a class="project-back" href="{{ d.get('back_href', '/realisations') }}"><span aria-hidden="true">←</span> {{ d.get('back_label', 'Toutes les réalisations') }}</a>
+    <a class="project-back" href="{{ d.get('back_href', '/realisations') }}" data-field="back_label"><span aria-hidden="true">←</span> {{ d.get('back_label', 'Toutes les réalisations') }}</a>
     <div class="project-cover__content">
-      {% if d.get('kicker') %}<p class="p-kicker">{{ d.get('kicker') }}</p>{% endif %}
-      <h1 class="p-title" id="project-title">{{ d.get('title','')|inline }}</h1>
-      {% if d.get('intro') %}<p class="p-intro">{{ d.get('intro') }}</p>{% endif %}
+      <p class="p-kicker" data-field="kicker">{{ d.get('kicker') or '' }}</p>
+      <h1 class="p-title" id="project-title" data-field="title">{{ d.get('title','')|inline }}</h1>
+      <p class="p-intro" data-field="intro">{{ d.get('intro') or '' }}</p>
       {# Sans photo fournie, le visuel d'ambiance reste seul : pas de cadre vide en public.
          Le champ `image` du back office prend le relais dès qu'une vraie photo existe. #}
     </div>
@@ -69,9 +69,9 @@
 {% else %}
 <section class="page-hero{% if d.get('dense') %} page-hero--dense{% endif %}{% if d.get('wide_title') %} page-hero--wide{% endif %}">
   <div class="container">
-    {% if d.get('kicker') %}<p class="page-label reveal">{{ d.get('kicker') }}</p>{% endif %}
-    <h1 class="page-title reveal" style="--d:.08s">{{ d.get('title','')|inline }}</h1>
-    {% if d.get('intro') %}<p class="page-intro reveal" style="--d:.16s">{{ d.get('intro') }}</p>{% endif %}
+    <p class="page-label reveal" data-field="kicker">{{ d.get('kicker') or '' }}</p>
+    <h1 class="page-title reveal" style="--d:.08s" data-field="title">{{ d.get('title','')|inline }}</h1>
+    <p class="page-intro reveal" style="--d:.16s" data-field="intro">{{ d.get('intro') or '' }}</p>
     {# L'emplacement des actions est toujours rendu, même sans bouton : la hauteur
        de la bande ne dépend pas du contenu (cf. `.page-hero,.p-hero`). #}
     {% if d.get('ctas') %}{{ ctas(d.get('ctas'), 'hero-ctas reveal') }}{% else %}<div class="hero-ctas reveal" aria-hidden="true"></div>{% endif %}

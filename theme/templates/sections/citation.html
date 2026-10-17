@@ -1,16 +1,12 @@
 {% set d = s.data %}
-{% if d.get('quote') %}
 <section class="citation reveal">
   <div class="container">
     <blockquote class="quote">
-      <p class="quote-text">{{ d.get('quote')|rich }}</p>
-      {% if d.get('author') or d.get('role') %}
+      <p class="quote-text" data-field="quote">{{ (d.get('quote') or '')|rich }}</p>
       <footer class="quote-source">
-        {% if d.get('author') %}<cite>{{ d.get('author') }}</cite>{% endif %}
-        {% if d.get('role') %}<span class="quote-role">{{ d.get('role') }}</span>{% endif %}
+        <cite data-field="author">{{ d.get('author') or '' }}</cite>
+        <span class="quote-role" data-field="role">{{ d.get('role') or '' }}</span>
       </footer>
-      {% endif %}
     </blockquote>
   </div>
 </section>
-{% endif %}
