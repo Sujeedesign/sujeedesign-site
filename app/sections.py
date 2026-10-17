@@ -180,6 +180,7 @@ SECTION_TYPES: dict[str, dict[str, Any]] = {
             _f("label", "Libellé"),
             _f("title", "Titre"),
             _f("intro", "Introduction", "textarea"),
+            _f("aside_title", "Titre de la colonne d'infos", default="Infos pratiques"),
             _f("columns", "Colonnes de texte à droite", "items", fields=[_f("title", "Titre"), _f("body", "Texte", "html")]),
         ],
     },

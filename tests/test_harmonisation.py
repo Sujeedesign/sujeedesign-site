@@ -335,7 +335,17 @@ def seeded(site_db: Path) -> Iterator[None]:
         seo_description="Prendre contact.",
         sections=[
             {"type": "hero", "variant": "simple", "data": {"kicker": "Contact", "title": "Parlons-en"}},
-            {"type": "formulaire-contact", "data": {"title": "Votre projet", "columns": []}},
+            {
+                "type": "formulaire-contact",
+                "data": {
+                    "title": "Votre projet",
+                    "aside_title": "Infos pratiques",
+                    "columns": [
+                        {"title": "Disponibilite", "body": "<p>Paris et visio.</p>"},
+                        {"title": "Coordonnees", "body": '<ul class="list-check"><li>contact@exemple.fr</li></ul>'},
+                    ],
+                },
+            },
         ],
     )
     add(
@@ -564,6 +574,78 @@ def test_shared_stylesheet_defines_every_token_it_uses() -> None:
     used = set(re.findall(r"var\((--[\w-]+)", css_text))
     missing = used - defined - INLINE_VARIABLES
     assert missing == set(), "variables CSS utilisées mais non définies : " + ", ".join(sorted(missing))
+
+
+def test_shared_stylesheet_declares_animations_once_and_plays_only_declared_ones() -> None:
+    """Chaque `@keyframes` est déclaré une fois, et le nom joué existe vraiment.
+
+    Une déclaration imbriquée par erreur (`@keyframes x{@keyframes x{…}}`) est
+    ignorée par le navigateur : l'animation est morte sans le moindre message.
+    Le contrôle porte donc sur les deux sens : pas de doublon, et correspondance
+    exacte entre les noms joués par `animation:` et les noms déclarés.
+    """
+    css_text = SITE_CSS.read_text(encoding="utf-8")
+    declared = re.findall(r"@keyframes\s+([\w-]+)", css_text)
+    duplicates = sorted({name for name in declared if declared.count(name) > 1})
+    assert duplicates == [], "animation déclarée deux fois (donc jamais jouée) : " + ", ".join(duplicates)
+
+    played: set[str] = set()
+    for raw in re.findall(r"animation:\s*([^;}]+)", css_text):
+        name = (raw.strip().split() or [""])[0]
+        if not name or name.startswith("none"):
+            continue
+        played.add(name)
+
+    assert played - set(declared) == set(), "animation jouée mais non déclarée : " + ", ".join(sorted(played - set(declared)))
+    assert set(declared) - played == set(), "animation déclarée mais jamais jouée : " + ", ".join(sorted(set(declared) - played))
+
+
+def test_contact_page_puts_the_form_in_a_card_beside_a_labelled_aside(rendered: dict[str, RenderedPage]) -> None:
+    """Le formulaire vit dans une carte, la colonne d'infos vient en regard.
+
+    La colonne est un `<aside>` nommé par son titre, ses blocs sont des h3 (le
+    titre de la colonne reste le h2 de la section) : la hiérarchie de titres
+    reste séquentielle, ce que vérifie par ailleurs
+    `test_heading_hierarchy_is_sequential`.
+    """
+    page = rendered[CONTACT_ROUTE]
+    assert page.dom.token("contact-form-wrap"), "le formulaire doit être posé dans sa carte"
+    assert page.html.index("contact-form-wrap") < page.html.index("contact-aside"), "la carte du formulaire précède la colonne d'infos"
+    assert page.dom.token("contact-aside"), "la colonne d'informations pratiques doit être rendue"
+
+    aside = re.search(r"<aside\b[^>]*>(.*?)</aside>", page.html, re.S)
+    assert aside is not None, "colonne d'infos absente"
+    ouvrant = page.html[: aside.start()]
+    assert re.search(r'<aside[^>]*aria-labelledby="contact-aside-title"', ouvrant + page.html[aside.start() : aside.start() + 200]), (
+        "la colonne doit être nommée par son titre"
+    )
+    assert re.search(r'<h2[^>]*id="contact-aside-title"[^>]*>\s*Infos pratiques', page.html), "titre de colonne manquant"
+    blocs = re.findall(r'class="[^"]*\bcontact-aside-block\b[^"]*"', page.html)
+    assert len(blocs) == 2, f"un bloc par colonne du back office attendu (vu {len(blocs)})"
+    for titre in ("Disponibilite", "Coordonnees"):
+        assert re.search(rf"<h3>\s*{titre}\s*</h3>", page.html), f"le titre de bloc {titre} doit être un h3"
+
+    # Les champs qui occupent toute la largeur de la carte sont marqués dans le gabarit.
+    assert page.html.count("field--wide") >= 4, "type de projet, message, consentement et envoi occupent toute la largeur"
+    assert "<style" not in page.html, "aucun style embarqué : la mise en page vit dans la feuille partagée"
+
+
+def test_every_animation_selector_has_a_reduced_motion_escape() -> None:
+    """Aucune animation ne doit échapper à `prefers-reduced-motion`.
+
+    Le bloc dédié neutralise toutes les animations (durée 0,01 ms, une seule
+    itération) ; ce test garantit qu'il reste présent et qu'il continue de
+    couvrir les sélecteurs animés par des règles ciblées.
+    """
+    css_text = SITE_CSS.read_text(encoding="utf-8")
+    bloc = re.search(r"@media \(prefers-reduced-motion:reduce\)\{(.*?)\n\}", css_text, re.S)
+    assert bloc is not None, "bloc prefers-reduced-motion manquant"
+    contenu = bloc.group(1)
+    assert re.search(r"\*,\*::before,\*::after\{[^}]*animation-duration:\.01ms !important", contenu), (
+        "les animations ne sont pas ramenées à une durée nulle sous mouvement réduit"
+    )
+    for selecteur in (".project-cover__media", ".p-banner .visual", ".marquee-track", ".reveal"):
+        assert selecteur in contenu, f"{selecteur} échappe au mouvement réduit"
 
 
 def test_footer_links_expose_touch_targets() -> None:

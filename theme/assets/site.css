@@ -71,17 +71,18 @@ body.menu-open .menu-overlay a:nth-child(4){transition-delay:.15s}
    HERO — shader liquide WebGL + corridor de projets défilants
    ============================================================ */
 .hero{position:relative;min-height:100svh;display:flex;align-items:center;justify-content:center;color:#ffffff;overflow:hidden;isolation:isolate}
-/* Fallback dégradé iridescent si WebGL indisponible */
-.hero-bg{position:absolute;inset:0;z-index:0;background:var(--gradient-iridescent)}
+/* Fallback dégradé iridescent si WebGL indisponible : il dérive lentement, ce
+   qui garde la bande vivante même sans shader. */
+.hero-bg{position:absolute;inset:0;z-index:0;background:var(--gradient-iridescent);background-size:220% 220%;animation:gradient-pan 26s ease-in-out infinite}
 /* Shader liquide (port du composant nebula, Three.js → WebGL brut) */
 .hero-shader{position:absolute;inset:0;z-index:1;width:100%;height:100%;display:block}
 /* Photo de profil — flottement + inclinaison 3D (remplace le corridor de projets) */
 .hero-figure{position:absolute;left:50%;top:50%;z-index:2;height:70%;aspect-ratio:1200/1357;transform:translate(-50%,-50%);perspective:1100px;pointer-events:none;will-change:transform}
 .hero-float{animation:floaty 9s ease-in-out infinite;will-change:transform}
-@keyframes floaty{@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
 .hero-photo{width:100%;height:100%;display:block;object-fit:cover;transform-style:preserve-3d;will-change:transform}
 .hero-photo-shadow{position:absolute;left:10%;right:10%;bottom:-9%;height:12%;background:radial-gradient(50% 50% at 50% 50%, rgba(0,0,0,.5), transparent 72%);filter:blur(10px);animation:floaty-shadow 9s ease-in-out infinite}
-@keyframes floaty-shadow{@keyframes floaty-shadow{0%,100%{transform:scale(1);opacity:.28}}}
+@keyframes floaty-shadow{0%,100%{transform:scale(1) translateY(0);opacity:.28}50%{transform:scale(1.03) translateY(6px);opacity:.42}}
 .hero-grain{position:absolute;inset:0;z-index:3;opacity:.08;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E")}
 .hero::after{/* vignette douce pour la lisibilité */
   content:"";position:absolute;inset:0;z-index:4;pointer-events:none;background:radial-gradient(120% 100% at 50% 45%, transparent 52%, rgba(0,0,0,.5) 100%)}
@@ -98,10 +99,13 @@ body.loaded .hu{opacity:1;transform:none}
 /* Badge circulaire rotatif — SCROLL DOWN */
 .scroll-badge{position:absolute;left:clamp(20px,4vw,48px);bottom:clamp(20px,4vw,48px);z-index:5;width:104px;height:104px;color:#ffffff;will-change:transform,opacity}
 .scroll-badge svg{width:100%;height:100%;animation:spin 18s linear infinite}
-@keyframes spin{@keyframes spin{to{transform:rotate(360deg)}}}
+@keyframes spin{to{transform:rotate(360deg)}}
 .scroll-badge text{font-family:var(--font-roobert);font-size:9.2px;font-weight:400;letter-spacing:.26em;fill:currentColor}
 .scroll-badge .dot{fill:currentColor;animation:pulse 2.4s ease-in-out infinite}
-@keyframes pulse{@keyframes pulse{0%,100%{opacity:1}50%{opacity:.15}}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.15}}
+/* Le dégradé iridescent des bandeaux dérive lentement : la position de fond
+   s'anime, aucun repeint complet, coût négligeable. */
+@keyframes gradient-pan{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 /* ============================================================
    RÉVÉLATIONS AU SCROLL
    ============================================================ */
@@ -158,7 +162,7 @@ body.loaded .hu{opacity:1;transform:none}
 .marquee:hover .marquee-inner{animation-play-state:paused}
 .mq{display:inline-block;padding-right:.2em;font-size:clamp(52px,7.5vw,94px);font-weight:400;line-height:var(--leading-heading-lg);text-transform:uppercase}
 .mq-dot{color:var(--color-ash-mist);padding-inline:.28em}
-@keyframes marquee-scroll{@keyframes marquee-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}}
+@keyframes marquee-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 /* --- Prestations --- */
 .prestations-heading{font-size:clamp(30px,3.6vw,45px);font-weight:400;line-height:var(--leading-subheading-lg);margin:var(--spacing-28) 0 clamp(48px,6vw,88px)}
 .svc-row{display:grid;grid-template-columns:64px 1fr auto;align-items:baseline;gap:clamp(16px,3vw,40px);padding-block:clamp(22px,3vw,34px);border-top:1px solid rgba(0,0,0,.18);transition:padding-left var(--dur-mid) var(--ease-out);border-top-color:rgba(255,255,255,.14)}
@@ -194,7 +198,7 @@ html{scroll-behavior:auto}
 .marquee-track{animation:none}}
 /* Bande de contact de l'accueil = meme langage que les sections p-final (degrade iridescent + shader) */
 .p-final--home{position:relative;overflow:hidden;isolation:isolate;background:var(--color-obsidian-solid);color:var(--color-paper-solid)}
-.p-final--home::before{content:"";position:absolute;inset:0;z-index:0;background:var(--gradient-iridescent)}
+.p-final--home::before{content:"";position:absolute;inset:0;z-index:0;background:var(--gradient-iridescent);background-size:220% 220%;animation:gradient-pan 22s ease-in-out infinite}
 .p-final--home > .hero-shader{position:absolute;inset:0;z-index:1;width:100%;height:100%;display:block}
 .p-final--home > .container{position:relative;z-index:2}
 .p-final--home .contact-label{color:var(--color-ash-mist)}
@@ -334,7 +338,7 @@ html{scroll-behavior:auto}
 .gallery .work-grid{grid-template-columns:repeat(2,1fr)}
 /* CTA final */
 .p-final{position:relative;overflow:hidden;isolation:isolate;background:var(--color-obsidian-solid);color:var(--color-paper-solid);padding-block:clamp(88px,12vw,150px);text-align:center}
-.p-final .hero-bg{position:absolute;inset:0;z-index:0;background:var(--gradient-iridescent)}
+.p-final .hero-bg{position:absolute;inset:0;z-index:0;background:var(--gradient-iridescent);background-size:220% 220%;animation:gradient-pan 28s ease-in-out infinite}
 .p-final .hero-shader{position:absolute;inset:0;z-index:1;width:100%;height:100%;display:block}
 .p-final .container{position:relative;z-index:2}
 .p-final .p-title{max-width:none}
@@ -354,14 +358,15 @@ html{scroll-behavior:auto}
 .rel-card:hover .rel-idx{color:var(--color-obsidian)}
 .rel-card:hover .rel-arrow{opacity:1;transform:none}
 /* ===== Animations & micro-interactions (pages prestations) ===== */
-/* Entrée du hero au chargement — cascade kicker -> titre -> meta -> intro */
-@keyframes fadeUp{@keyframes fadeUp{from{opacity:0;transform:none}}}
+/* Entrée du hero : les quatre éléments ci-dessous sont posés d'emblée, sans
+   animation (la cascade d'origine n'était plus jouée et sa déclaration était
+   invalide, donc morte) */
 .p-hero .p-kicker{opacity:1!important;animation:none!important;transform:none!important}
 .p-hero .p-title{opacity:1!important;animation:none!important;transform:none!important}
 .p-hero .p-meta{opacity:1!important;animation:none!important;transform:none!important}
 .p-hero .p-intro{opacity:1!important;animation:none!important;transform:none!important}
 /* Bannière : léger élargissement à l'arrivée */
-@keyframes bannerIn{@keyframes bannerIn{from{transform:scale(1.04)}to{transform:scale(1.015)}}}
+@keyframes bannerIn{from{transform:scale(1.04)}to{transform:scale(1.015)}}
 /* Révélation des chapitres au scroll (io .reveal existant) + stagger */
 .s-chap.reveal{transition-delay:var(--d,0s)}
 .gallery.reveal .work-card{transition:transform var(--dur-mid) var(--ease-out)}
@@ -416,7 +421,7 @@ html{scroll-behavior:auto}
 .marquee-group{display:flex;align-items:center;gap:clamp(48px,6vw,96px);flex:none}
 .client-word{font-size:clamp(19px,2.2vw,28px);font-weight:300;letter-spacing:.1em;text-transform:uppercase;color:var(--color-felt-gray);white-space:nowrap;transition:color var(--dur-mid) var(--ease-out)}
 .client-word:hover{color:var(--color-obsidian)}
-@keyframes marquee{@keyframes marquee{to{transform:translateX(-50%)}}}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 .page-hero{background:var(--color-obsidian-solid);color:var(--color-paper-solid);padding:clamp(150px,26vh,300px) 0 clamp(90px,10vh,140px)}
 .page-label{font-size:11px;letter-spacing:.34em;text-transform:uppercase;opacity:.75}
 .page-title{font-size:clamp(46px,7vw,110px);font-weight:400;line-height:1.02;letter-spacing:-0.01em;margin-top:var(--spacing-28);max-width:14ch}
@@ -466,17 +471,24 @@ html{scroll-behavior:auto}
 .section--dense .travaux-heading{margin:var(--spacing-28) 0 clamp(20px,2.6vw,40px)}
 .page-hero--dense + .p-final{padding-top:clamp(56px,8vw,104px)}
 
-/* --- Accueil, au-delà de 720px : texte à gauche, portrait à droite ---- */
+/* --- Accueil, au-delà de 720px : texte à gauche, portrait à droite ----
+   Les deux blocs sont calés sur une même bande centrée : sans elle, le texte
+   reste plafonné à sa largeur de lecture pendant que le portrait se colle au
+   bord de la fenêtre (jusqu'à 755 px de vide sur écran large). */
 @media (min-width:721px){
+.hero{--hero-band:min(1200px,100% - clamp(40px,8vw,96px))}
 .hero::before{content:"";position:absolute;inset:0;z-index:5;pointer-events:none;background:linear-gradient(96deg,rgba(0,0,0,.80) 0%,rgba(0,0,0,.56) 30%,rgba(0,0,0,.16) 52%,rgba(0,0,0,0) 68%)}
-.hero-inner{display:flex;flex-direction:column;align-items:flex-start;text-align:left;max-width:var(--content-max-width);margin-inline:auto;padding:clamp(120px,18vh,210px) min(50vw,600px) clamp(96px,12vh,140px) clamp(20px,4vw,48px)}
+.hero-inner{display:flex;flex-direction:column;align-items:flex-start;text-align:left;max-width:var(--hero-band);margin-inline:auto;padding:clamp(120px,18vh,210px) min(46vw,560px) clamp(96px,12vh,140px) clamp(20px,4vw,48px)}
 .hero-title{width:100%;font-size:clamp(38px,4.4vw,64px);max-width:100%}
 .hero-rotator{display:block;width:100%;min-height:2.24em;text-align:left}
 .ht-word{left:0;white-space:normal;text-wrap:balance;text-align:left;transform:translateY(20px)}
 .ht-word.is-active{transform:translateY(0)}
 .ht-word.is-leaving{transform:translateY(-20px)}
 .hero .hero-ctas{justify-content:flex-start}
-.hero-figure{left:auto;right:clamp(20px,4vw,64px);top:50%;width:min(32vw,480px);height:auto;transform:translateY(-50%)}
+/* Le portrait est centré dans la colonne qui lui est réservée à droite du
+   texte (marges égales de part et d'autre), au lieu d'être collé au bord de la
+   bande, ce qui laissait un vide d'un seul côté sur écran large. */
+.hero-figure{left:auto;right:calc((100% - var(--hero-band)) / 2 + (min(46vw,560px) - min(32vw,460px)) / 2);top:50%;width:min(32vw,460px);height:auto;transform:translateY(-50%)}
 }
 
 /* Repère de défilement : plus grand et plus court à lire (desktop large) */
@@ -518,12 +530,55 @@ html{scroll-behavior:auto}
 .project-cover .p-kicker{color:rgba(255,255,255,.9);text-shadow:0 1px 3px rgba(0,0,0,.5)}
 .project-cover .p-intro{text-shadow:0 1px 3px rgba(0,0,0,.5)}
 
+/* ============================================================
+   CONTACT — formulaire en carte, colonne d'infos en regard
+   ============================================================ */
+.p-final--contact{text-align:left;padding-block:clamp(56px,7vw,104px)}
+.contact-grid{align-items:start}
+.contact-form-wrap{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.13);border-radius:var(--radius-cards,18px);padding:clamp(22px,2.6vw,40px)}
+.contact-form-label{color:var(--color-ash-mist)}
+.contact-form-title{color:var(--color-paper-solid)}
+.contact-form-intro{color:var(--color-ash-mist)}
+/* Deux colonnes de champs au large : larges blocs sur toute la ligne */
+.contact-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(18px,2.2vw,26px) clamp(18px,2.4vw,32px);margin-top:clamp(24px,3vw,36px)}
+.contact-form .field--wide{grid-column:1 / -1}
+.contact-form .field--submit{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.contact-form .field--submit .pill{width:auto}
+/* Colonne d'infos pratiques */
+.contact-aside{display:grid;gap:clamp(18px,2.2vw,30px);align-content:start;padding-top:clamp(4px,1vw,14px)}
+.contact-aside-title{font-size:clamp(20px,2.2vw,28px);font-weight:400;line-height:1.15;color:var(--color-paper-solid)}
+.contact-aside-block{border-top:1px solid rgba(255,255,255,.16);padding-top:clamp(14px,1.6vw,20px)}
+.contact-aside-block h3{font-size:11px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--color-ash-mist);margin:0 0 10px}
+.contact-aside-block p{font-size:16px;line-height:1.6;color:var(--color-ash-mist);margin:0 0 10px}
+.contact-aside-block p:last-child{margin-bottom:0}
+.contact-aside-block a{color:var(--color-paper-solid);text-decoration:none;border-bottom:1px solid rgba(255,255,255,.35);transition:border-color var(--dur-fast) var(--ease-out)}
+.contact-aside-block a:hover{border-color:var(--color-paper-solid)}
+
+/* ============================================================
+   MOUVEMENT — animations courtes et utiles
+   ============================================================ */
+/* Vignettes de réalisation : léger soulèvement au survol */
+.work-card{transition:transform var(--dur-mid) var(--ease-out)}
+.work-card:hover{transform:translateY(-6px)}
+/* Liens du menu : soulignement qui se trace */
+.nav-menu a{position:relative}
+.nav-menu a::after{content:"";position:absolute;left:0;right:100%;bottom:8px;height:1px;background:currentColor;opacity:.7;transition:right var(--dur-mid) var(--ease-out)}
+.nav-menu a:hover::after,.nav-menu a[aria-current="page"]::after{right:0}
+/* Étiquette de section : point qui respire */
+.section-label::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;margin-right:9px;vertical-align:middle;animation:pulse 3.4s ease-in-out infinite}
+/* Visuel de fiche : arrivée en douceur (neutralisée en mouvement réduit) */
+.project-cover__media{animation:cover-in 1.6s var(--ease-out) both}
+@keyframes cover-in{from{transform:scale(1.045)}to{transform:scale(1)}}
+
 /* --- Mobile : empilement reel des colonnes (le bloc historique etait place
    avant la regle de base, donc ecrase). En dernier dans la feuille. -------- */
 @media (max-width:720px){
 .grid-2{grid-template-columns:1fr;gap:clamp(24px,6vw,40px)}
 .contact-form-wrap,.p-final--contact .prose{width:100%;max-width:100%}
-.p-final--contact{padding-top:clamp(24px,5vh,40px)}
+.p-final--contact{padding-top:clamp(24px,5vh,40px);padding-bottom:clamp(40px,7vh,64px)}
+.contact-form{grid-template-columns:1fr;gap:clamp(16px,4vw,22px)}
+.contact-form-wrap{padding:clamp(20px,5vw,28px)}
+.contact-aside{padding-top:clamp(8px,3vw,16px)}
 .contact-form .field input,.contact-form .field select,.contact-form .field textarea{width:100%;max-width:100%}
 .contact-form .pill{width:100%;justify-content:center;white-space:normal}
 .prose{max-width:100%}

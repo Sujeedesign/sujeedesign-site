@@ -1,13 +1,16 @@
 {% set d = s.data %}
+{# Contact : formulaire groupé en carte (deux colonnes de champs au large) et
+   colonne d'informations pratiques en regard. Le contenu de la colonne vient du
+   back office ; sans données, elle ne s'affiche pas. #}
 <section class="page-body section p-final p-final--contact reveal" id="contact">
   <div class="hero-bg" id="pFinalBg" aria-hidden="true"></div>
   <canvas class="hero-shader" id="pFinalShader" aria-hidden="true"></canvas>
   <div class="container">
-    <div class="grid-2">
-      <div class="contact-form-wrap">
-        {% if d.get('label') %}<p class="page-label reveal">{{ d.get('label') }}</p>{% endif %}
-        {% if d.get('title') %}<h2 class="contact-form-title reveal">{{ d.get('title')|inline }}</h2>{% endif %}
-        {% if d.get('intro') %}<p class="contact-form-intro reveal">{{ d.get('intro') }}</p>{% endif %}
+    <div class="grid-2 contact-grid">
+      <div class="contact-form-wrap reveal">
+        {% if d.get('label') %}<p class="page-label contact-form-label">{{ d.get('label') }}</p>{% endif %}
+        {% if d.get('title') %}<h2 class="contact-form-title">{{ d.get('title')|inline }}</h2>{% endif %}
+        {% if d.get('intro') %}<p class="contact-form-intro">{{ d.get('intro') }}</p>{% endif %}
 
         <form class="contact-form" id="contactForm" method="post" action="/api/contact" novalidate>
           <input type="hidden" name="form_token" value="{{ form_token|default('') }}">
@@ -19,33 +22,19 @@
 
           <div class="field">
             <label for="cf-name">Nom <span class="req" aria-hidden="true">*</span></label>
-            <input id="cf-name" name="name" type="text" required autocomplete="name" aria-describedby="cf-name-error">
+            <input id="cf-name" name="name" type="text" required autocomplete="name" aria-describedby="cf-name-error" placeholder="Camille Dupont">
             <p class="field-error" id="cf-name-error" role="alert"></p>
           </div>
 
           <div class="field">
             <label for="cf-email">Email <span class="req" aria-hidden="true">*</span></label>
-            <input id="cf-email" name="email" type="email" required autocomplete="email" aria-describedby="cf-email-error">
+            <input id="cf-email" name="email" type="email" required autocomplete="email" aria-describedby="cf-email-error" placeholder="camille@exemple.fr">
             <p class="field-error" id="cf-email-error" role="alert"></p>
           </div>
 
           <div class="field">
-            <label for="cf-phone">Téléphone (facultatif)</label>
-            <input id="cf-phone" name="phone" type="tel" autocomplete="tel">
-          </div>
-
-          <div class="field">
-            <label for="cf-project">Type de projet</label>
-            <select id="cf-project" name="project_type">
-              <option value="">Choisir…</option>
-              <option>Identité de marque</option>
-              <option>Création visuelle &amp; PAO</option>
-              <option>Site web ou e-commerce</option>
-              <option>Conseil &amp; marketing</option>
-              <option>Solutions IA</option>
-              <option>Formation</option>
-              <option>Autre</option>
-            </select>
+            <label for="cf-phone">Téléphone <span class="hint">facultatif</span></label>
+            <input id="cf-phone" name="phone" type="tel" autocomplete="tel" placeholder="06 12 34 56 78">
           </div>
 
           <div class="field">
@@ -60,30 +49,53 @@
             </select>
           </div>
 
-          <div class="field">
+          <div class="field field--wide">
+            <label for="cf-project">Type de projet</label>
+            <select id="cf-project" name="project_type">
+              <option value="">Choisir…</option>
+              <option>Identité de marque</option>
+              <option>Création visuelle &amp; PAO</option>
+              <option>Site web ou e-commerce</option>
+              <option>Conseil &amp; marketing</option>
+              <option>Solutions IA</option>
+              <option>Formation</option>
+              <option>Autre</option>
+            </select>
+          </div>
+
+          <div class="field field--wide">
             <label for="cf-message">Votre projet <span class="req" aria-hidden="true">*</span></label>
-            <textarea id="cf-message" name="message" rows="6" required aria-describedby="cf-message-error"></textarea>
+            <textarea id="cf-message" name="message" rows="5" required aria-describedby="cf-message-error" placeholder="Où vous en êtes, ce que vous cherchez, votre échéance…"></textarea>
             <p class="field-error" id="cf-message-error" role="alert"></p>
           </div>
 
-          <div class="field field--check">
+          <div class="field field--wide field--check">
             <label class="check" for="cf-consent">
               <input id="cf-consent" name="consent" type="checkbox" value="1" required aria-describedby="cf-consent-error">
               <span>J'accepte que mes informations servent uniquement à me répondre, conformément aux <a href="/mentions-legales">mentions légales</a>.</span>
             </label>
             <p class="field-error" id="cf-consent-error" role="alert"></p>
           </div>
-          <button class="pill pill--filled" type="submit">Envoyer le message <span aria-hidden="true">→</span></button>
-          <p class="form-status" role="status" aria-live="polite"></p>
+
+          <div class="field field--wide field--submit">
+            <button class="pill pill--filled" type="submit">Envoyer le message <span aria-hidden="true">→</span></button>
+            <p class="form-status" role="status" aria-live="polite"></p>
+          </div>
         </form>
       </div>
 
-      <div class="prose">
-        {% for column in d.get('columns', []) %}
-        <h2>{{ column.get('title','') }}</h2>
-        {{ column.get('body','')|rich }}
+      {% set columns = d.get('columns', []) %}
+      {% if columns %}
+      <aside class="contact-aside" aria-labelledby="contact-aside-title">
+        <h2 class="contact-aside-title reveal" id="contact-aside-title">{{ d.get('aside_title') or "Infos pratiques" }}</h2>
+        {% for column in columns %}
+        <div class="contact-aside-block reveal" style="--d:{{ '%.2f'|format(0.05 * (loop.index + 1)) }}s">
+          <h3>{{ column.get('title','') }}</h3>
+          {{ column.get('body','')|rich }}
+        </div>
         {% endfor %}
-      </div>
+      </aside>
+      {% endif %}
     </div>
   </div>
 </section>

@@ -102,6 +102,17 @@ def test_contact_page_has_form(seeded, client: TestClient) -> None:
     assert 'method="post"' in response.text
 
 
+def test_contact_aside_is_optional(seeded, client: TestClient) -> None:
+    """Sans colonne renseignée dans le back office, la colonne d'infos disparaît.
+
+    Le contenu de cette colonne vient du back office : une page de contact vide
+    de colonnes ne doit pas laisser une colonne fantôme à côté du formulaire.
+    """
+    html = client.get("/contact").text
+    assert 'id="contactForm"' in html
+    assert "contact-aside" not in html
+
+
 def test_old_urls_are_redirected_with_301(seeded, client: TestClient) -> None:
     response = client.get("/projet-vaasam.html", follow_redirects=False)
     assert response.status_code == 301
