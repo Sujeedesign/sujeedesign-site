@@ -83,8 +83,9 @@ class SectionState:
             "label": self.label,
             "visible": self.visible,
             "position": self.position,
-            "data": self.effective,
-            "published": self.data,
+            "data": self.data,
+            "draft": self.draft,
+            "effective": self.effective,
             "revised": self.revised,
             "draft_version": self.draft_version,
         }
