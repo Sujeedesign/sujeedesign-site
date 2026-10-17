@@ -81,6 +81,15 @@ def _top_errors(field: Field, value: Any) -> list[ValidationError]:
 
 def _errors_for(field: Field, value: Any, path: str) -> list[ValidationError]:
     kind = field.kind
+    if kind is Kind.IMAGE:
+        # Une image est un chemin (média du site ou URL), jamais un objet : le
+        # panneau choisit le fichier, le champ ne porte que son adresse. Sans
+        # cette branche, toute image était refusée et les 4 types de blocs qui
+        # en portent une (hero, banniere, galerie, image pleine largeur) étaient
+        # impossibles à ajouter comme à remplir.
+        if isinstance(value, str):
+            return []
+        return [ValidationError(path, "bad_type", "image")]
     if kind in TEXT_KINDS:
         if not isinstance(value, str):
             return [ValidationError(path, "bad_type", str(kind.value))]

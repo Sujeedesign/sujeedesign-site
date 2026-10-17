@@ -319,7 +319,14 @@ def render_page(
     fingerprint = hashlib.sha1(
         json.dumps(normalized, sort_keys=True, ensure_ascii=False, default=str).encode("utf-8")
     ).hexdigest()[:16]
-    cache_key = f"{template}:{slug}:{revision}:{fingerprint}:{int(envelopes)}"
+    # La coque de l'éditeur (« Modifier cette page », feuille de l'éditeur)
+    # dépend de la session : elle fait partie de la clé de cache, sinon la page
+    # mise en cache pour un admin connecté est servie au visiteur suivant, et
+    # inversement.
+    cache_key = (
+        f"{template}:{slug}:{revision}:{fingerprint}:{int(envelopes)}:"
+        f"{int(bool(ctx.get('editor_enabled')))}"
+    )
     use_cache = use_cache and not edit
     if use_cache:
         with _cache_lock:

@@ -91,7 +91,7 @@
          fantôme à côté du formulaire). #}
       {% if columns or d.get('aside_title') %}
       <aside class="contact-aside" aria-labelledby="contact-aside-title">
-        <h2 class="contact-aside-title reveal" id="contact-aside-title" data-field="aside_title">{{ d.get('aside_title') or "Infos pratiques" }}</h2>
+        <h2 class="contact-aside-title reveal" id="contact-aside-title">{{ d.get('aside_title') or "Infos pratiques" }}</h2>
         {% for column in columns %}
         <div class="contact-aside-block reveal" style="--d:{{ '%.2f'|format(0.05 * (loop.index + 1)) }}s">
           <h3>{{ column.get('title','') }}</h3>

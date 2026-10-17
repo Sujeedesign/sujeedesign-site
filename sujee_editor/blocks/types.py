@@ -36,8 +36,10 @@ FORM_TYPE: dict[Kind, str] = {
     Kind.ITEMS: "items",
 }
 
-# Un champ est éditable en place par défaut quand sa valeur est un texte ou une image simple.
-INPLACE_KINDS = frozenset({Kind.TEXT, Kind.TEXTAREA, Kind.RICH, Kind.RICH_LINE, Kind.IMAGE})
+# Un champ est éditable en place quand sa valeur est un texte. Les images n'y
+# sont pas : un nœud marqué qui porte une `<img>` enregistrerait son balisage
+# comme chemin d'image au lieu de laisser le panneau choisir un média.
+INPLACE_KINDS = frozenset({Kind.TEXT, Kind.TEXTAREA, Kind.RICH, Kind.RICH_LINE})
 
 MISSING = object()
 
@@ -129,7 +131,10 @@ def _default_for(field: Field) -> Any:
         return False
     if field.kind is Kind.NUMBER:
         return 0
-    if field.kind in (Kind.LINES, Kind.ITEMS, Kind.IMAGES):
+    if field.kind in (Kind.LINES, Kind.ITEMS, Kind.IMAGES, Kind.CTAS):
+        # Une liste naît vide : rendre "" la faisait refuser par sa propre
+        # validation, donc un bloc neuf portant des boutons ne pouvait pas
+        # être ajouté.
         return []
     if field.kind is Kind.CHOICE:
         return field.choices[0] if field.choices else ""

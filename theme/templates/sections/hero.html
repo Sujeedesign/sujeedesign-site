@@ -55,7 +55,7 @@
   {% endif %}
   <div class="project-cover__shade" aria-hidden="true"></div>
   <div class="container project-cover__inner">
-    <a class="project-back" href="{{ d.get('back_href', '/realisations') }}" data-field="back_label"><span aria-hidden="true">←</span> {{ d.get('back_label', 'Toutes les réalisations') }}</a>
+    <a class="project-back" href="{{ d.get('back_href', '/realisations') }}"><span aria-hidden="true">←</span> {{ d.get('back_label') or 'Toutes les réalisations' }}</a>
     <div class="project-cover__content">
       <p class="p-kicker" data-field="kicker">{{ d.get('kicker') or '' }}</p>
       <h1 class="p-title" id="project-title" data-field="title">{{ d.get('title','')|inline }}</h1>

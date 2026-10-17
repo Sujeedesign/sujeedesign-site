@@ -348,3 +348,71 @@ def test_media_routes_are_absent_without_a_media_dir(db_file: Path) -> None:
     with TestClient(api) as client:
         cookies, headers = auth()
         assert client.get(f"{BASE}/media", cookies=cookies, headers=headers).status_code == 404
+
+
+# --- Revue de branche : refus sur la restauration et chemins pointes --------
+
+
+def make_api_with_seed(db_file, media_dir=None):
+    api = make_api(db_file, media_dir)
+    page_id, first, second = seed(db_file)
+    return api, page_id, first, second
+
+
+def test_a_dotted_path_is_refused_and_writes_nothing(tmp_path: Path) -> None:
+    """Fix [I1] : le panneau envoyait `images.0.src`, que l'API refuse. Cote serveur,
+    le refus reste explicite (400 unknown_field) et rien n'est ecrit."""
+    db_file = tmp_path / "site.db"
+    api, page_id, _, second = make_api_with_seed(db_file)
+    with TestClient(api) as client:
+        cookies, headers = auth()
+        response = client.patch(
+            f"{BASE}/pages/{page_id}/sections/{second}",
+            json={"field": "images.0.src", "value": "/medias/a.jpg", "expected_version": 0},
+            cookies=cookies,
+            headers=headers,
+        )
+    assert response.status_code == 400
+    assert response.json()["error"]["rule"] == "unknown_field"
+
+    connection = db_module.connect(db_file)
+    try:
+        row = connection.execute("SELECT draft FROM sections WHERE id = ?", (second,)).fetchone()
+        assert row["draft"] is None
+    finally:
+        connection.close()
+
+
+def test_restoring_a_revision_outside_the_schema_is_refused(tmp_path: Path) -> None:
+    """Fix [I3] : la route repond 400, pas 500, et la page reste intacte."""
+    db_file = tmp_path / "site.db"
+    api, page_id, _, _ = make_api_with_seed(db_file)
+    with TestClient(api) as client:
+        cookies, headers = auth()
+        published = client.post(f"{BASE}/pages/{page_id}/publish", cookies=cookies, headers=headers)
+        assert published.status_code == 200
+        revision_id = published.json()["revision_id"]
+
+    connection = db_module.connect(db_file)
+    try:
+        row = connection.execute("SELECT snapshot FROM revisions WHERE id = ?", (revision_id,)).fetchone()
+        snapshot = json.loads(row["snapshot"])
+        snapshot["sections"][0]["data"] = json.dumps({"title": 42})
+        before = [tuple(r) for r in connection.execute("SELECT id, data, draft FROM sections WHERE page_id = ? ORDER BY id", (page_id,))]
+        connection.execute("UPDATE revisions SET snapshot = ? WHERE id = ?", (json.dumps(snapshot), revision_id))
+        connection.commit()
+    finally:
+        connection.close()
+
+    with TestClient(api) as client:
+        cookies, headers = auth()
+        response = client.post(f"{BASE}/pages/{page_id}/revisions/{revision_id}/restore", cookies=cookies, headers=headers)
+    assert response.status_code == 400
+    assert response.json()["error"]["rule"] == "bad_type"
+
+    connection = db_module.connect(db_file)
+    try:
+        after = [tuple(r) for r in connection.execute("SELECT id, data, draft FROM sections WHERE page_id = ? ORDER BY id", (page_id,))]
+    finally:
+        connection.close()
+    assert after == before

@@ -57,7 +57,9 @@ def test_form_type_maps_rich_line_to_html():
 def test_inplace_defaults_by_kind():
     assert Field("title", Kind.TEXT, "Titre").inplace is True
     assert Field("body", Kind.RICH, "Texte").inplace is True
-    assert Field("cover", Kind.IMAGE, "Image").inplace is True
+    # Une image n'est pas éditée en place : son nœud porte une <img>, et
+    # enregistrer son innerHTML écrirait du balisage comme chemin de fichier.
+    assert Field("cover", Kind.IMAGE, "Image").inplace is False
     assert Field("list", Kind.LINES, "Liste").inplace is False
     assert Field("dark", Kind.BOOL, "Fond sombre").inplace is False
     assert Field("svg", Kind.RICH, "SVG", inplace=False).inplace is False
@@ -65,7 +67,10 @@ def test_inplace_defaults_by_kind():
 
 def test_catalogue_pins_the_expected_inplace_fields():
     hero = DEFAULT_BLOCKS["hero"]
-    assert {f.name for f in hero.inplace_fields} == {"kicker", "title", "intro", "back_label"}
+    assert {f.name for f in hero.inplace_fields} == {"kicker", "title", "intro"}
+    # Libellé de retour : il porte un texte par défaut (nom accessible du lien),
+    # il s'édite donc au panneau.
+    assert "back_label" not in {f.name for f in hero.inplace_fields}
     assert "cover" not in {f.name for f in hero.inplace_fields}
     chapter = DEFAULT_BLOCKS["chapter"]
     assert {f.name for f in chapter.inplace_fields} == {"kicker", "title", "body"}
@@ -95,3 +100,35 @@ def test_variants_are_preserved_for_every_type():
     assert DEFAULT_BLOCKS["texte-riche"].variants == {"1": "Une colonne", "2": "Deux colonnes"}
     assert DEFAULT_BLOCKS["bloc-liens"].variants["manuel"] == "Manuel"
     assert DEFAULT_BLOCKS["manifeste"].variants == {}
+
+
+# --- Revue de branche : l'edition en place d'une image detruisait son chemin
+# Fix [I5] : marquer la `<figure>` en `data-field="src"` faisait enregistrer son
+# innerHTML (l'image elle-meme) comme chemin. Une image s'edite au panneau.
+
+
+def test_an_image_field_is_not_editable_in_place():
+    field = Field("src", Kind.IMAGE, "Fichier")
+    assert field.inplace is False
+    for name, block in DEFAULT_BLOCKS.items():
+        for image_field in (item for item in block.fields if item.kind is Kind.IMAGE):
+            assert image_field.inplace is False, f"{name}.{image_field.name}"
+
+
+def test_no_template_marks_an_image_field_in_place():
+    import re
+    from pathlib import Path
+
+    from app import render as render_module
+
+    sections_dir = Path(render_module.TEMPLATES_DIR) / "sections"
+    marked: set[str] = set()
+    for template in sections_dir.glob("*.html"):
+        marked |= set(re.findall(r'data-field="([^"]+)"', template.read_text(encoding="utf-8")))
+    image_fields = {
+        field.name
+        for block in DEFAULT_BLOCKS.values()
+        for field in block.fields
+        if field.kind is Kind.IMAGE
+    }
+    assert marked & image_fields == set(), sorted(marked & image_fields)

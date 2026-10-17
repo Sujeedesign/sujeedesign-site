@@ -1,4 +1,5 @@
 {% set d = s.data %}
+{% if d.get('quote') %}
 <section class="citation reveal">
   <div class="container">
     <blockquote class="quote">
@@ -10,3 +11,4 @@
     </blockquote>
   </div>
 </section>
+{% endif %}

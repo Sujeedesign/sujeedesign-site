@@ -244,3 +244,24 @@ def test_edit_mode_renders_hidden_sections_muted(client, db_file: Path) -> None:
     assert "Citation masquée" in edited
     assert 'data-block-visible="0"' in edited
     assert edited.count('class="sjd-block"') == 3
+
+
+# --- Revue de branche : le cache ne melange pas admin et visiteur ----------
+# Fix [I2] : la cle de cache ignorait le contexte du lecteur, donc la page mise
+# en cache pour une session admin (avec son entree "Modifier cette page") etait
+# servie au visiteur suivant, et inversement.
+
+
+def test_the_cache_never_mixes_the_editor_shell_with_the_visitor_page(client, db_file: Path) -> None:
+    seed_page(db_file)
+    admin_first = client.get(f"/{SLUG}", cookies=admin_cookies())
+    assert "sjd-edit-entry" in admin_first.text
+
+    visitor = client.get(f"/{SLUG}")
+    assert "sjd-edit-entry" not in visitor.text
+    assert "/assets/editor/editor.css" not in visitor.text
+    assert "sjd-editor-data" not in visitor.text
+
+    client.get(f"/{SLUG}")
+    admin_again = client.get(f"/{SLUG}", cookies=admin_cookies())
+    assert "sjd-edit-entry" in admin_again.text

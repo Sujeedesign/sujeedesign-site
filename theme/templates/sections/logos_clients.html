@@ -1,5 +1,6 @@
 {% set d = s.data %}
 {% set logos = d.get('logos', []) %}
+{% if logos %}
 <section class="logos reveal">
   <div class="container">
     <p class="section-label reveal" data-field="label">{{ d.get('label') or '' }}</p>
@@ -10,3 +11,4 @@
     </ul>
   </div>
 </section>
+{% endif %}

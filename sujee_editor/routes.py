@@ -336,6 +336,10 @@ def build_router(
         try:
             try:
                 state, extras = store.restore(conn, page_id=page_id, revision_id=revision_id)
+            except ValidationFailed as exc:
+                # Révision héritée ou hors schéma : refusée en bloc, la page
+                # reste intacte.
+                return _validation_fail(exc)
             except UnknownRevision as exc:
                 raise HTTPException(status_code=404, detail="révision introuvable") from exc
             except UnknownPage as exc:

@@ -248,7 +248,13 @@ class Store:
         return self._write(conn, row, merged, expected_version)
 
     def _write(
-        self, conn: sqlite3.Connection, row: sqlite3.Row, data: dict[str, Any], expected_version: int
+        self,
+        conn: sqlite3.Connection,
+        row: sqlite3.Row,
+        data: dict[str, Any],
+        expected_version: int,
+        *,
+        commit: bool = True,
     ) -> SectionState:
         current = int(row["draft_version"] if "draft_version" in row.keys() else 0)
         cursor = conn.execute(
@@ -259,7 +265,8 @@ class Store:
         if cursor.rowcount == 0:
             conn.rollback()
             raise VersionConflict(current)
-        conn.commit()
+        if commit:
+            conn.commit()
         return self.section(conn, int(row["id"]))
 
     def add_section(
@@ -271,6 +278,7 @@ class Store:
         variant: str = "",
         position: int | None = None,
         data: Mapping[str, Any] | None = None,
+        commit: bool = True,
     ) -> SectionState:
         """Ajoute un bloc jamais publié : masqué en public, son contenu part en brouillon."""
         block = self.block_for(type)
@@ -298,7 +306,8 @@ class Store:
         )
         new_id = int(cursor.lastrowid or 0)
         self._shift(conn, int(page_id), new_id, int(position))
-        conn.commit()
+        if commit:
+            conn.commit()
         return self.section(conn, new_id)
 
     def _shift(self, conn: sqlite3.Connection, page_id: int, section_id: int, position: int) -> None:
@@ -460,20 +469,43 @@ class Store:
             raise UnknownRevision(str(revision_id))
         known = {section.id for section in self.page_state(conn, page_id).sections}
         restored: set[int] = set()
-        for entry in snapshot.get("sections", []):
-            data = _load_json(entry.get("data"), {})
-            section_id = int(entry.get("id") or 0)
-            restored.add(section_id)
-            if section_id and section_id in known:
-                self._write(conn, self._row(conn, section_id, page_id), data, self.section(conn, section_id).draft_version)
-                continue
-            self.add_section(
-                conn,
-                page_id=page_id,
-                type=str(entry.get("type") or "texte-riche"),
-                variant=str(entry.get("variant") or ""),
-                position=int(entry.get("position") or 0),
-                data=data,
-            )
+        try:
+            conn.execute("BEGIN")
+            for entry in snapshot.get("sections", []):
+                type_ = str(entry.get("type") or "texte-riche")
+                # Une révision vient d'ailleurs (ancien back office, révision
+                # héritée) : elle est validée avant d'écrire, sinon une donnée
+                # hors schéma entrait en base et rendait le bloc inéditable.
+                block = self.block_for(type_)
+                data = _load_json(entry.get("data"), {})
+                errors = validate_data(block, data)
+                if errors:
+                    raise ValidationFailed(errors)
+                section_id = int(entry.get("id") or 0)
+                restored.add(section_id)
+                if section_id and section_id in known:
+                    self._write(
+                        conn,
+                        self._row(conn, section_id, page_id),
+                        data,
+                        self.section(conn, section_id).draft_version,
+                        commit=False,
+                    )
+                    continue
+                self.add_section(
+                    conn,
+                    page_id=page_id,
+                    type=type_,
+                    variant=str(entry.get("variant") or ""),
+                    position=int(entry.get("position") or 0),
+                    data=data,
+                    commit=False,
+                )
+            conn.commit()
+        except Exception:
+            # Rien n'est restauré à moitié : la page reste exactement dans l'état
+            # où elle était avant la tentative.
+            conn.rollback()
+            raise
         extras = [section_id for section_id in known if section_id not in restored]
         return self.page_state(conn, page_id), extras

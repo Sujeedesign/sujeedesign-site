@@ -127,7 +127,7 @@ if (store) {
 
   const canvas = mountCanvas(context, { select });
   const rail = mountRail(context, { select: selectFromList, onToggle: () => bar && bar.render() });
-  const panel = mountPanel(context, { onToggle: () => bar && bar.render() });
+  const panel = mountPanel(context, { select, onToggle: () => bar && bar.render() });
   const bar = mountBar(context, { refresh, notice, tools });
 
   refresh();

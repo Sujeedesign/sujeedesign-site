@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from sujee_editor.blocks import DEFAULT_BLOCKS, Block, Field, Kind
+from sujee_editor.blocks import DEFAULT_BLOCKS, Block, Field, Kind, default_data
 from sujee_editor.blocks.validate import ValidationError, validate_data, validate_field
 
 hero = DEFAULT_BLOCKS["hero"]
@@ -104,3 +104,37 @@ def test_validation_never_raises_on_odd_structures():
 def test_a_block_with_no_data_has_no_error_except_required(name):
     errors = validate_data(DEFAULT_BLOCKS[name], {})
     assert all(error.rule == "required" for error in errors)
+
+
+# --- Revue de branche : une image est un chemin, pas un objet -------------
+# Fix [C1] : `Kind.IMAGE` n'avait aucune branche dans la validation, donc toute
+# valeur d'image etait refusee : 4 des 19 types de blocs etaient inutilisables.
+
+
+def test_an_image_field_accepts_a_path_and_refuses_anything_else():
+    assert validate_data(hero, {"cover": "/medias/une-image.jpg"}) == []
+    assert rules(validate_data(hero, {"cover": 42})) == [("cover", "bad_type")]
+    assert rules(validate_data(hero, {"cover": {"src": "/medias/a.jpg"}})) == [("cover", "bad_type")]
+
+
+def test_an_image_inside_a_list_is_validated_as_a_path():
+    galerie = DEFAULT_BLOCKS["galerie"]
+    assert validate_data(galerie, {"images": [{"src": "/medias/a.jpg", "alt": "", "caption": ""}]}) == []
+    errors = validate_data(galerie, {"images": [{"src": 12}]})
+    assert rules(errors) == [("images", "bad_item")]
+    assert errors[0].detail == "images[0].src"
+
+
+# Fix [C2] : `default_data` rendait "" pour un champ `ctas`, donc un bloc "CTA
+# final" neuf etait refuse par sa propre validation, et ne pouvait jamais etre ajoute.
+
+
+@pytest.mark.parametrize("name", sorted(DEFAULT_BLOCKS))
+def test_every_block_accepts_its_own_defaults(name):
+    block = DEFAULT_BLOCKS[name]
+    assert validate_data(block, default_data(block)) == []
+
+
+def test_a_cta_field_defaults_to_an_empty_list():
+    cta = DEFAULT_BLOCKS["cta-final"]
+    assert default_data(cta)["ctas"] == []

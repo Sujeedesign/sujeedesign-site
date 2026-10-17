@@ -77,19 +77,22 @@ export function mountPanel(context, hooks) {
         context.reload();
       }
     } else {
-      box.textContent = "Écriture impossible : réseau indisponible.";
+      // Une erreur inattendue (câblage, DOM) ne doit pas se déguiser en panne
+      // réseau : elle reste lisible dans la console.
+      console.error("écriture impossible", error);
+      box.textContent = "Écriture impossible : erreur inattendue.";
     }
     if (!box.parentNode) {
       root.prepend(box);
     }
   }
 
-  function mediaField(section, field, current) {
+  function mediaField(current, onChange) {
     const box = document.createElement("div");
     const input = document.createElement("input");
     input.type = "text";
     input.value = current || "";
-    input.addEventListener("change", () => writeField(section, field, input.value.trim()));
+    input.addEventListener("change", () => onChange(input.value.trim()));
     box.append(input);
     if (media && media.length) {
       const select = document.createElement("select");
@@ -106,7 +109,7 @@ export function mountPanel(context, hooks) {
       select.addEventListener("change", () => {
         if (select.value) {
           input.value = select.value;
-          writeField(section, field, select.value);
+          onChange(select.value);
         }
       });
       box.appendChild(select);
@@ -182,7 +185,16 @@ export function mountPanel(context, hooks) {
           const holder = document.createElement("div");
           holder.appendChild(labelFor(sub));
           if (sub.kind === "image") {
-            holder.appendChild(mediaField(section, { name: `${field.name}.${index}.${sub.name}` }, item[sub.name] || ""));
+            // Un sous-champ image s'écrit avec toute la liste, comme les autres
+            // sous-champs : l'API refuse un chemin pointé (`images.0.src`).
+            holder.appendChild(
+              mediaField(item[sub.name] || "", (value) => {
+                const next = items.map((entry, position) =>
+                  position === index ? Object.assign({}, entry, { [sub.name]: value }) : entry,
+                );
+                writeData(section, { [field.name]: next });
+              }),
+            );
           } else {
             const input = document.createElement("input");
             input.type = "text";
@@ -227,7 +239,7 @@ export function mountPanel(context, hooks) {
   function control(section, field) {
     const current = value(section, field);
     if (field.kind === "image") {
-      return mediaField(section, field, current);
+      return mediaField(current, (chosen) => writeField(section, field, chosen));
     }
     if (LIST_KINDS.includes(field.kind)) {
       return listControl(section, field, current);

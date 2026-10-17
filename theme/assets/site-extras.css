@@ -445,6 +445,7 @@
    seuls des éléments strictement vides sont masqués.
 --------------------------------------------------------------------------- */
 .bloc-title:empty,
+[data-field]:empty,
 .page-label:empty,
 .section-label:empty,
 .grid-more:empty,

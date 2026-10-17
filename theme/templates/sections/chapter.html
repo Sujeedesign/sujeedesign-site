@@ -1,4 +1,5 @@
 {% set d = s.data %}
+{% set items = d.get('list', []) %}
 <section class="s-chap reveal{% if d.get('dark') %} dark{% endif %}">
   <div class="container">
     <div class="chap">
@@ -6,15 +7,7 @@
         <span class="type" data-field="kicker">{{ d.get('kicker') or '' }}</span>
         <h2 class="chap-title" data-field="title">{{ (d.get('title') or '')|inline }}</h2>
       </div>
-      <div class="chap-body" data-field="body">
-        {{ d.get('body','')|rich }}
-        {% set items = d.get('list', []) %}
-        {% if items %}
-        <ul class="chap-list">
-          {% for item in items %}<li>{{ item }}</li>{% endfor %}
-        </ul>
-        {% endif %}
-      </div>
+      <div class="chap-body" data-field="body">{% if d.get('body') %}{{ d.get('body')|rich }}{% endif %}{% if items %}<ul class="chap-list">{% for item in items %}<li>{{ item }}</li>{% endfor %}</ul>{% endif %}</div>
     </div>
   </div>
 </section>

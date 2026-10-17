@@ -331,3 +331,60 @@ def test_restore_reports_sections_that_did_not_exist_in_the_revision(store: Stor
 def test_restore_refuses_an_unknown_revision(store: Store, conn, page_id: int) -> None:
     with pytest.raises(UnknownRevision):
         store.restore(conn, page_id=page_id, revision_id=999)
+
+
+# --- Revue de branche : ajout de tous les types, restauration sure ---------
+
+
+def sections_rows(conn, page_id):
+    rows = conn.execute(
+        "SELECT id, page_id, position, type, variant, label, visible, data, draft, draft_version "
+        "FROM sections WHERE page_id = ? ORDER BY id",
+        (int(page_id),),
+    ).fetchall()
+    return [tuple(row) for row in rows]
+
+
+def test_every_declared_block_type_can_be_added_to_a_page(store: Store, conn, page_id: int) -> None:
+    """Fix [C1/C2] : 4 types sur 19 refusaient toute creation (image, ctas)."""
+    for name in DEFAULT_BLOCKS:
+        state = store.add_section(conn, page_id=page_id, type=name)
+        assert state.id > 0, name
+        assert published(conn, state.id)["visible"] is False, name
+
+
+def mutate_last_snapshot(store: Store, conn, page_id: int, mutate) -> int:
+    store.publish(conn, page_id=page_id)
+    revision_id = int(store.revisions(conn, page_id)[0]["id"])
+    row = conn.execute("SELECT snapshot FROM revisions WHERE id = ?", (revision_id,)).fetchone()
+    snapshot = json.loads(row["snapshot"])
+    mutate(snapshot)
+    conn.execute("UPDATE revisions SET snapshot = ? WHERE id = ?", (json.dumps(snapshot), revision_id))
+    conn.commit()
+    return revision_id
+
+
+def test_restore_refuses_an_invalid_snapshot_without_writing_anything(store: Store, conn, page_id: int) -> None:
+    """Fix [I3] : une revision hors schema ne doit ni 500, ni laisser la page a moitie restauree."""
+    def corrupt(snapshot: dict) -> None:
+        snapshot["sections"][0]["data"] = json.dumps({"title": 42, "body": {"a": 1}})
+
+    revision_id = mutate_last_snapshot(store, conn, page_id, corrupt)
+    before = sections_rows(conn, page_id)
+    with pytest.raises(ValidationFailed) as exc:
+        store.restore(conn, page_id=page_id, revision_id=revision_id)
+    assert exc.value.errors[0].rule == "bad_type"
+    assert sections_rows(conn, page_id) == before
+
+
+def test_restore_refuses_an_unknown_block_type_without_partial_write(store: Store, conn, page_id: int) -> None:
+    """Le premier bloc du snapshot est valide et serait ecrit avant l'echec du second."""
+    def corrupt(snapshot: dict) -> None:
+        snapshot["sections"][1]["type"] = "bloc-inconnu"
+
+    revision_id = mutate_last_snapshot(store, conn, page_id, corrupt)
+    before = sections_rows(conn, page_id)
+    with pytest.raises(ValidationFailed) as exc:
+        store.restore(conn, page_id=page_id, revision_id=revision_id)
+    assert exc.value.errors[0].rule == "unknown_block"
+    assert sections_rows(conn, page_id) == before
