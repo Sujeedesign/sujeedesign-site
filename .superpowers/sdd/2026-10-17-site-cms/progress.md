@@ -13,3 +13,10 @@ Task 9 (deleguee a un sous-agent): SEO technique, JSON-LD, accessibilite, mise a
 Contenu et SEO: redaction confiee au profil sita -> docs/seo/{metadonnees,contenu-propositions}.json + audit-seo.md. Outil d application: tools/apply_seo.py.
 Revue visuelle: confiee au profil mira sur captures 1440 et 375 -> docs/revue-visuelle.md.
 Exploitation: tools/notify_messages.py (notification Telegram des messages, verifie en local) et docs/EXPLOITATION.md.
+
+Task 10 (recette) : reprise. Ruling: les correctifs visuels de la veille (0cde9b3) n'avaient jamais ete verifies sur une capture fraiche -> verification faite par mesures DOM au navigateur sur la recette (positions reelles en px), pas par captures d'ecran seules (les animations d'entree masquaient le contenu sur les captures, cause probable des "blocages" signales).
+Task 10 : Ruling: le parcours de bout en bout est ecrit en tests reels via httpx contre une instance vivante (SITE_E2E_URL), marque e2e, plutot qu'en Playwright (absent de l'image) -> le meme fichier tourne contre la recette et contre la prod apres bascule. Cout si faux: les interactions purement visuelles (menu, focus) ne sont pas couvertes par pytest ; elles ont ete verifiees a la main au navigateur et ce controle n'est pas rejouable automatiquement.
+Task 10 : Ruling: le formulaire public porte une limitation 3 envois par heure et par IP -> le test e2e envoie un seul message, et une execution repetee peut renvoyer 429 (échec explicite, pas silencieux).
+Revue visuelle (bloquants mira) : vignette au premier ecran (realisations 568-747 px selon largeur), premiere prestation services 375 a 582 px, cadre noir des fiches supprime -> les trois sont leves, mesures a l'appui (docs/recette-2026-10-17.md).
+Regression corrigee : accueil sur ecrans courts, hero de 815 px pour 667 px de haut -> portrait plafonne a 30svh, hero = hauteur d'ecran, actions visibles (test d'invariant CSS + mesure 320/360/375/390/414).
+Robustesse : repli sans JavaScript (site-noscript.css) car .hu/.reveal/.mw ne s'affichaient que par script.
