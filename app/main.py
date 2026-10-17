@@ -15,10 +15,13 @@ from . import contact as contact_module
 from . import db as db_module
 from . import public as public_module
 from . import render as render_module
+from . import repo as repo_module
 from . import seed as seed_module
 from . import security as security_module
 from . import settings as settings_module
 from .settings import VERSION
+
+import sujee_editor
 
 THEME_ASSETS = Path(__file__).resolve().parents[1] / "theme" / "assets"
 
@@ -66,9 +69,17 @@ def create_app(db_path: str | Path | None = None) -> FastAPI:
 
     app.state.get_db = get_db
     app.state.render_env = render_module.build_env()
-    app.mount("/assets", StaticFiles(directory=str(THEME_ASSETS)), name="assets")
     media_root = resolved.parent / "medias"
     media_root.mkdir(parents=True, exist_ok=True)
+    # L'éditeur est monté AVANT /assets : les routes sont évaluées dans l'ordre,
+    # sinon le montage parent répondrait pour /assets/editor/*.
+    sujee_editor.Editor(
+        db_path=resolved,
+        session_secret=security_module.session_secret,
+        media_dir=str(media_root),
+        page_path=repo_module.page_path,
+    ).mount(app)
+    app.mount("/assets", StaticFiles(directory=str(THEME_ASSETS)), name="assets")
     app.mount("/medias", StaticFiles(directory=str(media_root)), name="medias")
 
     @app.get("/api/health")

@@ -7,3 +7,6 @@ data/
 .pytest_cache/
 .DS_Store
 .superpowers/
+
+# Recette locale de l'éditeur (base et médias jetables)
+.recette/

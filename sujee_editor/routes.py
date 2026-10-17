@@ -47,9 +47,11 @@ MIME_BY_EXTENSION = {
 }
 MAX_UPLOAD_BYTES = 8 * 1024 * 1024
 SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
+API_PREFIX = "/api/editor"
+ASSETS_PREFIX = "/assets/editor"
 
 
-def _default_path(page: dict[str, Any]) -> str:
+def default_page_path(page: dict[str, Any]) -> str:
     kind = str(page.get("kind") or "page")
     slug = str(page.get("slug") or "")
     if kind == "accueil":
@@ -64,28 +66,35 @@ def _default_path(page: dict[str, Any]) -> str:
 def build_router(
     store: Store,
     *,
-    session_secret: str,
+    session_secret: str | Callable[[], str],
     cookie_name: str = SESSION_COOKIE,
     session_ttl: int = SESSION_TTL,
     media_dir: str | Path | None = None,
     page_path: Callable[[dict[str, Any]], str] | None = None,
     max_upload_bytes: int = MAX_UPLOAD_BYTES,
 ) -> APIRouter:
-    """Construit le routeur de l'éditeur pour un `Store` donné."""
+    """Construit le routeur de l'éditeur pour un `Store` donné.
+
+    Le secret peut être une fonction : il est alors résolu à chaque requête, ce
+    qui permet de démarrer l'application avant que l'environnement soit complet.
+    """
     router = APIRouter()
     media_root = Path(media_dir) if media_dir else None
-    path_for = page_path or _default_path
+    path_for = page_path or default_page_path
+
+    def secret() -> str:
+        return session_secret() if callable(session_secret) else str(session_secret)
 
     def require_session(request: Request) -> str:
         token = request.cookies.get(cookie_name, "")
-        if not verify_session(token, session_secret):
+        if not verify_session(token, secret()):
             raise HTTPException(status_code=401, detail="session requise")
         return "sujee"
 
     def check_csrf(request: Request) -> None:
         if request.method in SAFE_METHODS:
             return
-        if not verify_csrf(request.headers.get(CSRF_HEADER, ""), session_secret):
+        if not verify_csrf(request.headers.get(CSRF_HEADER, ""), secret()):
             raise HTTPException(status_code=403, detail="jeton CSRF manquant ou invalide")
 
     def check_origin(request: Request) -> None:
@@ -121,7 +130,7 @@ def build_router(
             "sections": [_section_json(section) for section in state.sections],
             "blocks": [block.serialize() for block in store.blocks.values()],
             "revisions": state.revisions,
-            "csrf": make_csrf(session_secret),
+            "csrf": make_csrf(secret()),
         }
 
     async def _json(request: Request) -> dict[str, Any]:

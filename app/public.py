@@ -125,6 +125,10 @@ def serve_page(
     signed_in = admin_session(request)
     ctx["editor_enabled"] = signed_in
     ctx["edit"] = bool(signed_in and wants_edit_mode(request))
+    editor = getattr(request.app.state, "editor", None)
+    if ctx["edit"] and editor is not None:
+        # État injecté pour le canevas : brouillon courant, schéma, révisions, CSRF.
+        ctx["editor"] = editor.page_payload(conn, int(page["id"]))
     sections = repo.sections_for(conn, int(page["id"]))
     ctx["jsonld"] = seo.jsonld_blocks(
         page=page,

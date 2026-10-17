@@ -27,6 +27,7 @@
    opacité 0 et la page paraîtrait vide. Feuille dédiée, chargée uniquement dans
    <noscript> : aucun bloc <style> embarqué (invariant du thème partagé). #}
 <noscript><link rel="stylesheet" href="/assets/site-noscript.css"></noscript>
+{% include "editor/head.html" ignore missing %}
 {% block head %}{% endblock %}
 {% include "partials/jsonld.html" ignore missing %}
 </head>
@@ -40,6 +41,7 @@
 {% include "partials/footer.html" %}
 <script src="/assets/site.js" defer></script>
 <script src="/assets/contact.js" defer></script>
+{% include "editor/bootstrap.html" ignore missing %}
 {% block scripts %}{% endblock %}
 </body>
 </html>

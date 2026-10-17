@@ -12,7 +12,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any, Iterable
 
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+from jinja2 import ChoiceLoader, Environment, FileSystemLoader, select_autoescape
 
 from . import db as db_module
 from . import sections as sections_module
@@ -154,8 +154,20 @@ def inline_html(raw: Any) -> str:
 
 
 def build_env(templates_dir: Path | None = None) -> Environment:
+    """Environnement Jinja du site.
+
+    Le dossier de gabarits du paquet éditeur est ajouté après celui du site :
+    `editor/head.html` et `editor/bootstrap.html` viennent du paquet, les
+    gabarits de blocs restent ceux du site (le site garde la main sur son design).
+    """
+    from sujee_editor import EDITOR_TEMPLATES
+
+    loaders: list[Any] = [FileSystemLoader(str(templates_dir or TEMPLATES_DIR))]
+    extra = Path(EDITOR_TEMPLATES)
+    if templates_dir is None and extra.is_dir():
+        loaders.append(FileSystemLoader(str(extra)))
     env = Environment(
-        loader=FileSystemLoader(str(templates_dir or TEMPLATES_DIR)),
+        loader=ChoiceLoader(loaders),
         autoescape=select_autoescape(["html", "xml"]),
         trim_blocks=True,
         lstrip_blocks=True,
