@@ -13,8 +13,8 @@
   --font-display:'Archivo', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;--font-body:'Space Grotesk', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;--font-roobert:var(--font-body);--font-raleway:var(--font-display);--font-system-ui:'system-ui', ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;/* Typography — Scale */
   --text-caption:12px;--leading-caption:1.19;--text-body-sm:16px;--leading-body-sm:1.15;--text-body:18px;--leading-body:1.5;--text-subheading:39px;--leading-subheading:1.19;--text-subheading-lg:45px;--leading-subheading-lg:1.15;--text-heading-sm:54px;--leading-heading-sm:1.39;--text-heading:78px;--leading-heading:1.1;--text-heading-lg:94px;--leading-heading-lg:0.76;--text-display:225px;--leading-display:1.25;/* Spacing */
   --spacing-8:8px;--spacing-12:12px;--spacing-28:28px;--spacing-40:40px;--spacing-48:48px;--spacing-64:64px;--spacing-68:68px;--spacing-152:152px;/* Layout */
-  --content-max-width:1148px;--page-max-width:var(--content-max-width);--section-spacing:clamp(88px,11vw,152px);--section-gap:46px;--card-padding:34px;--element-gap:14px;/* Border Radius — 0px partout, 75px (pill) uniquement boutons & tags */
-  --radius-tags:75px;--radius-cards:0px;--radius-images:0px;--radius-inputs:0px;--radius-buttons:75px;--radius-large:0px;
+  --content-max-width:1148px;--page-max-width:var(--content-max-width);--section-spacing:clamp(88px,11vw,152px);--section-gap:46px;--card-padding:34px;--element-gap:14px;/* Border Radius — 0px partout : cartes, images, champs, boutons et étiquettes */
+  --radius-tags:0px;--radius-cards:0px;--radius-images:0px;--radius-inputs:0px;--radius-buttons:0px;--radius-large:0px;
   /* Texture de grain (bruit SVG) utilisée en overlay sur les visuels */
   --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23g)'/%3E%3C/svg%3E");/* Motion */
   --ease-out:cubic-bezier(0.19,1,0.22,1);--dur-slow:.3s;--dur-mid:.22s;--dur-fast:.16s;--focus-ring-color:var(--color-accent)}
@@ -76,23 +76,19 @@ body.menu-open .menu-overlay a:nth-child(4){transition-delay:.15s}
 .hero-bg{position:absolute;inset:0;z-index:0;background:var(--gradient-iridescent);background-size:220% 220%;animation:gradient-pan 26s ease-in-out infinite}
 /* Shader liquide (port du composant nebula, Three.js → WebGL brut) */
 .hero-shader{position:absolute;inset:0;z-index:1;width:100%;height:100%;display:block}
-/* Photo de profil — flottement + inclinaison 3D (remplace le corridor de projets) */
-.hero-figure{position:absolute;left:50%;top:50%;z-index:2;height:70%;aspect-ratio:1200/1357;transform:translate(-50%,-50%);perspective:1100px;pointer-events:none;will-change:transform}
-.hero-float{animation:floaty 9s ease-in-out infinite;will-change:transform}
-@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
-.hero-photo{width:100%;height:100%;display:block;object-fit:cover;transform-style:preserve-3d;will-change:transform}
-.hero-photo-shadow{position:absolute;left:10%;right:10%;bottom:-9%;height:12%;background:radial-gradient(50% 50% at 50% 50%, rgba(0,0,0,.5), transparent 72%);filter:blur(10px);animation:floaty-shadow 9s ease-in-out infinite}
-@keyframes floaty-shadow{0%,100%{transform:scale(1) translateY(0);opacity:.28}50%{transform:scale(1.03) translateY(6px);opacity:.42}}
+.hero-inner{position:relative;z-index:6;display:flex;flex-direction:column;align-items:center;text-align:center;width:100%;max-width:min(1080px,100% - clamp(40px,8vw,96px));margin-inline:auto;padding:clamp(120px,18vh,220px) clamp(20px,5vw,28px) clamp(96px,12vh,140px);will-change:transform}
+.hero-title{width:100%;max-width:100%;font-size:clamp(46px,6.6vw,106px);font-weight:400;line-height:1.12;letter-spacing:-0.01em;margin-top:var(--spacing-28)}
+.hero-rotator{position:relative;display:block;width:100%;min-height:2.24em;text-align:center}
+.ht-word{position:absolute;left:0;right:0;top:0;white-space:normal;text-wrap:balance;text-align:center;pointer-events:none;transform:translateY(20px);opacity:0;will-change:transform,opacity;transition:opacity .45s var(--ease-out),transform .45s var(--ease-out)}
+.ht-word.is-active{opacity:1;transform:translateY(0)}
+.ht-word.is-leaving{opacity:0;transform:translateY(-20px)}
+.hero-ctas{display:flex;flex-wrap:wrap;justify-content:center;gap:16px;margin-top:clamp(32px,4vh,48px)}
 .hero-grain{position:absolute;inset:0;z-index:3;opacity:.08;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E")}
-.hero::after{/* vignette douce pour la lisibilité */
-  content:"";position:absolute;inset:0;z-index:4;pointer-events:none;background:radial-gradient(120% 100% at 50% 45%, transparent 52%, rgba(0,0,0,.5) 100%)}
-.hero-inner{position:relative;z-index:6;text-align:center;padding:clamp(150px,28vh,340px) 24px 110px;will-change:transform;width:100%}
-.hero-title{font-size:clamp(46px,6.6vw,106px);font-weight:400;line-height:1.12;letter-spacing:-0.01em;margin-top:var(--spacing-28)}
-.hero-rotator{position:relative;display:inline-block;text-align:center}
-.ht-word{position:absolute;left:50%;top:0;white-space:nowrap;pointer-events:none;transform:translate(-50%,20px);opacity:0;will-change:transform,opacity;transition:opacity .45s var(--ease-out),transform .45s var(--ease-out)}
-.ht-word.is-active{opacity:1;transform:translate(-50%,0)}
-.ht-word.is-leaving{opacity:0;transform:translate(-50%,-20px)}
-.hero-ctas{display:flex;flex-wrap:wrap;justify-content:center;gap:20px;margin-top:var(--spacing-48)}
+/* Voile de lisibilité : le titre occupe désormais le centre, la zone la plus
+   claire du fond animé. Profil mesuré au navigateur sur un cycle complet du
+   shader (16 images, pire cas de luminance sous chaque ligne de texte) : le
+   plateau couvre les lignes de titre et les actions, la vignette garde le bord. */
+.hero::after{content:"";position:absolute;inset:0;z-index:4;pointer-events:none;background:radial-gradient(95% 70% at 50% 46%, rgba(0,0,0,.62) 0%, rgba(0,0,0,.56) 45%, rgba(0,0,0,.50) 72%, rgba(0,0,0,.44) 92%, rgba(0,0,0,.34) 100%), radial-gradient(120% 100% at 50% 45%, transparent 38%, rgba(0,0,0,.55) 100%)}
 /* Unité d'apparition du hero : montée + fondu, en cascade */
 .hu{opacity:0;transform:translateY(28px);transition:opacity 1.25s var(--ease-out),transform 1.25s var(--ease-out);transition-delay:var(--hu-d,0s)}
 body.loaded .hu{opacity:1;transform:none}
@@ -180,13 +176,15 @@ body.loaded .hu{opacity:1;transform:none}
 .contact-label{color:var(--color-ash-mist)}
 .contact-heading{font-size:clamp(52px,8.5vw,110px);font-weight:400;line-height:0.9;margin:var(--spacing-28) 0 var(--spacing-64);text-wrap:balance}
 .contact-heading em{font-style:normal;font-weight:400;font-family:var(--font-raleway);color:#82828a}
-.pill{display:inline-flex;align-items:center;gap:14px;font-size:16px;font-weight:400;letter-spacing:0;min-height:44px;padding:11px 33px;border-radius:var(--radius-buttons);border:1px solid rgba(255,255,255,.3);color:var(--color-foreground);background:transparent;transition:color var(--dur-fast) var(--ease-out),background-color var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out),transform var(--dur-fast) var(--ease-out)}
-.pill:hover{background:var(--color-foreground);color:var(--color-background);border-color:var(--color-foreground);transform:translateY(-1px)}
+/* Bouton secondaire : contour, coins carrés, même boîte que le principal */
+.pill{display:inline-flex;align-items:center;justify-content:center;gap:12px;font-size:16px;font-weight:500;letter-spacing:0;min-height:48px;padding:14px 32px;border-radius:var(--radius-buttons);border:1px solid rgba(255,255,255,.3);color:var(--color-foreground);background:transparent;transition:color var(--dur-fast) var(--ease-out),background-color var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out),transform var(--dur-fast) var(--ease-out)}
+.pill:hover{background:var(--color-foreground);color:var(--color-background);border-color:var(--color-foreground);transform:translateY(-2px)}
 .pill.is-light{border-color:var(--color-obsidian);color:var(--color-obsidian)}
 .pill.is-light:hover{border-color:rgba(0,0,0,.4)}
-/* CTA principal : accent chaud, contrasté sur les surfaces sombres */
-.pill--filled{min-height:48px;background:var(--color-accent);color:var(--color-accent-ink);border-color:var(--color-accent);padding:14px 32px;font-size:16px;font-weight:500;transition:background var(--dur-mid) var(--ease-out),transform var(--dur-mid) var(--ease-out),color var(--dur-mid) var(--ease-out)}
-.pill--filled:hover{background:#d9bb8b;color:var(--color-accent-ink);border-color:#d9bb8b;transform:translateY(-3px)}
+/* CTA principal : accent chaud, contrasté sur les surfaces sombres. Même boîte
+   et mêmes états que le secondaire, seule la surface change. */
+.pill--filled{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:48px;padding:14px 32px;font-size:16px;font-weight:500;border-radius:var(--radius-buttons);border:1px solid var(--color-accent);background:var(--color-accent);color:var(--color-accent-ink);transition:background var(--dur-mid) var(--ease-out),transform var(--dur-mid) var(--ease-out),color var(--dur-mid) var(--ease-out),border-color var(--dur-mid) var(--ease-out)}
+.pill--filled:hover{background:#d9bb8b;color:var(--color-accent-ink);border-color:#d9bb8b;transform:translateY(-2px)}
 .contact-links{display:flex;flex-wrap:wrap;align-items:center;gap:24px 40px}
 /* Accessibilite : sans animation, les trois lignes du titre doivent se lire et rester dans le cadre */
 @media (prefers-reduced-motion:reduce){.ht-word{white-space:normal;opacity:1 !important;transform:none !important;animation:none !important;position:static !important}
@@ -211,7 +209,7 @@ html{scroll-behavior:auto}
 .p-final--contact .prose a{color:var(--color-paper-solid)}
 .p-final--contact .list-check li{color:var(--color-ash-mist)}
 .p-final--contact .list-check strong{color:var(--color-paper-solid)}
-.text-link{font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.8;transition:color var(--dur-slow) var(--ease-out),opacity var(--dur-fast) linear,transform var(--dur-mid) var(--ease-out);padding-block:13px;display:inline-flex;align-items:center}
+.text-link{font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.8;transition:color var(--dur-slow) var(--ease-out),opacity var(--dur-fast) linear,transform var(--dur-mid) var(--ease-out);padding-block:13px;min-height:44px;display:inline-flex;align-items:center}
 /* Cibles tactiles : les liens-texte conservent leur apparence mais offrent ≥44px de zone de tap. */
 .page-body a,.project-content a{padding-block:13px;display:inline-flex;align-items:center}
 .text-link:hover{opacity:1;transform:translateX(4px)}
@@ -392,7 +390,7 @@ html{scroll-behavior:auto}
 .tl-desc b{font-weight:400;color:inherit}
 /* Mentions Behance */
 .beh{background:var(--color-paper);padding-block:clamp(56px,7vw,96px)}
-.beh-tag{display:inline-block;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--color-felt-gray);border:1px solid rgba(0,0,0,.18);border-radius:75px;padding:8px 18px;margin:0 8px 8px 0;transition:color var(--dur-mid) var(--ease-out),border-color var(--dur-mid) var(--ease-out)}
+.beh-tag{display:inline-block;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--color-felt-gray);border:1px solid rgba(0,0,0,.18);border-radius:var(--radius-tags);padding:8px 18px;margin:0 8px 8px 0;transition:color var(--dur-mid) var(--ease-out),border-color var(--dur-mid) var(--ease-out)}
 .beh-tag:hover{color:var(--color-obsidian);border-color:var(--color-obsidian)}
 .beh-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(20px,3vw,40px);margin-top:var(--spacing-40)}
 .beh-card{display:flex;flex-direction:column;gap:10px;text-decoration:none}
@@ -456,9 +454,11 @@ html{scroll-behavior:auto}
       (« image ») et zone de texte calme tant que la photo n'est pas fournie.
    ============================================================ */
 
-/* --- Boutons pâles sur fonds animés : contraste relevé --------------- */
-.hero .pill,.page-hero .pill,.p-final .pill{border-color:rgba(255,255,255,.55);color:var(--color-paper-solid);background:rgba(0,0,0,.22)}
-.hero .pill:hover,.page-hero .pill:hover,.p-final .pill:hover{background:var(--color-paper-solid);color:var(--color-accent-ink);border-color:var(--color-paper-solid)}
+/* --- Boutons pâles sur fonds animés : contraste relevé ---------------
+   Réservé aux actions secondaires : la variante pleine garde sa surface ambre,
+   y compris pour l'envoi du formulaire de contact (classes pill + pill--filled). */
+.hero .pill:not(.pill--filled),.page-hero .pill:not(.pill--filled),.p-final .pill:not(.pill--filled){border-color:rgba(255,255,255,.55);color:var(--color-paper-solid);background:rgba(0,0,0,.5)}
+.hero .pill:not(.pill--filled):hover,.page-hero .pill:not(.pill--filled):hover,.p-final .pill:not(.pill--filled):hover{background:var(--color-paper-solid);color:var(--color-accent-ink);border-color:var(--color-paper-solid)}
 
 /* --- Bandeaux de page : texte aligné sur le bord, boutons sur le même axe */
 .page-hero .hero-ctas{justify-content:flex-start}
@@ -471,50 +471,34 @@ html{scroll-behavior:auto}
 .section--dense .travaux-heading{margin:var(--spacing-28) 0 clamp(20px,2.6vw,40px)}
 .page-hero--dense + .p-final{padding-top:clamp(56px,8vw,104px)}
 
-/* --- Accueil, au-delà de 720px : texte à gauche, portrait à droite ----
-   Les deux blocs sont calés sur une même bande centrée : sans elle, le texte
-   reste plafonné à sa largeur de lecture pendant que le portrait se colle au
-   bord de la fenêtre (jusqu'à 755 px de vide sur écran large). */
-@media (min-width:721px){
-.hero{--hero-band:min(1200px,100% - clamp(40px,8vw,96px))}
-.hero::before{content:"";position:absolute;inset:0;z-index:5;pointer-events:none;background:linear-gradient(96deg,rgba(0,0,0,.80) 0%,rgba(0,0,0,.56) 30%,rgba(0,0,0,.16) 52%,rgba(0,0,0,0) 68%)}
-.hero-inner{display:flex;flex-direction:column;align-items:flex-start;text-align:left;max-width:var(--hero-band);margin-inline:auto;padding:clamp(120px,18vh,210px) min(46vw,560px) clamp(96px,12vh,140px) clamp(20px,4vw,48px)}
-.hero-title{width:100%;font-size:clamp(38px,4.4vw,64px);max-width:100%}
-.hero-rotator{display:block;width:100%;min-height:2.24em;text-align:left}
-.ht-word{left:0;white-space:normal;text-wrap:balance;text-align:left;transform:translateY(20px)}
-.ht-word.is-active{transform:translateY(0)}
-.ht-word.is-leaving{transform:translateY(-20px)}
-.hero .hero-ctas{justify-content:flex-start}
-/* Le portrait est centré dans la colonne qui lui est réservée à droite du
-   texte (marges égales de part et d'autre), au lieu d'être collé au bord de la
-   bande, ce qui laissait un vide d'un seul côté sur écran large. */
-.hero-figure{left:auto;right:calc((100% - var(--hero-band)) / 2 + (min(46vw,560px) - min(32vw,460px)) / 2);top:50%;width:min(32vw,460px);height:auto;transform:translateY(-50%)}
-}
+/* --- Accueil : plus de composition en deux colonnes. Le portrait a quitté le
+   hero, le contenu centré vaut pour tous les formats (cf. `.hero-inner` plus
+   haut), il n'y a donc plus rien à repositionner au-delà de 720px. */
 
 /* Repère de défilement : plus grand et plus court à lire (desktop large) */
 @media (min-width:821px){.scroll-badge{width:124px;height:124px}}
 
-/* --- Accueil, jusqu'à 720px : portrait au-dessus, titre et actions dessous */
+/* --- Accueil, jusqu'à 720px : titre centré et actions dessous, sans portrait */
 @media (max-width:720px){
-.hero{flex-direction:column;justify-content:flex-start;align-items:center;gap:clamp(18px,3vh,30px);padding:clamp(84px,12vh,112px) 0 clamp(40px,6vh,64px)}
-.hero::before{display:none}
-.hero-figure{position:relative;left:auto;right:auto;top:auto;width:min(74vw,320px);height:auto;margin-inline:auto;transform:none}
-.hero-inner{display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 clamp(20px,5vw,28px);transform:none!important}
+.hero{flex-direction:column;justify-content:flex-start;align-items:center;padding:clamp(84px,12vh,112px) 0 clamp(40px,6vh,64px)}
+.hero-inner{display:flex;flex-direction:column;align-items:center;text-align:center;max-width:none;padding:0 clamp(20px,5vw,28px);transform:none!important}
 .hero-title{font-size:clamp(36px,10.4vw,48px);margin-top:0;max-width:100%}
-.hero-rotator{display:block;width:auto!important;height:auto!important;text-align:center}
-.ht-word,.ht-word.is-active,.ht-word.is-leaving{position:static;left:auto;display:block;white-space:normal;opacity:1;transform:none}
+.hero-rotator{height:auto!important;min-height:0}
+.ht-word,.ht-word.is-active,.ht-word.is-leaving{position:static;left:auto;right:auto;display:block;white-space:normal;opacity:1;transform:none}
 .hero .hero-ctas{margin-top:clamp(24px,4vh,34px);gap:12px;justify-content:center}
+/* Sur mobile le titre occupe toute la largeur : un voile vertical remplace le
+   voile elliptique, trop faible sur les bords (mesuré sous le shader). */
+.hero::after{background:linear-gradient(180deg, rgba(0,0,0,.20) 0%, rgba(0,0,0,.26) 30%, rgba(0,0,0,.38) 55%, rgba(0,0,0,.28) 100%)}
 .hero .scroll-badge{display:none}
 .page-hero{padding:clamp(74px,10vh,96px) 0 clamp(28px,4vh,44px)}
 .page-hero + .section,.page-hero--dense + .section{padding-top:clamp(22px,4vh,36px)}
 }
 
-/* --- Accueil sur écrans courts (petits téléphones) : le premier écran doit
-   contenir le portrait, le titre et les deux actions sans défilement. Le
-   portrait est donc plafonné par la hauteur, et le rythme vertical resserré. */
+/* --- Accueil sur écrans courts (petits téléphones) : le titre et les actions
+   doivent tenir dans le premier écran sans défilement. Le portrait ayant quitté
+   le hero, seul le rythme vertical reste à resserrer. */
 @media (max-width:720px) and (max-height:760px){
-.hero{padding-top:clamp(52px,7.5vh,80px);gap:clamp(12px,2vh,20px)}
-.hero-figure{width:auto;height:min(30svh,240px);max-width:min(64vw,260px)}
+.hero{padding-top:clamp(52px,7.5vh,80px)}
 .hero-title{font-size:clamp(32px,9.2vw,42px)}
 .hero .hero-ctas{margin-top:clamp(16px,2.6vh,24px)}
 }

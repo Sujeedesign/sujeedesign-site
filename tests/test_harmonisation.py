@@ -21,6 +21,7 @@ Tests legacy volontairement non portés :
 
 from __future__ import annotations
 
+import json
 import re
 from collections import Counter
 from collections.abc import Iterator
@@ -254,9 +255,10 @@ def seeded(site_db: Path) -> Iterator[None]:
                 "variant": "accueil",
                 "data": {
                     "rotator": ["Design ta marque"],
-                    "photo": "https://images.sujeedesign.com/portrait.jpg",
-                    "photo_alt": "Portrait de Sujeepan Sabesan",
-                    "ctas": [{"label": "Voir les realisations", "href": "/realisations", "style": "pill--filled"}],
+                    "ctas": [
+                        {"label": "Voir les realisations", "href": "/realisations", "style": "pill--filled"},
+                        {"label": "Un projet ? Parlons-en", "href": "/contact", "style": "pill"},
+                    ],
                 },
             },
             {
@@ -274,7 +276,11 @@ def seeded(site_db: Path) -> Iterator[None]:
                 "data": {
                     "title_lines": ["Parlons de votre projet"],
                     "shader": True,
-                    "ctas": [{"label": "Ecrire un mot", "href": "/contact", "style": "pill--filled"}],
+                    "ctas": [
+                        {"label": "Ecrire un mot", "href": "/contact", "style": "pill--filled"},
+                        {"label": "LinkedIn", "href": "https://www.linkedin.com/in/sujeepan-sabesan", "style": "text-link"},
+                        {"label": "Revenir en haut", "href": "#hero", "style": "text-link"},
+                    ],
                 },
             },
         ],
@@ -357,6 +363,13 @@ def seeded(site_db: Path) -> Iterator[None]:
         seo_description="Prestation d'identite de marque.",
         sections=[
             {"type": "hero", "variant": "page", "data": {"kicker": "Service", "title": "Identite de marque"}},
+            {
+                # Visuel distant : la règle « une image distante déclare ses
+                # dimensions » reste exercée par le rendu (cf.
+                # `test_remote_images_declare_intrinsic_size`).
+                "type": "banniere",
+                "data": {"src": "https://images.sujeedesign.com/service-identite.jpg", "alt": "Planche d'identite visuelle"},
+            },
             {
                 "type": "chapter",
                 "data": {"kicker": "02 Methode", "title": "Comment ca se passe", "list": ["Atelier", "Pistes", "Livrables"]},
@@ -501,6 +514,136 @@ def test_primary_cta_uses_filled_style_on_every_page(rendered: dict[str, Rendere
         assert page.dom.token("pill--filled"), (
             f"{route} : chaque page doit porter une action principale avec le style partagé pill--filled"
         )
+
+
+# -------------------------------------------------- CTA : une seule géométrie
+
+
+def test_interactive_ctas_have_square_corners() -> None:
+    """Décision de recette : plus aucun coin arrondi sur un contrôle du site.
+
+    Les jetons de rayon valent déjà 0px pour les cartes, les images et les
+    champs. Les boutons et les étiquettes suivent : sans cela, le système garde
+    une exception arrondie isolée.
+    """
+    css_text = SITE_CSS.read_text(encoding="utf-8")
+    assert re.search(r"--radius-buttons:\s*0px", css_text), "boutons non carrés dans les jetons"
+    assert re.search(r"--radius-tags:\s*0px", css_text), "étiquettes non carrées dans les jetons"
+    assert "border-radius:75px" not in css_text, "rayon arrondi résiduel sur un contrôle"
+    assert "border-radius:999px" not in css_text, "rayon arrondi résiduel sur un contrôle"
+
+
+def test_cta_variants_share_one_geometry() -> None:
+    """Les deux variantes de bouton partagent boîte, hauteur, padding et flèche."""
+    css_text = SITE_CSS.read_text(encoding="utf-8")
+    rules: dict[str, str] = {}
+    for variant in ("pill", "pill--filled"):
+        match = re.search(rf"\.{variant}\{{([^}}]*)\}}", css_text)
+        assert match is not None, f"règle .{variant} manquante"
+        rules[variant] = match.group(1).replace(" ", "")
+    for variant, rule in rules.items():
+        assert "display:inline-flex" in rule, f".{variant} : même boîte pour les deux variantes"
+        assert "min-height:48px" in rule, f".{variant} : hauteur de contrôle unifiée"
+        assert "padding:14px32px" in rule, f".{variant} : padding unifié"
+        assert "font-size:16px" in rule, f".{variant} : corps de texte unifié"
+        assert "font-weight:500" in rule, f".{variant} : graisse unifiée"
+        assert "gap:12px" in rule, f".{variant} : écart à la flèche unifié"
+        assert "border-radius:var(--radius-buttons)" in rule, f".{variant} : rayon unifié"
+
+
+def test_cta_labels_use_only_the_shared_styles(rendered: dict[str, RenderedPage]) -> None:
+    allowed = {"pill", "pill--filled", "text-link"}
+    for route, page in rendered.items():
+        for match in re.finditer(r'<a\b[^>]*class="([^"]*)"[^>]*>', page.html):
+            classes = set(match.group(1).split())
+            if classes & allowed:
+                assert classes <= allowed, f"{route} : style de CTA hors du jeu partagé ({match.group(1)})"
+
+
+def test_primary_cta_keeps_its_filled_style_on_dark_backgrounds() -> None:
+    """L'action principale reste ambre, même sur les fonds animés.
+
+    La règle « boutons pâles » cible les fonds sombres et aurait écrasé la
+    variante pleine (specificité .p-final .pill > .pill--filled) : elle doit donc
+    exclure explicitement `.pill--filled` (cas du bouton d'envoi du formulaire,
+    qui porte les deux classes).
+    """
+    css_text = SITE_CSS.read_text(encoding="utf-8")
+    for selector in re.findall(r"([^{}]*\.hero \.pill[^{}]*)\{", css_text):
+        assert ":not(.pill--filled)" in selector, f"sélecteur trop large : {selector.strip()}"
+    assert not re.search(r"\.p-final \.pill(?!:not)\{", css_text), "un fond pâle écraserait la variante pleine"
+
+
+def test_seed_ctas_follow_the_shared_hierarchy() -> None:
+    """Le contenu livré respecte la hiérarchie : une action principale pleine par
+    section, le reste en secondaire, et un lien externe reste un lien texte."""
+    payload = json.loads((ROOT / "seed" / "content.json").read_text(encoding="utf-8"))
+    sections_avec_cta = 0
+    for page in payload["pages"]:
+        for section in page["sections"]:
+            ctas = (section.get("data") or {}).get("ctas") or []
+            if not ctas:
+                continue
+            sections_avec_cta += 1
+            styles = [cta.get("style", "pill") for cta in ctas]
+            assert styles.count("pill--filled") <= 1, f"{page['slug']} : deux actions principales"
+            for cta, style in zip(ctas, styles):
+                assert style in {"pill", "pill--filled", "text-link"}, f"style inconnu : {style}"
+                if (cta.get("href") or "").startswith("http"):
+                    assert style == "text-link", f"lien externe en bouton : {cta}"
+    assert sections_avec_cta >= 5, "jeu de données trop pauvre pour exercer la règle"
+
+
+def test_text_link_ctas_never_render_an_arrow(rendered: dict[str, RenderedPage]) -> None:
+    """Un lien texte reste un lien : pas de flèche ajoutée par le conteneur."""
+    for route, page in rendered.items():
+        for match in re.finditer(r'<a\b[^>]*class="[^"]*\btext-link\b[^"]*"[^>]*>(.*?)</a>', page.html, re.S):
+            assert "\u2192" not in match.group(1), f"{route} : un lien texte porte une flèche"
+
+
+def test_final_cta_reuses_the_shared_cta_macro() -> None:
+    template = (ROOT / "theme" / "templates" / "sections" / "cta_final.html").read_text(encoding="utf-8")
+    assert "partials/macros.html" in template, "le CTA final doit passer par la macro partagée"
+    assert "ctas(" in template, "le CTA final doit appeler la macro ctas"
+
+
+# ------------------------------------------------- hero d'accueil : contenu
+
+
+def test_home_hero_has_no_portrait(rendered: dict[str, RenderedPage]) -> None:
+    page = rendered[HOME_ROUTE]
+    # Le hero d'accueil est un <header class="hero">, pas une <section>.
+    header = re.search(r'<header class="hero"[^>]*>(.*?)</header>', page.html, re.S)
+    assert header is not None, "hero d'accueil absent"
+    hero = header.group(1)
+    assert "hero-figure" not in hero and "hero-photo" not in hero, "portrait encore rendu dans le hero"
+    assert "<img" not in hero, "le hero d'accueil n'affiche plus d'image"
+    assert "hero-figure" not in page.html and "hero-photo" not in page.html, "portrait encore rendu sur la page"
+
+
+def test_home_hero_styles_describe_no_portrait() -> None:
+    css_text = SITE_CSS.read_text(encoding="utf-8")
+    assert ".hero-figure" not in css_text, "règles du portrait encore déclarées"
+    assert ".hero-photo" not in css_text, "règles du portrait encore déclarées"
+    assert "floaty" not in css_text, "animations du portrait encore déclarées"
+    script = (ROOT / "theme" / "assets" / "site.js").read_text(encoding="utf-8")
+    assert "heroFigure" not in script and "heroPhoto" not in script, "le script pilote encore un portrait"
+
+
+def test_home_hero_content_is_centered() -> None:
+    """Le contenu du hero d'accueil est centré à toutes les largeurs."""
+    css_text = SITE_CSS.read_text(encoding="utf-8")
+    rules = re.findall(r"\.hero-inner\{([^}]*)\}", css_text)
+    assert rules, "règle .hero-inner absente"
+    assert "text-align:center" in rules[0], "le contenu du hero doit rester centré"
+    for rule in rules:
+        assert "text-align:left" not in rule, "le hero est remis en colonne de gauche"
+        assert "align-items:flex-start" not in rule, "le hero est remis en colonne de gauche"
+    assert re.search(r"\.hero-ctas\{[^}]*justify-content:center", css_text), "actions du hero non centrées"
+    assert not re.search(r"\.hero \.hero-ctas\{[^}]*justify-content:flex-start", css_text), (
+        "actions du hero alignées à gauche"
+    )
+    assert ".hero::before" not in css_text, "voile latéral du portrait encore en place"
 
 
 def test_every_page_has_a_skip_link_to_main(rendered: dict[str, RenderedPage]) -> None:
@@ -661,28 +804,25 @@ def test_meta_line_stays_legible_on_dark_heroes() -> None:
 
 
 def test_home_hero_fits_short_phone_screens() -> None:
-    """Le premier écran de l'accueil doit contenir portrait, titre et actions.
+    """Le premier écran de l'accueil contient le titre et les actions, sans portrait.
 
-    Sur un petit téléphone (375x667), un portrait dimensionné en largeur
-    (`min(74vw,320px)`) rendait le hero plus haut que l'écran et poussait les
-    boutons sous la ligne de flottaison. La règle courte plafonne le portrait
-    par la hauteur et resserre le rythme vertical.
+    Sur un petit téléphone (375x667), le rythme vertical est resserré pour que
+    le titre et les actions restent au-dessus de la ligne de flottaison. Le
+    portrait ayant quitté le hero, il n'y a plus de hauteur d'image à plafonner.
     """
     css_text = SITE_CSS.read_text(encoding="utf-8")
     block = re.search(r"@media \(max-width:720px\) and \(max-height:760px\)\{(.*?)\n\}", css_text, re.S)
     assert block is not None, "aucune règle pour les écrans courts"
     rules = block.group(1).replace(" ", "")
-    figure = re.search(r"\.hero-figure\{([^}]*)\}", rules)
-    assert figure is not None, "le portrait du hero n'est pas plafonné sur écran court"
-    assert "height:min(30svh" in figure.group(1), "le portrait doit être borné par la hauteur de l'écran"
+    assert ".hero-figure" not in rules, "le hero n'a plus de portrait à plafonner"
     assert re.search(r"\.hero-title\{[^}]*font-size", rules), "titre du hero non resserré sur écran court"
-    assert re.search(r"\.hero\n?\.hero-ctas\{[^}]*margin-top", rules) or ".hero.hero-ctas{" in rules, (
+    assert re.search(r"\.hero\.hero-ctas\{[^}]*margin-top", rules) or ".hero.hero-ctas{" in rules, (
         "actions du hero non resserrées sur écran court"
     )
 
 
 def test_remote_images_declare_intrinsic_size(rendered: dict[str, RenderedPage]) -> None:
-    # Le portrait de l'accueil du jeu de données est distant : la règle est réellement exercée.
+    # Le visuel distant du bandeau (jeu de données) exerce réellement la règle.
     for route, page in rendered.items():
         for image in page.dom.images:
             if not (image["src"] or "").startswith(("http://", "https://")):

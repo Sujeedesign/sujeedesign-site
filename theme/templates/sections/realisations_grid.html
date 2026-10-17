@@ -19,7 +19,7 @@
       {% for item in cards %}{{ work_card(item, loop.index0) }}{% endfor %}
     </div>
     {% if d.get('all_label') %}
-    <p class="grid-more reveal"><a class="pill" href="/realisations">{{ d.get('all_label') }} <span aria-hidden="true">→</span></a></p>
+    <div class="grid-more reveal"><a class="text-link" href="/realisations">{{ d.get('all_label') }}</a></div>
     {% endif %}
   </div>
 </section>

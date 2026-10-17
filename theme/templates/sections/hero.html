@@ -3,17 +3,11 @@
 {% set variant = s.variant or 'simple' %}
 
 {% if variant == 'accueil' %}
+{# Le hero d'accueil n'affiche plus de portrait : une seule colonne centrée,
+   titre rotatif puis actions, sur le fond animé. #}
 <header class="hero" id="hero">
   <div class="hero-bg" id="heroBg"></div>
   {% if d.get('shader', true) %}<canvas class="hero-shader" id="heroShader" aria-hidden="true"></canvas>{% endif %}
-  {% if d.get('photo') %}
-  <div class="hero-figure" id="heroFigure">
-    <div class="hero-float" id="heroFloat">
-      <img class="hero-photo" id="heroPhoto" src="{{ d.get('photo') }}" alt="{{ d.get('photo_alt','') }}" draggable="false" width="720" height="900">
-    </div>
-    <div class="hero-photo-shadow"></div>
-  </div>
-  {% endif %}
   <div class="hero-grain"></div>
   <div class="hero-inner" id="heroInner">
     {% set rotator = d.get('rotator', []) %}

@@ -317,28 +317,6 @@
     initShader(canvas, canvas.id === "heroShader" ? "__shaderProbe" : null);
   });
 
-  /* ---------- Portrait : inclinaison au curseur ---------- */
-  var heroFigure = document.getElementById("heroFigure");
-  var heroPhoto = document.getElementById("heroPhoto");
-  if (!reduced && finePointer && heroFigure && heroPhoto) {
-    var tiltCur = { x: 0, y: 0 }, tiltTgt = { x: 0, y: 0 };
-    window.addEventListener("pointermove", function (event) {
-      var r = heroFigure.getBoundingClientRect();
-      var nx = (event.clientX - r.left) / r.width - 0.5;
-      var ny = (event.clientY - r.top) / r.height - 0.5;
-      tiltTgt.x = ny * -13;
-      tiltTgt.y = nx * 16;
-    }, { passive: true });
-    (function tiltLoop() {
-      tiltCur.x += (tiltTgt.x - tiltCur.x) * 0.07;
-      tiltCur.y += (tiltTgt.y - tiltCur.y) * 0.07;
-      heroPhoto.style.transform =
-        "rotateX(" + tiltCur.x.toFixed(2) + "deg) rotateY(" + tiltCur.y.toFixed(2) + "deg)" +
-        " translate3d(" + (tiltCur.y * 0.9).toFixed(2) + "px," + (tiltCur.x * 0.6).toFixed(2) + "px,0)";
-      requestAnimationFrame(tiltLoop);
-    })();
-  }
-
   /* ---------- Parallaxe et illumination ---------- */
   var heroInner = document.getElementById("heroInner");
   var badge = document.getElementById("scrollBadge");
@@ -348,12 +326,10 @@
   function tick() {
     ticking = false;
     var scrollY = window.scrollY;
-    if (!reduced && !compactHero.matches && heroInner && heroFigure && badge && scrollY < window.innerHeight * 1.6) {
+    if (!reduced && !compactHero.matches && heroInner && badge && scrollY < window.innerHeight * 1.6) {
       var hr = heroInner.getBoundingClientRect();
       if (hr.bottom > 0) {
         heroInner.style.transform = "translate3d(0," + (scrollY * 0.30) + "px,0)";
-        heroFigure.style.transform = "translateY(-50%) translate3d(0," + (scrollY * 0.10) + "px,0)";
-        heroFigure.style.opacity = Math.max(0, 1 - scrollY / 520).toFixed(3);
         badge.style.opacity = Math.max(0, 1 - scrollY / 560).toFixed(3);
         badge.style.transform = "translate3d(0," + (scrollY * 0.12) + "px,0)";
       }

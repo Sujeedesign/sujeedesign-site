@@ -1,8 +1,8 @@
-{% macro ctas(items, wrapper_class) %}
+{% macro ctas(items, wrapper_class, wrapper_attrs) %}
 {% if items %}
-<div class="{{ wrapper_class|default('hero-ctas') }}">
+<div class="{{ wrapper_class|default('hero-ctas') }}"{% if wrapper_attrs %} {{ wrapper_attrs }}{% endif %}>
   {% for cta in items %}
-  <a class="{{ cta.style|default('pill') }}" href="{{ cta.href|default('#') }}">{% if cta.style == 'text-link' %}{{ cta.label }}{% else %}{{ cta.label }} <span aria-hidden="true">{{ cta.icon|default('→') }}</span>{% endif %}</a>
+  <a class="{{ cta.style|default('pill') }}"{% if cta.id %} id="{{ cta.id }}"{% endif %} href="{{ cta.href|default('#') }}">{% if cta.style == 'text-link' %}{{ cta.label }}{% else %}{{ cta.label }} <span aria-hidden="true">{{ cta.icon|default('→') }}</span>{% endif %}</a>
   {% endfor %}
 </div>
 {% endif %}

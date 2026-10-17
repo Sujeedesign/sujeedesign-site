@@ -15,11 +15,7 @@
       {% endif %}
     </h2>
     {% if d.get('intro') %}<p class="p-intro reveal" style="--d:.16s">{{ d.get('intro') }}</p>{% endif %}
-    <div class="contact-links p-final-cta reveal" style="--d:.2s">
-      {% for cta in d.get('ctas', []) %}
-      <a class="{{ cta.style|default('pill') }}" {% if cta.id %}id="{{ cta.id }}"{% endif %} href="{{ cta.href|default('#') }}">{{ cta.label }} <span aria-hidden="true">{{ cta.icon|default('→') }}</span></a>
-      {% endfor %}
-    </div>
+    {{ ctas(d.get('ctas', []), 'contact-links p-final-cta reveal', 'style="--d:.2s"') }}
   </div>
 </section>
 

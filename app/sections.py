@@ -29,7 +29,7 @@ SECTION_TYPES: dict[str, dict[str, Any]] = {
     "hero": {
         "label": "Bandeau d'ouverture",
         "variants": {
-            "accueil": "Accueil (portrait + fond animé)",
+            "accueil": "Accueil (titre centré + fond animé)",
             "page": "Page interne (sur-titre, puis méta)",
             "simple": "Page simple (libellé, titre, intro)",
             "projet": "Couverture de réalisation",
@@ -40,8 +40,6 @@ SECTION_TYPES: dict[str, dict[str, Any]] = {
             _f("intro", "Introduction", "textarea"),
             _f("meta", "Étiquettes", "lines"),
             _f("rotator", "Mots du titre rotatif", "lines"),
-            _f("photo", "Portrait", "image"),
-            _f("photo_alt", "Texte alternatif du portrait"),
             _f("cover", "Image de couverture", "image"),
             _f("cover_alt", "Texte alternatif de la couverture"),
             _f("image", "Visuel du projet (photo)", "image"),

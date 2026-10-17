@@ -40,8 +40,6 @@
                 "style": "pill"
               }
             ],
-            "photo": "/assets/sujeepan_sabesan.jpg",
-            "photo_alt": "Portrait de Sujeepan Sabesan",
             "shader": true
           },
           "label": "hero"
@@ -325,7 +323,7 @@
               {
                 "label": "LinkedIn",
                 "href": "https://www.linkedin.com/in/sujeepan-sabesan",
-                "style": "pill"
+                "style": "text-link"
               }
             ],
             "shader": true,

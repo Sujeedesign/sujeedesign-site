@@ -3,6 +3,6 @@
 <section class="p-banner">{{ d.get('svg','')|svg }}</section>
 {% elif d.get('src') %}
 <section class="p-banner">
-  <img class="visual" src="{{ d.get('src') }}" alt="{{ d.get('alt','') }}" loading="lazy" decoding="async">
+  <img class="visual" src="{{ d.get('src') }}" alt="{{ d.get('alt','') }}" width="{{ d.get('width') or 1920 }}" height="{{ d.get('height') or 1080 }}" loading="lazy" decoding="async">
 </section>
 {% endif %}
