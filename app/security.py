@@ -64,6 +64,20 @@ def verify_token(purpose: str, token: str, ttl: int = FORM_TTL, now: int | None 
     return 0 <= current - issued <= ttl
 
 
+def token_issued_at(token: str) -> int | None:
+    """Horodatage d'émission d'un jeton signé, None si la signature est invalide."""
+    parts = (token or "").split(".")
+    if len(parts) != 4:
+        return None
+    payload = ".".join(parts[:3])
+    if not hmac.compare_digest(parts[3], _sign(payload)):
+        return None
+    try:
+        return int(parts[1])
+    except ValueError:
+        return None
+
+
 def make_session(now: int | None = None) -> str:
     return make_token("session", SESSION_TTL, now)
 

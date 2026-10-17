@@ -138,6 +138,21 @@ def text_to_html(raw: Any) -> str:
     return "".join(f"<p>{html_module.escape(b, quote=False)}</p>" for b in blocks)
 
 
+def inline_html(raw: Any) -> str:
+    """Texte destiné à un titre ou un libellé : nettoyé, sans paragraphe englobant.
+
+    `text_to_html` enveloppe chaque bloc dans un `<p>` ; placé dans un `<h1>`…`<h6>`
+    ce paragraphe produit un HTML invalide (titre dans un titre). On garde le nettoyage
+    des balises autorisées, sans le bloc.
+    """
+    if raw is None:
+        return ""
+    text = str(raw).strip()
+    if not text:
+        return ""
+    return sanitize_html(text)
+
+
 def build_env(templates_dir: Path | None = None) -> Environment:
     env = Environment(
         loader=FileSystemLoader(str(templates_dir or TEMPLATES_DIR)),
@@ -147,6 +162,7 @@ def build_env(templates_dir: Path | None = None) -> Environment:
     )
     env.filters["safe_html"] = lambda value: sanitize_html(value) if _has_markup(value) else html_module.escape(str(value or ""), quote=False)
     env.filters["rich"] = lambda value: _mark_safe(text_to_html(value))
+    env.filters["inline"] = lambda value: _mark_safe(inline_html(value))
     env.filters["svg"] = lambda value: _mark_safe(sanitize_svg(value))
     env.filters["json_array"] = lambda value: _as_list(value)
     return env

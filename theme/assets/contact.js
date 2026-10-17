@@ -7,6 +7,9 @@
 
   var status = form.querySelector(".form-status");
 
+  /* Jeton anti-robot : le cookie sjd_form est HttpOnly, le serveur le lit
+     directement (il vaut mieux que le champ caché, qui vient du HTML en cache). */
+
   function setError(field, message) {
     var input = form.querySelector("#" + field);
     var box = form.querySelector("#" + field + "-error");
@@ -27,6 +30,9 @@
     var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.value.trim());
     ok = setError("cf-email", emailOk ? "" : "Merci d'indiquer un email valide.") && ok;
     ok = setError("cf-message", message.value.trim().length >= 10 ? "" : "Décrivez votre projet en quelques mots.") && ok;
+
+    var consent = form.querySelector("#cf-consent");
+    ok = setError("cf-consent", consent && consent.checked ? "" : "Merci d'accepter le traitement de vos informations.") && ok;
     return ok;
   }
 

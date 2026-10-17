@@ -12,6 +12,7 @@ from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse,
 
 from . import repo
 from . import security
+from . import seo
 from . import settings as settings_module
 from .db import connect as db_connect
 from .db import content_revision
@@ -105,11 +106,31 @@ def serve_page(
     ctx = build_ctx(request, conn, page, extra)
     ctx["body_class"] = "project-page" if page["kind"] == "realisation" else ""
     sections = repo.sections_for(conn, int(page["id"]))
+    ctx["jsonld"] = seo.jsonld_blocks(
+        page=page,
+        settings=ctx["settings"],
+        base=ctx["seo"]["base_url"],
+        path=ctx["seo"]["path"],
+        sections=sections,
+        services=ctx["services"],
+        breadcrumb=str(ctx.get("breadcrumb") or ""),
+    )
     html_out = render_page(ENV, page=page, sections=sections, ctx=ctx, template="pages/page.html")
     headers = {"Cache-Control": "no-cache"}
     if status_code == 404:
         headers["X-Robots-Tag"] = "noindex"
-    return HTMLResponse(html_out, status_code=status_code, headers=headers)
+    response = HTMLResponse(html_out, status_code=status_code, headers=headers)
+    if any((section["type"] if "type" in section.keys() else "") == "formulaire-contact" for section in sections):
+        # Jeton de formulaire neuf à chaque visite : le HTML peut rester en cache.
+        response.set_cookie(
+            "sjd_form",
+            security.make_token("contact"),
+            httponly=True,
+            secure=settings_module.cookie_secure(),
+            samesite="lax",
+            max_age=security.FORM_TTL,
+        )
+    return response
 
 
 def not_found(request: Request, conn: sqlite3.Connection) -> HTMLResponse:
@@ -245,7 +266,7 @@ def catch_all(request: Request, path: str) -> Response:
             repo.touch_redirect_hit(conn, candidate)
             conn.commit()
             return RedirectResponse(redirect["target"], status_code=int(redirect["code"] or 301))
-        page = repo.page_by_slug(conn, path.strip("/"), kinds=["page"])
+        page = repo.page_by_slug(conn, path.strip("/"), kinds=["page", "libre"])
         if page is None:
             return not_found(request, conn)
         return serve_page(request, conn, page)

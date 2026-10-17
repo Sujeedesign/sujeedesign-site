@@ -4,7 +4,7 @@
     <div class="chap">
       <div class="chap-head">
         {% if d.get('kicker') %}<span class="type">{{ d.get('kicker') }}</span>{% endif %}
-        {% if d.get('title') %}<h2 class="chap-title">{{ d.get('title')|rich }}</h2>{% endif %}
+        {% if d.get('title') %}<h2 class="chap-title">{{ d.get('title')|inline }}</h2>{% endif %}
       </div>
       <div class="chap-body">
         {{ d.get('body','')|rich }}

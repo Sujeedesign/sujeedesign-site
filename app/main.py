@@ -11,9 +11,11 @@ from fastapi import Depends, FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 
 from . import admin as admin_module
+from . import contact as contact_module
 from . import db as db_module
 from . import public as public_module
 from . import render as render_module
+from . import seed as seed_module
 from . import security as security_module
 from . import settings as settings_module
 from .settings import VERSION
@@ -22,7 +24,13 @@ THEME_ASSETS = Path(__file__).resolve().parents[1] / "theme" / "assets"
 
 
 def create_app(db_path: str | Path | None = None) -> FastAPI:
-    """Construit l'application. `db_path` permet d'isoler les tests."""
+    """Construit l'application. `db_path` permet d'isoler les tests.
+
+    Quand un chemin de base est fourni (tests, outils), l'application ne touche
+    pas au contenu : le chargement du contenu initial ne concerne que le
+    démarrage réel du site sur un volume vide.
+    """
+    explicit_db = db_path is not None
     resolved = Path(db_path) if db_path is not None else settings_module.db_path()
 
     @asynccontextmanager
@@ -30,6 +38,9 @@ def create_app(db_path: str | Path | None = None) -> FastAPI:
         conn = db_module.connect(resolved)
         try:
             db_module.init_db(conn)
+            if not explicit_db:
+                # Premier démarrage réel sur un volume vide : contenu initial.
+                seed_module.seed_if_empty(conn, Path(__file__).resolve().parents[1] / "seed" / "content.json")
         finally:
             conn.close()
         yield
@@ -44,6 +55,7 @@ def create_app(db_path: str | Path | None = None) -> FastAPI:
     )
     app.state.db_path = resolved
     app.state.login_limiter = security_module.RateLimiter()
+    app.state.contact_limiter = security_module.RateLimiter()
 
     def get_db(request: Request) -> Iterator[sqlite3.Connection]:
         conn = db_module.connect(request.app.state.db_path)
@@ -66,6 +78,8 @@ def create_app(db_path: str | Path | None = None) -> FastAPI:
 
     app.include_router(admin_module.router)
     app.include_router(admin_module.api, prefix="/api/admin")
+    app.include_router(contact_module.router)
+    app.include_router(contact_module.sync)
     app.include_router(public_module.router)
 
     return app

@@ -4,7 +4,7 @@
 <section class="stats reveal">
   <div class="container">
     {% if d.get('label') %}<p class="section-label reveal">{{ d.get('label') }}</p>{% endif %}
-    {% if d.get('title') %}<h2 class="stats-title">{{ d.get('title')|rich }}</h2>{% endif %}
+    {% if d.get('title') %}<h2 class="stats-title">{{ d.get('title')|inline }}</h2>{% endif %}
     <dl class="stats-grid">
       {% for item in items %}
       <div class="stat">

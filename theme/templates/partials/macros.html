@@ -11,7 +11,7 @@
 {% macro heading_lines(lines, css_class) %}
 {% if lines %}
 <h2 class="{{ css_class }}">
-  {% for line in lines %}<span class="reveal-line"><span>{{ line|rich }}</span></span>{% endfor %}
+  {% for line in lines %}<span class="reveal-line"><span>{{ line|inline }}</span></span>{% endfor %}
 </h2>
 {% endif %}
 {% endmacro %}
@@ -21,7 +21,7 @@
   <div class="work-media">
     <div class="work-img">
       {% if item.cover %}
-      <img src="{{ item.cover }}" alt="{{ item.cover_alt|default('') }}" loading="lazy" width="1200" height="900">
+      <img src="{{ item.cover }}" alt="{{ item.cover_alt|default('') }}"{% if not item.cover_alt %} aria-hidden="true"{% endif %} loading="lazy" width="1200" height="900">
       {% else %}
       <div class="thumb t{{ (index % 4) + 1 }}"></div>
       {% endif %}

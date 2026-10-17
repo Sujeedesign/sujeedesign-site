@@ -16,8 +16,8 @@
       "title": "Sujee Design",
       "status": "publie",
       "in_menu": false,
-      "seo_title": "Sujee Design — Votre marque, de A à Z",
-      "seo_description": "Sujee Design — Sujeepan Sabesan, designer & directeur artistique à Paris. Identité de marque, création visuelle, web, marketing, solutions IA. Depuis 2013.",
+      "seo_title": "Designer graphique à Paris | Sujee Design",
+      "seo_description": "Designer graphique à Paris, Sujeepan Sabesan accompagne les TPE, PME et restaurateurs en identité, création visuelle, web, marketing et IA depuis 2013.",
       "sections": [
         {
           "type": "hero",
@@ -155,7 +155,9 @@
             ]
           }
         }
-      ]
+      ],
+      "seo_title": "Réalisations design et identité | Sujee Design",
+      "seo_description": "Réalisations de Sujee Design : identités de marque, supports visuels, projets web, automatisations IA et formation UI/UX conçus avec leurs clients."
     },
     {
       "slug": "services",
@@ -181,7 +183,9 @@
           "label": "prestations",
           "data": {}
         }
-      ]
+      ],
+      "seo_title": "Services design, web et marque | Sujee Design",
+      "seo_description": "Services de Sujee Design à Paris : identité de marque, création visuelle, sites web, conseil marketing et solutions IA adaptées à votre activité."
     },
     {
       "slug": "a-propos",
@@ -191,8 +195,8 @@
       "in_menu": true,
       "menu_label": "À propos",
       "menu_position": 30,
-      "seo_title": "À propos — Sujee Design",
-      "seo_description": "Sujeepan Sabesan, directeur artistique et formateur UI/UX : parcours, expériences en agence, enseignement et projets. Sujee Design, Paris.",
+      "seo_title": "Directeur artistique à Paris | Sujeepan Sabesan",
+      "seo_description": "Directeur artistique et formateur UI/UX à Paris, Sujeepan Sabesan accompagne les projets print et digitaux en indépendant depuis 2013.",
       "sections": [
         {
           "type": "hero",
@@ -332,8 +336,8 @@
       "in_menu": true,
       "menu_label": "Contact",
       "menu_position": 40,
-      "seo_title": "Contact — Sujee Design",
-      "seo_description": "Contactez Sujee Design : refonte d'identité, création visuelle, web, marketing, IA. Réponse sous 24h ouvrées. Paris.",
+      "seo_title": "Contact designer graphique à Paris | Sujee Design",
+      "seo_description": "Contactez Sujee Design pour parler de votre identité, de vos supports, de votre site web ou d'un projet de communication à Paris et ailleurs.",
       "sections": [
         {
           "type": "hero",
@@ -411,7 +415,9 @@
             "body": "<p>Revenez à l'accueil ou explorez les réalisations et les services depuis le menu.</p>"
           }
         }
-      ]
+      ],
+      "seo_title": "Page introuvable | Sujee Design",
+      "seo_description": "La page demandée est introuvable ou a changé d'adresse. Retrouvez les services et réalisations de Sujee Design depuis les liens de navigation."
     },
     {
       "slug": "identite",
@@ -422,8 +428,8 @@
       "num": 1,
       "position": 1,
       "in_menu": false,
-      "seo_title": "Identité de marque — Sujee Design",
-      "seo_description": "Identité de marque complète : stratégie, logo, système visuel et guidelines. Sujee Design, Paris.",
+      "seo_title": "Identité de marque à Paris | Sujee Design",
+      "seo_description": "Identité de marque à Paris : stratégie, nom, logo, système visuel et guidelines conçus pour représenter votre activité sur tous vos supports.",
       "sections": [
         {
           "type": "hero",
@@ -550,8 +556,8 @@
       "num": 2,
       "position": 2,
       "in_menu": false,
-      "seo_title": "Création visuelle & PAO — Sujee Design",
-      "seo_description": "Création visuelle et PAO : direction artistique, print et digital. Cartes, flyers, brochures, campagnes. Sujee Design, Paris.",
+      "seo_title": "Création visuelle et PAO à Paris | Sujee Design",
+      "seo_description": "Création visuelle et PAO à Paris : direction artistique, supports print et digitaux, déclinaisons, préparation et suivi d'impression pour votre marque.",
       "sections": [
         {
           "type": "hero",
@@ -678,8 +684,8 @@
       "num": 3,
       "position": 3,
       "in_menu": false,
-      "seo_title": "Sites web & e-commerce — Sujee Design",
-      "seo_description": "Sites web et e-commerce sur mesure : design, intégration, contenus et suivi. Sujee Design, Paris.",
+      "seo_title": "Création de site web à Paris | Sujee Design",
+      "seo_description": "Création de site web et e-commerce : cadrage, design, intégration, contenus et accompagnement après mise en ligne pour votre activité.",
       "sections": [
         {
           "type": "hero",
@@ -806,8 +812,8 @@
       "num": 4,
       "position": 4,
       "in_menu": false,
-      "seo_title": "Conseil & marketing — Sujee Design",
-      "seo_description": "Conseil et marketing : positionnement, contenus, campagnes et déploiement. Sujee Design, Paris.",
+      "seo_title": "Conseil marketing et communication | Sujee Design",
+      "seo_description": "Conseil marketing à Paris : clarifiez votre positionnement, vos messages et vos contenus, puis déployez votre communication avec méthode.",
       "sections": [
         {
           "type": "hero",
@@ -933,8 +939,8 @@
       "num": 5,
       "position": 5,
       "in_menu": false,
-      "seo_title": "Solutions IA sur mesure — Sujee Design",
-      "seo_description": "Solutions IA sur mesure : automatisations, agents et workflows pour alléger votre quotidien. Sujee Design, Paris.",
+      "seo_title": "Automatisation IA pour entreprises | Sujee Design",
+      "seo_description": "Automatisation IA pour TPE et PME : workflows, agents et intégrations adaptés à vos tâches, documentés et conçus pour rester simples à utiliser.",
       "sections": [
         {
           "type": "hero",
@@ -1066,8 +1072,8 @@
       ],
       "position": 1,
       "in_menu": false,
-      "seo_title": "Vaasam Paris — Identité — Sujee Design",
-      "seo_description": "Identité de marque et direction artistique pour Vaasam Paris : stratégie, logotype, système visuel. Sujee Design, 2026.",
+      "seo_title": "Identité de marque Vaasam Paris | Sujee Design",
+      "seo_description": "Projet d'identité de marque pour Vaasam Paris : stratégie, logotype, système visuel et déclinaisons print et digitales réalisés en 2026.",
       "sections": [
         {
           "type": "hero",
@@ -1139,8 +1145,8 @@
       ],
       "position": 2,
       "in_menu": false,
-      "seo_title": "Resto Franchise Africain — Identité — Sujee Design",
-      "seo_description": "Identité de marque et déclinaisons pour un réseau de franchise : système cohérent, gabarits déployables. Sujee Design, 2026.",
+      "seo_title": "Identité de franchise restaurant | Sujee Design",
+      "seo_description": "Identité de marque et supports pour Resto Franchise Africain : système visuel et gabarits pensés pour les points de vente d'un réseau.",
       "sections": [
         {
           "type": "hero",
@@ -1213,8 +1219,8 @@
       ],
       "position": 3,
       "in_menu": false,
-      "seo_title": "Solutions IA & Automations — Sujee Design",
-      "seo_description": "Workflows, bots et intégrations IA : automatiser votre quotidien pour gagner du temps. Sujee Design, 2026.",
+      "seo_title": "Projet d'automatisation IA | Sujee Design",
+      "seo_description": "Exemple de workflows et automatisations IA appliqués au studio : devis, veille, rédaction et intégrations documentés, sans résultat chiffré avancé.",
       "sections": [
         {
           "type": "hero",
@@ -1286,8 +1292,8 @@
       ],
       "position": 4,
       "in_menu": false,
-      "seo_title": "Formation UI/UX & PAO — Sujee Design",
-      "seo_description": "Cursus et supports pédagogiques UI/UX & PAO : méthodes du design appliquées, exercices concrets. Sujee Design, 2025.",
+      "seo_title": "Formation UI/UX et PAO | Sujee Design",
+      "seo_description": "Conception de cursus et supports de formation UI/UX et PAO : exercices, ateliers et contenus pédagogiques fondés sur des situations de projet concrètes.",
       "sections": [
         {
           "type": "hero",
@@ -1341,6 +1347,52 @@
             "title": "Un projet de formation<br>ou de supports ?"
           },
           "label": "cta"
+        }
+      ]
+    },
+    {
+      "slug": "mentions-legales",
+      "kind": "libre",
+      "title": "Mentions légales",
+      "status": "publie",
+      "in_menu": false,
+      "seo_title": "Mentions légales — Sujee Design",
+      "seo_description": "Éditeur, hébergeur, données personnelles, cookies et droits RGPD du site sujeedesign.com : les informations légales de Sujee Design.",
+      "sections": [
+        {
+          "type": "hero",
+          "variant": "page",
+          "label": "hero",
+          "data": {
+            "kicker": "Informations légales",
+            "title": "Mentions légales",
+            "meta": [
+              "Éditeur : Sujee Design",
+              "Paris, France"
+            ],
+            "intro": "Qui édite ce site, où il est hébergé, et ce qu'il advient de vos données.",
+            "ctas": []
+          }
+        },
+        {
+          "type": "texte-riche",
+          "variant": "1",
+          "label": "editeur",
+          "data": {
+            "label": "Éditeur et hébergeur",
+            "title": "Éditeur du site",
+            "body": "<p>Le site sujeedesign.com est édité par Sujee Design, activité de Sujeepan Sabesan, designer et directeur artistique, exerçant en auto-entrepreneur à Paris (France).</p><p>Contact : <a href=\"mailto:s.sujeepan.pro@gmail.com\">s.sujeepan.pro@gmail.com</a></p><p>Numéro SIRET, adresse de l'établissement et coordonnées de l'hébergeur : ces informations précises restent à compléter dans le back office, dans le réglage « mentions » des réglages du site.</p>"
+          }
+        },
+        {
+          "type": "texte-riche",
+          "variant": "1",
+          "label": "donnees",
+          "data": {
+            "label": "Données et droits",
+            "title": "Données personnelles, cookies et propriété intellectuelle",
+            "body": "<p>Ce site ne dépose aucun cookie de mesure d'audience et aucun traceur publicitaire : aucun consentement cookie n'est donc nécessaire pour le consulter.</p><p>Les informations transmises via le formulaire de contact (nom, email, téléphone facultatif, type de projet, budget, message) servent uniquement à répondre à votre demande. Elles ne sont ni revendues, ni cédées, ni utilisées à d'autres fins.</p><p>Conformément au RGPD, vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation et d'opposition sur les données qui vous concernent. Pour l'exercer, écrivez à <a href=\"mailto:s.sujeepan.pro@gmail.com\">s.sujeepan.pro@gmail.com</a> : la demande est traitée sans frais, dans les meilleurs délais.</p><p>Les visuels, identités, sites et réalisations présentés sur ce site restent la propriété intellectuelle de Sujee Design et de ses clients. Toute reproduction ou réutilisation, même partielle, sans autorisation écrite est interdite.</p>"
+          }
         }
       ]
     }

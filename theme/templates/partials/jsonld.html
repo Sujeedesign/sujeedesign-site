@@ -1,0 +1,5 @@
+{# Données structurées JSON-LD (schema.org). Blocs préparés par app/seo.py.
+   `tojson` échappe <, >, & et ' : le contenu ne peut pas sortir du script. #}
+{% for block in jsonld|default([]) %}
+<script type="application/ld+json">{{ block|tojson }}</script>
+{% endfor %}

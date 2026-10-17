@@ -23,6 +23,8 @@ DEFAULT_SETTINGS = {
     "behance": "https://www.behance.net/SujeepanSabesan",
     "city": "Paris, France",
     "studio": "Sujee Design",
+    "person_name": "Sujeepan Sabesan",
+    "job_title": "Designer et directeur artistique",
     "legal_name": "Sujee Design — Sujeepan Sabesan",
     "mentions": "SIRET, hébergeur et mentions légales à compléter dans le back office.",
     "analytics_id": "",

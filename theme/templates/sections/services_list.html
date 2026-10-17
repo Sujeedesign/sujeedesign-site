@@ -1,6 +1,9 @@
 {% set d = s.data %}
 {% set source = services|default([]) %}
 {% set slugs = d.get('slugs', []) %}
+{# Un titre de section absent ne doit pas faire sauter un niveau de titre : sans
+   intertitre de section, les prestations sont les sections de la page (h2). #}
+{% set item_level = '3' if d.get('title') else '2' %}
 {% if s.variant == 'manuel' and slugs %}
   {% set rows = source|selectattr('slug', 'in', slugs)|list %}
 {% else %}
@@ -9,13 +12,13 @@
 <section class="section" id="prestations">
   <div class="container">
     {% if d.get('label') %}<p class="section-label reveal" style="--d:.05s">{{ d.get('label') }}</p>{% endif %}
-    {% if d.get('title') %}<h2 class="prestations-heading reveal">{{ d.get('title','')|rich }}</h2>{% endif %}
+    {% if d.get('title') %}<h2 class="prestations-heading reveal">{{ d.get('title','')|inline }}</h2>{% endif %}
     <div class="reveal" style="--d:.1s">
       {% for item in rows %}
       <a class="svc-row" href="{{ item.href }}">
         <span class="svc-idx">{{ '%02d' % (loop.index) }}</span>
         <div>
-          <h3 class="svc-name">{{ item.title }}</h3>
+          <h{{ item_level }} class="svc-name">{{ item.title }}</h{{ item_level }}>
           <p class="svc-desc">{{ item.excerpt }}</p>
         </div>
         <span class="svc-arrow" aria-hidden="true">→</span>
