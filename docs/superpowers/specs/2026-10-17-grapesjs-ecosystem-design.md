@@ -42,7 +42,7 @@ L’interface charge le noyau et l’extension de thème du site dans le navigat
 
 Le projet GrapesJS JSON est la source de vérité éditoriale du brouillon. Il est versionné avec la version du noyau, du schéma de projet et du thème. Les données ne sont pas des templates Jinja imposés à tous les sites.
 
-À la publication, l’éditeur produit le rendu HTML des composants éditoriaux du projet avec les règles du thème. L’adaptateur valide l’autorisation, les types de composants et les champs, nettoie le HTML selon une politique de balisage stricte et transmet le résultat à l’application pour validation/enregistrement atomique. Le CSS de thème est fourni par le site, pas édité ni publié comme CSS libre du projet.
+À la publication, l’adaptateur valide l’autorisation, les types de composants et les champs, puis transmet à l’application un résultat éditorial contrôlé pour validation/enregistrement atomique. Selon le moteur du site, ce résultat peut être du HTML nettoyé avec une liste blanche ou une projection structurée vers des composants/gabarits natifs. Le pilote FastAPI/Jinja mappe les composants vers ses sections typées, validées côté serveur, plutôt que de publier du HTML libre. Le CSS de thème reste fourni par le site et n’est jamais édité ni publié comme CSS libre du projet.
 
 Les blocs qui dépendent de données ou d’actions serveur (formulaire, liste de réalisations/produits, réservation, espace membre, etc.) restent des composants déclaratifs du thème : le projet stocke une clé de composant et des propriétés validées ; l’adaptateur ou le rendu du site les associe à l’implémentation fonctionnelle. Aucun JavaScript arbitraire fourni par le projet n’est exécuté.
 

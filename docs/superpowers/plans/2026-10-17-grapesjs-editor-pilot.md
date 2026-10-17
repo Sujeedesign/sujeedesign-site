@@ -136,8 +136,9 @@
 
 1. Faire une revue sécurité/qualité des changements (validation serveur, auth, XSS, permissions, données privées, stabilité du build).
 2. Vérifier que l’ancien éditeur reste utilisable et qu’aucun écran de production n’a basculé.
-3. Préparer pour Sujee un bilan comprenant parcours réalisé, limites ergonomiques observées, tests réellement exécutés, diffs et décision recommandée : élargir au catalogue, ajuster ou abandonner.
-4. Demander l’accord séparé avant d’étendre l’éditeur à d’autres pages, retirer l’ancien éditeur, pousser une branche ou déployer quoi que ce soit.
+3. Préparer pour Sujee un bilan comprenant le parcours réalisé, limites ergonomiques observées, tests réellement exécutés et décision recommandée : élargir au catalogue, ajuster ou abandonner.
+4. Si tous les critères de recette et de revue sont verts, appliquer l’autorisation explicite déjà donnée par Sujee : pousser la version candidate sur la branche de production et la déployer via la procédure `sujeedesign-site`. Suivre le déploiement jusqu’à l’état `finished`, vérifier le commit construit, `/api/health`, la page publique et les assets GrapesJS servis. N’effectuer aucune modification de contenu de production lors du déploiement.
+5. Si un contrôle échoue ou si la santé du site se dégrade, arrêter la suite et appliquer la procédure de rollback du skill `sujeedesign-site`, puis vérifier de nouveau l’état public.
 
 ## Ordre et dépendances
 
@@ -154,5 +155,5 @@
 - Refondre l’apparence publique du site : le brief de DA est un travail séparé.
 - Migrer automatiquement l’ensemble des 19 sections ou toutes les pages existantes.
 - Extraire ou publier dès le premier prototype une dépendance réutilisable officielle.
-- Déployer en production, modifier le contenu de production, retirer le back office actuel, ou installer un service payant.
+- Déployer en production ou modifier son contenu avant que tous les critères de recette, les tests, la revue et l’autorisation donnée par Sujee soient satisfaits ; retirer le back office actuel ou installer un service payant.
 - Promettre une expérience équivalente à Webflow avant de l’avoir testée avec Sujee.
