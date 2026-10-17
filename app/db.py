@@ -5,7 +5,14 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
+
+# Colonnes ajoutées après la première mise en production. Chaque entrée est
+# appliquée une seule fois, dans l'ordre, par `migrate` (idempotent).
+MIGRATIONS: tuple[tuple[str, str, str], ...] = (
+    ("sections", "draft", "TEXT"),
+    ("sections", "draft_version", "INTEGER NOT NULL DEFAULT 0"),
+)
 
 REQUIRED_TABLES = (
     "pages",
@@ -56,6 +63,8 @@ CREATE TABLE IF NOT EXISTS sections (
   label TEXT NOT NULL DEFAULT '',
   visible INTEGER NOT NULL DEFAULT 1,
   data TEXT NOT NULL DEFAULT '{}',
+  draft TEXT,
+  draft_version INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -140,20 +149,34 @@ def connect(path: str | Path) -> sqlite3.Connection:
     return conn
 
 
+def migrate(conn: sqlite3.Connection) -> list[str]:
+    """Ajoute les colonnes manquantes aux bases existantes. Idempotent.
+
+    Aucune donnée publiée n'est touchée : seules des colonnes sont ajoutées.
+    Retourne la liste des colonnes réellement ajoutées.
+    """
+    added: list[str] = []
+    for table, column, definition in MIGRATIONS:
+        columns = {row["name"] for row in conn.execute(f"PRAGMA table_info({table})")}
+        if not columns or column in columns:
+            continue
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
+        added.append(column)
+    if added or get_meta(conn, "schema_version") != str(SCHEMA_VERSION):
+        set_meta(conn, "schema_version", str(SCHEMA_VERSION))
+    conn.commit()
+    return added
+
+
 def init_db(conn: sqlite3.Connection) -> None:
     """Crée le schéma si nécessaire. Idempotent."""
     conn.executescript(SCHEMA)
-    conn.execute(
-        "INSERT INTO _meta (key, value) VALUES ('schema_version', ?) "
-        "ON CONFLICT(key) DO NOTHING",
-        (str(SCHEMA_VERSION),),
-    )
     conn.execute(
         "INSERT INTO _meta (key, value) VALUES ('content_revision', '1') "
         "ON CONFLICT(key) DO NOTHING",
         (),
     )
-    conn.commit()
+    migrate(conn)
 
 
 def get_meta(conn: sqlite3.Connection, key: str, default: str = "") -> str:
