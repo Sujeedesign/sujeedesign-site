@@ -72,6 +72,13 @@ def test_trailing_slash_is_normalised(seeded, client: TestClient) -> None:
     assert client.get("/services/", follow_redirects=False).headers["location"] == "/services"
 
 
+def test_security_headers_are_present(client: TestClient) -> None:
+    reponse = client.get("/contact")
+    assert reponse.headers["X-Content-Type-Options"] == "nosniff"
+    assert reponse.headers["Referrer-Policy"] == "strict-origin-when-cross-origin"
+    assert "geolocation=()" in reponse.headers["Permissions-Policy"]
+
+
 def test_listing_pages(seeded, client: TestClient) -> None:
     assert client.get("/realisations").status_code == 200
     assert client.get("/services").status_code == 200

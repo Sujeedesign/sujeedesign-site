@@ -76,6 +76,18 @@ def create_app(db_path: str | Path | None = None) -> FastAPI:
         revision = db_module.content_revision(conn)
         return {"ok": True, "version": VERSION, "revision": revision}
 
+    @app.middleware("http")
+    async def security_headers(request: Request, call_next):
+        """En-têtes de durcissement communs à toutes les réponses."""
+        response = await call_next(request)
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+        response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
+        response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+        if request.url.scheme == "https":
+            response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+        return response
+
     app.include_router(admin_module.router)
     app.include_router(admin_module.api, prefix="/api/admin")
     app.include_router(contact_module.router)

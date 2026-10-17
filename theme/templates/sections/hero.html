@@ -64,12 +64,8 @@
       {% if d.get('kicker') %}<p class="p-kicker">{{ d.get('kicker') }}</p>{% endif %}
       <h1 class="p-title" id="project-title">{{ d.get('title','')|inline }}</h1>
       {% if d.get('intro') %}<p class="p-intro">{{ d.get('intro') }}</p>{% endif %}
-      {% if not image %}
-      <figure class="project-cover__slot">
-        <span class="slot-frame" aria-hidden="true"></span>
-        <figcaption class="slot-caption">Visuel du projet à venir</figcaption>
-      </figure>
-      {% endif %}
+      {# Sans photo fournie, le visuel d'ambiance reste seul : pas de cadre vide en public.
+         Le champ `image` du back office prend le relais dès qu'une vraie photo existe. #}
     </div>
   </div>
 </section>
