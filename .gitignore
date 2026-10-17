@@ -10,3 +10,6 @@ data/
 
 # Recette locale de l'éditeur (base et médias jetables)
 .recette/
+
+# Worktrees locaux de développement
+.worktrees/
