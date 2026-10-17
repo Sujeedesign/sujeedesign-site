@@ -45,6 +45,7 @@ def client(db_file: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[TestClien
     monkeypatch.setenv("SESSION_SECRET", "secret-de-test")
     monkeypatch.setenv("ADMIN_PASSWORD", "mot-de-passe-de-test")
     monkeypatch.setenv("SYNC_TOKEN", "jeton-de-test")
+    monkeypatch.setenv("COOKIE_SECURE", "0")  # TestClient parle en HTTP
     application = create_app(db_file)
     with TestClient(application) as test_client:
         yield test_client

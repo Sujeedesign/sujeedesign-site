@@ -219,8 +219,34 @@ def registry() -> dict[str, dict[str, Any]]:
     return SECTION_TYPES
 
 
-def template_for(type_: str) -> str | None:
-    return TEMPLATE_BY_TYPE.get(type_)
+def template_for(type_: str) -> str:
+    return TEMPLATE_BY_TYPE.get(type_, "")
+
+
+def default_value(field: dict[str, Any]) -> Any:
+    if "default" in field:
+        return field["default"]
+    kind = field.get("type", "text")
+    if kind == "bool":
+        return field["name"] in {"shader"}
+    if kind == "number":
+        return field.get("value") or 0
+    if kind in {"lines", "items", "images", "choices"}:
+        return []
+    if kind == "choice":
+        choices = field.get("choices") or [""]
+        return choices[0]
+    return ""
+
+
+def default_data(type_: str) -> dict[str, Any]:
+    """Données initiales d'une section de ce type (formulaire d'ajout)."""
+    spec = SECTION_TYPES.get(type_) or {}
+    data = {field["name"]: default_value(field) for field in spec.get("fields", [])}
+    variants = spec.get("variants") or {}
+    if variants:
+        data["_variant"] = next(iter(variants))
+    return data
 
 
 def defaults_for(type_: str) -> dict[str, Any]:

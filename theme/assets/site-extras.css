@@ -399,6 +399,24 @@
   overflow: hidden;
 }
 
+/* ---------- Bandeau d'aperçu (back office) ---------- */
+.preview-banner {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  background: #b98957;
+  color: #0b0b0c;
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 10px 16px;
+  text-align: center;
+}
+
+.preview-banner a {
+  color: #0b0b0c;
+  text-decoration: underline;
+}
+
 /* ---------- Adaptations mobiles ---------- */
 @media (max-width: 900px) {
   .gallery-grid {

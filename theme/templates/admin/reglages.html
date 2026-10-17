@@ -1,0 +1,66 @@
+{% extends "admin/base.html" %}
+{% block titre %}Réglages{% endblock %}
+{% block contenu %}
+<header class="admin-head">
+  <div>
+    <h1>Réglages du site</h1>
+    <p class="admin-sub">Identité, coordonnées, partage et redirections.</p>
+  </div>
+</header>
+<p class="admin-note" id="editorStatus" role="status" aria-live="polite"></p>
+
+<section class="panel">
+  <h2>Identité et coordonnées</h2>
+  <form class="grid-form" id="settingsForm">
+    <div class="field"><label for="s-site_name">Nom du site</label><input id="s-site_name" name="site_name" value="{{ reglages.site_name }}"></div>
+    <div class="field"><label for="s-tagline">Signature</label><input id="s-tagline" name="tagline" value="{{ reglages.tagline }}"></div>
+    <div class="field field--wide"><label for="s-site_description">Description par défaut</label><textarea id="s-site_description" name="site_description">{{ reglages.site_description }}</textarea></div>
+    <div class="field"><label for="s-base_url">URL publique</label><input id="s-base_url" name="base_url" value="{{ reglages.base_url }}"></div>
+    <div class="field"><label for="s-email">Email de contact</label><input id="s-email" name="email" type="email" value="{{ reglages.email }}"></div>
+    <div class="field"><label for="s-phone">Téléphone</label><input id="s-phone" name="phone" value="{{ reglages.phone }}"></div>
+    <div class="field"><label for="s-city">Ville</label><input id="s-city" name="city" value="{{ reglages.city }}"></div>
+    <div class="field"><label for="s-studio">Nom du studio</label><input id="s-studio" name="studio" value="{{ reglages.studio }}"></div>
+    <div class="field"><label for="s-legal_name">Raison sociale</label><input id="s-legal_name" name="legal_name" value="{{ reglages.legal_name }}"></div>
+    <div class="field"><label for="s-linkedin">LinkedIn</label><input id="s-linkedin" name="linkedin" value="{{ reglages.linkedin }}"></div>
+    <div class="field"><label for="s-behance">Behance</label><input id="s-behance" name="behance" value="{{ reglages.behance }}"></div>
+    <div class="field"><label for="s-analytics_id">Identifiant Analytics</label><input id="s-analytics_id" name="analytics_id" value="{{ reglages.analytics_id }}"></div>
+    <div class="field field--wide"><label for="s-mentions">Mentions légales (texte affiché sur la page)</label><textarea id="s-mentions" name="mentions">{{ reglages.mentions }}</textarea></div>
+    <div class="field">
+      <label for="s-og_image">Image de partage par défaut</label>
+      <div class="input-with-media">
+        <input id="s-og_image" name="og_image" value="{{ reglages.og_image }}">
+        <button class="btn btn--small" type="button" data-upload-target="#s-og_image">Choisir un média</button>
+      </div>
+    </div>
+    <div class="panel-actions field--wide"><button class="btn btn--primary" type="submit">Enregistrer les réglages</button></div>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>Redirections</h2>
+  <p class="admin-note">Les anciennes URL (.html) redirigent vers les nouvelles. Ajoute ici toute nouvelle redirection permanente.</p>
+  <form class="inline-form" id="redirectForm">
+    <label class="sr-only" for="r-path">Ancien chemin</label>
+    <input id="r-path" name="path" placeholder="/ancienne-adresse.html" required>
+    <label class="sr-only" for="r-target">Nouveau chemin</label>
+    <input id="r-target" name="target" placeholder="/nouvelle-adresse" required>
+    <label class="sr-only" for="r-code">Code</label>
+    <select id="r-code" name="code"><option value="301">301</option><option value="302">302</option></select>
+    <button class="btn btn--primary" type="submit">Ajouter</button>
+  </form>
+  <table class="admin-table">
+    <thead><tr><th>Ancien chemin</th><th>Destination</th><th>Code</th><th>Clics</th><th></th></tr></thead>
+    <tbody>
+      {% for redirect in redirects %}
+      <tr>
+        <td>{{ redirect.path }}</td>
+        <td>{{ redirect.target }}</td>
+        <td>{{ redirect.code }}</td>
+        <td class="muted">{{ redirect.hits }}</td>
+        <td class="right"><button class="btn btn--small btn--danger" type="button" data-delete-redirect="{{ redirect.path }}">Supprimer</button></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

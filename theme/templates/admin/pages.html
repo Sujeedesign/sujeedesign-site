@@ -1,0 +1,48 @@
+{% extends "admin/base.html" %}
+{% block titre %}Pages{% endblock %}
+{% block contenu %}
+<header class="admin-head">
+  <div>
+    <h1>Pages</h1>
+    <p class="admin-sub">{{ pages|length }} page(s)</p>
+  </div>
+  <div class="admin-head-actions">
+    <form class="inline-form" method="get" action="/admin/pages">
+      <label class="sr-only" for="q">Rechercher</label>
+      <input id="q" name="q" value="{{ q }}" placeholder="Rechercher…">
+      <select name="kind" aria-label="Filtrer par type">
+        {% for value, label in kinds %}
+        <option value="{{ value }}" {% if kind == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <button class="btn" type="submit">Filtrer</button>
+    </form>
+    <button class="btn btn--primary" type="button" id="newPage" data-kind="{{ kind or 'page' }}">Nouvelle page</button>
+  </div>
+</header>
+
+<table class="admin-table">
+  <thead>
+    <tr><th>Titre</th><th>Type</th><th>Statut</th><th>Sections</th><th>Modifiée</th><th></th></tr>
+  </thead>
+  <tbody>
+    {% for item in pages %}
+    <tr>
+      <td>
+        <a href="/admin/pages/{{ item.id }}">{{ item.title or item.slug }}</a>
+        <span class="muted">/{{ item.slug }}</span>
+        {% if item.in_menu %}<span class="tag tag--soft">menu</span>{% endif %}
+      </td>
+      <td>{{ item.kind }}</td>
+      <td><span class="tag {% if item.status == 'publie' %}tag--ok{% else %}tag--draft{% endif %}">{{ item.status }}</span></td>
+      <td class="muted">{{ sections_count.get(item.id, 0) }}</td>
+      <td class="muted">{{ item.updated_at }}</td>
+      <td class="right">
+        <a href="/admin/apercu/{{ item.id }}" target="_blank" rel="noopener">Aperçu</a>
+        <button class="btn btn--small btn--danger" type="button" data-delete-page="{{ item.id }}" data-title="{{ item.title }}">Supprimer</button>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

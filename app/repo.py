@@ -521,4 +521,14 @@ def table_counts(conn: sqlite3.Connection) -> dict[str, int]:
     out["brouillons"] = int(
         conn.execute("SELECT COUNT(*) AS c FROM pages WHERE status = 'brouillon'").fetchone()["c"]
     )
+    out["realisations"] = int(
+        conn.execute(
+            "SELECT COUNT(*) AS c FROM pages WHERE kind = 'realisation' AND status = ?", (PUBLISHED,)
+        ).fetchone()["c"]
+    )
+    out["services"] = int(
+        conn.execute(
+            "SELECT COUNT(*) AS c FROM pages WHERE kind = 'service' AND status = ?", (PUBLISHED,)
+        ).fetchone()["c"]
+    )
     return out

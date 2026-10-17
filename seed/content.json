@@ -1,0 +1,1420 @@
+{
+  "reglages": {
+    "site_name": "Sujee Design",
+    "tagline": "Votre marque, de A à Z",
+    "base_url": "https://sujeedesign.com",
+    "email": "s.sujeepan.pro@gmail.com",
+    "linkedin": "https://www.linkedin.com/in/sujeepan-sabesan",
+    "behance": "https://www.behance.net/SujeepanSabesan",
+    "city": "Paris, France",
+    "legal_name": "Sujee Design — Sujeepan Sabesan"
+  },
+  "pages": [
+    {
+      "slug": "accueil",
+      "kind": "accueil",
+      "title": "Sujee Design",
+      "status": "publie",
+      "in_menu": false,
+      "seo_title": "Sujee Design — Votre marque, de A à Z",
+      "seo_description": "Sujee Design — Sujeepan Sabesan, designer & directeur artistique à Paris. Identité de marque, création visuelle, web, marketing, solutions IA. Depuis 2013.",
+      "sections": [
+        {
+          "type": "hero",
+          "variant": "accueil",
+          "data": {
+            "rotator": [
+              "Sujee,",
+              "Design ta marque",
+              "de A à Z."
+            ],
+            "ctas": [
+              {
+                "label": "Découvrir les réalisations",
+                "href": "#travaux",
+                "style": "pill--filled"
+              },
+              {
+                "label": "Un projet ? Parlons-en",
+                "href": "/contact",
+                "style": "pill"
+              }
+            ],
+            "photo": "/assets/sujeepan_sabesan.jpg",
+            "photo_alt": "Portrait de Sujeepan Sabesan",
+            "shader": true
+          },
+          "label": "hero"
+        },
+        {
+          "type": "manifeste",
+          "data": {
+            "label": "Manifeste",
+            "heading_lines": [
+              "Votre image,",
+              "de la première idée",
+              "au dernier pixel."
+            ],
+            "text": "Depuis 2013, je construis des marques entières. Identité, création visuelle, sites web, marketing, solutions IA : un seul bureau à Paris, une seule exigence, faire en sorte que chaque détail vous ressemble."
+          },
+          "label": "manifeste"
+        },
+        {
+          "type": "realisations-grid",
+          "variant": "auto",
+          "data": {
+            "label": "Travaux",
+            "heading_lines": [
+              "Sélection",
+              "de projets."
+            ]
+          },
+          "label": "realisations"
+        },
+        {
+          "type": "marquee",
+          "data": {
+            "items": [
+              "Identité",
+              "Création visuelle",
+              "Web",
+              "Marketing",
+              "Intelligence artificielle"
+            ]
+          },
+          "label": "marquee"
+        },
+        {
+          "type": "services-list",
+          "variant": "auto",
+          "data": {
+            "label": "Prestations",
+            "title": "Tout ce qu'une marque<br>peut avoir besoin de."
+          },
+          "label": "prestations"
+        },
+        {
+          "type": "cta-final",
+          "variant": "accueil",
+          "data": {
+            "kicker": "Contact",
+            "intro": "",
+            "ctas": [
+              {
+                "label": "Écrire un email",
+                "href": "mailto:s.sujeepan.pro@gmail.com?subject=Un%20projet%20%C3%A0%20discuter",
+                "style": "pill"
+              },
+              {
+                "label": "LinkedIn",
+                "href": "https://www.linkedin.com/in/sujeepan-sabesan",
+                "style": "text-link"
+              },
+              {
+                "label": "Revenir en haut ↑",
+                "href": "#hero",
+                "style": "text-link"
+              }
+            ],
+            "shader": true,
+            "title_lines": [
+              "Un projet ?",
+              "<em>Parlons-en.</em>"
+            ]
+          },
+          "label": "contact"
+        }
+      ]
+    },
+    {
+      "slug": "realisations",
+      "kind": "page",
+      "title": "Réalisations",
+      "status": "publie",
+      "in_menu": true,
+      "menu_position": 10,
+      "sections": [
+        {
+          "type": "hero",
+          "variant": "simple",
+          "label": "hero",
+          "data": {
+            "kicker": "Travaux",
+            "title": "Toutes les réalisations",
+            "intro": ""
+          }
+        },
+        {
+          "type": "realisations-grid",
+          "variant": "auto",
+          "label": "realisations",
+          "data": {
+            "heading_lines": [
+              "Sélection",
+              "de projets."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "slug": "services",
+      "kind": "page",
+      "title": "Services",
+      "status": "publie",
+      "in_menu": true,
+      "menu_position": 20,
+      "sections": [
+        {
+          "type": "hero",
+          "variant": "simple",
+          "label": "hero",
+          "data": {
+            "kicker": "Prestations",
+            "title": "Tout ce qu'une marque<br>peut avoir besoin de.",
+            "intro": ""
+          }
+        },
+        {
+          "type": "services-list",
+          "variant": "auto",
+          "label": "prestations",
+          "data": {}
+        }
+      ]
+    },
+    {
+      "slug": "a-propos",
+      "kind": "page",
+      "title": "À propos",
+      "status": "publie",
+      "in_menu": true,
+      "menu_label": "À propos",
+      "menu_position": 30,
+      "seo_title": "À propos — Sujee Design",
+      "seo_description": "Sujeepan Sabesan, directeur artistique et formateur UI/UX : parcours, expériences en agence, enseignement et projets. Sujee Design, Paris.",
+      "sections": [
+        {
+          "type": "hero",
+          "variant": "page",
+          "data": {
+            "kicker": "À propos",
+            "title": "Sujeepan Sabesan<br>Directeur artistique",
+            "meta": [
+              "Direction artistique",
+              "Formation UI/UX",
+              "Print & digital",
+              "Depuis 2011",
+              "Paris"
+            ],
+            "intro": "Designer polyvalent, je conçois, je forme et je conseille depuis plus de quinze ans. Un même fil rouge : faire en sorte que chaque projet vous ressemble, du premier mot au dernier pixel.",
+            "ctas": []
+          },
+          "label": "hero"
+        },
+        {
+          "type": "banniere",
+          "data": {
+            "svg": "<svg class=\"visual\" viewBox=\"0 0 1200 500\" role=\"img\" aria-label=\"Portrait éditorial de Sujee Design\" xmlns=\"http://www.w3.org/2000/svg\">\n  <defs>\n    <linearGradient id=\"iridA\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0.6\">\n      <stop offset=\"0\" stop-color=\"rgb(160,224,171)\"/>\n      <stop offset=\"0.5\" stop-color=\"rgb(255,172,46)\"/>\n      <stop offset=\"1\" stop-color=\"rgb(165,45,37)\"/>\n    </lineargradient>\n    <radialGradient id=\"halo\" cx=\"0.72\" cy=\"0.42\" r=\"0.6\">\n      <stop offset=\"0\" stop-color=\"rgb(160,224,171)\" stop-opacity=\"0.28\"/>\n      <stop offset=\"1\" stop-color=\"transparent\"/>\n    </radialgradient>\n  </defs>\n  <rect width=\"1200\" height=\"500\" fill=\"#0b0b0c\"/>\n  <rect width=\"1200\" height=\"500\" fill=\"url(#halo)\"/>\n  \n  <rect x=\"56\" y=\"60\" width=\"1088\" height=\"380\" fill=\"none\" stroke=\"#2a2a2e\" stroke-width=\"1\"/>\n  <rect x=\"56\" y=\"60\" width=\"1088\" height=\"2\" fill=\"url(#iridA)\" opacity=\"0.9\"/>\n  <rect x=\"56\" y=\"438\" width=\"1088\" height=\"2\" fill=\"url(#iridA)\" opacity=\"0.9\"/>\n  \n  <text x=\"88\" y=\"150\" fill=\"#f2f2f4\" font-family=\"DM Sans, sans-serif\" font-size=\"18\" font-weight=\"300\" letter-spacing=\"6\">SUJEE DESIGN</text>\n  <text x=\"88\" y=\"188\" fill=\"#6d6d6d\" font-family=\"DM Sans, sans-serif\" font-size=\"12\" font-weight=\"400\" letter-spacing=\"4\">DIRECTION ARTISTIQUE · FORMATION UI/UX · PAO</text>\n  <line x1=\"88\" y1=\"216\" x2=\"1112\" y2=\"216\" stroke=\"#2a2a2e\" stroke-width=\"1\"/>\n  \n  <text x=\"88\" y=\"360\" fill=\"url(#iridA)\" font-family=\"DM Sans, sans-serif\" font-size=\"150\" font-weight=\"300\" opacity=\"0.9\">SS</text>\n  <text x=\"320\" y=\"360\" fill=\"#f2f2f4\" font-family=\"DM Sans, sans-serif\" font-size=\"26\" font-weight=\"300\">Votre marque, de A à Z.</text>\n  <text x=\"320\" y=\"398\" fill=\"#6d6d6d\" font-family=\"DM Sans, sans-serif\" font-size=\"14\" font-weight=\"400\">Depuis 2013 · Paris</text>\n  \n  <g fill=\"#95959c\" font-family=\"DM Sans, sans-serif\" font-size=\"11\" letter-spacing=\"2\">\n    <text x=\"1088\" y=\"150\" text-anchor=\"end\">2010 — LEDTOLITE</text>\n    <text x=\"1088\" y=\"188\" text-anchor=\"end\">2014 — PIXIBAY · RAJ SERVICES</text>\n    <text x=\"1088\" y=\"226\" text-anchor=\"end\">2018 — WEBS↯ART · MJM</text>\n  </g>\n  <circle cx=\"1088\" cy=\"330\" r=\"3\" fill=\"#f2f2f4\"/>\n</svg>"
+          },
+          "label": "banniere"
+        },
+        {
+          "type": "chapter",
+          "data": {
+            "kicker": "01 · Résumé",
+            "title": "Quinze ans de direction artistique.",
+            "body": "<p>Directeur artistique et formateur UI/UX, je travaille dans la communication de marque depuis plusieurs agences de communication, et en indépendant depuis 2013. Je prends en charge la conception et la réalisation de projets print et digitaux, de la petite mission au projet d'envergure.</p><p>Mes domaines d'expertise : la direction artistique, print et web, la gestion de projet, le management d'équipe, le conseil et la stratégie. Mon savoir-faire s'est construit sur la rigueur et l'implication constante aux côtés de mes clients.</p>",
+            "list": [
+              "Direction artistique print & web",
+              "Gestion de projet et management d'équipe",
+              "Conseil et stratégie de marque",
+              "Mise en production : print, web, motion, photo"
+            ],
+            "dark": false
+          },
+          "label": "chapter"
+        },
+        {
+          "type": "chapter",
+          "data": {
+            "kicker": "Parcours · 2010 — aujourd'hui",
+            "title": "Les étapes, en vrai.",
+            "body": "<ul class=\"timeline\"><li class=\"reveal\" style=\"--d:.05s\">\n          <span class=\"tl-yr\">2010 — 2011</span>\n          <h3 class=\"tl-role\">Graphiste web / print</h3>\n          <div class=\"tl-firme\">LEDTOLITE</div>\n          <p class=\"tl-desc\">Premiers supports print et digitaux en agence.</p>\n        </li><li class=\"reveal\" style=\"--d:.12s\">\n          <span class=\"tl-yr\">Depuis 2013</span>\n          <h3 class=\"tl-role\">DA / Motion designer / Photographe</h3>\n          <div class=\"tl-firme\">Sujeedesign · studio indépendant — Montreuil / Paris</div>\n          <p class=\"tl-desc\">Mon activité indépendante : réflexion sur la stratégie de communication, création de chartes graphiques et identités de marque, supports et PLV, community management pour des restaurants (Americain SteakHouse, Le Kolam), refonte de sites (Phone2000, Age Consulting) et maquettes 3D.</p>\n        </li><li class=\"reveal\" style=\"--d:.19s\">\n          <span class=\"tl-yr\">2012 — 2013</span>\n          <h3 class=\"tl-role\">Graphiste / Chef de projet multimédia</h3>\n          <div class=\"tl-firme\">SYLUMIS ART LIGHTING</div>\n          <p class=\"tl-desc\">Refonte du site, cahier des charges, charte graphique, catalogues produits, prise de vue photo et vidéo, montage et motion design.</p>\n        </li><li class=\"reveal\" style=\"--d:.26s\">\n          <span class=\"tl-yr\">2014 — 2015</span>\n          <h3 class=\"tl-role\">Directeur artistique / Associé</h3>\n          <div class=\"tl-firme\">Pixibay</div>\n          <p class=\"tl-desc\">Direction de la création des packs de communication : identités visuelles, webdesign, éléments print, bannières sociales.</p>\n        </li><li class=\"reveal\" style=\"--d:.33s\">\n          <span class=\"tl-yr\">2018</span>\n          <h3 class=\"tl-role\">Directeur artistique</h3>\n          <div class=\"tl-firme\">GSM Master · CBI Multimedia</div>\n          <p class=\"tl-desc\">Stratégie de communication, charte graphique, site PHP/MySQL ; puis analyse des besoins clients, wireframes, maquettes fonctionnelles, animations et contenus interactifs.</p>\n        </li><li class=\"reveal\" style=\"--d:.40s\">\n          <span class=\"tl-yr\">2018 — 2026</span>\n          <h3 class=\"tl-role\">Formateur UI/UX & PAO</h3>\n          <div class=\"tl-firme\">École Webstart & MJM Graphic Design · Paris</div>\n          <p class=\"tl-desc\">UI/UX design, WordPress, HTML/CSS et PAO, encadrement de la 1re à la 3e année : direction graphique, e-merchandising, photographie, infographie web et webmarketing.</p>\n        </li><li class=\"reveal\" style=\"--d:.47s\">\n          <span class=\"tl-yr\">2023 — 2026</span>\n          <h3 class=\"tl-role\">Directeur de création</h3>\n          <div class=\"tl-firme\">Steewo</div>\n          <p class=\"tl-desc\">Définition fonctionnelle du produit, wireframes, prototypes et tests utilisateurs, identité visuelle, charte et site vitrine, campagnes de lancement.</p>\n        </li></ul>",
+            "list": [],
+            "dark": true
+          },
+          "label": "chapter"
+        },
+        {
+          "type": "chapter",
+          "data": {
+            "kicker": "03 · Enseigner",
+            "title": "Formateur depuis 2018.",
+            "body": "<p>J'ai formé des étudiants en UI/UX design, WordPress, HTML/CSS et PAO à l'École MJM Graphic Design et à l'École Webstart, du niveau 1re à la 3e année : direction graphique, e-merchandising, photographie, infographie web, webmarketing.</p><p>Enseigner m'a appris une chose précieuse : expliquer simplement ce qu'on fait. C'est devenu une marque de fabrique. Chaque projet livré est documenté, transmis et compris.</p>",
+            "list": [
+              "Cursus UI/UX, HTML/CSS et PAO",
+              "Accompagnement de projets créatifs",
+              "Pédagogie appliquée aux clients"
+            ],
+            "dark": false
+          },
+          "label": "chapter"
+        },
+        {
+          "type": "texte-riche",
+          "variant": "1",
+          "data": {
+            "label": "Clients & collaborations",
+            "title": "",
+            "body": "<p>LEDTOLITE · SYLUMIS Art Lighting · Pixibay · GSM Master · CBI Multimédia · Steewo · Americain SteakHouse · Le Kolam · Phone2000 · Age Consulting · Groupe Active Habitat · Adequation</p>"
+          },
+          "label": "clients"
+        },
+        {
+          "type": "texte-riche",
+          "variant": "1",
+          "data": {
+            "label": "Sur Behance",
+            "title": "",
+            "body": "<p>Des projets visibles sur mon profil Behance : refontes de sites, identités visuelles, présentations corporate, applications et jeux interactifs.</p><p>Identité · Webdesign · Print · Corporate · Applications · Jeux interactifs · Affiches · Direction artistique</p><ul><li><a href=\"https://www.behance.net/gallery/236057975/Website-Redesign-Groupe-Active-Habitat-(2018)\" target=\"_blank\" rel=\"noopener\">Website Redesign – Groupe Active Habitat (2018)</a> — <small>6 octobre 2025</small></li><li><a href=\"https://www.behance.net/gallery/235687863/Website-Redesign-Adequation-(2016)\" target=\"_blank\" rel=\"noopener\">Website Redesign – Adequation (2016)</a> — <small>30 septembre 2025</small></li><li><a href=\"https://www.behance.net/gallery/235686631/Webdesign-Doce-Awards-2016\" target=\"_blank\" rel=\"noopener\">Webdesign - Doc&#x27;e Awards 2016</a> — <small>30 septembre 2025</small></li></ul><p><a href=\"https://www.behance.net/sujeepansabesan\" target=\"_blank\" rel=\"noopener\">Voir le profil Behance ↗</a></p>"
+          },
+          "label": "behance"
+        },
+        {
+          "type": "texte-riche",
+          "variant": "1",
+          "data": {
+            "label": "Dernières actus · LinkedIn",
+            "title": "",
+            "body": "<ul><li><a href=\"https://www.linkedin.com/posts/yohann-lemoine-0715a5198_rechercheemploi-design-uxdesign-activity-7429170035815886849-vD6s\" target=\"_blank\" rel=\"noopener\">À la recherche d&#x27;une nouvelle opportunité en Web Design / UI-UX / Graphisme. Diplômé en Direction Artistique UX/UI, avec expériences en alternance, freelance et marketing.</a> — <small>16 février 2026 · Repost</small> <small>Voir sur LinkedIn ↗</small></li><li><a href=\"https://www.linkedin.com/posts/killian-le-bellu-5056b0269_cv-killian-le-bellu-2026-activity-7427030383906721792-pOhH\" target=\"_blank\" rel=\"noopener\">Après deux années d&#x27;alternance très formatrices chez Sciences Po Executive Education et IML GROUP, je viens de décrocher mon Bachelor chez École MJM Graphic Design.</a> — <small>10 février 2026 · Repost</small> <small>Voir sur LinkedIn ↗</small></li><li><a href=\"https://www.linkedin.com/posts/raj-services-france_raj-services-x-francoise-paris-activity-7404076479870816256-EDC4\" target=\"_blank\" rel=\"noopener\">Nous sommes fiers d&#x27;accueillir Françoise Paris dans notre entrepôt de Bagnolet. Une marque de mode parisienne qui réinvente le chic français à travers des créations durables.</a> — <small>9 décembre 2025 · Repost</small> <small>Voir sur LinkedIn ↗</small></li></ul>"
+          },
+          "label": "linkedin"
+        },
+        {
+          "type": "realisations-grid",
+          "variant": "auto",
+          "data": {
+            "label": "Sélection de projets"
+          },
+          "label": "realisations"
+        },
+        {
+          "type": "cta-final",
+          "variant": "interne",
+          "data": {
+            "kicker": "La suite",
+            "intro": "Un premier échange pour comprendre votre activité, vos envies et votre calendrier. Sans engagement.",
+            "ctas": [
+              {
+                "label": "Me contacter",
+                "href": "/contact",
+                "style": "pill--filled"
+              },
+              {
+                "label": "LinkedIn",
+                "href": "https://www.linkedin.com/in/sujeepan-sabesan",
+                "style": "pill"
+              }
+            ],
+            "shader": true,
+            "title": "Envie de travailler<br>avec moi ?"
+          },
+          "label": "cta"
+        }
+      ]
+    },
+    {
+      "slug": "contact",
+      "kind": "page",
+      "title": "Contact",
+      "status": "publie",
+      "in_menu": true,
+      "menu_label": "Contact",
+      "menu_position": 40,
+      "seo_title": "Contact — Sujee Design",
+      "seo_description": "Contactez Sujee Design : refonte d'identité, création visuelle, web, marketing, IA. Réponse sous 24h ouvrées. Paris.",
+      "sections": [
+        {
+          "type": "hero",
+          "variant": "simple",
+          "data": {
+            "kicker": "Contact",
+            "title": "Un projet ?<br>Parlons-en.",
+            "intro": "Une idée, une refonte, un questionnement : envoyez-moi un email, je réponds personnellement sous 24h ouvrées.",
+            "ctas": [
+              {
+                "label": "Écrire un email",
+                "href": "mailto:s.sujeepan.pro@gmail.com?subject=Un%20projet%20%C3%A0%20discuter",
+                "style": "pill--filled"
+              }
+            ]
+          },
+          "label": "hero"
+        },
+        {
+          "type": "formulaire-contact",
+          "data": {
+            "label": "",
+            "title": "",
+            "intro": "",
+            "columns": [
+              {
+                "title": "Je réponds à tout",
+                "body": "<p>Que vous ayez un brief précis ou juste une intuition, écrivez-moi : je vous réponds avec des questions concrètes, pas avec un devis formaté. Un premier échange de 20 minutes suffit souvent à savoir si le projet est le bon.</p>"
+              },
+              {
+                "title": "Disponibilité",
+                "body": "<p>Basé à Paris, je travaille avec des clients partout en France et à l'étranger, en présentiel ou en visio. Les délais sont fixés ensemble au démarrage et tenus : c'est la règle du studio.</p>"
+              },
+              {
+                "title": "Prix",
+                "body": "<p>Chaque projet est différent : un tarif sur mesure, établi après un cadrage clair. Aucune surprise en cours de route, et une facturation transparente, dès la première mission.</p>"
+              },
+              {
+                "title": "Coordonnées",
+                "body": "<ul class=\"list-check\">\n          <li><strong>Email :</strong> <a href=\"mailto:s.sujeepan.pro@gmail.com\">s.sujeepan.pro@gmail.com</a></li>\n          <li><strong>LinkedIn :</strong> <a href=\"https://www.linkedin.com/in/sujeepan-sabesan\" target=\"_blank\" rel=\"noopener\">in/sujeepan-sabesan</a></li>\n          <li><strong>Base :</strong> Paris, France</li>\n        </ul>"
+              },
+              {
+                "title": "Ce que j'écoute",
+                "body": "<p>Refonte d'identité, création visuelle, site web, e-commerce, conseil, formation, automatisations IA : si c'est votre image, c'est mon sujet.</p>"
+              }
+            ]
+          },
+          "label": "formulaire"
+        }
+      ]
+    },
+    {
+      "slug": "404",
+      "kind": "page",
+      "title": "Page introuvable",
+      "status": "publie",
+      "robots": "noindex,nofollow",
+      "in_menu": false,
+      "sections": [
+        {
+          "type": "hero",
+          "variant": "simple",
+          "label": "hero",
+          "data": {
+            "kicker": "Erreur 404",
+            "title": "Page introuvable",
+            "intro": "La page que vous cherchez n'existe pas ou a été déplacée."
+          }
+        },
+        {
+          "type": "texte-riche",
+          "variant": "1",
+          "label": "aide",
+          "data": {
+            "body": "<p>Revenez à l'accueil ou explorez les réalisations et les services depuis le menu.</p>"
+          }
+        }
+      ]
+    },
+    {
+      "slug": "identite",
+      "kind": "service",
+      "title": "Identité de marque",
+      "status": "publie",
+      "excerpt": "Stratégie, nom, logo, système visuel complet : une identité qui tient sur tous les supports.",
+      "num": 1,
+      "position": 1,
+      "in_menu": false,
+      "seo_title": "Identité de marque — Sujee Design",
+      "seo_description": "Identité de marque complète : stratégie, logo, système visuel et guidelines. Sujee Design, Paris.",
+      "sections": [
+        {
+          "type": "hero",
+          "variant": "page",
+          "data": {
+            "kicker": "Prestation 01 — Identité de marque",
+            "title": "Une marque<br>qui vous ressemble,<br>partout.",
+            "meta": [
+              "Stratégie",
+              "Naming",
+              "Logo",
+              "Système visuel",
+              "Guidelines"
+            ],
+            "intro": "Votre image de marque, c'est la première impression que vous laissez avant même d'avoir dit un mot. Je construis la vôtre de A à Z : une base solide, qui tient sur tous vos supports et dans le temps.",
+            "ctas": []
+          },
+          "label": "hero"
+        },
+        {
+          "type": "banniere",
+          "data": {
+            "svg": "<svg class=\"visual\" viewBox=\"0 0 960 420\" role=\"img\" aria-label=\"Composition : cartes de visite et monogramme\" xmlns=\"http://www.w3.org/2000/svg\">\n<defs><linearGradient id=\"irid\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"rgb(160,224,171)\"/><stop offset=\"0.5\" stop-color=\"rgb(255,172,46)\"/><stop offset=\"1\" stop-color=\"rgb(165,45,37)\"/></lineargradient></defs>\n<rect width=\"960\" height=\"420\" fill=\"#141418\"/>\n<circle cx=\"150\" cy=\"110\" r=\"90\" fill=\"none\" stroke=\"url(#irid)\" stroke-width=\"2\" opacity=\"0.8\"/>\n<circle cx=\"150\" cy=\"110\" r=\"64\" fill=\"none\" stroke=\"#2a2a2e\" stroke-width=\"1\"/>\n<circle cx=\"150\" cy=\"110\" r=\"38\" fill=\"none\" stroke=\"#2a2a2e\" stroke-width=\"1\"/>\n<text x=\"150\" y=\"118\" font-family=\"DM Sans, sans-serif\" font-size=\"34\" font-weight=\"300\" fill=\"#f2f2f4\" text-anchor=\"middle\">S</text>\n<g transform=\"translate(280,60)\">\n  <rect width=\"300\" height=\"176\" fill=\"#0b0b0c\" stroke=\"rgba(255,255,255,.16)\"/>\n  <rect width=\"300\" height=\"60\" fill=\"#1c1c20\"/>\n  <circle cx=\"42\" cy=\"30\" r=\"14\" fill=\"none\" stroke=\"url(#irid)\" stroke-width=\"1.6\"/>\n  <text x=\"42\" y=\"35\" font-family=\"DM Sans, sans-serif\" font-size=\"15\" font-weight=\"300\" fill=\"#fff\" text-anchor=\"middle\">S</text>\n  <text x=\"70\" y=\"33\" font-family=\"DM Sans, sans-serif\" font-size=\"16\" fill=\"#f2f2f4\">SUJEE DESIGN</text>\n  <text x=\"24\" y=\"104\" font-family=\"DM Sans, sans-serif\" font-size=\"13\" fill=\"#95959c\">Votre marque, de A à Z.</text>\n  <text x=\"24\" y=\"142\" font-family=\"DM Sans, sans-serif\" font-size=\"11\" letter-spacing=\"2\" fill=\"#6a6a70\">PARIS — FRANCE</text>\n</g>\n<g transform=\"translate(640,60)\">\n  <rect width=\"280\" height=\"176\" fill=\"#0b0b0c\" stroke=\"rgba(255,255,255,.12)\" transform=\"rotate(6 140 88)\"/>\n  <rect width=\"280\" height=\"176\" fill=\"#0b0b0c\" stroke=\"rgba(255,255,255,.3)\"/>\n  <text x=\"140\" y=\"80\" font-family=\"DM Sans, sans-serif\" font-size=\"26\" font-weight=\"300\" fill=\"#f2f2f4\" text-anchor=\"middle\">Sujee Design</text>\n  <text x=\"140\" y=\"110\" font-family=\"DM Sans, sans-serif\" font-size=\"11\" letter-spacing=\"1.6\" fill=\"#95959c\" text-anchor=\"middle\">S. SABESAN</text>\n  <text x=\"140\" y=\"140\" font-family=\"DM Sans, sans-serif\" font-size=\"10\" fill=\"#6a6a70\" text-anchor=\"middle\">s.sujeepan.pro@gmail.com</text>\n</g>\n<g transform=\"translate(120,300)\">\n  <rect width=\"160\" height=\"96\" fill=\"#151519\" stroke=\"rgba(255,255,255,.12)\"/>\n  <text x=\"80\" y=\"46\" font-family=\"DM Sans, sans-serif\" font-size=\"30\" font-weight=\"300\" fill=\"#f2f2f4\" text-anchor=\"middle\">S</text>\n  <rect width=\"30\" height=\"2\" x=\"65\" y=\"58\" fill=\"url(#irid)\"/>\n</g>\n<g transform=\"translate(320,300)\">\n  <rect width=\"160\" height=\"96\" fill=\"#151519\" stroke=\"rgba(255,255,255,.12)\"/>\n  <text x=\"80\" y=\"52\" font-family=\"DM Sans, sans-serif\" font-size=\"14\" font-weight=\"300\" fill=\"#f2f2f4\" text-anchor=\"middle\">S.D</text>\n</g>\n<g transform=\"translate(520,300)\">\n  <rect width=\"160\" height=\"96\" fill=\"#151519\" stroke=\"rgba(255,255,255,.12)\"/>\n  <circle cx=\"80\" cy=\"48\" r=\"17\" fill=\"none\" stroke=\"url(#irid)\" stroke-width=\"1.6\"/>\n</g>\n<g transform=\"translate(720,300)\">\n  <rect width=\"160\" height=\"96\" fill=\"#151519\" stroke=\"rgba(255,255,255,.12)\"/>\n  <text x=\"80\" y=\"50\" font-family=\"DM Sans, sans-serif\" font-size=\"18\" font-weight=\"400\" letter-spacing=\"6\" fill=\"#f2f2f4\" text-anchor=\"middle\">S.D</text>\n</g>\n<text x=\"900\" y=\"390\" font-family=\"DM Sans, sans-serif\" font-size=\"10\" letter-spacing=\"3\" fill=\"#6a6a70\" text-anchor=\"end\">DÉCLINAISONS DU SIGNE</text>\n</svg>"
+          },
+          "label": "banniere"
+        },
+        {
+          "type": "chapter",
+          "data": {
+            "kicker": "01 · Résumé",
+            "title": "Ce que c'est, en vrai.",
+            "body": "<p>Une identité de marque, c'est plus qu'un beau logo. C'est la traduction visuelle de qui vous êtes : votre façon de faire, votre ton, vos valeurs. Le tout réuni dans un système cohérent et durable.</p><p>Je pars de votre activité et de vos objectifs, pas d'un stylo qui s'agite. Le résultat : une marque qui vous ressemble, et qui se déploie sans effort sur chaque support.</p>",
+            "list": [],
+            "dark": false
+          },
+          "label": "chapter"
+        },
+        {
+          "type": "chapter",
+          "data": {
+            "kicker": "02 · Le défi",
+            "title": "Pourquoi si peu de marques marquent.",
+            "body": "<p>Beaucoup de marques se ressemblent. Les raisons sont connues : logo créé sur un générateur, couleurs choisies au feeling, supports créés au fil de l'eau par des prestataires différents.</p><p>Le résultat se paie chaque jour : une image floue, des clients qui ne vous recommandent pas, un sentiment de « pas tout à fait ça » que personne n'arrive à nommer. C'est ce que je corrige.</p>",
+            "list": [],
+            "dark": false
+          },
+          "label": "chapter"
+        },
+        {
+          "type": "chapter",
+          "data": {
+            "kicker": "03 · Ma réponse",
+            "title": "Un système, pas un dessin.",
+            "body": "<p>Ma réponse tient en une idée : construire une identité comme un outil, pas comme une déco. Elle doit servir vos objectifs commerciaux, pas seulement vos goûts.</p><p>Concrètement, vous repartez avec un socle complet et cohérent :</p>",
+            "list": [
+              "Une stratégie de marque claire : positionnement, cible, ton, valeurs",
+              "Un logo et ses variantes, pensés pour tous les formats",
+              "Une palette, une typographie et un système de composition",
+              "Des guidelines simples pour que toutes vos équipes l'utilisent bien",
+              "Vos premiers supports appliqués : cartes, signatures, réseaux, en-têtes"
+            ],
+            "dark": true
+          },
+          "label": "chapter"
+        },
+        {
+          "type": "chapter",
+          "data": {
+            "kicker": "04 · Et après ?",
+            "title": "Ce que ça change au quotidien.",
+            "body": "<p>Plus besoin de deviner. Chaque nouveau support part du même système : vos prestataires produisent juste, vos équipes publient sereinement, votre marque gagne en reconnaissance à chaque contact.</p><p>Et quand vous évoluez, le système évolue avec vous : je reste disponible pour décliner, adapter ou faire grandir votre identité dans la durée.</p>",
+            "list": [],
+            "dark": false
+          },
+          "label": "chapter"
+        },
+        {
+          "type": "realisations-grid",
+          "variant": "auto",
+          "data": {
+            "label": "Projets phare"
+          },
+          "label": "realisations"
+        },
+        {
+          "type": "cta-final",
+          "variant": "interne",
+          "data": {
+            "kicker": "La suite",
+            "intro": "Un premier échange pour comprendre votre activité, vos envies et votre calendrier. Sans engagement.",
+            "ctas": [
+              {
+                "label": "Démarrer un projet",
+                "href": "/contact",
+                "style": "pill--filled"
+              },
+              {
+                "label": "Écrire directement",
+                "href": "mailto:s.sujeepan.pro@gmail.com",
+                "style": "pill"
+              }
+            ],
+            "shader": true,
+            "title": "Et si on parlait<br>de votre marque ?"
+          },
+          "label": "cta"
+        },
+        {
+          "type": "bloc-liens",
+          "variant": "services",
+          "data": {
+            "label": "Dans la même rubrique"
+          },
+          "label": "liens"
+        }
+      ]
+    },
+    {
+      "slug": "creation-visuelle",
+      "kind": "service",
+      "title": "Création visuelle & PAO",
+      "status": "publie",
+      "excerpt": "Direction artistique, print, digital. De la carte de visite à la campagne entière.",
+      "num": 2,
+      "position": 2,
+      "in_menu": false,
+      "seo_title": "Création visuelle & PAO — Sujee Design",
+      "seo_description": "Création visuelle et PAO : direction artistique, print et digital. Cartes, flyers, brochures, campagnes. Sujee Design, Paris.",
+      "sections": [
+        {
+          "type": "hero",
+          "variant": "page",
+          "data": {
+            "kicker": "Prestation 02 — Création visuelle & PAO",
+            "title": "Des supports<br>qui vous ressemblent,<br>du papier aux pixels.",
+            "meta": [
+              "Direction artistique",
+              "Print",
+              "Digital",
+              "Déclinaisons",
+              "Impression"
+            ],
+            "intro": "Une identité, c'est bien. Des supports qui la font vivre, c'est mieux. Je conçois tout ce qui porte votre marque : cartes, flyers, brochures, affiches, contenus digital, jusqu'au suivi d'impression.",
+            "ctas": []
+          },
+          "label": "hero"
+        },
+        {
+          "type": "banniere",
+          "data": {
+            "svg": "<svg class=\"visual\" viewBox=\"0 0 960 420\" role=\"img\" aria-label=\"Supports print : carte, flyer, affiche\" xmlns=\"http://www.w3.org/2000/svg\">\n<defs><linearGradient id=\"irid\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"rgb(160,224,171)\"/><stop offset=\"0.5\" stop-color=\"rgb(255,172,46)\"/><stop offset=\"1\" stop-color=\"rgb(165,45,37)\"/></lineargradient>\n<pattern id=\"grid\" width=\"20\" height=\"20\" patternUnits=\"userSpaceOnUse\"><path d=\"M20 0H0V20\" fill=\"none\" stroke=\"rgba(255,255,255,.05)\"/></pattern></defs>\n<rect width=\"960\" height=\"420\" fill=\"#141418\"/>\n<rect width=\"960\" height=\"420\" fill=\"url(#grid)\"/>\n<g transform=\"translate(60,60)\">\n  <rect width=\"520\" height=\"300\" fill=\"#0b0b0c\" stroke=\"rgba(255,255,255,.14)\"/>\n  <text x=\"60\" y=\"60\" font-family=\"DM Sans, sans-serif\" font-size=\"11\" letter-spacing=\"4\" fill=\"#6a6a70\">BROCHURE</text>\n  <rect x=\"60\" y=\"90\" width=\"150\" height=\"3\" fill=\"url(#irid)\"/>\n  <text x=\"60\" y=\"150\" font-family=\"DM Sans, sans-serif\" font-size=\"30\" font-weight=\"300\" fill=\"#f2f2f4\">L'art de la</text>\n  <text x=\"60\" y=\"192\" font-family=\"DM Sans, sans-serif\" font-size=\"30\" font-weight=\"300\" fill=\"#f2f2f4\">mise en page.</text>\n  <text x=\"60\" y=\"240\" font-family=\"DM Sans, sans-serif\" font-size=\"12\" fill=\"#95959c\">Identité, print, digital : chaque support</text>\n  <text x=\"60\" y=\"262\" font-family=\"DM Sans, sans-serif\" font-size=\"12\" fill=\"#95959c\">fait vivre votre marque.</text>\n  <circle cx=\"480\" cy=\"240\" r=\"52\" fill=\"none\" stroke=\"url(#irid)\" stroke-width=\"1.4\" opacity=\"0.85\"/>\n  <circle cx=\"480\" cy=\"240\" r=\"30\" fill=\"none\" stroke=\"#2a2a2e\"/>\n</g>\n<g transform=\"translate(620,60)\">\n  <rect width=\"280\" height=\"140\" fill=\"#101014\" stroke=\"rgba(255,255,255,.12)\"/>\n  <text x=\"24\" y=\"70\" font-family=\"DM Sans, sans-serif\" font-size=\"22\" font-weight=\"300\" fill=\"#f2f2f4\">Carte</text>\n  <text x=\"24\" y=\"98\" font-family=\"DM Sans, sans-serif\" font-size=\"22\" font-weight=\"300\" fill=\"#f2f2f4\">de visite</text>\n  <circle cx=\"238\" cy=\"40\" r=\"16\" fill=\"none\" stroke=\"url(#irid)\" stroke-width=\"1.4\"/>\n</g>\n<g transform=\"translate(620,220)\">\n  <rect width=\"280\" height=\"140\" fill=\"#101014\" stroke=\"rgba(255,255,255,.12)\"/>\n  <text x=\"24\" y=\"70\" font-family=\"DM Sans, sans-serif\" font-size=\"22\" font-weight=\"300\" fill=\"#f2f2f4\">Flyer</text>\n  <text x=\"24\" y=\"98\" font-family=\"DM Sans, sans-serif\" font-size=\"22\" font-weight=\"300\" fill=\"#f2f2f4\">de lancement</text>\n  <rect x=\"196\" y=\"28\" width=\"60\" height=\"60\" fill=\"none\" stroke=\"url(#irid)\" stroke-width=\"1.2\"/>\n</g>\n<text x=\"900\" y=\"390\" font-family=\"DM Sans, sans-serif\" font-size=\"10\" letter-spacing=\"3\" fill=\"#6a6a70\" text-anchor=\"end\">PRINT &amp; DIGITAL</text>\n</svg>"
+          },
+          "label": "banniere"
+        },
+        {
+          "type": "chapter",
+          "data": {
+            "kicker": "01 · Résumé",
+            "title": "Le pont entre votre marque et le monde.",
+            "body": "<p>La création visuelle, c'est le moment où votre identité devient tangible : ce que vos clients voient, touchent, gardent. Un bon support ne décore pas, il communique.</p><p>Je couvre toute la chaîne, de la direction artistique à la production finale, avec un œil sur vos objectifs et votre budget.</p>",
+            "list": [],
+            "dark": false
+          },
+          "label": "chapter"
+        },
+        {
+          "type": "chapter",
+          "data": {
+            "kicker": "02 · Le défi",
+            "title": "Quand les supports se contredisent.",
+            "body": "<p>Un logo sobre sur le site, un flyer chargé, une carte qui ne ressemble à rien, des couleurs qui varient d'un prestataire à l'autre : votre image s'effrite à chaque support.</p><p>Le pire : ça ne se voit pas tout de suite. Mais vos clients le sentent, sans pouvoir le dire. Et ils choisissent souvent ailleurs, sans savoir pourquoi.</p>",
+            "list": [],
+            "dark": false
+          },
+          "label": "chapter"
+        },
+        {
+          "type": "chapter",
+          "data": {
+            "kicker": "03 · Ma réponse",
+            "title": "Une ligne claire, appliquée partout.",
+            "body": "<p>Ma réponse : une direction artistique unique, déclinée méthodiquement. Chaque support reprend le même système, adapté à son usage, sans trahir l'esprit de la marque.</p><p>Concrètement, vous repartez avec :</p>",
+            "list": [
+              "Des déclinaisons print : papeterie, flyers, cartes, brochures, affiches",
+              "Des déclinaisons digital : réseaux sociaux, cartes de visite électroniques, bannières",
+              "Des supports de vente : présentations, fiches produits, catalogues",
+              "Une préparation d'impression soignée : fichiers propres, épreuves, suivi",
+              "Des gabarits réutilisables, pour que votre équipe produise juste ensuite"
+            ],
+            "dark": true
+          },
+          "label": "chapter"
+        },
+        {
+          "type": "chapter",
+          "data": {
+            "kicker": "04 · Et après ?",
+            "title": "Des supports qui travaillent pour vous.",
+            "body": "<p>Fini les supports bricolés à la dernière minute. Chaque pièce sort cohérente, et vous gardez les gabarits : le prochain besoin se produit vite, bien, sans repartir de zéro.</p><p>Et comme tout part du même système, votre marque gagne en puissance à chaque nouveau contact.</p>",
+            "list": [],
+            "dark": false
+          },
+          "label": "chapter"
+        },
+        {
+          "type": "realisations-grid",
+          "variant": "auto",
+          "data": {
+            "label": "Projets phare"
+          },
+          "label": "realisations"
+        },
+        {
+          "type": "cta-final",
+          "variant": "interne",
+          "data": {
+            "kicker": "La suite",
+            "intro": "Un premier échange pour faire le point sur vos supports actuels et vos priorités.",
+            "ctas": [
+              {
+                "label": "Démarrer un projet",
+                "href": "/contact",
+                "style": "pill--filled"
+              },
+              {
+                "label": "Écrire directement",
+                "href": "mailto:s.sujeepan.pro@gmail.com",
+                "style": "pill"
+              }
+            ],
+            "shader": true,
+            "title": "Des supports,<br>et du sens."
+          },
+          "label": "cta"
+        },
+        {
+          "type": "bloc-liens",
+          "variant": "services",
+          "data": {
+            "label": "Dans la même rubrique"
+          },
+          "label": "liens"
+        }
+      ]
+    },
+    {
+      "slug": "web",
+      "kind": "service",
+      "title": "Sites web & e-commerce",
+      "status": "publie",
+      "excerpt": "Design, intégration, suivi. Des vitrines et des boutiques pensées pour convertir.",
+      "num": 3,
+      "position": 3,
+      "in_menu": false,
+      "seo_title": "Sites web & e-commerce — Sujee Design",
+      "seo_description": "Sites web et e-commerce sur mesure : design, intégration, contenus et suivi. Sujee Design, Paris.",
+      "sections": [
+        {
+          "type": "hero",
+          "variant": "page",
+          "data": {
+            "kicker": "Prestation 03 — Sites web & e-commerce",
+            "title": "Un site<br>qui vous représente,<br>et qui travaille.",
+            "meta": [
+              "Design",
+              "Intégration",
+              "E-commerce",
+              "Contenus",
+              "Suivi"
+            ],
+            "intro": "Un site n'est pas une vitrine : c'est votre meilleur vendeur, disponible 24h/24. Je conçois des sites pensés pour vos visiteurs et vos objectifs, du premier écran à la mise en ligne, puis dans la durée.",
+            "ctas": []
+          },
+          "label": "hero"
+        },
+        {
+          "type": "banniere",
+          "data": {
+            "svg": "<svg class=\"visual\" viewBox=\"0 0 960 420\" role=\"img\" aria-label=\"Maquettes de site : bureau et mobile\" xmlns=\"http://www.w3.org/2000/svg\">\n<defs><linearGradient id=\"irid\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"rgb(160,224,171)\"/><stop offset=\"0.5\" stop-color=\"rgb(255,172,46)\"/><stop offset=\"1\" stop-color=\"rgb(165,45,37)\"/></lineargradient></defs>\n<rect width=\"960\" height=\"420\" fill=\"#141418\"/>\n<g transform=\"translate(60,50)\">\n  <rect width=\"560\" height=\"330\" fill=\"#0b0b0c\" stroke=\"rgba(255,255,255,.16)\"/>\n  <rect width=\"560\" height=\"46\" fill=\"#1c1c20\"/>\n  <circle cx=\"28\" cy=\"23\" r=\"6\" fill=\"#3a3a40\"/>\n  <circle cx=\"52\" cy=\"23\" r=\"6\" fill=\"#3a3a40\"/>\n  <rect x=\"120\" y=\"14\" width=\"130\" height=\"18\" fill=\"#3a3a40\"/>\n  <rect x=\"380\" y=\"14\" width=\"50\" height=\"14\" fill=\"#2c2c31\"/>\n  <rect x=\"440\" y=\"14\" width=\"50\" height=\"14\" fill=\"#2c2c31\"/>\n  <rect x=\"500\" y=\"14\" width=\"40\" height=\"14\" fill=\"#2c2c31\"/>\n  <rect x=\"30\" y=\"80\" width=\"240\" height=\"60\" fill=\"url(#irid)\" opacity=\"0.9\"/>\n  <text x=\"52\" y=\"118\" font-family=\"DM Sans, sans-serif\" font-size=\"20\" font-weight=\"400\" fill=\"#111\" >Sujee Design</text>\n  <rect x=\"30\" y=\"160\" width=\"180\" height=\"12\" fill=\"#3a3a40\"/>\n  <rect x=\"30\" y=\"184\" width=\"240\" height=\"12\" fill=\"#2a2a2e\"/>\n  <rect x=\"160\" y=\"220\" width=\"130\" height=\"40\" rx=\"20\" fill=\"none\" stroke=\"url(#irid)\" stroke-width=\"1.4\"/>\n  <rect x=\"320\" y=\"160\" width=\"110\" height=\"100\" fill=\"#1c1c20\"/>\n  <rect x=\"450\" y=\"160\" width=\"110\" height=\"100\" fill=\"#1c1c20\"/>\n  <rect x=\"30\" y=\"280\" width=\"160\" height=\"10\" fill=\"#2a2a2e\"/>\n  <rect x=\"30\" y=\"298\" width=\"120\" height=\"10\" fill=\"#2a2a2e\"/>\n</g>\n<g transform=\"translate(680,50)\">\n  <rect x=\"30\" y=\"0\" width=\"220\" height=\"330\" rx=\"26\" fill=\"#0b0b0c\" stroke=\"rgba(255,255,255,.18)\"/>\n  <rect x=\"52\" y=\"10\" width=\"176\" height=\"14\" rx=\"7\" fill=\"#1c1c20\"/>\n  <rect x=\"46\" y=\"44\" width=\"188\" height=\"120\" rx=\"10\" fill=\"url(#irid)\" opacity=\"0.9\"/>\n  <text x=\"140\" y=\"104\" font-family=\"DM Sans, sans-serif\" font-size=\"15\" font-weight=\"400\" fill=\"#111\" text-anchor=\"middle\">Pensé mobile.</text>\n  <rect x=\"46\" y=\"180\" width=\"188\" height=\"14\" fill=\"#3a3a40\"/>\n  <rect x=\"46\" y=\"202\" width=\"150\" height=\"12\" fill=\"#2a2a2e\"/>\n  <rect x=\"46\" y=\"222\" width=\"88\" height=\"32\" rx=\"16\" fill=\"none\" stroke=\"url(#irid)\" stroke-width=\"1.3\"/>\n  <rect x=\"46\" y=\"272\" width=\"188\" height=\"1\" fill=\"rgba(255,255,255,.12)\"/>\n  <rect x=\"46\" y=\"286\" width=\"120\" height=\"10\" fill=\"#2a2a2e\"/>\n  <rect x=\"46\" y=\"304\" width=\"160\" height=\"10\" fill=\"#2a2a2e\"/>\n</g>\n<text x=\"900\" y=\"400\" font-family=\"DM Sans, sans-serif\" font-size=\"10\" letter-spacing=\"3\" fill=\"#6a6a70\" text-anchor=\"end\">RESPONSIVE</text>\n</svg>"
+          },
+          "label": "banniere"
+        },
+        {
+          "type": "chapter",
+          "data": {
+            "kicker": "01 · Résumé",
+            "title": "Un site qui fait son travail.",
+            "body": "<p>Beaucoup de sites existent. Peu travaillent : ils sont lents, confus, ou simplement jolis sans servir à rien. Je construis des sites qui racontent votre histoire et guident vos visiteurs vers l'action.</p><p>Vitrine, portfolio, e-commerce : je m'adapte à votre besoin, avec une exigence constante de clarté et de performance.</p>",
+            "list": [],
+            "dark": false
+          },
+          "label": "chapter"
+        },
+        {
+          "type": "chapter",
+          "data": {
+            "kicker": "02 · Le défi",
+            "title": "Un site qui coûte, sans rapporter.",
+            "body": "<p>Un site peut être un poste de dépense silencieux : des pages qui ne convertissent pas, des visiteurs qui partent, un design daté qui décrédibilise tout ce que vous faites par ailleurs.</p><p>Souvent, les signes sont là : peu de demandes via le site, un taux de rebond élevé, une refonte repoussée parce que « c'est compliqué ».</p>",
+            "list": [],
+            "dark": false
+          },
+          "label": "chapter"
+        },
+        {
+          "type": "chapter",
+          "data": {
+            "kicker": "03 · Ma réponse",
+            "title": "Un site pensé comme un parcours.",
+            "body": "<p>Je commence par vos objectifs, pas par les tendances : qui visite, que doivent-ils faire, comment les y amener en douceur. Puis je dessine, je construis, et je vérifie que ça fonctionne vraiment.</p><p>Concrètement, vous repartez avec :</p>",
+            "list": [
+              "Une arborescence et des contenus pensés pour vos visiteurs",
+              "Un design sur mesure, fidèle à votre identité",
+              "Une version mobile irréprochable, pensée dès le départ",
+              "Une mise en ligne soignée : performances, référencement de base, accessibilité",
+              "Un accompagnement après lancement : réglages, évolutions, formation"
+            ],
+            "dark": true
+          },
+          "label": "chapter"
+        },
+        {
+          "type": "chapter",
+          "data": {
+            "kicker": "04 · Et après ?",
+            "title": "Un outil, pas un projet fini.",
+            "body": "<p>Un site vit : il se mesure, s'ajuste, s'enrichit. Je reste disponible après la mise en ligne pour faire évoluer les contenus, ajouter des fonctionnalités ou analyser ce qui fonctionne.</p><p>Vous gardez la main : des outils simples, documentés, et si besoin, une formation pour reprendre les rênes en confiance.</p>",
+            "list": [],
+            "dark": false
+          },
+          "label": "chapter"
+        },
+        {
+          "type": "realisations-grid",
+          "variant": "auto",
+          "data": {
+            "label": "Projets phare"
+          },
+          "label": "realisations"
+        },
+        {
+          "type": "cta-final",
+          "variant": "interne",
+          "data": {
+            "kicker": "La suite",
+            "intro": "Un échange pour comprendre votre activité, votre public et ce que votre site devrait accomplir.",
+            "ctas": [
+              {
+                "label": "Démarrer un projet",
+                "href": "/contact",
+                "style": "pill--filled"
+              },
+              {
+                "label": "Écrire directement",
+                "href": "mailto:s.sujeepan.pro@gmail.com",
+                "style": "pill"
+              }
+            ],
+            "shader": true,
+            "title": "Et si votre site<br>travaillait pour vous ?"
+          },
+          "label": "cta"
+        },
+        {
+          "type": "bloc-liens",
+          "variant": "services",
+          "data": {
+            "label": "Dans la même rubrique"
+          },
+          "label": "liens"
+        }
+      ]
+    },
+    {
+      "slug": "marketing",
+      "kind": "service",
+      "title": "Conseil & marketing",
+      "status": "publie",
+      "excerpt": "Positionnement, contenu, déploiement. Une image qui travaille pour vous.",
+      "num": 4,
+      "position": 4,
+      "in_menu": false,
+      "seo_title": "Conseil & marketing — Sujee Design",
+      "seo_description": "Conseil et marketing : positionnement, contenus, campagnes et déploiement. Sujee Design, Paris.",
+      "sections": [
+        {
+          "type": "hero",
+          "variant": "page",
+          "data": {
+            "kicker": "Prestation 04 — Conseil & marketing",
+            "title": "Une image<br>au service de vos<br>objectifs.",
+            "meta": [
+              "Positionnement",
+              "Contenu",
+              "Campagnes",
+              "Déploiement"
+            ],
+            "intro": "Bien communiquer, ça ne s'improvise pas, mais ça s'apprend et ça s'organise. Je vous aide à clarifier votre positionnement, à produire les bons contenus et à les déployer là où votre public vous attend.",
+            "ctas": []
+          },
+          "label": "hero"
+        },
+        {
+          "type": "banniere",
+          "data": {
+            "svg": "<svg class=\"visual\" viewBox=\"0 0 960 420\" role=\"img\" aria-label=\"Plan de déploiement de marque\" xmlns=\"http://www.w3.org/2000/svg\">\n<defs><linearGradient id=\"irid\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"rgb(160,224,171)\"/><stop offset=\"0.5\" stop-color=\"rgb(255,172,46)\"/><stop offset=\"1\" stop-color=\"rgb(165,45,37)\"/></lineargradient></defs>\n<rect width=\"960\" height=\"420\" fill=\"#141418\"/>\n<path d=\"M80 340 C 260 120, 420 420, 600 190 S 840 120, 900 90\" fill=\"none\" stroke=\"url(#irid)\" stroke-width=\"2\" stroke-dasharray=\"1 10\" stroke-linecap=\"round\"/>\n<g transform=\"translate(60,300)\"><rect width=\"120\" height=\"70\" fill=\"#0b0b0c\" stroke=\"rgba(255,255,255,.18)\"/><text x=\"60\" y=\"30\" font-family=\"DM Sans, sans-serif\" font-size=\"12\" letter-spacing=\"2\" fill=\"#f2f2f4\" text-anchor=\"middle\">01 AUDIT</text><text x=\"60\" y=\"52\" font-family=\"DM Sans, sans-serif\" font-size=\"10\" fill=\"#6a6a70\" text-anchor=\"middle\">Diagnostic</text></g>\n<g transform=\"translate(240,60)\"><rect width=\"120\" height=\"70\" fill=\"#0b0b0c\" stroke=\"rgba(255,255,255,.18)\"/><text x=\"60\" y=\"30\" font-family=\"DM Sans, sans-serif\" font-size=\"12\" letter-spacing=\"2\" fill=\"#f2f2f4\" text-anchor=\"middle\">02 PÔLE</text><text x=\"60\" y=\"52\" font-family=\"DM Sans, sans-serif\" font-size=\"10\" fill=\"#6a6a70\" text-anchor=\"middle\">Positionnement</text></g>\n<g transform=\"translate(440,290)\"><rect width=\"120\" height=\"70\" fill=\"#0b0b0c\" stroke=\"rgba(255,255,255,.18)\"/><text x=\"60\" y=\"30\" font-family=\"DM Sans, sans-serif\" font-size=\"12\" letter-spacing=\"2\" fill=\"#f2f2f4\" text-anchor=\"middle\">03 DÉPLOIEMENT</text><text x=\"60\" y=\"52\" font-family=\"DM Sans, sans-serif\" font-size=\"10\" fill=\"#6a6a70\" text-anchor=\"middle\">Supports &amp; rythme</text></g>\n<g transform=\"translate(680,80)\"><rect width=\"150\" height=\"70\" fill=\"url(#irid)\" opacity=\"0.92\"/><text x=\"75\" y=\"32\" font-family=\"DM Sans, sans-serif\" font-size=\"12\" letter-spacing=\"2\" fill=\"#111\" text-anchor=\"middle\">04 MESURE</text><text x=\"75\" y=\"52\" font-family=\"DM Sans, sans-serif\" font-size=\"10\" fill=\"#111\" text-anchor=\"middle\">Ajuster, itérer</text></g>\n<text x=\"900\" y=\"400\" font-family=\"DM Sans, sans-serif\" font-size=\"10\" letter-spacing=\"3\" fill=\"#6a6a70\" text-anchor=\"end\">MÉTHODE</text>\n</svg>"
+          },
+          "label": "banniere"
+        },
+        {
+          "type": "chapter",
+          "data": {
+            "kicker": "01 · Résumé",
+            "title": "Communiquer avec méthode.",
+            "body": "<p>Le marketing n'est pas un mystère : c'est une question de clarté et de cohérence. Qui êtes-vous, pour qui, avec quoi, et par quels canaux atteindre les bonnes personnes.</p><p>Je vous accompagne sur ces décisions, avec des contenus et des plans concrets plutôt que des concepts vagues.</p>",
+            "list": [],
+            "dark": false
+          },
+          "label": "chapter"
+        },
+        {
+          "type": "chapter",
+          "data": {
+            "kicker": "02 · Le défi",
+            "title": "Parler beaucoup, être peu entendu.",
+            "body": "<p>On peut publier sans relâche et rester invisible : contenus sans ligne directrice, messages incohérents, canaux choisis par défaut plutôt que par pertinence.</p><p>Résultat : du temps investi, des moyens dispersés, et une image qui ne progresse pas. Le problème n'est pas l'effort, c'est l'absence de cap.</p>",
+            "list": [],
+            "dark": false
+          },
+          "label": "chapter"
+        },
+        {
+          "type": "chapter",
+          "data": {
+            "kicker": "03 · Ma réponse",
+            "title": "Un cap, puis une cadence.",
+            "body": "<p>Je commence par poser le cap : positionnement clair, messages qui vous ressemblent, publics prioritaires. Ensuite seulement, on déploie avec méthode.</p><p>Concrètement, vous repartez avec :</p>",
+            "list": [
+              "Un positionnement clarifié et des messages qui vous ressemblent",
+              "Une stratégie de contenus adaptée à vos canaux",
+              "Des supports de communication prêts à diffuser",
+              "Un calendrier de déploiement réaliste",
+              "Des indicateurs simples pour savoir ce qui fonctionne"
+            ],
+            "dark": true
+          },
+          "label": "chapter"
+        },
+        {
+          "type": "chapter",
+          "data": {
+            "kicker": "04 · Et après ?",
+            "title": "Une communication qui s'entretient.",
+            "body": "<p>Une fois le cap posé, la communication devient un rythme : des contenus qui sortent juste, des messages qui se renforcent, une image qui progresse mois après mois.</p><p>Je peux rester à vos côtés pour produire ou ajuster, ou vous laisser les outils pour avancer seuls en confiance.</p>",
+            "list": [],
+            "dark": false
+          },
+          "label": "chapter"
+        },
+        {
+          "type": "realisations-grid",
+          "variant": "auto",
+          "data": {
+            "label": "Projets phare"
+          },
+          "label": "realisations"
+        },
+        {
+          "type": "cta-final",
+          "variant": "interne",
+          "data": {
+            "kicker": "La suite",
+            "intro": "Un échange pour comprendre où vous en êtes, où vous voulez aller, et ce qui vous freine.",
+            "ctas": [
+              {
+                "label": "Démarrer un projet",
+                "href": "/contact",
+                "style": "pill--filled"
+              },
+              {
+                "label": "Écrire directement",
+                "href": "mailto:s.sujeepan.pro@gmail.com",
+                "style": "pill"
+              }
+            ],
+            "shader": true,
+            "title": "Et si on posait<br>votre cap ?"
+          },
+          "label": "cta"
+        },
+        {
+          "type": "bloc-liens",
+          "variant": "services",
+          "data": {
+            "label": "Dans la même rubrique"
+          },
+          "label": "liens"
+        }
+      ]
+    },
+    {
+      "slug": "ia",
+      "kind": "service",
+      "title": "Solutions IA sur mesure",
+      "status": "publie",
+      "excerpt": "Automatisations, agents, workflows : l'IA au service de votre façon de travailler.",
+      "num": 5,
+      "position": 5,
+      "in_menu": false,
+      "seo_title": "Solutions IA sur mesure — Sujee Design",
+      "seo_description": "Solutions IA sur mesure : automatisations, agents et workflows pour alléger votre quotidien. Sujee Design, Paris.",
+      "sections": [
+        {
+          "type": "hero",
+          "variant": "page",
+          "data": {
+            "kicker": "Prestation 05 — Solutions IA sur mesure",
+            "title": "L'IA fait le travail,<br>vous gardez<br>la main.",
+            "meta": [
+              "Automatisation",
+              "Agents",
+              "Workflows",
+              "Intégrations"
+            ],
+            "intro": "L'intelligence artificielle peut alléger vos journées : répondre, classer, résumer, générer, relancer. Je conçois des solutions simples à utiliser, adaptées à votre métier, sans jargon ni promesses irréalistes.",
+            "ctas": []
+          },
+          "label": "hero"
+        },
+        {
+          "type": "banniere",
+          "data": {
+            "svg": "<svg class=\"visual\" viewBox=\"0 0 960 420\" role=\"img\" aria-label=\"Workflow d'automatisation IA\" xmlns=\"http://www.w3.org/2000/svg\">\n<defs><linearGradient id=\"irid\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"1\"><stop offset=\"0\" stop-color=\"rgb(160,224,171)\"/><stop offset=\"0.5\" stop-color=\"rgb(255,172,46)\"/><stop offset=\"1\" stop-color=\"rgb(165,45,37)\"/></lineargradient></defs>\n<rect width=\"960\" height=\"420\" fill=\"#141418\"/>\n<g transform=\"translate(60,150)\"><circle cx=\"70\" cy=\"60\" r=\"58\" fill=\"#0b0b0c\" stroke=\"rgba(255,255,255,.2)\"/><text x=\"70\" y=\"66\" font-family=\"DM Sans, sans-serif\" font-size=\"13\" letter-spacing=\"1.6\" fill=\"#f2f2f4\" text-anchor=\"middle\">TÂCHE</text></g>\n<path d=\"M128 178 H 240\" stroke=\"rgba(255,255,255,.25)\" stroke-width=\"1.4\"/>\n<g transform=\"translate(250,110)\"><rect width=\"200\" height=\"130\" rx=\"65\" fill=\"#0b0b0c\" stroke=\"url(#irid)\" stroke-width=\"1.6\"/><text x=\"100\" y=\"56\" font-family=\"DM Sans, sans-serif\" font-size=\"11\" letter-spacing=\"3\" fill=\"#f2f2f4\" text-anchor=\"middle\">AGENT IA</text><text x=\"100\" y=\"82\" font-family=\"DM Sans, sans-serif\" font-size=\"10\" fill=\"#95959c\" text-anchor=\"middle\">réfléchit, rédige,</text><text x=\"100\" y=\"98\" font-family=\"DM Sans, sans-serif\" font-size=\"10\" fill=\"#95959c\" text-anchor=\"middle\">vérifie</text></g>\n<path d=\"M450 175 H 560\" stroke=\"rgba(255,255,255,.25)\" stroke-width=\"1.4\"/>\n<g transform=\"translate(570,150)\"><circle cx=\"70\" cy=\"60\" r=\"58\" fill=\"#0b0b0c\" stroke=\"rgba(255,255,255,.2)\"/><text x=\"70\" y=\"56\" font-family=\"DM Sans, sans-serif\" font-size=\"11\" letter-spacing=\"1.6\" fill=\"#f2f2f4\" text-anchor=\"middle\">RÉSULTAT</text><text x=\"70\" y=\"74\" font-family=\"DM Sans, sans-serif\" font-size=\"9\" fill=\"#6a6a70\" text-anchor=\"middle\">validé</text></g>\n<path d=\"M300 240 C 300 320, 700 320, 700 210\" fill=\"none\" stroke=\"rgba(255,255,255,.15)\" stroke-width=\"1\" stroke-dasharray=\"3 6\"/>\n<g transform=\"translate(760,80)\"><rect width=\"150\" height=\"54\" rx=\"27\" fill=\"url(#irid)\" opacity=\"0.92\"/><text x=\"75\" y=\"32\" font-family=\"DM Sans, sans-serif\" font-size=\"12\" fill=\"#111\" text-anchor=\"middle\">← itère en boucle</text></g>\n<text x=\"900\" y=\"400\" font-family=\"DM Sans, sans-serif\" font-size=\"10\" letter-spacing=\"3\" fill=\"#6a6a70\" text-anchor=\"end\">AUTOMATISATION</text>\n</svg>"
+          },
+          "label": "banniere"
+        },
+        {
+          "type": "chapter",
+          "data": {
+            "kicker": "01 · Résumé",
+            "title": "L'IA, enfin utile au quotidien.",
+            "body": "<p>L'IA fait beaucoup de bruit, et peu de choses utiles sans un vrai travail de mise en place. Mon rôle : transformer des besoins concrets en automatismes qui tournent vraiment.</p><p>Gagner deux heures par jour sur les tâches répétitives, c'est un projet de plus qui avance chaque mois. C'est ce que je vise.</p>",
+            "list": [],
+            "dark": false
+          },
+          "label": "chapter"
+        },
+        {
+          "type": "chapter",
+          "data": {
+            "kicker": "02 · Le défi",
+            "title": "Des outils puissants, mal exploités.",
+            "body": "<p>Chacun teste ChatGPT, les outils fleurissent, et pourtant rien ne change : les saisies se font encore à la main, les relances s'accumulent, les contenus se réécrivent cent fois.</p><p>Le problème n'est pas l'envie : c'est l'écart entre les outils et votre quotidien. Sans intégration réelle, la technologie reste une curiosité.</p>",
+            "list": [],
+            "dark": false
+          },
+          "label": "chapter"
+        },
+        {
+          "type": "chapter",
+          "data": {
+            "kicker": "03 · Ma réponse",
+            "title": "Des automatismes qui tiennent la route.",
+            "body": "<p>Je pars de vos tâches, pas des buzzwords : ce qui vous prend du temps, ce qui se répète, ce qui pourrait se faire tout seul. Puis je construis des solutions testées, documentées, simples.</p><p>Concrètement, vous repartez avec :</p>",
+            "list": [
+              "Un audit rapide de vos tâches répétitives",
+              "Des automatisations sur vos outils existants (mail, CRM, documents, pages)",
+              "Des agents ou workflows adaptés à votre métier",
+              "Des documentations claires pour l'usage quotidien",
+              "Une maintenance et des évolutions possibles dans la durée"
+            ],
+            "dark": true
+          },
+          "label": "chapter"
+        },
+        {
+          "type": "chapter",
+          "data": {
+            "kicker": "04 · Et après ?",
+            "title": "Des journées un peu plus légères.",
+            "body": "<p>Les tâches pénibles se font seules, les contenus se génèrent en quelques minutes, les relances partent à l'heure. Vous récupérez du temps, et vous gardez le contrôle sur chaque décision.</p><p>Et comme chaque solution est documentée, votre équipe l'adopte sans formation lourde. L'outil devient invisible, le gain reste.</p>",
+            "list": [],
+            "dark": false
+          },
+          "label": "chapter"
+        },
+        {
+          "type": "realisations-grid",
+          "variant": "auto",
+          "data": {
+            "label": "Projets phare"
+          },
+          "label": "realisations"
+        },
+        {
+          "type": "cta-final",
+          "variant": "interne",
+          "data": {
+            "kicker": "La suite",
+            "intro": "Un échange pour repérer ensemble les tâches qui méritent d'être automatisées.",
+            "ctas": [
+              {
+                "label": "Démarrer un projet",
+                "href": "/contact",
+                "style": "pill--filled"
+              },
+              {
+                "label": "Écrire directement",
+                "href": "mailto:s.sujeepan.pro@gmail.com",
+                "style": "pill"
+              }
+            ],
+            "shader": true,
+            "title": "Et si l'IA vous<br>rendait du temps ?"
+          },
+          "label": "cta"
+        },
+        {
+          "type": "bloc-liens",
+          "variant": "services",
+          "data": {
+            "label": "Dans la même rubrique"
+          },
+          "label": "liens"
+        }
+      ]
+    },
+    {
+      "slug": "vaasam-paris",
+      "kind": "realisation",
+      "title": "Vaasam Paris",
+      "status": "publie",
+      "excerpt": "Une identité complète pour une adresse parisienne : stratégie, logotype, système visuel et déclinaisons.",
+      "cover": "/assets/projects/project-vaasam.svg",
+      "cover_alt": "",
+      "year": 2026,
+      "categories": [
+        "Identité",
+        "Direction artistique"
+      ],
+      "position": 1,
+      "in_menu": false,
+      "seo_title": "Vaasam Paris — Identité — Sujee Design",
+      "seo_description": "Identité de marque et direction artistique pour Vaasam Paris : stratégie, logotype, système visuel. Sujee Design, 2026.",
+      "sections": [
+        {
+          "type": "hero",
+          "variant": "projet",
+          "data": {
+            "kicker": "Projet — Identité de marque",
+            "title": "Vaasam Paris.<br>Identité & direction artistique.",
+            "intro": "Une identité complète pour une adresse parisienne : stratégie, logotype, système visuel et déclinaisons.",
+            "cover": "/assets/projects/project-vaasam.svg",
+            "cover_alt": ""
+          },
+          "label": "hero"
+        },
+        {
+          "type": "etude-de-cas",
+          "data": {
+            "blocks": [
+              {
+                "kind": "liste",
+                "title": "Mission",
+                "items": [
+                  "Stratégie de marque : positionnement, territoire d'expression, personnalité",
+                  "Logotype et déclinaisons, pensés pour le print et le digital",
+                  "Système visuel : typographie, palette, motifs, iconographie",
+                  "Direction artistique des supports de lancement"
+                ]
+              },
+              {
+                "kind": "texte",
+                "title": "Approche",
+                "body": "<p>Plutôt qu'une identité décorative, l'objectif était une marque fonctionnelle : lisible en petite taille, efficace en noir et blanc, capable de traverser les supports sans se dégrader. Le système a été construit pour être décliné par n'importe qui, partout, sans trahir son esprit.</p><div class=\"meta-grid\"><div class=\"meta-item\"><div class=\"k\">Prestation</div><div class=\"v\">Identité de marque</div></div><div class=\"meta-item\"><div class=\"k\">Année</div><div class=\"v\">2026</div></div><div class=\"meta-item\"><div class=\"k\">Domaine</div><div class=\"v\">Restaurant · Paris</div></div><div class=\"meta-item\"><div class=\"k\">Livrables</div><div class=\"v\">Brand book + déclinaisons</div></div></div>"
+              }
+            ]
+          },
+          "label": "etude"
+        },
+        {
+          "type": "cta-final",
+          "variant": "interne",
+          "data": {
+            "kicker": "La suite",
+            "intro": "Un premier échange pour comprendre votre activité et votre calendrier.",
+            "ctas": [
+              {
+                "label": "Parlons de votre projet",
+                "href": "/contact",
+                "style": "pill--filled"
+              }
+            ],
+            "shader": true,
+            "title": "Votre projet mérite<br>la même exigence."
+          },
+          "label": "cta"
+        }
+      ]
+    },
+    {
+      "slug": "resto-franchise-africain",
+      "kind": "realisation",
+      "title": "Resto Franchise Africain",
+      "status": "publie",
+      "excerpt": "Un système d'identité pensé pour la franchise : cohérent sur tous les points de vente, simple à déployer.",
+      "cover": "/assets/projects/project-rfa.svg",
+      "cover_alt": "",
+      "year": 2026,
+      "categories": [
+        "Identité",
+        "Déclinaisons"
+      ],
+      "position": 2,
+      "in_menu": false,
+      "seo_title": "Resto Franchise Africain — Identité — Sujee Design",
+      "seo_description": "Identité de marque et déclinaisons pour un réseau de franchise : système cohérent, gabarits déployables. Sujee Design, 2026.",
+      "sections": [
+        {
+          "type": "hero",
+          "variant": "projet",
+          "data": {
+            "kicker": "Projet — Identité & franchise",
+            "title": "Resto Franchise Africain.<br>Identité & déclinaisons.",
+            "intro": "Un système d'identité pensé pour la franchise : cohérent sur tous les points de vente, simple à déployer.",
+            "cover": "/assets/projects/project-rfa.svg",
+            "cover_alt": ""
+          },
+          "label": "hero"
+        },
+        {
+          "type": "etude-de-cas",
+          "data": {
+            "blocks": [
+              {
+                "kind": "liste",
+                "title": "Mission",
+                "items": [
+                  "Identité de marque : logotype, palette, typographies, motifs",
+                  "Déclinaisons franchise : enseignes, menus, supports point de vente",
+                  "Gabarits modulables pour les futurs franchisés",
+                  "Documentation du système pour une prise en main rapide"
+                ]
+              },
+              {
+                "kind": "texte",
+                "title": "Approche",
+                "body": "<p>Le défi de la franchise : chaque point de vente doit offrir la même expérience, avec des équipes et des contextes différents. Le système a donc été conçu en gabarits — règles claires, composants prêts à l'emploi — pour que la marque reste intacte partout où elle s'implante.</p><div class=\"meta-grid\"><div class=\"meta-item\"><div class=\"k\">Prestation</div><div class=\"v\">Identité · Déclinaisons</div></div><div class=\"meta-item\"><div class=\"k\">Année</div><div class=\"v\">2026</div></div><div class=\"meta-item\"><div class=\"k\">Domaine</div><div class=\"v\">Restauration · Franchise</div></div><div class=\"meta-item\"><div class=\"k\">Livrables</div><div class=\"v\">Système + gabarits franchise</div></div></div>"
+              }
+            ]
+          },
+          "label": "etude"
+        },
+        {
+          "type": "cta-final",
+          "variant": "interne",
+          "data": {
+            "kicker": "La suite",
+            "intro": "Un échange pour cadrer l'identité et ses déclinaisons.",
+            "ctas": [
+              {
+                "label": "Discuter du projet",
+                "href": "/contact",
+                "style": "pill--filled"
+              }
+            ],
+            "shader": true,
+            "title": "Une marque à déployer<br>partout pareil ?"
+          },
+          "label": "cta"
+        }
+      ]
+    },
+    {
+      "slug": "solutions-ia-automations",
+      "kind": "realisation",
+      "title": "Solutions IA & Automations",
+      "status": "publie",
+      "excerpt": "Des outils IA qui font tourner le studio : automatisations, agents et workflows au service de la productivité.",
+      "cover": "/assets/projects/project-ia.svg",
+      "cover_alt": "",
+      "year": 2026,
+      "categories": [
+        "Workflows",
+        "Bots",
+        "Intégrations"
+      ],
+      "position": 3,
+      "in_menu": false,
+      "seo_title": "Solutions IA & Automations — Sujee Design",
+      "seo_description": "Workflows, bots et intégrations IA : automatiser votre quotidien pour gagner du temps. Sujee Design, 2026.",
+      "sections": [
+        {
+          "type": "hero",
+          "variant": "projet",
+          "data": {
+            "kicker": "Projet — Automatisation & IA",
+            "title": "Solutions IA & Automations.<br>Workflows · Bots · Intégrations.",
+            "intro": "Des outils IA qui font tourner le studio : automatisations, agents et workflows au service de la productivité.",
+            "cover": "/assets/projects/project-ia.svg",
+            "cover_alt": ""
+          },
+          "label": "hero"
+        },
+        {
+          "type": "etude-de-cas",
+          "data": {
+            "blocks": [
+              {
+                "kind": "liste",
+                "title": "Mission",
+                "items": [
+                  "Automatisation du cycle devis-facturation : de la demande au suivi",
+                  "Agents de rédaction et de veille : contenus à ton, synthèses régulières",
+                  "Workflows intégrés : outils du studio reliés par l'IA",
+                  "Documentation et formation des équipes à l'usage quotidien"
+                ]
+              },
+              {
+                "kind": "texte",
+                "title": "Approche",
+                "body": "<p>Chaque automatisation part d'une contrainte réelle observée dans le travail quotidien. Le critère de succès n'est pas la prouesse technique mais le temps gagné — mesurable, documenté, reproductible. Ce qui fonctionne ici est transposable chez les clients.</p><div class=\"meta-grid\"><div class=\"meta-item\"><div class=\"k\">Prestation</div><div class=\"v\">Workflows · Bots · Intégrations</div></div><div class=\"meta-item\"><div class=\"k\">Année</div><div class=\"v\">2026</div></div><div class=\"meta-item\"><div class=\"k\">Nature</div><div class=\"v\">Programme studio</div></div><div class=\"meta-item\"><div class=\"k\">Bénéfice</div><div class=\"v\">Temps gagné, tâches répétitives éliminées</div></div></div>"
+              }
+            ]
+          },
+          "label": "etude"
+        },
+        {
+          "type": "cta-final",
+          "variant": "interne",
+          "data": {
+            "kicker": "La suite",
+            "intro": "Un échange pour repérer les tâches qui méritent d'être automatisées.",
+            "ctas": [
+              {
+                "label": "Discuter du projet",
+                "href": "/contact",
+                "style": "pill--filled"
+              }
+            ],
+            "shader": true,
+            "title": "Une automatisation<br>à mettre en place ?"
+          },
+          "label": "cta"
+        }
+      ]
+    },
+    {
+      "slug": "formation-ui-ux-pao",
+      "kind": "realisation",
+      "title": "Formation UI / UX & PAO",
+      "status": "publie",
+      "excerpt": "Des cursus et supports de formation conçus pour transmettre les méthodes du design, de la première maquette à la mise en production.",
+      "cover": "/assets/projects/project-formation.svg",
+      "cover_alt": "",
+      "year": 2025,
+      "categories": [
+        "Supports",
+        "Contenu pédagogique"
+      ],
+      "position": 4,
+      "in_menu": false,
+      "seo_title": "Formation UI/UX & PAO — Sujee Design",
+      "seo_description": "Cursus et supports pédagogiques UI/UX & PAO : méthodes du design appliquées, exercices concrets. Sujee Design, 2025.",
+      "sections": [
+        {
+          "type": "hero",
+          "variant": "projet",
+          "data": {
+            "kicker": "Projet — Formation & pédagogie",
+            "title": "Formation UI/UX & PAO.<br>Supports & contenu pédagogique.",
+            "intro": "Des cursus et supports de formation conçus pour transmettre les méthodes du design, de la première maquette à la mise en production.",
+            "cover": "/assets/projects/project-formation.svg",
+            "cover_alt": ""
+          },
+          "label": "hero"
+        },
+        {
+          "type": "etude-de-cas",
+          "data": {
+            "blocks": [
+              {
+                "kind": "liste",
+                "title": "Mission",
+                "items": [
+                  "Conception de cursus : progression pédagogique, objectifs, évaluations",
+                  "Supports de cours : présentations, exercices, ateliers pratiques",
+                  "Contenus UI/UX : wireframes, prototypage, design systems, tests utilisateurs",
+                  "Contenus PAO : mise en page, print, préparation des fichiers"
+                ]
+              },
+              {
+                "kind": "texte",
+                "title": "Approche",
+                "body": "<p>On n'apprend pas le design en écoutant : on l'apprend en faisant. Les supports sont construits autour d'exercices concrets qui reproduisent des situations réelles de projet, pour que chaque apprenant reparte avec des réflexes — pas seulement des concepts.</p><div class=\"meta-grid\"><div class=\"meta-item\"><div class=\"k\">Prestation</div><div class=\"v\">Supports · Contenu pédagogique</div></div><div class=\"meta-item\"><div class=\"k\">Année</div><div class=\"v\">2025</div></div><div class=\"meta-item\"><div class=\"k\">Public</div><div class=\"v\">Apprenants, équipes, professionnels</div></div><div class=\"meta-item\"><div class=\"k\">Formats</div><div class=\"v\">Cursus, ateliers, supports</div></div></div>"
+              }
+            ]
+          },
+          "label": "etude"
+        },
+        {
+          "type": "cta-final",
+          "variant": "interne",
+          "data": {
+            "kicker": "La suite",
+            "intro": "Un échange pour cadrer le programme, les publics et les livrables.",
+            "ctas": [
+              {
+                "label": "Discuter du projet",
+                "href": "/contact",
+                "style": "pill--filled"
+              }
+            ],
+            "shader": true,
+            "title": "Un projet de formation<br>ou de supports ?"
+          },
+          "label": "cta"
+        }
+      ]
+    }
+  ],
+  "redirections": [
+    {
+      "path": "/index.html",
+      "target": "/",
+      "code": 301
+    },
+    {
+      "path": "/realisations.html",
+      "target": "/realisations",
+      "code": 301
+    },
+    {
+      "path": "/services.html",
+      "target": "/services",
+      "code": 301
+    },
+    {
+      "path": "/apropos.html",
+      "target": "/a-propos",
+      "code": 301
+    },
+    {
+      "path": "/contact.html",
+      "target": "/contact",
+      "code": 301
+    },
+    {
+      "path": "/identite.html",
+      "target": "/services/identite",
+      "code": 301
+    },
+    {
+      "path": "/creation-visuelle.html",
+      "target": "/services/creation-visuelle",
+      "code": 301
+    },
+    {
+      "path": "/web.html",
+      "target": "/services/web",
+      "code": 301
+    },
+    {
+      "path": "/marketing.html",
+      "target": "/services/marketing",
+      "code": 301
+    },
+    {
+      "path": "/ia.html",
+      "target": "/services/ia",
+      "code": 301
+    },
+    {
+      "path": "/projet-vaasam.html",
+      "target": "/realisations/vaasam-paris",
+      "code": 301
+    },
+    {
+      "path": "/projet-rfa.html",
+      "target": "/realisations/resto-franchise-africain",
+      "code": 301
+    },
+    {
+      "path": "/projet-ia.html",
+      "target": "/realisations/solutions-ia-automations",
+      "code": 301
+    },
+    {
+      "path": "/projet-formation.html",
+      "target": "/realisations/formation-ui-ux-pao",
+      "code": 301
+    }
+  ]
+}

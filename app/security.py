@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import hmac
 import os
 import secrets
+import struct
 import time
 from threading import Lock
 
@@ -85,9 +87,25 @@ def random_filename(extension: str) -> str:
     return f"{stem}.{ext}" if ext else stem
 
 
+def totp_code(secret: str, offset: int = 0, now: int | None = None) -> str:
+    """Code TOTP (RFC 6238, pas de 30 s, 6 chiffres)."""
+    current = int(time.time() if now is None else now)
+    key = base64.b32decode(secret.upper() + "=" * (-len(secret) % 8), casefold=True)
+    digest = hmac.new(key, struct.pack(">Q", current // 30 + offset), hashlib.sha1).digest()
+    start = digest[-1] & 0x0F
+    value = struct.unpack(">I", digest[start : start + 4])[0] & 0x7FFFFFFF
+    return f"{value % 1_000_000:06d}"
+
+
+def verify_totp(secret: str, code: str, window: int = 1, now: int | None = None) -> bool:
+    candidate = (code or "").strip().replace(" ", "")
+    if not secret or len(candidate) != 6 or not candidate.isdigit():
+        return False
+    return any(hmac.compare_digest(candidate, totp_code(secret, offset, now)) for offset in range(-window, window + 1))
+
+
 class RateLimiter:
     """Limiteur en mémoire, fenêtre glissante. Suffisant pour un conteneur unique."""
-
     def __init__(self) -> None:
         self._hits: dict[str, list[float]] = {}
         self._lock = Lock()

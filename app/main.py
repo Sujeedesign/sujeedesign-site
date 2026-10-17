@@ -10,9 +10,11 @@ from typing import Iterator
 from fastapi import Depends, FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 
+from . import admin as admin_module
 from . import db as db_module
 from . import public as public_module
 from . import render as render_module
+from . import security as security_module
 from . import settings as settings_module
 from .settings import VERSION
 
@@ -41,6 +43,7 @@ def create_app(db_path: str | Path | None = None) -> FastAPI:
         lifespan=lifespan,
     )
     app.state.db_path = resolved
+    app.state.login_limiter = security_module.RateLimiter()
 
     def get_db(request: Request) -> Iterator[sqlite3.Connection]:
         conn = db_module.connect(request.app.state.db_path)
@@ -61,6 +64,8 @@ def create_app(db_path: str | Path | None = None) -> FastAPI:
         revision = db_module.content_revision(conn)
         return {"ok": True, "version": VERSION, "revision": revision}
 
+    app.include_router(admin_module.router)
+    app.include_router(admin_module.api, prefix="/api/admin")
     app.include_router(public_module.router)
 
     return app

@@ -46,6 +46,11 @@ def media_dir() -> Path:
     return data_dir() / "medias"
 
 
+def cookie_secure() -> bool:
+    """Cookie de session en Secure (production HTTPS). COOKIE_SECURE=0 pour les tests HTTP."""
+    return env("COOKIE_SECURE", "1").strip().lower() not in {"0", "false", "no", ""}
+
+
 def public_base_url() -> str:
     return env("SITE_BASE_URL", "https://sujeedesign.com").rstrip("/")
 

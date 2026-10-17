@@ -1,0 +1,7 @@
+# SDD ledger — plan: docs/superpowers/plans/2026-10-17-site-cms.md
+
+Setup: reprise d une session anterieure (Tasks 1-3 commitees 70ccfa0..523af0a, back office en cours non commite).
+Pre-flight: le code reel utilise app/repo.py, app/public.py, app/admin.py, app/security.py (plan prevoit app/routes/*, app/content.py, app/auth.py) -> Ruling: garder la structure reelle, le plan reste la reference fonctionnelle.
+
+Task 5+6: Ruling: 3 causes racines des 18 echecs de tests/test_admin.py -> (1) cookie de session Secure jamais renvoye en HTTP par TestClient -> COOKIE_SECURE=0 en test, Secure par defaut en prod ; (2) limiteur de connexion global partage entre tests -> limiteur par application (app.state.login_limiter) ; (3) check_origin evalue apres require_admin (401 au lieu de 403) -> dependance de routeur. Cout si faux: none, la prod reste inchangee (Secure par defaut).
+Task 6: Ruling: test_settings_can_be_saved presupposait une page d accueil absente de la base de test -> fixture locale accueil (convention de tests/test_public.py).
