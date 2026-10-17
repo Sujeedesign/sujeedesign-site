@@ -1,4 +1,6 @@
-# Plan d’implémentation : prototype GrapesJS Core sur le site pilote
+# GrapesJS Core Editor Pilot Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Follow the TDD cycle for every code behavior; checkboxes are execution records.
 
 > **Pour l’exécution par agent :** suivre les tâches dans l’ordre et appliquer le TDD sur chaque changement testable. Ne pas déployer en production sans demande explicite distincte.
 
@@ -6,11 +8,13 @@
 
 **Architecture :** GrapesJS Core est le moteur navigateur. Le module `sujee_editor` porte le montage GrapesJS et ses composants de base ; le thème du site fournit une extension avec les sections autorisées. Un contrat d’API REST authentifié conserve les projets GrapesJS JSON en brouillon. Un adaptateur du thème traduit les composants autorisés vers le modèle de sections déjà consommé par FastAPI/Jinja à la publication. Le site public continue à rendre ses gabarits Jinja et ses fonctions métier. Aucun HTML, CSS ou JavaScript arbitraire provenant de l’éditeur ne devient public. Le prototype reste isolé de la production et l’ancien éditeur demeure disponible pendant l’évaluation.
 
-**Spécification :** `docs/superpowers/specs/2026-10-17-grapesjs-ecosystem-design.md`
+**Tech Stack:** GrapesJS Core (version stable vérifiée au démarrage), JavaScript ESM, Vite, Python 3.13/FastAPI, SQLite, Jinja, pytest, Docker ; GitHub Actions et Dependabot pour la maintenance.
 
-**Contexte du dépôt vérifié :** Python 3.13/FastAPI/Jinja/SQLite, pas de package frontend Node existant à la racine ; Node v26 et npm v11 disponibles dans l’environnement de travail. Le Dockerfile de production est actuellement Python seul. `sujee_editor` expose déjà ses routes et son stockage de sections, son schéma comporte 19 blocs et les écritures utilisent session, CSRF, contrôle Origin et version optimiste. Le dépôt a 391 tests collectés au moment de la rédaction. Le plan prévoit une construction locale du bundle et devra vérifier qu’elle fonctionne aussi dans le build Docker.
+**Spec:** `docs/superpowers/specs/2026-10-17-grapesjs-ecosystem-design.md`
 
-## Contraintes globales
+**Contexte du dépôt vérifié :** Python 3.13/FastAPI/Jinja/SQLite, pas de package frontend Node existant à la racine ; Node v26 et npm v11 disponibles dans l’environnement de travail. Le Dockerfile de production est actuellement Python seul. `sujee_editor` expose déjà ses routes et son stockage de sections, son schéma comporte 19 blocs et les écritures utilisent session, CSRF, contrôle Origin et version optimiste. Le dépôt a 391 tests collectés au moment de la rédaction.
+
+## Global Constraints
 
 - Vérifier la version GrapesJS Core et la licence réelle du paquet avant de la pinner ; fixer les versions dans `package.json` et `package-lock.json`. Ne pas inclure Studio SDK ni requête CDN/runtime externe.
 - Servir le JS et le CSS construits depuis les assets du site. Construire le frontend dans un build reproductible, inclus dans l’image de recette et de production via une étape dédiée ; pas de dépendance à un build manuel oublié.
@@ -18,9 +22,17 @@
 - Valider côté serveur la forme du projet, les types de composants admis, les champs, la taille JSON, les versions et les références de médias. Le client n’est jamais autoritaire.
 - Pas d’édition arbitraire de CSS, de scripts, de styles inline ou de blocs HTML génériques. L’export GrapesJS n’est pas publié directement ; le rendu public passe par les composants et gabarits connus du site.
 - Garder les changements derrière une URL d’administration de recette. Ne pas remplacer l’éditeur actif ni supprimer son code dans ce prototype.
-- Ne pas toucher à la prod, ses données ou ses médias. Garder les fichiers de recette et probes temporaires hors du dépôt et hors de `/tmp`, sous `/opt/data/profiles/raj/cache/scratch`.
+- Ne pas toucher aux données ou médias de production. La mise en production du code est autorisée par Sujee, mais uniquement après la recette, les tests et la revue finale, via le skill de déploiement du site.
 
-## Tâche 1 : épingler GrapesJS Core et démontrer le modèle de composant
+## Review Focus
+
+- Projet JSON avec un type natif ou composant inconnu : refus côté serveur ; tests dans `tests/test_editor_project.py` et `tests/test_editor_project_routes.py`.
+- Projet JSON trop volumineux/profond ou malformé : rejet sans écriture ; test de route dans `tests/test_editor_project_routes.py`.
+- Texte riche malveillant (scripts, gestionnaires d’événement, URL `javascript:`) : rejet ou nettoyage conforme au schéma ; tests dans `tests/test_editor_visual_publish.py`.
+- Deux éditeurs enregistrent à partir d’une version identique : le second reçoit un conflit sans écraser le premier ; test de route.
+- Une section existante ou un média ne peut pas être mappé : l’import/publication échoue sans conversion partielle ni modification publique ; tests de projet et de publication.
+
+### Task 1: GrapesJS Core épinglé et build frontend autonome
 
 **Fichiers :**
 - Créer `sujee_editor/editor/frontend/package.json`, `package-lock.json`, `vite.config.js`, `src/main.js`, `src/theme-plugin.js`.
@@ -39,7 +51,7 @@
 
 **Commit :** `build(editor): add self-hosted GrapesJS Core frontend`
 
-## Tâche 2 : contrat de thème et adaptateur de conversion du site pilote
+### Task 2: contrat de thème et adaptateur de conversion du site pilote
 
 **Fichiers :**
 - Créer `sujee_editor/editor/theme.py` (ou module équivalent de registre/version), `sujee_editor/editor/project.py` et `tests/test_editor_project.py`.
@@ -56,7 +68,7 @@
 
 **Commit :** `feat(editor): define versioned theme project adapter`
 
-## Tâche 3 : brouillon de projet et API d’édition protégée
+### Task 3: brouillon de projet et API d’édition protégée
 
 **Fichiers :**
 - Modifier `app/db.py` pour une migration additive idempotente ; créer une table dédiée aux projets visuels plutôt que d’utiliser les lignes section comme stockage implicite de JSON GrapesJS.
@@ -75,7 +87,7 @@
 
 **Commit :** `feat(editor): persist protected visual project drafts`
 
-## Tâche 4 : interface GrapesJS de recette et accroche admin
+### Task 4: interface GrapesJS de recette et accroche admin
 
 **Fichiers :**
 - Créer `sujee_editor/editor/static/visual-editor.js`, `visual-editor.css` et les modules nécessaires (barre, panneau, adaptateur de stockage, thème pilote).
@@ -95,7 +107,7 @@
 
 **Commit :** `feat(editor): add GrapesJS visual editor pilot UI`
 
-## Tâche 5 : rendu public, sécurité et parcours navigateur réel
+### Task 5: rendu public, sécurité et parcours navigateur réel
 
 **Fichiers :**
 - Modifier l’adaptateur de publication/public rendering seulement si les tests d’intégration l’exigent.
@@ -113,7 +125,7 @@
 
 **Commit :** `test(editor): verify GrapesJS pilot end to end`
 
-## Tâche 6 : rendre les mises à jour GrapesJS maintenables
+### Task 6: rendre les mises à jour GrapesJS maintenables
 
 **Fichiers :**
 - Créer `.github/dependabot.yml` pour le gestionnaire npm du sous-projet `sujee_editor/editor/frontend`.
@@ -132,7 +144,7 @@
 
 **Commit :** `ci(editor): automate GrapesJS dependency maintenance`
 
-## Tâche 7 : revue et décision de suite
+### Task 7: revue finale et déploiement autorisé
 
 1. Faire une revue sécurité/qualité des changements (validation serveur, auth, XSS, permissions, données privées, stabilité du build).
 2. Vérifier que l’ancien éditeur reste utilisable et qu’aucun écran de production n’a basculé.
