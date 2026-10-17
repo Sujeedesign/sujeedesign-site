@@ -37,7 +37,9 @@
     {% set meta = d.get('meta', []) %}
     {% if meta %}<div class="p-meta">{% for item in meta %}<span>{{ item }}</span>{% endfor %}</div>{% endif %}
     {% if d.get('intro') %}<p class="p-intro">{{ d.get('intro') }}</p>{% endif %}
-    {{ ctas(d.get('ctas', [])) }}
+    {# L'emplacement des actions est toujours rendu : la bande garde la même
+       hauteur que les pages qui, elles, portent un bouton. #}
+    {% if d.get('ctas') %}{{ ctas(d.get('ctas')) }}{% else %}<div class="hero-ctas" aria-hidden="true"></div>{% endif %}
   </div>
 </section>
 
@@ -70,7 +72,9 @@
     {% if d.get('kicker') %}<p class="page-label reveal">{{ d.get('kicker') }}</p>{% endif %}
     <h1 class="page-title reveal" style="--d:.08s">{{ d.get('title','')|inline }}</h1>
     {% if d.get('intro') %}<p class="page-intro reveal" style="--d:.16s">{{ d.get('intro') }}</p>{% endif %}
-    {{ ctas(d.get('ctas', []), 'hero-ctas reveal') }}
+    {# L'emplacement des actions est toujours rendu, même sans bouton : la hauteur
+       de la bande ne dépend pas du contenu (cf. `.page-hero,.p-hero`). #}
+    {% if d.get('ctas') %}{{ ctas(d.get('ctas'), 'hero-ctas reveal') }}{% else %}<div class="hero-ctas reveal" aria-hidden="true"></div>{% endif %}
   </div>
 </section>
 {% endif %}

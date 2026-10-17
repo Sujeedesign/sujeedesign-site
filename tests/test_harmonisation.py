@@ -975,3 +975,114 @@ def test_mobile_menu_updates_accessibility_and_keyboard_focus(client: TestClient
     assert "})();" in script, "le script de navigation doit être syntaxiquement fermé"
     for route in PROJECT_ROUTES:
         assert re.search(r'id="menuOverlay"[^>]*aria-hidden="true"', rendered[route].html), f"{route} : menu ouvert au chargement"
+
+
+# ------------------------------------------------- typographie : un rôle, une valeur
+
+# Exceptions admises, et rien d'autre : la boîte des actions garde sa taille de
+# texte (verrouillée par les tests de CTA), les glyphes décoratifs et le badge
+# SVG de défilement gardent la leur, un survol de menu resserre l'interlettrage.
+TAILLES_HORS_ECHELLE = {".pill", ".pill--filled", ".scroll-badge text", ".svc-arrow", ".rel-arrow"}
+INTERLETTRAGES_HORS_ECHELLE = {".menu-overlay a:hover", ".scroll-badge text"}
+
+
+def stylesheet_rules() -> list[tuple[str, str]]:
+    """Couples (sélecteur, déclarations) : une règle = une entrée, media inclus.
+
+    Les commentaires sont retirés et le sélecteur ramené à sa dernière ligne :
+    la feuille est écrite une règle par ligne, les commentaires au-dessus.
+    """
+    css_text = re.sub(r"/\*.*?\*/", "", SITE_CSS.read_text(encoding="utf-8"), flags=re.S)
+    return [
+        (match.group(1).strip().splitlines()[-1].strip(), match.group(2))
+        for match in re.finditer(r"([^{}]+)\{([^{}]*)\}", css_text)
+        if match.group(1).strip()
+    ]
+
+
+def test_typography_scale_is_the_only_source_of_text_sizes() -> None:
+    """Une seule source pour les tailles de texte : les jetons de `:root`.
+
+    Avant la refonte, la feuille portait 33 tailles `clamp()` pour un seul site :
+    chaque section réinventait son échelle. Désormais un rôle (sur-titre, corps,
+    chapeau, titre de contenu, titre de section, héros) vaut une seule valeur.
+    """
+    css_text = SITE_CSS.read_text(encoding="utf-8")
+    hors_echelle: list[str] = []
+    for selecteur, declarations in stylesheet_rules():
+        if selecteur.startswith("@") or ":root" in selecteur:
+            continue
+        if selecteur in TAILLES_HORS_ECHELLE:
+            continue
+        for valeur in re.findall(r"font-size:\s*([^;}]+)", declarations):
+            if not valeur.strip().startswith("var(--fs-"):
+                hors_echelle.append(f"{selecteur} → {valeur.strip()}")
+    assert hors_echelle == [], "tailles de texte hors de l'échelle : " + ", ".join(hors_echelle)
+
+    jetons = css_text[css_text.index(":root{") : css_text.index("/* Spacing */")]
+    reste = css_text.replace(jetons, "")
+    assert "font-size:clamp(" not in reste, "une taille responsive est écrite hors des jetons"
+
+
+def test_letter_spacing_uses_one_of_the_two_tokens() -> None:
+    """Deux interlettrages seulement : sur-titres et micro-capitales."""
+    hors_echelle: list[str] = []
+    for selecteur, declarations in stylesheet_rules():
+        if selecteur.startswith("@") or ":root" in selecteur or selecteur in INTERLETTRAGES_HORS_ECHELLE:
+            continue
+        for valeur in re.findall(r"letter-spacing:\s*([^;}]+)", declarations):
+            valeur = valeur.strip()
+            if valeur.startswith("var(--ls-") or valeur in {"0", "normal"}:
+                continue
+            hors_echelle.append(f"{selecteur} → {valeur}")
+    assert hors_echelle == [], "interlettrages hors de l'échelle : " + ", ".join(hors_echelle)
+
+
+def test_internal_banners_are_one_single_band() -> None:
+    """Même hauteur, même fond animé, même rythme pour les deux gabarits."""
+    css_text = SITE_CSS.read_text(encoding="utf-8")
+    bande = re.search(r"\.page-hero,\.p-hero\{([^}]*)\}", css_text)
+    assert bande is not None, "bande partagée des pages internes absente"
+    declarations = bande.group(1)
+    assert "min-height:var(--banner-min-height)" in declarations, "hauteur de bande non partagée"
+    assert "padding:" in declarations, "rythme interne de la bande non partagé"
+    assert re.search(r"\.page-hero::before,\.p-hero::before\{[^}]*animation:gradient-pan", css_text), (
+        "le dégradé animé doit habiller les deux gabarits"
+    )
+    assert not re.search(r"\.page-hero--dense\{[^}]*padding", css_text), (
+        "un modificateur change encore la hauteur de la bande"
+    )
+    for gabarit in ("page-hero", "p-hero"):
+        assert not re.search(rf"\.{gabarit}\{{[^}}]*min-height:(?!var\(--banner-min-height\))", css_text), (
+            f"hauteur propre à .{gabarit}"
+        )
+
+
+def test_internal_banners_always_reserve_the_actions_slot(rendered: dict[str, RenderedPage]) -> None:
+    """La bande garde la même hauteur, avec ou sans bouton."""
+    for route in (*LISTING_ROUTES, CONTACT_ROUTE, SERVICE_DETAIL_ROUTE):
+        page = rendered[route]
+        bande = page.section("page-hero") or page.section("p-hero")
+        assert bande is not None, f"{route} : bande d'ouverture attendue"
+        assert bande.count("hero-ctas") == 1, f"{route} : un seul emplacement d'actions par bande"
+        if 'class="hero-ctas' in bande and "aria-hidden" in bande:
+            assert page.dom.token("pill--filled") or page.dom.token("pill"), f"{route} : page sans action par ailleurs"
+
+
+def test_reading_measure_stays_in_the_comfort_band() -> None:
+    """Lecture longue : 65-75 caractères par ligne, frise pour le parcours.
+
+    Le contenu de la base n'a pas de classes (le chapitre « Parcours » est une
+    liste nue) : la mise en forme doit donc rester ici, et pas dans les contenus.
+    """
+    css_text = SITE_CSS.read_text(encoding="utf-8")
+    assert re.search(r"\.prose\{max-width:56ch\}", css_text), "mesure de lecture du texte éditorial"
+    assert re.search(r"\.chap-body p\{[^}]*max-width:58ch", css_text), "mesure de lecture des chapitres"
+    frise = re.search(r"\.chap-body > ul:not\(\.chap-list\)\{([^}]*)\}", css_text)
+    assert frise is not None, "le parcours sans classes doit être mis en forme sans toucher au contenu"
+    assert "list-style:none" in frise.group(1), "plus de puces par défaut sous une frise"
+    assert re.search(r"\.chap-body h3\{[^}]*font-size:var\(--fs-h3\)", css_text), (
+        "les intitulés du parcours suivent l'échelle, pas la taille par défaut du navigateur"
+    )
+
+
