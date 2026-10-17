@@ -578,6 +578,27 @@ def test_meta_line_stays_legible_on_dark_heroes() -> None:
     assert not re.search(r"color:\s*var\(--color-paper\)", match.group(1)), "métadonnées illisibles sur fond noir"
 
 
+def test_home_hero_fits_short_phone_screens() -> None:
+    """Le premier écran de l'accueil doit contenir portrait, titre et actions.
+
+    Sur un petit téléphone (375x667), un portrait dimensionné en largeur
+    (`min(74vw,320px)`) rendait le hero plus haut que l'écran et poussait les
+    boutons sous la ligne de flottaison. La règle courte plafonne le portrait
+    par la hauteur et resserre le rythme vertical.
+    """
+    css_text = SITE_CSS.read_text(encoding="utf-8")
+    block = re.search(r"@media \(max-width:720px\) and \(max-height:760px\)\{(.*?)\n\}", css_text, re.S)
+    assert block is not None, "aucune règle pour les écrans courts"
+    rules = block.group(1).replace(" ", "")
+    figure = re.search(r"\.hero-figure\{([^}]*)\}", rules)
+    assert figure is not None, "le portrait du hero n'est pas plafonné sur écran court"
+    assert "height:min(30svh" in figure.group(1), "le portrait doit être borné par la hauteur de l'écran"
+    assert re.search(r"\.hero-title\{[^}]*font-size", rules), "titre du hero non resserré sur écran court"
+    assert re.search(r"\.hero\n?\.hero-ctas\{[^}]*margin-top", rules) or ".hero.hero-ctas{" in rules, (
+        "actions du hero non resserrées sur écran court"
+    )
+
+
 def test_remote_images_declare_intrinsic_size(rendered: dict[str, RenderedPage]) -> None:
     # Le portrait de l'accueil du jeu de données est distant : la règle est réellement exercée.
     for route, page in rendered.items():

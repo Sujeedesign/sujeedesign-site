@@ -497,6 +497,16 @@ html{scroll-behavior:auto}
 .page-hero + .section,.page-hero--dense + .section{padding-top:clamp(22px,4vh,36px)}
 }
 
+/* --- Accueil sur écrans courts (petits téléphones) : le premier écran doit
+   contenir le portrait, le titre et les deux actions sans défilement. Le
+   portrait est donc plafonné par la hauteur, et le rythme vertical resserré. */
+@media (max-width:720px) and (max-height:760px){
+.hero{padding-top:clamp(52px,7.5vh,80px);gap:clamp(12px,2vh,20px)}
+.hero-figure{width:auto;height:min(30svh,240px);max-width:min(64vw,260px)}
+.hero-title{font-size:clamp(32px,9.2vw,42px)}
+.hero .hero-ctas{margin-top:clamp(16px,2.6vh,24px)}
+}
+
 /* --- Fiches réalisation : visuel du projet + zone de texte calme ------ */
 .project-cover__media--photo{object-position:center 38%}
 .project-cover__shade{background:linear-gradient(180deg,rgba(0,0,0,.42),rgba(0,0,0,.22) 42%,rgba(0,0,0,.46)),radial-gradient(ellipse 74% 64% at 50% 47%,rgba(0,0,0,.52) 0%,rgba(0,0,0,.3) 60%,rgba(0,0,0,.06) 100%)}
