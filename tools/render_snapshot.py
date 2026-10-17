@@ -41,10 +41,10 @@ def main(argv: list[str] | None = None) -> int:
     try:
         init_db(connection)
         load_seed_file(connection, ROOT / "seed" / "content.json", replace=True)
-        slugs = [
-            row["slug"]
-            for row in connection.execute("SELECT slug FROM pages WHERE status = 'publie' ORDER BY slug")
-        ]
+        rows = list(connection.execute("SELECT * FROM pages WHERE status = 'publie'"))
+        from app import repo as repo_module
+
+        fiche_paths = [repo_module.page_path(row) for row in rows]
     finally:
         connection.close()
 
@@ -53,8 +53,7 @@ def main(argv: list[str] | None = None) -> int:
     with TestClient(app) as client:
         for path in FIXED_PATHS:
             captured[path] = client.get(path).text
-        for slug in slugs:
-            path = f"/{slug}"
+        for path in fiche_paths:
             captured[path] = client.get(path).text
 
     Path(args.out).write_text(json.dumps(captured, ensure_ascii=False), encoding="utf-8")
