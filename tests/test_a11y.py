@@ -329,6 +329,29 @@ def test_decorative_canvases_are_hidden_from_assistive_tech(audited: dict[str, P
     assert checked, "les fonds animés doivent rester présents mais masqués"
 
 
+def test_content_is_readable_without_javascript(audited: dict[str, PageAudit], site: TestClient) -> None:
+    """Sans JavaScript, les animations d'entrée ne doivent pas masquer le contenu.
+
+    `.hu` (titre du hero) et `.reveal` (sections) partent à opacité 0 et ne
+    deviennent visibles que par script : sans filet `noscript`, un visiteur avec
+    JavaScript désactivé (ou un script qui ne charge pas) voit une page vide.
+    Le filet est une feuille dédiée, chargée uniquement dans `noscript`, pour ne
+    pas réintroduire de bloc `<style>` embarqué.
+    """
+    for path in ("/", "/services", "/contact"):
+        html = site.get(path).text
+        assert '<noscript><link rel="stylesheet" href="/assets/site-noscript.css"></noscript>' in html, path
+
+    sheet = ROOT / "theme" / "assets" / "site-noscript.css"
+    assert sheet.is_file(), "feuille de repli absente du thème"
+    rules = sheet.read_text(encoding="utf-8").replace(" ", "")
+    for selector in (".hu", ".reveal", ".reveal-line>span", ".mw"):
+        assert selector in rules, f"{selector} reste masqué sans JavaScript"
+    assert "opacity:1!important" in rules
+    assert "transform:none!important" in rules
+    assert site.get("/assets/site-noscript.css").status_code == 200
+
+
 def test_footer_links_to_the_legal_notice_page(site: TestClient, audited: dict[str, PageAudit]) -> None:
     for path in audited:
         assert 'href="/mentions-legales"' in site.get(path).text, path

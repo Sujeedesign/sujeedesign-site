@@ -23,6 +23,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/site.css">
 <link rel="stylesheet" href="/assets/site-extras.css">
+{# Filet de sécurité : sans JavaScript, les animations d'entrée resteraient à
+   opacité 0 et la page paraîtrait vide. Feuille dédiée, chargée uniquement dans
+   <noscript> : aucun bloc <style> embarqué (invariant du thème partagé). #}
+<noscript><link rel="stylesheet" href="/assets/site-noscript.css"></noscript>
 {% block head %}{% endblock %}
 {% include "partials/jsonld.html" ignore missing %}
 </head>

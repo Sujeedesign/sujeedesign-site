@@ -1,0 +1,15 @@
+/* Repli sans JavaScript.
+   `.hu` (titre du hero), `.reveal` (sections) et `.mw` (mots animés) partent à
+   opacité nulle dans site.css et ne deviennent visibles que par script. Sans
+   JavaScript, la page resterait vide : cette feuille, chargée uniquement dans
+   <noscript>, rétablit le contenu. Elle reprend les règles de
+   `prefers-reduced-motion` et reste hors des blocs <style> embarqués. */
+.hu,
+.reveal,
+.reveal-line > span,
+.mw {
+  opacity: 1 !important;
+  transform: none !important;
+  animation: none !important;
+  position: static !important;
+}
