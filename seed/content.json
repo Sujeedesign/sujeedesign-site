@@ -24,9 +24,9 @@
           "variant": "accueil",
           "data": {
             "rotator": [
-              "Sujee,",
-              "Design ta marque",
-              "de A à Z."
+              "Sujee Design",
+              "Identité, web & création",
+              "pour votre marque."
             ],
             "ctas": [
               {
@@ -55,7 +55,7 @@
               "de la première idée",
               "au dernier pixel."
             ],
-            "text": "Depuis 2013, je construis des marques entières. Identité, création visuelle, sites web, marketing, solutions IA : un seul bureau à Paris, une seule exigence, faire en sorte que chaque détail vous ressemble."
+            "text": "Depuis 2013, j'accompagne les TPE, PME, restaurateurs et créateurs de marque dans leur communication. Identité, supports visuels, site web, conseil marketing ou automatisation : nous construisons une réponse adaptée à votre activité, avec un interlocuteur unique à Paris."
           },
           "label": "manifeste"
         },
@@ -89,7 +89,7 @@
           "variant": "auto",
           "data": {
             "label": "Prestations",
-            "title": "Tout ce qu'une marque<br>peut avoir besoin de."
+            "title": "Des services pour faire vivre votre marque"
           },
           "label": "prestations"
         },
@@ -141,7 +141,9 @@
           "data": {
             "kicker": "Travaux",
             "title": "Toutes les réalisations",
-            "intro": ""
+            "intro": "Identités de marque, supports de communication, projets numériques et outils IA : découvrez une sélection de projets menés pour des marques, des entreprises et des équipes de formation.",
+            "dense": true,
+            "wide_title": true
           }
         },
         {
@@ -150,9 +152,10 @@
           "label": "realisations",
           "data": {
             "heading_lines": [
-              "Sélection",
-              "de projets."
-            ]
+              "Des projets",
+              "en images."
+            ],
+            "dense": true
           }
         }
       ],
@@ -173,15 +176,19 @@
           "label": "hero",
           "data": {
             "kicker": "Prestations",
-            "title": "Tout ce qu'une marque<br>peut avoir besoin de.",
-            "intro": ""
+            "title": "Des services pour votre marque, de l'idée au déploiement",
+            "intro": "Vous lancez une marque, préparez une refonte ou cherchez à mieux communiquer ? Choisissez le besoin qui vous ressemble : identité, création visuelle, site web, conseil marketing ou automatisation IA.",
+            "dense": true,
+            "wide_title": true
           }
         },
         {
           "type": "services-list",
           "variant": "auto",
           "label": "prestations",
-          "data": {}
+          "data": {
+            "dense": true
+          }
         }
       ],
       "seo_title": "Services design, web et marque | Sujee Design",
@@ -346,6 +353,7 @@
             "kicker": "Contact",
             "title": "Un projet ?<br>Parlons-en.",
             "intro": "Une idée, une refonte, un questionnement : envoyez-moi un email, je réponds personnellement sous 24h ouvrées.",
+            "dense": true,
             "ctas": [
               {
                 "label": "Écrire un email",
@@ -444,7 +452,7 @@
               "Système visuel",
               "Guidelines"
             ],
-            "intro": "Votre image de marque, c'est la première impression que vous laissez avant même d'avoir dit un mot. Je construis la vôtre de A à Z : une base solide, qui tient sur tous vos supports et dans le temps.",
+            "intro": "Vous lancez une activité ou votre image ne reflète plus ce que vous faites ? Je vous accompagne de la stratégie au système visuel : nom, logo, couleurs, typographies et règles d'usage pour vos supports.",
             "ctas": []
           },
           "label": "hero"
@@ -572,7 +580,7 @@
               "Déclinaisons",
               "Impression"
             ],
-            "intro": "Une identité, c'est bien. Des supports qui la font vivre, c'est mieux. Je conçois tout ce qui porte votre marque : cartes, flyers, brochures, affiches, contenus digital, jusqu'au suivi d'impression.",
+            "intro": "Cartes, menus, flyers, brochures, affiches ou contenus pour le web : je conçois des supports cohérents avec votre identité, puis prépare les fichiers et vous accompagne jusqu'à l'impression si nécessaire.",
             "ctas": []
           },
           "label": "hero"
@@ -700,7 +708,7 @@
               "Contenus",
               "Suivi"
             ],
-            "intro": "Un site n'est pas une vitrine : c'est votre meilleur vendeur, disponible 24h/24. Je conçois des sites pensés pour vos visiteurs et vos objectifs, du premier écran à la mise en ligne, puis dans la durée.",
+            "intro": "Vous avez besoin d'un site vitrine, d'un portfolio ou d'une boutique en ligne ? Je vous accompagne du cadrage et du design à l'intégration, puis à la mise en ligne et aux évolutions du site.",
             "ctas": []
           },
           "label": "hero"
@@ -827,7 +835,7 @@
               "Campagnes",
               "Déploiement"
             ],
-            "intro": "Bien communiquer, ça ne s'improvise pas, mais ça s'apprend et ça s'organise. Je vous aide à clarifier votre positionnement, à produire les bons contenus et à les déployer là où votre public vous attend.",
+            "intro": "Vous communiquez sans ligne claire ou vous préparez le lancement d'une offre ? Nous travaillons votre positionnement, vos messages et vos contenus, puis organisons leur diffusion sur les canaux adaptés à votre public.",
             "ctas": []
           },
           "label": "hero"
@@ -954,7 +962,7 @@
               "Workflows",
               "Intégrations"
             ],
-            "intro": "L'intelligence artificielle peut alléger vos journées : répondre, classer, résumer, générer, relancer. Je conçois des solutions simples à utiliser, adaptées à votre métier, sans jargon ni promesses irréalistes.",
+            "intro": "Vous répétez les mêmes saisies, relances ou mises en forme ? J'identifie les tâches qui peuvent être automatisées, puis conçois des workflows ou agents adaptés à vos outils, avec documentation et contrôle humain.",
             "ctas": []
           },
           "label": "hero"

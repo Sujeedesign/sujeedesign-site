@@ -260,6 +260,9 @@ def sitemap(request: Request) -> Response:
 def catch_all(request: Request, path: str) -> Response:
     conn = _db(request)
     try:
+        # Adresse avec barre oblique finale : une seule forme canonique par page.
+        if path.endswith("/") and path.strip("/"):
+            return RedirectResponse("/" + path.strip("/"), status_code=301)
         candidate = "/" + path.lstrip("/")
         redirect = repo.find_redirect(conn, candidate)
         if redirect is not None:

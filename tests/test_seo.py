@@ -184,6 +184,20 @@ def test_meta_description_is_present_on_every_indexable_page(site: TestClient, d
         assert len(description) >= 40, f"{page['path']} : description trop courte ({description!r})"
 
 
+def test_meta_descriptions_are_unique(site: TestClient, db_file: Path) -> None:
+    """Chaque page indexable a sa propre description : pas de repli générique."""
+    descriptions: dict[str, str] = {}
+    for page in indexable_pages(db_file):
+        html = site.get(page["path"]).text
+        match = re.search(r'<meta name="description" content="([^"]*)"', html)
+        assert match is not None, f"{page['path']} : pas de meta description"
+        description = match.group(1).strip()
+        assert description not in descriptions, (
+            f"description partagée par {page['path']} et {descriptions[description]}"
+        )
+        descriptions[description] = page["path"]
+
+
 def test_open_graph_and_twitter_card_are_complete(site: TestClient, db_file: Path) -> None:
     for page in indexable_pages(db_file):
         html = site.get(page["path"]).text

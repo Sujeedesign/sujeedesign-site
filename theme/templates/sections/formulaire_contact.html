@@ -6,7 +6,7 @@
     <div class="grid-2">
       <div class="contact-form-wrap">
         {% if d.get('label') %}<p class="page-label reveal">{{ d.get('label') }}</p>{% endif %}
-        {% if d.get('title') %}<h2 class="contact-form-title reveal">{{ d.get('title')|rich }}</h2>{% endif %}
+        {% if d.get('title') %}<h2 class="contact-form-title reveal">{{ d.get('title')|inline }}</h2>{% endif %}
         {% if d.get('intro') %}<p class="contact-form-intro reveal">{{ d.get('intro') }}</p>{% endif %}
 
         <form class="contact-form" id="contactForm" method="post" action="/api/contact" novalidate>

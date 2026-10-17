@@ -29,7 +29,7 @@
       <defs>
         <path id="circlePath" d="M 52,52 m -38,0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0"/>
       </defs>
-      <text><textPath href="#circlePath">SCROLL DOWN · SCROLL DOWN · SCROLL DOWN · SCROLL DOWN</textPath></text>
+      <text><textPath href="#circlePath">SCROLL DOWN · SCROLL DOWN · </textPath></text>
       <circle class="dot" cx="52" cy="52" r="4"/>
     </svg>
   </div>
@@ -48,8 +48,13 @@
 </section>
 
 {% elif variant == 'projet' %}
-<section class="project-cover" aria-labelledby="project-title">
-  {% if d.get('cover') %}
+{# `image` : visuel réel du projet (photo fournie par le client). Sans lui, le
+   hero garde son visuel d'ambiance et réserve proprement l'emplacement. #}
+{% set image = d.get('image') %}
+<section class="project-cover{% if not image %} project-cover--ambient{% endif %}" aria-labelledby="project-title">
+  {% if image %}
+  <img class="project-cover__media project-cover__media--photo" src="{{ image }}" alt="{{ d.get('image_alt','') }}"{% if not d.get('image_alt') %} aria-hidden="true"{% endif %} width="{{ d.get('image_width') or 1920 }}" height="{{ d.get('image_height') or 1080 }}">
+  {% elif d.get('cover') %}
   <img class="project-cover__media" src="{{ d.get('cover') }}" alt="{{ d.get('cover_alt','') }}" aria-hidden="true" width="1920" height="1080">
   {% endif %}
   <div class="project-cover__shade" aria-hidden="true"></div>
@@ -59,12 +64,18 @@
       {% if d.get('kicker') %}<p class="p-kicker">{{ d.get('kicker') }}</p>{% endif %}
       <h1 class="p-title" id="project-title">{{ d.get('title','')|inline }}</h1>
       {% if d.get('intro') %}<p class="p-intro">{{ d.get('intro') }}</p>{% endif %}
+      {% if not image %}
+      <figure class="project-cover__slot">
+        <span class="slot-frame" aria-hidden="true"></span>
+        <figcaption class="slot-caption">Visuel du projet à venir</figcaption>
+      </figure>
+      {% endif %}
     </div>
   </div>
 </section>
 
 {% else %}
-<section class="page-hero">
+<section class="page-hero{% if d.get('dense') %} page-hero--dense{% endif %}{% if d.get('wide_title') %} page-hero--wide{% endif %}">
   <div class="container">
     {% if d.get('kicker') %}<p class="page-label reveal">{{ d.get('kicker') }}</p>{% endif %}
     <h1 class="page-title reveal" style="--d:.08s">{{ d.get('title','')|inline }}</h1>

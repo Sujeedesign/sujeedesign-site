@@ -4,6 +4,9 @@
 
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var finePointer = window.matchMedia("(hover:hover) and (pointer:fine)").matches;
+  /* Sous 720px, le hero accueil empile portrait, titre et actions :
+     ni rotation du titre ni parallaxe (cf. site.css). */
+  var compactHero = window.matchMedia("(max-width: 720px)");
 
   /* ---------- Année du pied de page ---------- */
   var yearEl = document.getElementById("year");
@@ -17,19 +20,20 @@
   /* ---------- Titre du hero : rotation mot par mot ---------- */
   (function rotateHeroTitle() {
     var rot = document.getElementById("heroRotator");
-    if (!rot || reduced) return;
+    if (!rot || reduced || compactHero.matches) return;
     var words = Array.prototype.slice.call(rot.querySelectorAll(".ht-word"));
     if (words.length < 2) return;
     var cur = 0;
 
     function sizeRotator() {
-      var w = 0, h = 0;
+      /* La largeur du bloc rotatif est fixée par la feuille de style (le titre
+         se replie dans la colonne de texte) : seule la hauteur doit être
+         constante pour éviter tout saut vertical entre les mots. */
+      var h = 0;
       words.forEach(function (el) {
         var r = el.getBoundingClientRect();
-        w = Math.max(w, r.width);
         h = Math.max(h, r.height);
       });
-      rot.style.width = w + "px";
       rot.style.height = h + "px";
     }
     sizeRotator();
@@ -344,11 +348,11 @@
   function tick() {
     ticking = false;
     var scrollY = window.scrollY;
-    if (!reduced && heroInner && heroFigure && badge && scrollY < window.innerHeight * 1.6) {
+    if (!reduced && !compactHero.matches && heroInner && heroFigure && badge && scrollY < window.innerHeight * 1.6) {
       var hr = heroInner.getBoundingClientRect();
       if (hr.bottom > 0) {
         heroInner.style.transform = "translate3d(0," + (scrollY * 0.30) + "px,0)";
-        heroFigure.style.transform = "translate(-50%,-50%) translate3d(0," + (scrollY * 0.10) + "px,0)";
+        heroFigure.style.transform = "translateY(-50%) translate3d(0," + (scrollY * 0.10) + "px,0)";
         heroFigure.style.opacity = Math.max(0, 1 - scrollY / 520).toFixed(3);
         badge.style.opacity = Math.max(0, 1 - scrollY / 560).toFixed(3);
         badge.style.transform = "translate3d(0," + (scrollY * 0.12) + "px,0)";

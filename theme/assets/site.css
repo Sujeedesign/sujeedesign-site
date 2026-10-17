@@ -440,3 +440,72 @@ html{scroll-behavior:auto}
 .timeline p{font-size:16px;line-height:1.55;color:var(--color-felt-gray);max-width:52ch}
 /* Never gate page-family hero copy behind reveal animations. */
 .page-hero .reveal{opacity:1!important;transform:none!important;animation:none!important}
+
+/* ============================================================
+   REVUE VISUELLE — corrections (voir docs/revue-visuelle.md)
+   1. Accueil : le titre et les actions ne se superposent plus au portrait
+      (composition en deux colonnes au-delà de 720px, empilée en dessous).
+   2. Pages listes (réalisations, services, contact) : rythme vertical
+      resserré via le drapeau de contenu « dense ».
+   3. Fiches réalisation : emplacement propre du visuel du projet
+      (« image ») et zone de texte calme tant que la photo n'est pas fournie.
+   ============================================================ */
+
+/* --- Boutons pâles sur fonds animés : contraste relevé --------------- */
+.hero .pill,.page-hero .pill,.p-final .pill{border-color:rgba(255,255,255,.55);color:var(--color-paper-solid);background:rgba(0,0,0,.22)}
+.hero .pill:hover,.page-hero .pill:hover,.p-final .pill:hover{background:var(--color-paper-solid);color:var(--color-accent-ink);border-color:var(--color-paper-solid)}
+
+/* --- Bandeaux de page : texte aligné sur le bord, boutons sur le même axe */
+.page-hero .hero-ctas{justify-content:flex-start}
+.page-hero .page-intro{color:var(--color-ash-mist)}
+.page-hero--dense{padding:clamp(96px,13vh,140px) 0 clamp(40px,5vh,64px)}
+.page-hero--wide .page-title{max-width:100%;font-size:clamp(38px,5vw,68px)}
+
+/* --- Sections de liste : le premier projet entre dans le premier écran - */
+.section--dense{padding-top:clamp(28px,3.5vw,48px)}
+.section--dense .travaux-heading{margin:var(--spacing-28) 0 clamp(20px,2.6vw,40px)}
+.page-hero--dense + .p-final{padding-top:clamp(56px,8vw,104px)}
+
+/* --- Accueil, au-delà de 720px : texte à gauche, portrait à droite ---- */
+@media (min-width:721px){
+.hero::before{content:"";position:absolute;inset:0;z-index:5;pointer-events:none;background:linear-gradient(96deg,rgba(0,0,0,.80) 0%,rgba(0,0,0,.56) 30%,rgba(0,0,0,.16) 52%,rgba(0,0,0,0) 68%)}
+.hero-inner{display:flex;flex-direction:column;align-items:flex-start;text-align:left;max-width:var(--content-max-width);margin-inline:auto;padding:clamp(120px,18vh,210px) min(50vw,600px) clamp(96px,12vh,140px) clamp(20px,4vw,48px)}
+.hero-title{width:100%;font-size:clamp(38px,4.4vw,64px);max-width:100%}
+.hero-rotator{display:block;width:100%;min-height:2.24em;text-align:left}
+.ht-word{left:0;white-space:normal;text-wrap:balance;text-align:left;transform:translateY(20px)}
+.ht-word.is-active{transform:translateY(0)}
+.ht-word.is-leaving{transform:translateY(-20px)}
+.hero .hero-ctas{justify-content:flex-start}
+.hero-figure{left:auto;right:clamp(20px,4vw,64px);top:50%;width:min(32vw,480px);height:auto;transform:translateY(-50%)}
+}
+
+/* Repère de défilement : plus grand et plus court à lire (desktop large) */
+@media (min-width:821px){.scroll-badge{width:124px;height:124px}}
+
+/* --- Accueil, jusqu'à 720px : portrait au-dessus, titre et actions dessous */
+@media (max-width:720px){
+.hero{flex-direction:column;justify-content:flex-start;align-items:center;gap:clamp(18px,3vh,30px);padding:clamp(84px,12vh,112px) 0 clamp(40px,6vh,64px)}
+.hero::before{display:none}
+.hero-figure{position:relative;left:auto;right:auto;top:auto;width:min(74vw,320px);height:auto;margin-inline:auto;transform:none}
+.hero-inner{display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 clamp(20px,5vw,28px);transform:none!important}
+.hero-title{font-size:clamp(36px,10.4vw,48px);margin-top:0;max-width:100%}
+.hero-rotator{display:block;width:auto!important;height:auto!important;text-align:center}
+.ht-word,.ht-word.is-active,.ht-word.is-leaving{position:static;left:auto;display:block;white-space:normal;opacity:1;transform:none}
+.hero .hero-ctas{margin-top:clamp(24px,4vh,34px);gap:12px;justify-content:center}
+.hero .scroll-badge{display:none}
+}
+
+/* --- Fiches réalisation : visuel du projet + zone de texte calme ------ */
+.project-cover__media--photo{object-position:center 38%}
+.project-cover__shade{background:linear-gradient(180deg,rgba(0,0,0,.42),rgba(0,0,0,.22) 42%,rgba(0,0,0,.46)),radial-gradient(ellipse 74% 64% at 50% 47%,rgba(0,0,0,.52) 0%,rgba(0,0,0,.3) 60%,rgba(0,0,0,.06) 100%)}
+/* Sans photo fournie, le visuel d'ambiance est fortement atténué et le texte
+   s'appuie sur une zone sombre : la couverture reste lisible et calme. */
+.project-cover--ambient .project-cover__media{opacity:.34;filter:saturate(.8)}
+.project-cover--ambient .project-cover__shade{background:linear-gradient(180deg,rgba(0,0,0,.4),rgba(0,0,0,.2) 42%,rgba(0,0,0,.44)),radial-gradient(ellipse 74% 64% at 50% 47%,rgba(0,0,0,.8) 0%,rgba(0,0,0,.62) 56%,rgba(0,0,0,.34) 100%)}
+.project-cover__slot{display:flex;flex-direction:column;align-items:center;gap:12px;width:min(100%,420px);margin:clamp(28px,4vh,44px) auto 0}
+.project-cover__slot .slot-frame{position:relative;display:block;width:100%;aspect-ratio:16/10;border:1px solid rgba(255,255,255,.26);background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,0))}
+.project-cover__slot .slot-frame::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;background:var(--gradient-iridescent)}
+.project-cover__slot .slot-caption{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.72)}
+.project-page .project-back{opacity:.96;text-shadow:0 1px 3px rgba(0,0,0,.55)}
+.project-cover .p-kicker{color:rgba(255,255,255,.9);text-shadow:0 1px 3px rgba(0,0,0,.5)}
+.project-cover .p-intro{text-shadow:0 1px 3px rgba(0,0,0,.5)}

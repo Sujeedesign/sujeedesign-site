@@ -9,7 +9,7 @@
 {% else %}
   {% set rows = source %}
 {% endif %}
-<section class="section" id="prestations">
+<section class="section{% if d.get('dense') %} section--dense{% endif %}" id="prestations">
   <div class="container">
     {% if d.get('label') %}<p class="section-label reveal" style="--d:.05s">{{ d.get('label') }}</p>{% endif %}
     {% if d.get('title') %}<h2 class="prestations-heading reveal">{{ d.get('title','')|inline }}</h2>{% endif %}

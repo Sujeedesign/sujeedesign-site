@@ -9,7 +9,7 @@
 {% endif %}
 {% set limit = d.get('limit')|int if d.get('limit') else 0 %}
 {% if limit %}{% set cards = cards[:limit] %}{% endif %}
-<section class="section" id="travaux">
+<section class="section{% if d.get('dense') %} section--dense{% endif %}" id="travaux">
   <div class="container">
     {% if d.get('label') %}<p class="section-label reveal" style="--d:.05s">{{ d.get('label') }}</p>{% endif %}
     {{ heading_lines(d.get('heading_lines', []), 'travaux-heading reveal') }}

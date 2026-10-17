@@ -64,6 +64,14 @@ def test_home_renders(seeded, client: TestClient) -> None:
     assert "canonical" in response.text
 
 
+def test_trailing_slash_is_normalised(seeded, client: TestClient) -> None:
+    """Une barre oblique finale renvoie 301 vers l'adresse canonique."""
+    response = client.get("/realisations/", follow_redirects=False)
+    assert response.status_code == 301
+    assert response.headers["location"] == "/realisations"
+    assert client.get("/services/", follow_redirects=False).headers["location"] == "/services"
+
+
 def test_listing_pages(seeded, client: TestClient) -> None:
     assert client.get("/realisations").status_code == 200
     assert client.get("/services").status_code == 200
