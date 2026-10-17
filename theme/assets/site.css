@@ -507,3 +507,14 @@ html{scroll-behavior:auto}
 .project-page .project-back{opacity:.96;text-shadow:0 1px 3px rgba(0,0,0,.55)}
 .project-cover .p-kicker{color:rgba(255,255,255,.9);text-shadow:0 1px 3px rgba(0,0,0,.5)}
 .project-cover .p-intro{text-shadow:0 1px 3px rgba(0,0,0,.5)}
+
+/* --- Mobile : empilement reel des colonnes (le bloc historique etait place
+   avant la regle de base, donc ecrase). En dernier dans la feuille. -------- */
+@media (max-width:720px){
+.grid-2{grid-template-columns:1fr;gap:clamp(24px,6vw,40px)}
+.contact-form-wrap,.p-final--contact .prose{width:100%;max-width:100%}
+.p-final--contact{padding-top:clamp(24px,5vh,40px)}
+.contact-form .field input,.contact-form .field select,.contact-form .field textarea{width:100%;max-width:100%}
+.contact-form .pill{width:100%;justify-content:center;white-space:normal}
+.prose{max-width:100%}
+}
