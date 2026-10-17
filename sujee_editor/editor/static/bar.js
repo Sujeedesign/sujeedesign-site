@@ -114,13 +114,30 @@ export function mountBar(context, hooks) {
     });
     revisions.addEventListener("focus", reloadRevisions);
 
-    root.append(
-      status,
-      revisions,
-      button("Publier", publish, true),
-      button("Quitter l'édition", () => {
-        window.location.href = window.location.pathname;
-      }),
+    const tools = (hooks.tools && hooks.tools()) || [];
+    const toolsBox = document.createElement("div");
+    toolsBox.className = "sjd-bar__tools";
+    tools.forEach((tool) => {
+      const node = button(tool.label, tool.onClick, false);
+      if (tool.pressed) {
+        node.setAttribute("aria-pressed", "true");
+      }
+      toolsBox.appendChild(node);
+    });
+
+    root.append(status, revisions);
+    if (toolsBox.childElementCount) {
+      root.appendChild(toolsBox);
+    }
+    const quit = button("Quitter l'édition", () => {
+      window.location.href = window.location.pathname;
+    });
+    quit.dataset.role = "quit";
+    root.append(button("Publier", publish, true), quit);
+    // La hauteur réelle de la barre sert aux vues plein écran des écrans étroits.
+    document.documentElement.style.setProperty(
+      "--sjd-bar-h",
+      `${Math.round(root.getBoundingClientRect().height)}px`,
     );
   }
 

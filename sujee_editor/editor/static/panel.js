@@ -286,7 +286,25 @@ export function mountPanel(context, hooks) {
     }
   }
 
+  function show() {
+    root.hidden = false;
+    if (hooks.onToggle) {
+      hooks.onToggle();
+    }
+  }
+
+  function hide() {
+    root.hidden = true;
+    if (hooks.onToggle) {
+      hooks.onToggle();
+    }
+  }
+
+  function isOpen() {
+    return !root.hidden;
+  }
+
   loadMedia().then(() => render(null));
   render(null);
-  return { render: (section) => render(section) };
+  return { render: (section) => render(section), show, hide, isOpen };
 }

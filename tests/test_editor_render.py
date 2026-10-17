@@ -100,6 +100,41 @@ def main_of(html_text: str) -> str:
     return match.group(1)
 
 
+def without_hidden_blocks(html_text: str) -> str:
+    """Retire les enveloppes des blocs masqués (data-block-visible="0").
+
+    Ils sont rendus en mode édition pour rester éditables, mais ils ne font pas
+    partie de ce qu'un visiteur voit : on les écarte avant de comparer, avec le
+    séparateur qui les précède, pour ne pas laisser de ligne vide derrière eux.
+    """
+    pieces: list[tuple[str, str | None]] = []
+    index = 0
+    opener = re.compile(r'<div class="sjd-block"[^>]*>')
+    token = re.compile(r"<div\b|</div>")
+    while True:
+        match = opener.search(html_text, index)
+        if match is None:
+            pieces.append((html_text[index:], None))
+            break
+        separator = html_text[index : match.start()]
+        depth = 1
+        cursor = match.end()
+        while depth:
+            found = token.search(html_text, cursor)
+            assert found is not None, "enveloppe non fermée"
+            depth += 1 if found.group().startswith("<div") else -1
+            cursor = found.end()
+        pieces.append((separator, html_text[match.start() : cursor]))
+        index = cursor
+    out: list[str] = []
+    for separator, body in pieces:
+        if body is None:
+            out.append(separator)
+        elif 'data-block-visible="0"' not in body.split(">", 1)[0]:
+            out.append(separator + body)
+    return "".join(out)
+
+
 def draft_html(client, cookies=None) -> str:
     response = client.get(f"/{SLUG}?edit=1", cookies=cookies or {})
     assert response.status_code == 200
@@ -195,4 +230,17 @@ def test_a_page_without_any_draft_is_unchanged_by_edit_mode(client, db_file: Pat
     seed_page(db_file)
     published = client.get(f"/{SLUG}").text
     edited = draft_html(client, admin_cookies())
-    assert unwrap_envelopes(main_of(published)) == unwrap_envelopes(main_of(edited))
+    # Les blocs masqués n'existent qu'en mode édition : écartés, le reste doit
+    # être identique au rendu public.
+    assert unwrap_envelopes(main_of(published)) == unwrap_envelopes(without_hidden_blocks(main_of(edited)))
+
+
+def test_edit_mode_renders_hidden_sections_muted(client, db_file: Path) -> None:
+    """Un bloc masqué n'est pas public, mais reste dans le canevas, grisé."""
+    seed_page(db_file)
+    public = client.get(f"/{SLUG}").text
+    edited = draft_html(client, admin_cookies())
+    assert "Citation masquée" not in public
+    assert "Citation masquée" in edited
+    assert 'data-block-visible="0"' in edited
+    assert edited.count('class="sjd-block"') == 3

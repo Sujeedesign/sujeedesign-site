@@ -86,6 +86,18 @@ body.sjd-panel-open {
   color: rgba(255, 255, 255, 0.75);
 }
 
+/* Boutons de navigation propres aux écrans étroits (page, blocs, bloc courant).
+   Le canevas les remplit uniquement sous 900 px. */
+.sjd-bar__tools {
+  display: flex;
+  gap: 8px;
+}
+
+.sjd-bar__tools button[aria-pressed="true"] {
+  background: var(--sjd-editor-accent);
+  border-color: var(--sjd-editor-accent);
+}
+
 .sjd-bar button,
 .sjd-panel__button,
 .sjd-rail__button {
@@ -114,7 +126,7 @@ body.sjd-panel-open {
   position: fixed;
   top: 0;
   left: 0;
-  bottom: 56px;
+  bottom: var(--sjd-bar-h, 56px);
   z-index: 94;
   width: 268px;
   overflow-y: auto;
@@ -158,7 +170,7 @@ body.sjd-panel-open {
   position: fixed;
   top: 0;
   right: 0;
-  bottom: 56px;
+  bottom: var(--sjd-bar-h, 56px);
   z-index: 94;
   width: 336px;
   overflow-y: auto;
@@ -227,14 +239,16 @@ body.sjd-editing-locked [data-field] {
   cursor: default;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 899px) {
   .sjd-rail,
   .sjd-panel {
     top: 0;
     left: 0;
     right: 0;
+    /* La vue plein écran s'arrête au-dessus de la barre, dont la hauteur réelle
+       est publiée dans --sjd-bar-h par la barre elle-même. */
+    bottom: var(--sjd-bar-h, 56px);
     width: auto;
-    bottom: 56px;
   }
 
   .sjd-rail[hidden],
@@ -244,5 +258,61 @@ body.sjd-editing-locked [data-field] {
 
   body.is-editing [data-field] {
     cursor: default;
+  }
+
+  /* Sur téléphone, la barre tient en trois lignes courtes (état, vues, actions)
+     et tout ce qui se touche fait 44 px. */
+  .sjd-bar {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 6px 12px;
+  }
+
+  .sjd-bar__status {
+    flex: 1 1 100%;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sjd-bar__tools {
+    order: 2;
+    flex: 1 1 100%;
+  }
+
+  .sjd-bar__tools button {
+    flex: 1;
+  }
+
+  .sjd-bar__select {
+    order: 3;
+    flex: 1 1 auto;
+    min-height: 44px;
+  }
+
+  .sjd-bar button[data-primary="1"] {
+    order: 4;
+  }
+
+  /* « Quitter l'édition » doublonne le bouton « Page » sur téléphone. */
+  .sjd-bar button[data-role="quit"] {
+    display: none;
+  }
+
+  .sjd-bar button,
+  .sjd-rail__button,
+  .sjd-rail__icon,
+  .sjd-panel__button,
+  .sjd-bar__select {
+    min-height: 44px;
+  }
+
+  .sjd-panel input[type="text"],
+  .sjd-panel textarea,
+  .sjd-panel select,
+  .sjd-panel input[type="number"],
+  .sjd-panel__check {
+    min-height: 44px;
   }
 }

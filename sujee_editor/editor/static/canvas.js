@@ -14,7 +14,9 @@ export function mountCanvas(context, hooks) {
   let busy = false;
 
   function wrappers() {
-    return Array.from(document.querySelectorAll("[data-block-id]"));
+    // Le rail marque aussi ses lignes avec data-block-id : le canevas ne
+    // regarde que les blocs de la page.
+    return Array.from(root.querySelectorAll("[data-block-id]"));
   }
 
   function kindOf(section, fieldName) {

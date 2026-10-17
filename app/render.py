@@ -308,10 +308,13 @@ def render_page(
     edit = bool(ctx.get("edit"))
     slug = _get(page, "slug", "?")
     revision = str(ctx.get("revision", "0"))
+    # En mode édition, les blocs masqués sont rendus eux aussi (grisés par la
+    # feuille de l'éditeur) : sinon un bloc nouvellement ajouté, qui naît masqué,
+    # serait introuvable dans le canevas. Le rendu public, lui, les exclut.
     normalized = [
         section_context(section, edit=edit)
         for section in sections
-        if bool(_get(section, "visible", 1))
+        if edit or bool(_get(section, "visible", 1))
     ]
     fingerprint = hashlib.sha1(
         json.dumps(normalized, sort_keys=True, ensure_ascii=False, default=str).encode("utf-8")

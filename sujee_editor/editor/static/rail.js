@@ -159,6 +159,24 @@ export function mountRail(context, hooks) {
     }
   }
 
+  function show() {
+    root.hidden = false;
+    if (hooks.onToggle) {
+      hooks.onToggle();
+    }
+  }
+
+  function hide() {
+    root.hidden = true;
+    if (hooks.onToggle) {
+      hooks.onToggle();
+    }
+  }
+
+  function isOpen() {
+    return !root.hidden;
+  }
+
   render();
-  return { render };
+  return { render, show, hide, isOpen };
 }
