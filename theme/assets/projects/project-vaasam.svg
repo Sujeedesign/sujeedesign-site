@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <title>Voile irisé, Vaasam Paris</title>
+  <desc>Texture abstraite pleine largeur, aux tons sauge, ambre et oxblood.</desc>
+  <defs>
+    <radialGradient id="sage" cx="38%" cy="34%" r="65%"><stop stop-color="#a0e0ab" stop-opacity=".88"/><stop offset=".28" stop-color="#759779" stop-opacity=".62"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+    <radialGradient id="amber" cx="50%" cy="50%" r="62%"><stop stop-color="#ffac2e" stop-opacity=".92"/><stop offset=".34" stop-color="#b66f2c" stop-opacity=".56"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+    <radialGradient id="wine" cx="50%" cy="50%" r="64%"><stop stop-color="#a52d25" stop-opacity=".9"/><stop offset=".37" stop-color="#702820" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+    <filter id="liquid" x="-20%" y="-25%" width="140%" height="150%"><feTurbulence type="fractalNoise" baseFrequency=".004 .009" numOctaves="2" seed="11" result="flow"/><feDisplacementMap in="SourceGraphic" in2="flow" scale="150" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".7" numOctaves="2" seed="21"/><feColorMatrix type="saturate" values="0"/></filter>
+    <radialGradient id="shade"><stop offset=".2" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".7"/></radialGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="#050505"/>
+  <g filter="url(#liquid)">
+    <path d="M-200 660C40 180 470 100 780 280s330 330 250 540-480 390-780 310S-370 980-200 660Z" fill="url(#sage)"/>
+    <path d="M520-160c420 50 660 300 570 620S850 930 670 780 370 520 440 220s-150-430 80-380Z" fill="url(#amber)"/>
+    <path d="M1180 130c320-250 780-80 860 230s-180 620-510 650-470-260-400-470 20-300 50-410Z" fill="url(#wine)"/>
+  </g>
+  <rect width="1920" height="1080" fill="url(#shade)"/>
+  <rect width="1920" height="1080" filter="url(#grain)" opacity=".075" style="mix-blend-mode:soft-light"/>
+</svg>
