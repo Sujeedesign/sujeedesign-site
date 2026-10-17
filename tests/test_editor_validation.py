@@ -80,6 +80,11 @@ def test_lines_accept_a_list_or_a_string():
     assert validate_data(ESSAI, {"titre": "ok", "lignes": ["a", 3]})[0].detail == "lignes[1]"
 
 
+def test_a_block_without_variants_ignores_the_variant_key():
+    assert rules(validate_data(chapter, {"_variant": "dark"})) == []
+    assert rules(validate_data(hero, {"_variant": "nope"})) == [("_variant", "bad_variant")]
+
+
 def test_underscore_keys_are_ignored():
     assert rules(validate_data(chapter, {"_vu": True, "_note": "interne"})) == []
 

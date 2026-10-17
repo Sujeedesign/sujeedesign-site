@@ -112,6 +112,30 @@ class Block:
         }
 
 
+def default_data(block: Block) -> dict[str, Any]:
+    """Valeurs de départ d'un bloc neuf, dérivées du schéma (aucune donnée en dur)."""
+    data: dict[str, Any] = {}
+    for field in block.fields:
+        data[field.name] = _default_for(field)
+    if block.variants:
+        data["_variant"] = next(iter(block.variants))
+    return data
+
+
+def _default_for(field: Field) -> Any:
+    if field.has_default:
+        return field.default
+    if field.kind is Kind.BOOL:
+        return False
+    if field.kind is Kind.NUMBER:
+        return 0
+    if field.kind in (Kind.LINES, Kind.ITEMS, Kind.IMAGES):
+        return []
+    if field.kind is Kind.CHOICE:
+        return field.choices[0] if field.choices else ""
+    return ""
+
+
 def _serialize_field(field: Field) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "name": field.name,

@@ -40,7 +40,7 @@ def validate_data(block: Block, data: Any) -> list[ValidationError]:
         return [ValidationError("", "bad_type", "data")]
     errors: list[ValidationError] = []
     variant = data.get("_variant")
-    if variant is not None and str(variant) not in block.variants:
+    if block.variants and variant is not None and str(variant) not in block.variants:
         errors.append(ValidationError("_variant", "bad_variant", str(variant)))
     for key in data:
         if key.startswith("_"):

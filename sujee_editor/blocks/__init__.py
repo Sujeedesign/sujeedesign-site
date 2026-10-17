@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from .catalogue import DEFAULT_BLOCKS, get_block
-from .types import Block, Field, Kind
+from .types import Block, Field, Kind, default_data
 from .validate import ValidationError, validate_data, validate_field
 
 __all__ = [
@@ -12,6 +12,7 @@ __all__ = [
     "Kind",
     "DEFAULT_BLOCKS",
     "get_block",
+    "default_data",
     "ValidationError",
     "validate_data",
     "validate_field",
