@@ -78,7 +78,15 @@ L’interface GrapesJS standard n’est pas présumée satisfaire la barre UX. L
 - Les projets ont des versions explicites noyau/thème/schéma. Une incompatibilité bloque l’édition avec un message actionnable ; une migration explicite doit précéder toute conversion destructive.
 - L’éditeur ne change jamais le contenu public si le client n’a pas validé et publié ses modifications.
 
-## 7. Hors périmètre de la première tranche
+## 7. Maintenance GrapesJS et compatibilité des projets
+
+- GrapesJS Core, les plugins et les outils de build sont épinglés à des versions exactes dans le lockfile ; aucun upgrade automatique n’est fusionné sans revue.
+- Les mises à jour de dépendances sont proposées par PR automatisées et exécutent build, tests, contrôle licence/sécurité et tests de compatibilité avec des projets déjà enregistrés.
+- Avant une mise à jour, lire les notes de version et migration officielles, vérifier l’impact sur les composants/thèmes, puis valider dans une recette.
+- Le JSON GrapesJS et le schéma des composants sont versionnés. Toute mise à niveau qui change le format ajoute une migration ou un lecteur rétrocompatible avant d’être déployée ; prévoir retour arrière.
+- Une mise à jour GrapesJS ne déclenche pas à elle seule un déploiement de site.
+
+## 8. Hors périmètre de la première tranche
 
 - Un éditeur générique d’HTML/CSS ou un concurrent complet de Webflow.
 - Le Studio SDK, services de stockage/édition hébergés ou licences par domaine.
@@ -87,7 +95,7 @@ L’interface GrapesJS standard n’est pas présumée satisfaire la barre UX. L
 - Les fonctionnalités métier (boutique, réservation, espace client, gestion de catalogue) dans GrapesJS.
 - Une refonte graphique du site spécifiée sans brief de DA distinct. Cette spec concerne l’écosystème d’édition, pas le design final des pages.
 
-## 8. Phasage proposé
+## 9. Phasage proposé
 
 1. **Prototype vertical sur le site pilote** : intégrer GrapesJS Core dans une page d’administration de recette, avec interface simple, vrai CSS, trois types de sections représentatifs, édition titre/texte/image, ajout/réorganisation, sauvegarde brouillon et reprise après rechargement. Vérifier rendu public et sécurité avant d’étendre.
 2. **Consolidation du contrat** : transformer les besoins prouvés en interface d’adaptateur versionnée ; traiter les erreurs, permissions, assets, publication, compatibilité et export contrôlé ; couvrir par tests automatisés et navigateur.
@@ -96,7 +104,7 @@ L’interface GrapesJS standard n’est pas présumée satisfaire la barre UX. L
 
 Chaque phase reste isolée de la production jusqu’à validation explicite et vérifications de recette. Une mise en production nécessite une procédure et une validation distinctes.
 
-## 9. Critères de réussite
+## 10. Critères de réussite
 
 - Sur le site pilote, un auteur peut choisir une section de la page, modifier titre/texte/image, ajouter et réordonner une section, puis voir le résultat exact après publication.
 - Le parcours est compréhensible sans connaître GrapesJS ; une courte observation utilisateur confirme qu’un auteur retrouve facilement l’ajout d’une section et l’édition d’un texte.
@@ -107,9 +115,9 @@ Chaque phase reste isolée de la production jusqu’à validation explicite et v
 - Un site suivant peut réutiliser noyau et contrat avec un thème/adaptateur spécifique, sans copier le moteur ni modifier le noyau.
 - Les coûts de runtime n’incluent pas une licence ou un service hébergé du Studio SDK.
 
-## 10. Points à valider dans le plan, sans bloquer la spec
+## 11. Points à valider dans le plan, sans bloquer la spec
 
-- Version GrapesJS Core retenue et politique d’upgrade, sur la base de la version stable vérifiée au démarrage de l’implémentation.
+- Version GrapesJS Core et outils de build exacts retenus au démarrage, après vérification de la version stable et de sa licence.
 - Format exact de sérialisation, publication et nettoyage ; le prototype doit comparer le projet JSON, le rendu publié et l’affichage réel.
 - Choix de la coque UI et des composants réellement inclus par défaut ; le critère est la simplicité observée, pas la fidélité aux panneaux stock.
 - Condition de validation pour extraire le kit : deuxième site réel ou adaptateur de démonstration suffisamment représentatif.

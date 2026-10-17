@@ -113,7 +113,26 @@
 
 **Commit :** `test(editor): verify GrapesJS pilot end to end`
 
-## Tâche 6 : revue et décision de suite
+## Tâche 6 : rendre les mises à jour GrapesJS maintenables
+
+**Fichiers :**
+- Créer `.github/dependabot.yml` pour le gestionnaire npm du sous-projet `sujee_editor/editor/frontend`.
+- Créer `.github/workflows/grapesjs-editor.yml` pour compiler le bundle et exécuter les tests sur les PR et pushes concernés.
+- Créer `docs/development/grapesjs-upgrades.md` (ou l’emplacement documentaire développeur existant après vérification).
+
+**Étapes :**
+
+1. Configurer Dependabot sur une cadence hebdomadaire, avec mises à jour npm séparées ou groupées sans confondre GrapesJS Core et dépendances de build ; limiter le bruit et ne jamais activer l’auto-merge.
+2. Ajouter un workflow GitHub Actions déclenché sur PR et push touchant le kit, le thème, les tests, le lockfile ou le Dockerfile. Il exécute `npm ci`, le build frontend, les tests Python concernés et les tests de compatibilité du projet.
+3. Mettre dans le pipeline des tests de lecture/réécriture de projets enregistrés par la version précédente de GrapesJS. Le workflow échoue si les assets ne sont pas construits ou si les tests de format/rendu cassent.
+4. Documenter la routine de mise à niveau : examiner notes de version officielles et changelog, vérifier licence et advisories, examiner le diff du lockfile, exécuter les tests, valider une recette, puis seulement fusionner ; rollback distinct et pas de déploiement automatique.
+5. Documenter la politique de version des project JSON et composants. Toute migration incompatible doit être rétrocompatible ou accompagnée d’une migration testée avant l’upgrade ; un projet non migrable ne doit pas être réenregistré sous le nouveau format.
+6. Vérifier le workflow avec une PR de mise à jour simulée ou un changement de version contrôlé, sans fusionner de version non validée. Confirmer que le résultat CI est visible pour les futures PR Dependabot.
+7. Vérifier les permissions du workflow : lecture seule par défaut, aucun secret de production, aucun accès au déploiement.
+
+**Commit :** `ci(editor): automate GrapesJS dependency maintenance`
+
+## Tâche 7 : revue et décision de suite
 
 1. Faire une revue sécurité/qualité des changements (validation serveur, auth, XSS, permissions, données privées, stabilité du build).
 2. Vérifier que l’ancien éditeur reste utilisable et qu’aucun écran de production n’a basculé.
@@ -127,7 +146,8 @@
 - Tâche 3 avant le branchement de sauvegarde et publication de l’interface.
 - Tâche 4 après Tâches 1 à 3.
 - Tâche 5 après Tâche 4, avant toute décision d’élargissement.
-- Tâche 6 ferme uniquement le prototype, jamais le chantier global.
+- Tâche 6 après Tâches 1 à 5 afin que Dependabot/CI protègent le kit réellement livré.
+- Tâche 7 ferme uniquement le prototype, jamais le chantier global.
 
 ## Non-objectifs de ce plan
 
