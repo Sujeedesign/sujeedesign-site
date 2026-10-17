@@ -13,3 +13,6 @@ data/
 
 # Worktrees locaux de développement
 .worktrees/
+
+# Bundle GrapesJS généré au build (copié dans l'image de l'application)
+sujee_editor/editor/static/visual/
