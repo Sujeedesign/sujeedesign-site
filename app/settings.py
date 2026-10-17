@@ -11,12 +11,20 @@ VERSION = "1.0.0"
 DEFAULT_SETTINGS = {
     "site_name": "Sujee Design",
     "tagline": "Votre marque, de A à Z",
+    "site_description": (
+        "Sujee Design — Sujeepan Sabesan, designer & directeur artistique à Paris. "
+        "Identité de marque, création visuelle, web, marketing, solutions IA."
+    ),
+    "base_url": "",
+    "og_image": "",
     "email": "s.sujeepan.pro@gmail.com",
     "phone": "",
     "linkedin": "https://www.linkedin.com/in/sujeepan-sabesan",
     "behance": "https://www.behance.net/SujeepanSabesan",
     "city": "Paris, France",
+    "studio": "Sujee Design",
     "legal_name": "Sujee Design — Sujeepan Sabesan",
+    "mentions": "SIRET, hébergeur et mentions légales à compléter dans le back office.",
     "analytics_id": "",
 }
 

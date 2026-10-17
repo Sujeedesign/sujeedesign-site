@@ -1,0 +1,20 @@
+{% set d = s.data %}
+<section class="s-chap reveal{% if d.get('dark') %} dark{% endif %}">
+  <div class="container">
+    <div class="chap">
+      <div class="chap-head">
+        {% if d.get('kicker') %}<span class="type">{{ d.get('kicker') }}</span>{% endif %}
+        {% if d.get('title') %}<h2 class="chap-title">{{ d.get('title')|rich }}</h2>{% endif %}
+      </div>
+      <div class="chap-body">
+        {{ d.get('body','')|rich }}
+        {% set items = d.get('list', []) %}
+        {% if items %}
+        <ul class="chap-list">
+          {% for item in items %}<li>{{ item }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>

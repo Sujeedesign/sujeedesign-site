@@ -1,0 +1,9 @@
+{% from "partials/macros.html" import heading_lines %}
+{% set d = s.data %}
+<section class="section" id="manifeste">
+  <div class="container">
+    {% if d.get('label') %}<p class="section-label reveal">{{ d.get('label') }}</p>{% endif %}
+    {{ heading_lines(d.get('heading_lines', []), 'manifeste-heading reveal') }}
+    {% if d.get('text') %}<p class="manifeste-text" id="manifesteText">{{ d.get('text') }}</p>{% endif %}
+  </div>
+</section>

@@ -1,0 +1,25 @@
+{% from "partials/macros.html" import heading_lines, work_card %}
+{% set d = s.data %}
+{% set source = realisations|default([]) %}
+{% set slugs = d.get('slugs', []) %}
+{% if s.variant == 'manuel' and slugs %}
+  {% set cards = source|selectattr('slug', 'in', slugs)|list %}
+{% else %}
+  {% set cards = source %}
+{% endif %}
+{% set limit = d.get('limit')|int if d.get('limit') else 0 %}
+{% if limit %}{% set cards = cards[:limit] %}{% endif %}
+<section class="section" id="travaux">
+  <div class="container">
+    {% if d.get('label') %}<p class="section-label reveal" style="--d:.05s">{{ d.get('label') }}</p>{% endif %}
+    {{ heading_lines(d.get('heading_lines', []), 'travaux-heading reveal') }}
+  </div>
+  <div class="container">
+    <div class="work-grid">
+      {% for item in cards %}{{ work_card(item, loop.index0) }}{% endfor %}
+    </div>
+    {% if d.get('all_label') %}
+    <p class="grid-more reveal"><a class="pill" href="/realisations">{{ d.get('all_label') }} <span aria-hidden="true">→</span></a></p>
+    {% endif %}
+  </div>
+</section>

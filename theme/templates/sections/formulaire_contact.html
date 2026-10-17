@@ -1,0 +1,83 @@
+{% set d = s.data %}
+<section class="page-body section p-final p-final--contact reveal" id="contact">
+  <div class="hero-bg" id="pFinalBg" aria-hidden="true"></div>
+  <canvas class="hero-shader" id="pFinalShader" aria-hidden="true"></canvas>
+  <div class="container">
+    <div class="grid-2">
+      <div class="contact-form-wrap">
+        {% if d.get('label') %}<p class="page-label reveal">{{ d.get('label') }}</p>{% endif %}
+        {% if d.get('title') %}<h2 class="contact-form-title reveal">{{ d.get('title')|rich }}</h2>{% endif %}
+        {% if d.get('intro') %}<p class="contact-form-intro reveal">{{ d.get('intro') }}</p>{% endif %}
+
+        <form class="contact-form" id="contactForm" method="post" action="/api/contact" novalidate>
+          <input type="hidden" name="form_token" value="{{ form_token|default('') }}">
+          <input type="hidden" name="source_path" value="{{ current_path|default('/contact') }}">
+          <div class="hp-field" aria-hidden="true">
+            <label for="cf-website">Ne pas remplir ce champ</label>
+            <input id="cf-website" name="website" type="text" tabindex="-1" autocomplete="off">
+          </div>
+
+          <div class="field">
+            <label for="cf-name">Nom <span class="req" aria-hidden="true">*</span></label>
+            <input id="cf-name" name="name" type="text" required autocomplete="name" aria-describedby="cf-name-error">
+            <p class="field-error" id="cf-name-error" role="alert"></p>
+          </div>
+
+          <div class="field">
+            <label for="cf-email">Email <span class="req" aria-hidden="true">*</span></label>
+            <input id="cf-email" name="email" type="email" required autocomplete="email" aria-describedby="cf-email-error">
+            <p class="field-error" id="cf-email-error" role="alert"></p>
+          </div>
+
+          <div class="field">
+            <label for="cf-phone">Téléphone (facultatif)</label>
+            <input id="cf-phone" name="phone" type="tel" autocomplete="tel">
+          </div>
+
+          <div class="field">
+            <label for="cf-project">Type de projet</label>
+            <select id="cf-project" name="project_type">
+              <option value="">Choisir…</option>
+              <option>Identité de marque</option>
+              <option>Création visuelle &amp; PAO</option>
+              <option>Site web ou e-commerce</option>
+              <option>Conseil &amp; marketing</option>
+              <option>Solutions IA</option>
+              <option>Formation</option>
+              <option>Autre</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="cf-budget">Budget envisagé</label>
+            <select id="cf-budget" name="budget">
+              <option value="">À définir</option>
+              <option>Moins de 1 000 €</option>
+              <option>1 000 € à 3 000 €</option>
+              <option>3 000 € à 6 000 €</option>
+              <option>6 000 € à 12 000 €</option>
+              <option>Plus de 12 000 €</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="cf-message">Votre projet <span class="req" aria-hidden="true">*</span></label>
+            <textarea id="cf-message" name="message" rows="6" required aria-describedby="cf-message-error"></textarea>
+            <p class="field-error" id="cf-message-error" role="alert"></p>
+          </div>
+
+          <p class="form-note">Vos informations servent uniquement à vous répondre. Voir les <a href="/mentions-legales">mentions légales</a>.</p>
+          <button class="pill pill--filled" type="submit">Envoyer le message <span aria-hidden="true">→</span></button>
+          <p class="form-status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+
+      <div class="prose">
+        {% for column in d.get('columns', []) %}
+        <h2>{{ column.get('title','') }}</h2>
+        {{ column.get('body','')|rich }}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>

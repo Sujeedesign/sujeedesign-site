@@ -1,0 +1,26 @@
+{% set d = s.data %}
+{% set source = services|default([]) %}
+{% set slugs = d.get('slugs', []) %}
+{% if s.variant == 'manuel' and slugs %}
+  {% set rows = source|selectattr('slug', 'in', slugs)|list %}
+{% else %}
+  {% set rows = source %}
+{% endif %}
+<section class="section" id="prestations">
+  <div class="container">
+    {% if d.get('label') %}<p class="section-label reveal" style="--d:.05s">{{ d.get('label') }}</p>{% endif %}
+    {% if d.get('title') %}<h2 class="prestations-heading reveal">{{ d.get('title','')|rich }}</h2>{% endif %}
+    <div class="reveal" style="--d:.1s">
+      {% for item in rows %}
+      <a class="svc-row" href="{{ item.href }}">
+        <span class="svc-idx">{{ '%02d' % (loop.index) }}</span>
+        <div>
+          <h3 class="svc-name">{{ item.title }}</h3>
+          <p class="svc-desc">{{ item.excerpt }}</p>
+        </div>
+        <span class="svc-arrow" aria-hidden="true">→</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>

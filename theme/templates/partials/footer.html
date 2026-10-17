@@ -1,0 +1,24 @@
+{% set settings = settings|default({}) %}
+{% set footer = footer|default({}) %}
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="f-addr">
+        <h3>Studio</h3>
+        <p>{{ settings.legal_name|default('Sujee Design — Sujeepan Sabesan') }}</p>
+        <p>{{ settings.city|default('Paris, France') }}</p>
+      </div>
+      <div class="f-addr">
+        <h3>Contact</h3>
+        {% if settings.email %}<p><a href="mailto:{{ settings.email }}">{{ settings.email }}</a></p>{% endif %}
+        {% if settings.linkedin %}<p><a href="{{ settings.linkedin }}" target="_blank" rel="noopener">linkedin.com/in/sujeepan-sabesan</a></p>{% endif %}
+      </div>
+      <div class="f-note">
+        <h3>Mentions</h3>
+        <p>© <span id="year">{{ year|default(2026) }}</span> {{ settings.site_name|default('Sujee Design') }}.</p>
+        <p>{{ settings.tagline|default('Votre marque, de A à Z.') }}</p>
+        <p><a href="/mentions-legales">Mentions légales</a></p>
+      </div>
+    </div>
+  </div>
+</footer>

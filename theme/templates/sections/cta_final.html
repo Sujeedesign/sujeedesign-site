@@ -1,0 +1,39 @@
+{% from "partials/macros.html" import ctas %}
+{% set d = s.data %}
+
+{% if s.variant == 'accueil' %}
+<section class="section contact p-final p-final--home reveal" id="contact">
+  {% if d.get('shader', true) %}<canvas class="hero-shader" id="contactShader" aria-hidden="true"></canvas>{% endif %}
+  <div class="container">
+    <p class="section-label contact-label reveal" style="--d:.05s">{{ d.get('kicker','Contact') }}</p>
+    <h2 class="contact-heading reveal">
+      {% set lines = d.get('title_lines', []) %}
+      {% if lines %}
+        {% for line in lines %}<span class="reveal-line"><span>{{ line|rich }}</span></span>{% endfor %}
+      {% else %}
+        <span class="reveal-line"><span>{{ d.get('title','')|rich }}</span></span>
+      {% endif %}
+    </h2>
+    {% if d.get('intro') %}<p class="p-intro reveal" style="--d:.16s">{{ d.get('intro') }}</p>{% endif %}
+    <div class="contact-links p-final-cta reveal" style="--d:.2s">
+      {% for cta in d.get('ctas', []) %}
+      <a class="{{ cta.style|default('pill') }}" {% if cta.id %}id="{{ cta.id }}"{% endif %} href="{{ cta.href|default('#') }}">{{ cta.label }} <span aria-hidden="true">{{ cta.icon|default('→') }}</span></a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% else %}
+<section class="p-final reveal">
+  {% if d.get('shader', true) %}
+  <div class="hero-bg" id="pFinalBg" aria-hidden="true"></div>
+  <canvas class="hero-shader" id="pFinalShader" aria-hidden="true"></canvas>
+  {% endif %}
+  <div class="container">
+    {% if d.get('kicker') %}<p class="p-kicker reveal" style="color:var(--color-paper-solid);--d:.05s">{{ d.get('kicker') }}</p>{% endif %}
+    <h2 class="p-title reveal" style="--d:.08s">{{ d.get('title','')|rich }}</h2>
+    {% if d.get('intro') %}<p class="p-intro reveal" style="margin-inline:auto;text-align:center;max-width:44ch;--d:.16s">{{ d.get('intro') }}</p>{% endif %}
+    {{ ctas(d.get('ctas', []), 'p-final-cta reveal') }}
+  </div>
+</section>
+{% endif %}

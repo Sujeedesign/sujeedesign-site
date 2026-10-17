@@ -8,10 +8,15 @@ from pathlib import Path
 from typing import Iterator
 
 from fastapi import Depends, FastAPI, Request
+from fastapi.staticfiles import StaticFiles
 
 from . import db as db_module
+from . import public as public_module
+from . import render as render_module
 from . import settings as settings_module
 from .settings import VERSION
+
+THEME_ASSETS = Path(__file__).resolve().parents[1] / "theme" / "assets"
 
 
 def create_app(db_path: str | Path | None = None) -> FastAPI:
@@ -45,11 +50,18 @@ def create_app(db_path: str | Path | None = None) -> FastAPI:
             conn.close()
 
     app.state.get_db = get_db
+    app.state.render_env = render_module.build_env()
+    app.mount("/assets", StaticFiles(directory=str(THEME_ASSETS)), name="assets")
+    media_root = resolved.parent / "medias"
+    media_root.mkdir(parents=True, exist_ok=True)
+    app.mount("/medias", StaticFiles(directory=str(media_root)), name="medias")
 
     @app.get("/api/health")
     def health(conn: sqlite3.Connection = Depends(get_db)) -> dict:
         revision = db_module.content_revision(conn)
         return {"ok": True, "version": VERSION, "revision": revision}
+
+    app.include_router(public_module.router)
 
     return app
 

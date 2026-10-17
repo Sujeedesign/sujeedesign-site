@@ -1,0 +1,16 @@
+{% set d = s.data %}
+<section class="related reveal">
+  <div class="container">
+    {% if d.get('label') %}<p class="related-label">{{ d.get('label') }}</p>{% endif %}
+    <div class="related-grid">
+      {% for item in items|default([]) %}
+      <a class="rel-card" href="{{ item.href }}">
+        <span class="rel-idx">{{ '%02d' % loop.index }}</span>
+        <span class="rel-name">{{ item.title }}</span>
+        <span class="rel-desc">{{ item.excerpt }}</span>
+        <span class="rel-arrow" aria-hidden="true">→</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,75 @@
+{% from "partials/macros.html" import ctas %}
+{% set d = s.data %}
+{% set variant = s.variant or 'simple' %}
+
+{% if variant == 'accueil' %}
+<header class="hero" id="hero">
+  <div class="hero-bg" id="heroBg"></div>
+  {% if d.get('shader', true) %}<canvas class="hero-shader" id="heroShader" aria-hidden="true"></canvas>{% endif %}
+  {% if d.get('photo') %}
+  <div class="hero-figure" id="heroFigure">
+    <div class="hero-float" id="heroFloat">
+      <img class="hero-photo" id="heroPhoto" src="{{ d.get('photo') }}" alt="{{ d.get('photo_alt','') }}" draggable="false" width="720" height="900">
+    </div>
+    <div class="hero-photo-shadow"></div>
+  </div>
+  {% endif %}
+  <div class="hero-grain"></div>
+  <div class="hero-inner" id="heroInner">
+    {% set rotator = d.get('rotator', []) %}
+    <h1 class="hero-title" id="heroTitle" aria-label="{{ (rotator|join(' '))|replace('<br>', ' ') }}">
+      <span class="hero-rotator" id="heroRotator" aria-hidden="true">
+        {% for word in rotator %}<span class="ht-word{% if loop.first %} is-active{% endif %}">{{ word }}</span>{% endfor %}
+      </span>
+    </h1>
+    {{ ctas(d.get('ctas', []), 'hero-ctas hu') }}
+  </div>
+  <div class="scroll-badge" id="scrollBadge" aria-hidden="true">
+    <svg viewBox="0 0 104 104">
+      <defs>
+        <path id="circlePath" d="M 52,52 m -38,0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0"/>
+      </defs>
+      <text><textPath href="#circlePath">SCROLL DOWN · SCROLL DOWN · SCROLL DOWN · SCROLL DOWN</textPath></text>
+      <circle class="dot" cx="52" cy="52" r="4"/>
+    </svg>
+  </div>
+</header>
+
+{% elif variant == 'page' %}
+<section class="p-hero">
+  <div class="container">
+    {% if d.get('kicker') %}<p class="p-kicker">{{ d.get('kicker') }}</p>{% endif %}
+    <h1 class="p-title">{{ d.get('title','')|rich }}</h1>
+    {% set meta = d.get('meta', []) %}
+    {% if meta %}<div class="p-meta">{% for item in meta %}<span>{{ item }}</span>{% endfor %}</div>{% endif %}
+    {% if d.get('intro') %}<p class="p-intro">{{ d.get('intro') }}</p>{% endif %}
+    {{ ctas(d.get('ctas', [])) }}
+  </div>
+</section>
+
+{% elif variant == 'projet' %}
+<section class="project-cover" aria-labelledby="project-title">
+  {% if d.get('cover') %}
+  <img class="project-cover__media" src="{{ d.get('cover') }}" alt="{{ d.get('cover_alt','') }}" aria-hidden="true" width="1920" height="1080">
+  {% endif %}
+  <div class="project-cover__shade" aria-hidden="true"></div>
+  <div class="container project-cover__inner">
+    <a class="project-back" href="{{ d.get('back_href', '/realisations') }}"><span aria-hidden="true">←</span> {{ d.get('back_label', 'Toutes les réalisations') }}</a>
+    <div class="project-cover__content">
+      {% if d.get('kicker') %}<p class="p-kicker">{{ d.get('kicker') }}</p>{% endif %}
+      <h1 class="p-title" id="project-title">{{ d.get('title','')|rich }}</h1>
+      {% if d.get('intro') %}<p class="p-intro">{{ d.get('intro') }}</p>{% endif %}
+    </div>
+  </div>
+</section>
+
+{% else %}
+<section class="page-hero">
+  <div class="container">
+    {% if d.get('kicker') %}<p class="page-label reveal">{{ d.get('kicker') }}</p>{% endif %}
+    <h1 class="page-title reveal" style="--d:.08s">{{ d.get('title','')|rich }}</h1>
+    {% if d.get('intro') %}<p class="page-intro reveal" style="--d:.16s">{{ d.get('intro') }}</p>{% endif %}
+    {{ ctas(d.get('ctas', []), 'hero-ctas reveal') }}
+  </div>
+</section>
+{% endif %}

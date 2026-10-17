@@ -1,0 +1,25 @@
+{% set d = s.data %}
+{% set blocks = d.get('blocks', []) %}
+{% if blocks %}
+<section class="page-body project-content" id="project-story" aria-label="Détails du projet">
+  <div class="container">
+    {% for block in blocks %}
+      {% if block.get('title') %}<h2>{{ block.get('title') }}</h2>{% endif %}
+      {% if block.get('kind') == 'texte' %}
+        {{ block.get('body','')|rich }}
+      {% elif block.get('kind') == 'liste' %}
+        <ul class="list-check">
+          {% for item in block.get('items', []) %}<li>{{ item }}</li>{% endfor %}
+        </ul>
+      {% elif block.get('kind') == 'meta' %}
+        <div class="meta-grid">
+          {% for pair in block.get('meta', []) %}
+            {% set parts = pair.split('|') %}
+            <div class="meta-item"><div class="k">{{ parts[0]|trim }}</div><div class="v">{{ parts[1]|trim if parts|length > 1 else '' }}</div></div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</section>
+{% endif %}

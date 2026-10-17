@@ -1,0 +1,18 @@
+{% set d = s.data %}
+{% set images = d.get('images', []) %}
+{% set columns = d.get('columns')|int if d.get('columns') else 3 %}
+{% if images %}
+<section class="gallery reveal">
+  <div class="container">
+    {% if d.get('label') %}<p class="gallery-label">{{ d.get('label') }}</p>{% endif %}
+    <div class="gallery-grid" style="--cols:{{ columns }}">
+      {% for image in images %}
+      <figure class="gallery-item">
+        <img src="{{ image.get('src','') }}" alt="{{ image.get('alt','') }}" loading="lazy" decoding="async">
+        {% if image.get('caption') %}<figcaption>{{ image.get('caption') }}</figcaption>{% endif %}
+      </figure>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}

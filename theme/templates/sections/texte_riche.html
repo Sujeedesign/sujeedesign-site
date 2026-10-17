@@ -1,0 +1,10 @@
+{% set d = s.data %}
+<section class="page-body section reveal">
+  <div class="container">
+    {% if d.get('label') %}<p class="page-label reveal">{{ d.get('label') }}</p>{% endif %}
+    {% if d.get('title') %}<h2 class="bloc-title">{{ d.get('title')|rich }}</h2>{% endif %}
+    <div class="{% if s.variant == '2' %}grid-2{% else %}prose{% endif %}">
+      {{ d.get('body','')|rich }}
+    </div>
+  </div>
+</section>

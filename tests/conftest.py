@@ -18,6 +18,15 @@ from app.db import connect, init_db  # noqa: E402
 from app.main import create_app  # noqa: E402
 
 
+@pytest.fixture(autouse=True)
+def _clear_render_cache() -> Iterator[None]:
+    from app import render as render_module
+
+    render_module.invalidate()
+    yield
+    render_module.invalidate()
+
+
 @pytest.fixture()
 def db_file(tmp_path: Path) -> Path:
     return tmp_path / "site.db"

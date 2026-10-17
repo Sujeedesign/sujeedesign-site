@@ -1,0 +1,38 @@
+{% macro ctas(items, wrapper_class) %}
+{% if items %}
+<div class="{{ wrapper_class|default('hero-ctas') }}">
+  {% for cta in items %}
+  <a class="{{ cta.style|default('pill') }}" href="{{ cta.href|default('#') }}">{% if cta.style == 'text-link' %}{{ cta.label }}{% else %}{{ cta.label }} <span aria-hidden="true">{{ cta.icon|default('→') }}</span>{% endif %}</a>
+  {% endfor %}
+</div>
+{% endif %}
+{% endmacro %}
+
+{% macro heading_lines(lines, css_class) %}
+{% if lines %}
+<h2 class="{{ css_class }}">
+  {% for line in lines %}<span class="reveal-line"><span>{{ line|rich }}</span></span>{% endfor %}
+</h2>
+{% endif %}
+{% endmacro %}
+
+{% macro work_card(item, index) %}
+<a class="work-card reveal" href="{{ item.href }}" style="--d:{{ index * 0.08 }}s">
+  <div class="work-media">
+    <div class="work-img">
+      {% if item.cover %}
+      <img src="{{ item.cover }}" alt="{{ item.cover_alt|default('') }}" loading="lazy" width="1200" height="900">
+      {% else %}
+      <div class="thumb t{{ (index % 4) + 1 }}"></div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="work-meta">
+    <span class="work-title">{{ item.title }}</span>
+    <div class="work-meta-line">
+      <span class="work-tag">{{ item.tags|default('') }}</span>
+      <span class="work-year">{{ item.year|default('') }}</span>
+    </div>
+  </div>
+</a>
+{% endmacro %}

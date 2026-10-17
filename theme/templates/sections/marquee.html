@@ -1,0 +1,11 @@
+{% set d = s.data %}
+{% set items = d.get('items', []) %}
+{% if items %}
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-inner">
+    {% for _ in range(2) %}
+    <span class="mq">{% for item in items %}{{ item }}<span class="mq-dot">·</span>{% endfor %}</span>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}

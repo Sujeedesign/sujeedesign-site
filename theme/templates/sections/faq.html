@@ -1,0 +1,18 @@
+{% set d = s.data %}
+{% set items = d.get('items', []) %}
+{% if items %}
+<section class="faq reveal">
+  <div class="container">
+    {% if d.get('label') %}<p class="section-label reveal">{{ d.get('label') }}</p>{% endif %}
+    {% if d.get('title') %}<h2 class="bloc-title">{{ d.get('title')|rich }}</h2>{% endif %}
+    <div class="faq-list">
+      {% for item in items %}
+      <details class="faq-item">
+        <summary class="faq-question">{{ item.get('q','') }}</summary>
+        <div class="faq-answer">{{ item.get('a','')|rich }}</div>
+      </details>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}

@@ -1,0 +1,14 @@
+{% set d = s.data %}
+{% set logos = d.get('logos', []) %}
+{% if logos %}
+<section class="logos reveal">
+  <div class="container">
+    {% if d.get('label') %}<p class="section-label reveal">{{ d.get('label') }}</p>{% endif %}
+    <ul class="logos-grid">
+      {% for logo in logos %}
+      <li class="logo-item"><img src="{{ logo.get('src','') }}" alt="{{ logo.get('alt','') }}" loading="lazy" decoding="async"></li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+{% endif %}

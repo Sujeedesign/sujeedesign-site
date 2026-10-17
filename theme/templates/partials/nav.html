@@ -1,0 +1,18 @@
+{% set settings = settings|default({}) %}
+{% set menu = menu|default([]) %}
+{% set current_path = current_path|default('/') %}
+<nav class="nav" id="nav" aria-label="Navigation principale">
+  <a href="/" class="nav-logo" aria-label="{{ settings.site_name|default('Sujee Design') }} — accueil"><img src="/assets/logo-sujeepan-sabesan.svg" alt="{{ settings.site_name|default('Sujee Design') }}"></a>
+  <div class="nav-menu">
+    {% for item in menu %}<a href="{{ item.href }}"{% if item.href == current_path %} aria-current="page"{% endif %}>{{ item.label }}</a>{% endfor %}
+  </div>
+  <button class="nav-toggle" id="navToggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="menuOverlay">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="menu-overlay" id="menuOverlay" aria-hidden="true">
+  <div class="menu-overlay-inner">
+    {% for item in menu %}<a href="{{ item.href }}"><small>{{ '%02d' % loop.index }}</small>{{ item.label }}</a>{% endfor %}
+  </div>
+</div>

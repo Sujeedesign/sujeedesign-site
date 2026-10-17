@@ -1,0 +1,19 @@
+{% set d = s.data %}
+{% set steps = d.get('steps', []) %}
+{% if steps %}
+<section class="process reveal">
+  <div class="container">
+    {% if d.get('label') %}<p class="section-label reveal">{{ d.get('label') }}</p>{% endif %}
+    {% if d.get('title') %}<h2 class="bloc-title">{{ d.get('title')|rich }}</h2>{% endif %}
+    <ol class="process-grid">
+      {% for step in steps %}
+      <li class="process-step">
+        <span class="step-idx">{{ '%02d' % loop.index }}</span>
+        <h3 class="step-title">{{ step.get('title','') }}</h3>
+        <p class="step-text">{{ step.get('text','') }}</p>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+{% endif %}

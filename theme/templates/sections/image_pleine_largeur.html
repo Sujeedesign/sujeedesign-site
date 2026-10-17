@@ -1,0 +1,9 @@
+{% set d = s.data %}
+{% if d.get('src') %}
+<section class="page-body reveal">
+  <figure class="full-bleed">
+    <img src="{{ d.get('src') }}" alt="{{ d.get('alt','') }}" loading="lazy" decoding="async">
+    {% if d.get('caption') %}<figcaption>{{ d.get('caption') }}</figcaption>{% endif %}
+  </figure>
+</section>
+{% endif %}
