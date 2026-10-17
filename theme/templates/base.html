@@ -30,7 +30,7 @@
 {% block head %}{% endblock %}
 {% include "partials/jsonld.html" ignore missing %}
 </head>
-<body class="{% block body_class %}{% endblock %}">
+<body class="{% block body_class %}{% endblock %}{% if edit %} is-editing{% endif %}"{% if edit %} data-edit-mode="1"{% endif %}>
 {% if preview %}<div class="preview-banner">Aperçu du brouillon — <a href="/admin/pages/{{ page.id }}">retour à l'édition</a></div>{% endif %}
 <a class="skip-link" href="#main-content">Passer au contenu</a>
 {% include "partials/nav.html" %}

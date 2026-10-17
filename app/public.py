@@ -38,6 +38,21 @@ def absolute(url: str, base: str) -> str:
     return base.rstrip("/") + "/" + url.lstrip("/")
 
 
+def admin_session(request: Request) -> bool:
+    """Vrai si la requête porte une session admin valide (cookie signé)."""
+    token = request.cookies.get(security.SESSION_COOKIE, "")
+    if not token:
+        return False
+    try:
+        return bool(security.verify_session(token))
+    except RuntimeError:
+        return False
+
+
+def wants_edit_mode(request: Request) -> bool:
+    return str(request.query_params.get("edit") or "").strip().lower() in {"1", "true", "oui", "yes"}
+
+
 def build_ctx(
     request: Request,
     conn: sqlite3.Connection,
@@ -105,6 +120,11 @@ def serve_page(
 ) -> HTMLResponse:
     ctx = build_ctx(request, conn, page, extra)
     ctx["body_class"] = "project-page" if page["kind"] == "realisation" else ""
+    # Le mode édition n'existe que pour une session admin valide : côté serveur,
+    # jamais côté client. Un visiteur qui ajoute ?edit=1 reçoit la page publiée.
+    signed_in = admin_session(request)
+    ctx["editor_enabled"] = signed_in
+    ctx["edit"] = bool(signed_in and wants_edit_mode(request))
     sections = repo.sections_for(conn, int(page["id"]))
     ctx["jsonld"] = seo.jsonld_blocks(
         page=page,

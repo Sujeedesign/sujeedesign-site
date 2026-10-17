@@ -207,11 +207,21 @@ def json_load(value: Any, default: Any = None) -> Any:
         return {} if default is None else default
 
 
-def section_context(section: sqlite3.Row | dict) -> dict:
-    """Normalise une section (row SQLite ou dict) pour les gabarits."""
+def section_context(section: sqlite3.Row | dict, *, edit: bool = False) -> dict:
+    """Normalise une section (row SQLite ou dict) pour les gabarits.
+
+    En mode édition, le brouillon remplace les données publiées ; les données
+    publiées restent intactes et ne sont jamais rendues à un visiteur.
+    """
     data = json_load(_get(section, "data", "{}"), {})
     if not isinstance(data, dict):
         data = {}
+    if edit:
+        draft = _get(section, "draft", None)
+        if draft not in (None, ""):
+            parsed = json_load(draft, {})
+            if isinstance(parsed, dict) and parsed:
+                data = parsed
     variant = data.get("_variant") or _get(section, "variant", "") or ""
     return {
         "id": _get(section, "id", 0),
@@ -221,7 +231,21 @@ def section_context(section: sqlite3.Row | dict) -> dict:
         "visible": bool(_get(section, "visible", 1)),
         "data": data,
         "position": _get(section, "position", 0),
+        "version": _get(section, "draft_version", 0),
+        "revised": _get(section, "draft", None) not in (None, ""),
     }
+
+
+def envelope_html(section: dict) -> str:
+    """Ouverture de l'enveloppe d'un bloc (fermée par `section_html`)."""
+    label = html_module.escape(str(section.get("label") or ""), quote=True)
+    type_ = html_module.escape(str(section.get("type") or ""), quote=True)
+    return (
+        f'<div class="sjd-block" data-block-id="{int(section.get("id") or 0)}"'
+        f' data-block-type="{type_}" data-block-label="{label}"'
+        f' data-block-visible="{1 if section.get("visible") else 0}"'
+        f' data-block-revised="{1 if section.get("revised") else 0}">'
+    )
 
 
 def _get(obj: Any, key: str, default: Any = "") -> Any:
@@ -234,17 +258,21 @@ def _get(obj: Any, key: str, default: Any = "") -> Any:
     return default if value is None else value
 
 
-def section_html(env: Environment, section: sqlite3.Row | dict, ctx: dict | None = None) -> str:
-    """Rend une section dans son gabarit dédié."""
-    normalized = section_context(section)
+def section_html(env: Environment, section: sqlite3.Row | dict, ctx: dict | None = None, *, envelopes: bool = True) -> str:
+    """Rend une section dans son gabarit dédié, enveloppée pour l'éditeur."""
+    context = ctx or {}
+    normalized = section_context(section, edit=bool(context.get("edit")))
     template_name = sections_module.template_for(normalized["type"])
     if not template_name:
-        return "<!-- section inconnue -->" if ctx and ctx.get("debug") else ""
+        return "<!-- section inconnue -->" if context.get("debug") else ""
     try:
         template = env.get_template(template_name)
     except Exception:  # gabarit absent : on n'empêche pas la page de s'afficher
         return ""
-    return template.render(s=normalized, **{k: v for k, v in (ctx or {}).items() if k != "s"})
+    rendered = template.render(s=normalized, **{k: v for k, v in context.items() if k != "s"})
+    if not envelopes:
+        return rendered
+    return envelope_html(normalized) + rendered + "</div>"
 
 
 def _heading_sequence(html_text: str) -> list[int]:
@@ -259,19 +287,25 @@ def render_page(
     ctx: dict,
     template: str = "pages/page.html",
     use_cache: bool = True,
+    envelopes: bool = True,
 ) -> str:
-    """Rend une page complète, avec cache invalidé par la révision de contenu."""
+    """Rend une page complète, avec cache invalidé par la révision de contenu.
+
+    Le mode édition ne passe jamais par le cache : le brouillon doit être frais.
+    """
+    edit = bool(ctx.get("edit"))
     slug = _get(page, "slug", "?")
     revision = str(ctx.get("revision", "0"))
     normalized = [
-        section_context(section)
+        section_context(section, edit=edit)
         for section in sections
         if bool(_get(section, "visible", 1))
     ]
     fingerprint = hashlib.sha1(
         json.dumps(normalized, sort_keys=True, ensure_ascii=False, default=str).encode("utf-8")
     ).hexdigest()[:16]
-    cache_key = f"{template}:{slug}:{revision}:{fingerprint}"
+    cache_key = f"{template}:{slug}:{revision}:{fingerprint}:{int(envelopes)}"
+    use_cache = use_cache and not edit
     if use_cache:
         with _cache_lock:
             cached = _cache.get(cache_key)
@@ -280,7 +314,7 @@ def render_page(
 
     section_ctx = dict(ctx)
     section_ctx["page"] = page
-    rendered_sections = [section_html(env, section, section_ctx) for section in normalized]
+    rendered_sections = [section_html(env, section, section_ctx, envelopes=envelopes) for section in normalized]
     body = "\n".join(part for part in rendered_sections if part)
     html_out = env.get_template(template).render(
         page=page,
