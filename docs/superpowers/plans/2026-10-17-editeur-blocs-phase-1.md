@@ -10,6 +10,36 @@
 
 **Spec:** `docs/superpowers/specs/2026-10-17-editeur-blocs-design.md`
 
+## État d'exécution (17 octobre, fin de journée)
+
+**Tasks 1 à 13 : faites, vérifiées, committées.** `80146af` (registre typé + `app/sections.py` en adaptateur), `f6a4c76` (validation), `045b01a` (colonnes de brouillon), `0d10df5` (store), `1de6617` (enveloppes et brouillon en mode édition), `c606059` (API : session, CSRF, brouillon, structure, publication, médias), `f2b7360` (accroche + canevas), `4aa58ba` (marquage des 19 gabarits et contrat par variante).
+
+**Task 14 : faite** (`9e183ee`). Sous 900 px, le rail et le panneau sont deux vues plein écran ouvertes une à la fois par une barre d'outils (Blocs, Ce bloc, Page) ; cibles 44 px ; la hauteur réelle de la barre est publiée dans `--sjd-bar-h` pour que les vues ne la recouvrent jamais.
+
+**Task 15 : vérifiée sur une instance locale** (`tools/editor_recette.py`, base de recette, port 8124) :
+
+- `pytest -q -m "not e2e"` : 334 passés. `pytest -q tests/test_e2e_browser.py -m e2e` contre l'instance locale : 4 passés.
+- Parcours navigateur réel (Chrome DevTools Protocol) : édition en place d'un titre, brouillon côté serveur, visiteur qui ne voit jamais le brouillon (avec ou sans `?edit=1`), publication, visiteur qui voit la nouvelle valeur, restauration d'une révision en brouillon, republication.
+- Rail : déplacement, duplication (copie juste après l'original, masquée et en brouillon), masquage (bloc absent en public, grisé dans le canevas), suppression, ajout d'un bloc par la palette.
+- Refus vérifiés : `409` version dépassée, `400` champ inconnu et texte trop long, `403` sans jeton CSRF, `404` bloc d'une autre page ou page inconnue, `401` sans session ; la valeur précédente reste intacte dans tous les cas.
+- Débordement horizontal : aucun à 375, 768 et 1280 px sur six routes, en public comme en édition.
+- Design verrouillé : hauteurs de bandeau identiques avant/après au pixel sur six pages et trois fenêtres (595 px en 1440x900, 629 en 1920x1080), un seul `h1` dans `<main>`.
+
+**Écarts assumés par rapport au plan, et pourquoi**
+
+1. Contrat du hero vérifié **par variante** : la variante `accueil` n'affiche par design ni sur-titre, ni introduction, ni lien de retour, donc l'union des variantes est la seule exigence tenable sans inventer des nœuds sur la page d'accueil publiée.
+2. `formulaire_contact` : la colonne latérale s'affiche dès qu'elle a un titre ou des colonnes (`{% if columns or aside_title %}`), sinon `test_contact_aside_is_optional` tombait.
+3. Les nœuds rendus vides des champs éditables sont masqués par une règle `:empty` dans `theme/assets/site-extras.css` au lieu d'être supprimés : ils restent ciblables pour l'édition en place, sans reprendre les 28 à 48 px de marge qu'ils consommaient.
+4. Les blocs masqués sont rendus **en mode édition** (opacité 0,55), pas en public : un bloc ajouté naît masqué, il doit rester visible dans le canevas sinon l'ajout paraît sans effet.
+5. L'API est portée par `sujee_editor/routes.py` avec des chemins qualifiés par la page (`/api/editor/pages/<page>/sections/<bloc>`) : un bloc d'une autre page répond `404` sans effet de bord.
+6. « Ajouter un bloc » pose le bloc en fin de page ; on le déplace ensuite avec les flèches du rail.
+
+**Points ouverts, non bloquants**
+
+- Après une restauration de révision, tout le snapshot passe en brouillon : les blocs inchangés sont marqués « en brouillon ». Cosmétique (le statut annonce 10 modifications).
+- `/a-propos` déborde de 5 px en 320 px (frise « Parcours »), **déjà avant ce chantier** ; les largeurs de référence du thème (375 px et au-dessus) sont propres.
+- 1280x720 mesure 565 px aujourd'hui contre 569 px dans la note du 17 octobre : identique avant et après ce chantier, donc écart de contexte de mesure et non régression.
+
 ## Global Constraints
 
 - Aucune couleur, taille de police, coin ou espacement en dur : uniquement les jetons du thème (`--fs-*`, `--radius-*`, couleurs existantes). Un test refuse toute `font-size` hors échelle (`tests/test_harmonisation.py`).

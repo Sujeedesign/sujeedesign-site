@@ -18,6 +18,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app ./app
 COPY theme ./theme
 COPY seed ./seed
+# Le paquet de l'éditeur est importé par l'application : sans lui, le conteneur
+# meurt à l'import (`ModuleNotFoundError: No module named 'sujee_editor'`).
+COPY sujee_editor ./sujee_editor
 
 RUN mkdir -p /data && useradd --system --uid 10001 --home /app site \
  && chown -R site:site /app /data
