@@ -3,28 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Éditeur visuel, pilote</title>
+    <title>Éditeur visuel pilote</title>
   </head>
   <body>
     <div class="visual-app">
       <header class="visual-topbar">
-        <strong>Éditeur visuel</strong>
-        <span>Prototype GrapesJS Core</span>
+        <strong>Éditeur visuel pilote</strong>
+        <div class="visual-actions"><span id="visual-status" role="status">Prêt</span><button id="visual-save">Enregistrer</button><button id="visual-rebase" hidden>Recharger le contenu</button><button id="visual-publish" class="primary">Publier</button></div>
       </header>
       <main class="visual-layout">
-        <aside id="visual-blocks" aria-label="Sections disponibles">
-          <h1>Sections</h1>
-        </aside>
+        <aside id="visual-blocks" aria-label="Sections disponibles"><h1>Sections</h1></aside>
         <section id="visual-canvas" aria-label="Aperçu de la page"></section>
-        <aside id="visual-traits" aria-label="Options de section">
-          <h1>Options</h1>
-        </aside>
-        <div id="visual-styles" hidden></div>
+        <aside id="visual-traits" aria-label="Options de section"><h1>Options</h1></aside>
       </main>
     </div>
-    <script>
-      window.sjdVisualEditorConfig = { themeStyles: ['/src/demo-theme.css'] };
-    </script>
+    <script id="visual-config" type="application/json">{"api":"/api/editor","page":{"id":1},"csrf":"test-token","draft_version":0,"theme_styles":["/src/demo-theme.css"],"project":{"schema_version":1,"theme_id":"sujee-site","theme_version":1,"project_data":{"pages":[{"id":"pilot","frames":[{"id":"frame","component":{"type":"wrapper","components":[]}}]}],"styles":[],"assets":[]}}}</script>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

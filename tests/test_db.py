@@ -108,7 +108,25 @@ def test_migrate_is_idempotent(tmp_path: Path) -> None:
         assert migrate(conn) == []
         init_db(conn)
         assert migrate(conn) == []
-        assert get_meta(conn, "schema_version") == "2"
+        assert get_meta(conn, "schema_version") == "3"
+    finally:
+        conn.close()
+
+
+def test_init_db_adds_visual_projects_table_to_an_existing_db(tmp_path: Path) -> None:
+    db_file = tmp_path / "prod.db"
+    conn = connect(db_file)
+    try:
+        conn.executescript(LEGACY_SECTIONS_TABLE)
+        init_db(conn)
+        tables = {row["name"] for row in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
+        assert "visual_projects" in tables
+        row = conn.execute("SELECT title FROM pages WHERE id = 1").fetchone()
+        assert row["title"] == "À propos"
+        columns = {row["name"] for row in conn.execute("PRAGMA table_info(visual_projects)")}
+        assert {"page_id", "draft_project_json", "published_project_json", "draft_version", "theme_id", "theme_version"} <= columns
+        assert get_meta(conn, "schema_version") == "3"
+        assert migrate(conn) == []
     finally:
         conn.close()
 

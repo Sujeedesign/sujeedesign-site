@@ -1,6 +1,12 @@
 # Site sujeedesign.com : application FastAPI (pages publiques + back office).
-FROM python:3.13-slim
+FROM node:22.12.0-alpine AS editor-assets
+WORKDIR /build/sujee_editor/editor/frontend
+COPY sujee_editor/editor/frontend/package.json sujee_editor/editor/frontend/package-lock.json ./
+RUN npm ci --no-audit --no-fund
+COPY sujee_editor/editor/frontend/ ./
+RUN npm run build
 
+FROM python:3.13-slim AS runtime
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     SITE_DATA=/data \
@@ -21,6 +27,7 @@ COPY seed ./seed
 # Le paquet de l'éditeur est importé par l'application : sans lui, le conteneur
 # meurt à l'import (`ModuleNotFoundError: No module named 'sujee_editor'`).
 COPY sujee_editor ./sujee_editor
+COPY --from=editor-assets /build/sujee_editor/editor/static/visual/ ./sujee_editor/editor/static/visual/
 
 RUN mkdir -p /data && useradd --system --uid 10001 --home /app site \
  && chown -R site:site /app /data

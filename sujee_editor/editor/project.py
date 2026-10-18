@@ -32,9 +32,9 @@ class ProjectError(ValueError):
 
 _VOID_TAGS = frozenset({"br"})
 _FIELD_TAGS = {
-    "chapter": {"kicker": {"p"}, "title": {"h2"}, "body": {"div"}, "list": {"ul"}},
+    "chapter": {"kicker": {"p", "span"}, "title": {"h2"}, "body": {"div"}, "list": {"ul"}},
     "image-pleine-largeur": {"src": {"img"}, "caption": {"figcaption"}},
-    "citation": {"quote": {"blockquote"}, "author": {"span"}, "role": {"span"}},
+    "citation": {"quote": {"p", "blockquote"}, "author": {"cite", "span"}, "role": {"span"}},
 }
 
 
@@ -161,47 +161,43 @@ def _component(section_type: str, section: Mapping[str, Any], data: Mapping[str,
             raise ProjectError("identifiant de section invalide")
         attributes["data-sjd-section-id"] = str(identifier)
 
-    children: list[dict[str, Any]] = []
     if section_type == "chapter":
-        children.extend(
-            [
-                _text_component(data.get("kicker"), "p", "kicker"),
-                _text_component(data.get("title"), "h2", "title"),
-                {
-                    "tagName": "div",
-                    "attributes": {"data-sjd-field": "body"},
-                    "components": _markup_components(str(data.get("body") or "")),
-                },
-                {
-                    "tagName": "ul",
-                    "attributes": {"data-sjd-field": "list"},
-                    "components": [{"tagName": "li", "content": line} for line in _lines(data.get("list"))],
-                },
-            ]
-        )
+        attributes["class"] = "s-chap reveal" + (" dark" if bool(data.get("dark")) else "")
         attributes["data-sjd-dark"] = "1" if bool(data.get("dark")) else "0"
+        children = [{
+            "tagName": "div", "attributes": {"class": "container"}, "components": [{
+                "tagName": "div", "attributes": {"class": "chap"}, "components": [
+                    {"tagName": "div", "attributes": {"class": "chap-head"}, "components": [
+                        {**_text_component(data.get("kicker"), "span", "kicker"), "attributes": {"class": "type", "data-sjd-field": "kicker"}},
+                        {**_text_component(data.get("title"), "h2", "title"), "attributes": {"class": "chap-title", "data-sjd-field": "title"}},
+                    ]},
+                    {"tagName": "div", "attributes": {"class": "chap-body"}, "components": [
+                        {"tagName": "div", "attributes": {"class": "chap-rich", "data-sjd-field": "body"}, "components": _markup_components(str(data.get("body") or ""))},
+                        {"tagName": "ul", "attributes": {"class": "chap-list", "data-sjd-field": "list"}, "components": [{"tagName": "li", "content": line} for line in _lines(data.get("list"))]},
+                    ]},
+                ],
+            }],
+        }]
     elif section_type == "image-pleine-largeur":
+        attributes["class"] = "page-body reveal"
         src = str(data.get("src") or "")
         if not _safe_media_path(src):
             raise ProjectError("image hors des médias locaux autorisés")
-        children.extend(
-            [
-                {
-                    "type": "image",
-                    "tagName": "img",
-                    "attributes": {"data-sjd-field": "src", "src": src, "alt": str(data.get("alt") or "")},
-                },
-                _text_component(data.get("caption"), "figcaption", "caption"),
-            ]
-        )
+        children = [{"tagName": "figure", "attributes": {"class": "full-bleed"}, "components": [
+            {"type": "image", "tagName": "img", "attributes": {"data-sjd-field": "src", "src": src, "alt": str(data.get("alt") or "")}},
+            _text_component(data.get("caption"), "figcaption", "caption"),
+        ]}]
     else:
-        children.extend(
-            [
-                _text_component(data.get("quote"), "blockquote", "quote"),
-                _text_component(data.get("author"), "span", "author"),
-                _text_component(data.get("role"), "span", "role"),
-            ]
-        )
+        attributes["class"] = "citation reveal"
+        children = [{"tagName": "div", "attributes": {"class": "container"}, "components": [{
+            "tagName": "blockquote", "attributes": {"class": "quote"}, "components": [
+                _text_component(data.get("quote"), "p", "quote") | {"attributes": {"class": "quote-text", "data-sjd-field": "quote"}},
+                {"tagName": "footer", "attributes": {"class": "quote-source"}, "components": [
+                    _text_component(data.get("author"), "cite", "author"),
+                    _text_component(data.get("role"), "span", "role") | {"attributes": {"class": "quote-role", "data-sjd-field": "role"}},
+                ]},
+            ],
+        }]}]
     return {
         "type": SECTION_COMPONENTS[section_type],
         "tagName": "section",

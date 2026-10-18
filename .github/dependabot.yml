@@ -1,0 +1,15 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /sujee_editor/editor/frontend
+    schedule:
+      interval: weekly
+      day: wednesday
+      time: "04:00"
+      timezone: Etc/UTC
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - grapesjs
+    commit-message:
+      prefix: chore(editor-deps)

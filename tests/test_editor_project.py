@@ -177,6 +177,30 @@ def test_sections_to_project_emits_versioned_theme_and_stable_section_types():
     assert [component["attributes"]["data-sjd-section-id"] for component in components] == ["7", "8", "9"]
 
 
+def test_project_uses_theme_dom_classes_for_the_canvas_preview():
+    project = sections_to_project(_source_sections())
+    components = project["project_data"]["pages"][0]["frames"][0]["component"]["components"]
+    chapter = components[0]
+
+    assert "s-chap" in chapter["attributes"]["class"].split()
+    container = chapter["components"][0]
+    assert container["attributes"]["class"] == "container"
+    fields = [node for node in _walk_test_nodes(chapter) if "data-sjd-field" in node.get("attributes", {})]
+    title = next(node for node in fields if node["attributes"]["data-sjd-field"] == "title")
+    assert title["attributes"]["class"] == "chap-title"
+    citation = components[2]
+    assert "citation" in citation["attributes"]["class"].split()
+    image = components[1]
+    assert "page-body" in image["attributes"]["class"].split()
+
+
+def _walk_test_nodes(node: dict):
+    yield node
+    for child in node.get("components", []):
+        if isinstance(child, dict):
+            yield from _walk_test_nodes(child)
+
+
 def test_project_to_sections_restores_fields_visibility_and_order():
     sections = project_to_sections(_three_section_project())
 

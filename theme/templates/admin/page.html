@@ -12,6 +12,7 @@
   </div>
   <div class="admin-head-actions">
     <a class="btn" href="/admin/apercu/{{ page.id }}" target="_blank" rel="noopener">Aperçu ↗</a>
+    <a class="btn" href="/admin/visual/{{ page.id }}">Tester l’éditeur visuel</a>
     {% if page.status == 'publie' %}
     <button class="btn" type="button" data-status="brouillon" data-page="{{ page.id }}">Repasser en brouillon</button>
     {% else %}

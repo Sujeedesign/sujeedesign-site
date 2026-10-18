@@ -5,6 +5,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import hmac
+import html
 import io
 import json
 import shutil
@@ -231,6 +232,81 @@ def page_editor(request: Request, page_id: int) -> Response:
             sections=repo.sections_for(conn, page_id),
             section_types=sections_module.SECTION_TYPES,
             revisions=repo.list_revisions(conn, "page", page_id, limit=10),
+        )
+    finally:
+        conn.close()
+
+
+@router.get("/admin/visual/{page_id}", response_class=HTMLResponse)
+def visual_page_editor(request: Request, page_id: int) -> Response:
+    if current_admin(request) is None:
+        return login_redirect()
+    conn = _conn(request)
+    try:
+        page = _page_or_404(conn, page_id)
+        editor = request.app.state.editor
+        state = editor.store.page_state(conn, page_id)
+        from sujee_editor.editor.project import ProjectError, sections_to_project
+        from sujee_editor.editor.theme import PILOT_SECTION_TYPES, THEME_ID, THEME_VERSION
+        from sujee_editor.tokens import make_csrf
+
+        omitted_labels = list(dict.fromkeys(
+            editor.store.block_for(section.type).label
+            for section in state.sections
+            if section.type not in PILOT_SECTION_TYPES
+        ))
+        warning_html = ""
+        if omitted_labels:
+            warning_html = (
+                "<p class='visual-preserved-note'>Mode pilote : seules les sections prises en charge sont affichées. "
+                "Les autres restent inchangées : "
+                + html.escape(", ".join(omitted_labels))
+                + ".</p>"
+            )
+        row = conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (page_id,)).fetchone()
+        if row is None:
+            try:
+                editable_sections = [
+                    section.serialize() for section in state.sections if section.type in PILOT_SECTION_TYPES
+                ]
+                project = sections_to_project(editable_sections)
+            except ProjectError as exc:
+                return HTMLResponse(f"Éditeur visuel indisponible : {html.escape(str(exc))}", status_code=409)
+            encoded = json.dumps(project, ensure_ascii=False, separators=(",", ":"))
+            conn.execute(
+                "INSERT OR IGNORE INTO visual_projects (page_id, draft_project_json, published_project_json, "
+                "draft_version, theme_id, theme_version) VALUES (?, ?, ?, 0, ?, ?)",
+                (page_id, encoded, encoded, THEME_ID, THEME_VERSION),
+            )
+            conn.commit()
+            row = conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (page_id,)).fetchone()
+        config = {
+            "api": "/api/editor",
+            "page": {"id": int(page_id), "title": str(page["title"] or ""), "path": repo.page_path(page)},
+            "csrf": make_csrf(editor.session_secret),
+            "draft_version": int(row["draft_version"]),
+            "project": json.loads(row["draft_project_json"]),
+            "theme_styles": ["/assets/site.css", "/assets/site-extras.css"],
+        }
+        config_json = json.dumps(config, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
+        title_html = html.escape(str(page["title"] or "Page"))
+        return HTMLResponse(
+            "<!doctype html><html lang='fr'><head><meta charset='utf-8'>"
+            "<meta name='viewport' content='width=device-width,initial-scale=1'>"
+            "<title>Éditeur visuel pilote</title>"
+            "<link rel='stylesheet' href='/assets/editor/visual/visual-editor.css'>"
+            "</head><body><div class='visual-app'>"
+            "<header class='visual-topbar'><a class='visual-back' href='/admin/pages/" + str(page_id) + "'>← Retour</a>"
+            "<div class='visual-heading'><strong>" + title_html + "</strong><span>Éditeur visuel pilote</span></div>"
+            "<div class='visual-actions'><span id='visual-status' role='status' aria-live='polite'>Prêt</span>"
+            "<button id='visual-save' type='button'>Enregistrer</button>"
+            "<button id='visual-rebase' type='button' hidden>Recharger le contenu</button>"
+            "<button id='visual-publish' type='button' class='primary'>Publier</button></div></header>"
+            "<main class='visual-layout'><aside id='visual-blocks' aria-label='Sections disponibles'><h1>Sections</h1>" + warning_html + "</aside>"
+            "<section id='visual-canvas' aria-label='Aperçu de la page'></section>"
+            "<aside id='visual-traits' aria-label='Options de section'><h1>Options</h1></aside></main></div>"
+            "<script id=\"visual-config\" type=\"application/json\">" + config_json + "</script>"
+            "<script type='module' src='/assets/editor/visual/visual-editor.js'></script></body></html>"
         )
     finally:
         conn.close()

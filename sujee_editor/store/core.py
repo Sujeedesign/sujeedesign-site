@@ -15,6 +15,8 @@ from pathlib import Path
 from typing import Any, Iterable, Mapping
 
 from ..blocks import Block, ValidationError, default_data, validate_data, validate_field
+from ..editor.project import sections_to_project
+from ..editor.theme import PILOT_SECTION_TYPES
 
 READY_TABLES = ("pages", "sections", "medias", "revisions")
 
@@ -45,6 +47,10 @@ class VersionConflict(StoreError):
     def __init__(self, current: int) -> None:
         super().__init__(f"version de brouillon dépassée (courante : {current})")
         self.current = int(current)
+
+
+class SourceConflict(StoreError):
+    """La projection publiée de la page a changé depuis l'import visuel."""
 
 
 class ValidationFailed(StoreError):
@@ -448,6 +454,183 @@ class Store:
             (int(page_id),),
         ).fetchall()
         return [{key: row[key] for key in row.keys()} for row in rows]
+
+    def reset_visual_project(
+        self,
+        conn: sqlite3.Connection,
+        *,
+        page_id: int,
+        expected_version: int,
+    ) -> dict[str, Any]:
+        """Discarde le brouillon visuel obsolète et le réimporte depuis la page courante."""
+        try:
+            conn.execute("BEGIN IMMEDIATE")
+            current = conn.execute(
+                "SELECT draft_version FROM visual_projects WHERE page_id = ?", (int(page_id),)
+            ).fetchone()
+            if current is None:
+                raise StoreNotReady("projet visuel non initialisé")
+            current_version = int(current["draft_version"])
+            if current_version != int(expected_version):
+                raise VersionConflict(current_version)
+            state = self.page_state(conn, page_id)
+            project = sections_to_project(
+                [section.serialize() for section in state.sections if section.type in PILOT_SECTION_TYPES]
+            )
+            encoded = _dump_json(project)
+            updated = conn.execute(
+                "UPDATE visual_projects SET draft_project_json = ?, published_project_json = ?, "
+                "draft_version = draft_version + 1, theme_id = ?, theme_version = ?, updated_at = datetime('now') "
+                "WHERE page_id = ? AND draft_version = ?",
+                (encoded, encoded, project["theme_id"], int(project["theme_version"]), int(page_id), int(expected_version)),
+            )
+            if updated.rowcount == 0:
+                raise VersionConflict(current_version)
+            conn.commit()
+            return {"project": project, "draft_version": int(expected_version) + 1}
+        except Exception:
+            conn.rollback()
+            raise
+
+    def publish_visual_project(
+        self,
+        conn: sqlite3.Connection,
+        *,
+        page_id: int,
+        expected_version: int,
+        project_json: str,
+        sections: list[dict[str, Any]],
+        theme_id: str,
+        theme_version: int,
+        author: str = "sujee",
+    ) -> dict[str, Any]:
+        """Publie atomiquement un projet visuel et sa projection de sections Jinja."""
+        try:
+            conn.execute("BEGIN IMMEDIATE")
+            project_row = conn.execute(
+                "SELECT draft_version, published_project_json FROM visual_projects WHERE page_id = ?",
+                (int(page_id),),
+            ).fetchone()
+            if project_row is None:
+                raise StoreNotReady("projet visuel non initialisé")
+            current_version = int(project_row["draft_version"])
+            if current_version != int(expected_version):
+                raise VersionConflict(current_version)
+
+            state = self.page_state(conn, page_id)
+            source = sections_to_project(
+                [section.serialize() for section in state.sections if section.type in PILOT_SECTION_TYPES]
+            )
+            try:
+                published_source = json.loads(str(project_row["published_project_json"]))
+            except (TypeError, json.JSONDecodeError) as exc:
+                raise SourceConflict("le contenu de référence du projet visuel est invalide") from exc
+            if source != published_source:
+                raise SourceConflict("des sections ont changé dans l’éditeur classique depuis l’ouverture du projet visuel")
+
+            snapshot = {
+                "page": {key: value for key, value in state.page.items()},
+                "sections": [self._snapshot_row(section) for section in state.sections],
+            }
+            existing = {section.id: section for section in state.sections}
+            editable_existing = [section for section in state.sections if section.type in PILOT_SECTION_TYPES]
+            editable_ids = {section.id for section in editable_existing}
+            editable_slots = sorted(section.position for section in editable_existing)
+            last_slot = max(editable_slots, default=max((section.position for section in state.sections), default=-1))
+            added_count = max(0, len(sections) - len(editable_slots))
+            if added_count and editable_ids:
+                placeholders = ",".join("?" for _ in editable_ids)
+                conn.execute(
+                    f"UPDATE sections SET position = position + ? WHERE page_id = ? AND id NOT IN ({placeholders}) AND position > ?",
+                    (added_count, int(page_id), *editable_ids, last_slot),
+                )
+            target_positions = editable_slots + [last_slot + offset + 1 for offset in range(added_count)]
+            retained: set[int] = set()
+            published_ids: list[int] = []
+            for position, entry in enumerate(sections):
+                position = target_positions[position]
+                type_ = str(entry.get("type") or "")
+                block = self.block_for(type_)
+                data = entry.get("data")
+                errors = validate_data(block, data)
+                if errors:
+                    raise ValidationFailed(errors)
+                identifier = entry.get("id")
+                variant = str(entry.get("variant") or "")
+                if block.variants and variant not in block.variants:
+                    raise ValidationFailed([ValidationError("_variant", "bad_variant", variant)])
+                visible = 1 if bool(entry.get("visible", True)) else 0
+                if identifier is not None:
+                    identifier = int(identifier)
+                    current = existing.get(identifier)
+                    if current is None:
+                        raise UnknownSection(str(identifier))
+                    if current.type != type_:
+                        raise ValidationFailed([ValidationError("type", "type_change_refused", type_)])
+                    retained.add(identifier)
+                    published_ids.append(identifier)
+                    conn.execute(
+                        "UPDATE sections SET position = ?, variant = ?, label = ?, visible = ?, data = ?, "
+                        "draft = NULL, draft_version = draft_version + 1, updated_at = datetime('now') "
+                        "WHERE id = ? AND page_id = ?",
+                        (
+                            position,
+                            variant,
+                            block.label,
+                            visible,
+                            _dump_json(data),
+                            identifier,
+                            int(page_id),
+                        ),
+                    )
+                else:
+                    cursor = conn.execute(
+                        "INSERT INTO sections (page_id, position, type, variant, label, visible, data, draft, draft_version) "
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, NULL, 0)",
+                        (int(page_id), position, type_, variant, block.label, visible, _dump_json(data)),
+                    )
+                    new_identifier = int(cursor.lastrowid or 0)
+                    retained.add(new_identifier)
+                    published_ids.append(new_identifier)
+            for identifier in editable_ids - retained:
+                conn.execute("DELETE FROM sections WHERE id = ? AND page_id = ?", (identifier, int(page_id)))
+
+            cursor = conn.execute(
+                "INSERT INTO revisions (entity_type, entity_id, snapshot, note, author) VALUES (?, ?, ?, ?, ?)",
+                ("page", int(page_id), json.dumps(snapshot, ensure_ascii=False, default=str), "Publication visuelle", author),
+            )
+            conn.execute("UPDATE pages SET updated_at = datetime('now') WHERE id = ?", (int(page_id),))
+            revision = self._bump_content_revision(conn)
+            published_sections = [
+                {**entry, "id": identifier}
+                for entry, identifier in zip(sections, published_ids, strict=True)
+            ]
+            published_project = sections_to_project(published_sections)
+            published_project_json = _dump_json(published_project)
+            updated = conn.execute(
+                "UPDATE visual_projects SET draft_project_json = ?, published_project_json = ?, "
+                "draft_version = draft_version + 1, theme_id = ?, theme_version = ?, updated_at = datetime('now') "
+                "WHERE page_id = ? AND draft_version = ?",
+                (published_project_json, published_project_json, theme_id, int(theme_version), int(page_id), int(expected_version)),
+            )
+            if updated.rowcount == 0:
+                raise VersionConflict(current_version)
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+
+        revision_id = int(cursor.lastrowid or 0)
+        published_at = conn.execute("SELECT created_at FROM revisions WHERE id = ?", (revision_id,)).fetchone()
+        fresh = self.page_state(conn, page_id)
+        return {
+            "revision_id": revision_id,
+            "published_at": published_at["created_at"] if published_at else "",
+            "content_revision": revision,
+            "draft_version": int(expected_version) + 1,
+            "project": published_project,
+            "sections": [section.serialize() for section in fresh.sections],
+        }
 
     def restore(
         self, conn: sqlite3.Connection, *, page_id: int, revision_id: int
