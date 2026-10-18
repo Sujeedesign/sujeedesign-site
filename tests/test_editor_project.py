@@ -1,0 +1,316 @@
+from __future__ import annotations
+
+import copy
+
+import pytest
+
+from sujee_editor.editor.project import (
+    PROJECT_SCHEMA_VERSION,
+    THEME_ID,
+    THEME_VERSION,
+    ProjectError,
+    project_to_sections,
+    sections_to_project,
+)
+
+
+def _field(tag: str, name: str, content: str = "") -> dict:
+    return {
+        "tagName": tag,
+        "attributes": {"data-sjd-field": name},
+        "content": content,
+    }
+
+
+def _section(section_type: str, identifier: int | None, children: list[dict], *, visible: bool = True) -> dict:
+    attributes = {
+        "data-sjd-section": section_type,
+        "data-sjd-visible": "1" if visible else "0",
+    }
+    if identifier is not None:
+        attributes["data-sjd-section-id"] = str(identifier)
+    return {
+        "type": f"sjd-section-{section_type}",
+        "tagName": "section",
+        "attributes": attributes,
+        "components": children,
+    }
+
+
+def _project(*sections: dict, styles: list | None = None) -> dict:
+    return {
+        "schema_version": PROJECT_SCHEMA_VERSION,
+        "theme_id": THEME_ID,
+        "theme_version": THEME_VERSION,
+        "project_data": {
+            "pages": [
+                {
+                    "frames": [
+                        {
+                            "component": {
+                                "type": "wrapper",
+                                "components": list(sections),
+                            }
+                        }
+                    ]
+                }
+            ],
+            "styles": list(styles or []),
+            "assets": [],
+        },
+    }
+
+
+def _rich_body() -> dict:
+    return {
+        "tagName": "div",
+        "attributes": {"data-sjd-field": "body"},
+        "components": [
+            {
+                "tagName": "p",
+                "components": [
+                    {"type": "textnode", "content": "Un texte "},
+                    {"tagName": "strong", "content": "riche"},
+                    {"type": "textnode", "content": "."},
+                ],
+            }
+        ],
+    }
+
+
+def _three_section_project() -> dict:
+    return _project(
+        _section(
+            "chapter",
+            7,
+            [
+                _field("p", "kicker", "01 · Présentation"),
+                _field("h2", "title", "Une histoire créative"),
+                _rich_body(),
+                _field("ul", "list", ""),
+            ],
+        ),
+        _section(
+            "image-pleine-largeur",
+            8,
+            [
+                {
+                    "type": "image",
+                    "tagName": "img",
+                    "attributes": {
+                        "data-sjd-field": "src",
+                        "src": "/medias/projet.webp",
+                        "alt": "Affiche de projet",
+                    },
+                },
+                _field("figcaption", "caption", "Une légende"),
+            ],
+            visible=False,
+        ),
+        _section(
+            "citation",
+            9,
+            [
+                _field("blockquote", "quote", "Créer avec intention."),
+                _field("span", "author", "Sujee"),
+                _field("span", "role", "Direction artistique"),
+            ],
+        ),
+    )
+
+
+def _source_sections() -> list[dict]:
+    return [
+        {
+            "id": 7,
+            "type": "chapter",
+            "variant": "",
+            "visible": True,
+            "position": 0,
+            "effective": {
+                "kicker": "01 · Présentation",
+                "title": "Une histoire créative",
+                "body": "<p>Un texte <strong>riche</strong>.</p>",
+                "list": "",
+                "dark": False,
+            },
+        },
+        {
+            "id": 8,
+            "type": "image-pleine-largeur",
+            "variant": "",
+            "visible": False,
+            "position": 1,
+            "effective": {
+                "src": "/medias/projet.webp",
+                "alt": "Affiche de projet",
+                "caption": "Une légende",
+            },
+        },
+        {
+            "id": 9,
+            "type": "citation",
+            "variant": "",
+            "visible": True,
+            "position": 2,
+            "effective": {
+                "quote": "Créer avec intention.",
+                "author": "Sujee",
+                "role": "Direction artistique",
+            },
+        },
+    ]
+
+
+def test_sections_to_project_emits_versioned_theme_and_stable_section_types():
+    project = sections_to_project(_source_sections())
+
+    assert project["schema_version"] == PROJECT_SCHEMA_VERSION
+    assert project["theme_id"] == THEME_ID
+    assert project["theme_version"] == THEME_VERSION
+    components = project["project_data"]["pages"][0]["frames"][0]["component"]["components"]
+    assert [component["type"] for component in components] == [
+        "sjd-section-chapter",
+        "sjd-section-image-pleine-largeur",
+        "sjd-section-citation",
+    ]
+    assert [component["attributes"]["data-sjd-section-id"] for component in components] == ["7", "8", "9"]
+
+
+def test_project_to_sections_restores_fields_visibility_and_order():
+    sections = project_to_sections(_three_section_project())
+
+    assert [section["type"] for section in sections] == ["chapter", "image-pleine-largeur", "citation"]
+    assert [section["position"] for section in sections] == [0, 1, 2]
+    assert [section["id"] for section in sections] == [7, 8, 9]
+    assert [section["visible"] for section in sections] == [True, False, True]
+    assert sections[0]["data"]["title"] == "Une histoire créative"
+    assert "<strong>riche</strong>" in sections[0]["data"]["body"]
+    assert sections[1]["data"] == {
+        "src": "/medias/projet.webp",
+        "alt": "Affiche de projet",
+        "caption": "Une légende",
+    }
+    assert sections[2]["data"]["author"] == "Sujee"
+
+
+def test_project_and_sections_round_trip_without_losing_theme_content():
+    imported = sections_to_project(_source_sections())
+
+    assert project_to_sections(imported) == project_to_sections(_three_section_project())
+
+
+def test_import_uses_effective_draft_content_and_sorts_by_position():
+    sections = _source_sections()
+    sections[0]["position"] = 2
+    sections[0]["effective"] = {**sections[0]["effective"], "title": "Brouillon"}
+    sections[1]["position"] = 0
+    sections[2]["position"] = 1
+
+    project = sections_to_project(sections)
+    result = project_to_sections(project)
+
+    assert [section["type"] for section in result] == ["image-pleine-largeur", "citation", "chapter"]
+    assert result[-1]["data"]["title"] == "Brouillon"
+
+
+def test_import_rejects_a_page_with_any_unsupported_section():
+    sections = _source_sections()
+    sections.append({"id": 10, "type": "faq", "position": 3, "visible": True, "effective": {}})
+
+    with pytest.raises(ProjectError, match="faq"):
+        sections_to_project(sections)
+
+
+def test_project_rejects_native_or_unknown_components():
+    project = _three_section_project()
+    root_components = project["project_data"]["pages"][0]["frames"][0]["component"]["components"]
+    root_components[1]["type"] = "image"
+
+    with pytest.raises(ProjectError, match="composant"):
+        project_to_sections(project)
+
+
+def test_project_rejects_arbitrary_styles_instead_of_publishing_them():
+    project = _three_section_project()
+    project["project_data"]["styles"] = [{"selectors": ["body"], "style": {"color": "red"}}]
+
+    with pytest.raises(ProjectError, match="style"):
+        project_to_sections(project)
+
+
+def test_project_rejects_style_on_the_canvas_wrapper():
+    project = _three_section_project()
+    project["project_data"]["pages"][0]["frames"][0]["component"]["style"] = {"color": "red"}
+
+    with pytest.raises(ProjectError, match="style"):
+        project_to_sections(project)
+
+
+def test_project_rejects_script_and_event_attributes_inside_rich_text():
+    project = _three_section_project()
+    project["project_data"]["pages"][0]["frames"][0]["component"]["components"][0]["components"][2]["components"] = [
+        {"tagName": "script", "content": "alert(1)"}
+    ]
+
+    with pytest.raises(ProjectError, match="HTML"):
+        project_to_sections(project)
+
+
+def test_project_rejects_external_or_script_image_urls():
+    project = _three_section_project()
+    image = project["project_data"]["pages"][0]["frames"][0]["component"]["components"][1]["components"][0]
+    image["attributes"]["src"] = "javascript:alert(1)"
+
+    with pytest.raises(ProjectError, match="image"):
+        project_to_sections(project)
+
+
+def test_project_rejects_duplicate_section_ids_and_wrong_theme_version():
+    project = _three_section_project()
+    components = project["project_data"]["pages"][0]["frames"][0]["component"]["components"]
+    components[1]["attributes"]["data-sjd-section-id"] = "7"
+    with pytest.raises(ProjectError, match="identifiant"):
+        project_to_sections(project)
+
+    project = _three_section_project()
+    project["theme_version"] += 1
+    with pytest.raises(ProjectError, match="version"):
+        project_to_sections(project)
+
+
+def test_project_rejects_bad_field_types_and_max_lengths():
+    project = _three_section_project()
+    components = project["project_data"]["pages"][0]["frames"][0]["component"]["components"]
+    components[0]["components"][1]["content"] = "x" * 250
+    with pytest.raises(ProjectError, match="validation"):
+        project_to_sections(project)
+
+
+def test_round_trip_handles_empty_image_values_and_unicode():
+    source = _source_sections()
+    source[0]["effective"]["title"] = "À travers les étoiles ✨"
+    source[1]["effective"]["src"] = ""
+
+    result = project_to_sections(sections_to_project(source))
+
+    assert result[0]["data"]["title"] == "À travers les étoiles ✨"
+    assert result[1]["data"]["src"] == ""
+
+
+def test_imported_chapter_list_items_round_trip_without_becoming_fields():
+    source = _source_sections()
+    source[0]["effective"]["list"] = "Première ligne\nDeuxième ligne"
+
+    result = project_to_sections(sections_to_project(source))
+
+    assert result[0]["data"]["list"] == "Première ligne\nDeuxième ligne"
+
+
+def test_input_objects_are_not_mutated():
+    source = _source_sections()
+    before = copy.deepcopy(source)
+
+    sections_to_project(source)
+
+    assert source == before
