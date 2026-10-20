@@ -24,7 +24,11 @@
     <aside id="visual-blocks" aria-label="Sections disponibles">
       <h1>Sections</h1>
     </aside>
-    <section id="visual-canvas" aria-label="Aperçu de la page"></section>
+    <section id="visual-canvas" aria-hidden="true"></section>
+    <section id="visual-preview-stage" aria-label="Aperçu réel de la page">
+      <span id="visual-preview-status" role="status" aria-live="polite">Chargement de l’aperçu…</span>
+      <iframe id="visual-live-preview" title="Aperçu réel de la page" sandbox="allow-same-origin"></iframe>
+    </section>
     <aside id="visual-traits" aria-label="Options de section"><h1>Options de section</h1></aside>
   </main>
 </div>

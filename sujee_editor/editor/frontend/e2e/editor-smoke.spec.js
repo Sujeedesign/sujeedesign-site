@@ -3,6 +3,12 @@ import { readFile } from 'node:fs/promises';
 
 const calls = [];
 
+function escapeText(value) {
+  return String(value || '').replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  })[character]);
+}
+
 test.beforeEach(async ({ page }) => {
   calls.length = 0;
   await page.route('**/api/editor/pages/1/visual-project', async (route) => {
@@ -13,18 +19,76 @@ test.beforeEach(async ({ page }) => {
       await route.continue();
     }
   });
+  await page.route('**/api/admin/pages/1/visual-preview', async (route) => {
+    if (route.request().method() !== 'POST') return route.continue();
+    const payload = route.request().postDataJSON();
+    const components = payload.project?.project_data?.pages?.[0]?.frames?.[0]?.component?.components || [];
+    const sections = components.map((component, position) => {
+      const attrs = component.attributes || {};
+      let data = {};
+      try { data = JSON.parse(attrs['data-sjd-data'] || '{}'); } catch { /* fixture fallback */ }
+      const section = attrs['data-sjd-section'] || 'chapter';
+      const title = escapeText(data.title || 'Titre de chapitre');
+      const darkClass = data.dark ? ' dark' : '';
+      return `<div class="sjd-block" data-block-id="${attrs['data-sjd-section-id'] || 0}" data-block-type="${section}" data-block-position="${position}"><section class="s-chap reveal${darkClass}"><h2>${title}</h2></section></div>`;
+    }).join('');
+    await route.fulfill({
+      status: 200,
+      contentType: 'text/html',
+      body: `<!doctype html><html lang="fr"><head><link rel="stylesheet" href="/src/demo-theme.css"></head><body><main>${sections}</main></body></html>`,
+    });
+  });
 });
 
-test('registers_all_nineteen_theme_blocks', async ({ page }) => {
+test('registers_all_twenty_theme_blocks', async ({ page }) => {
   await page.goto('/');
   await page.waitForFunction(() => Boolean(window.sjdVisualEditor && document.documentElement.dataset.visualEditorReady));
-  await expect(page.locator('#visual-blocks .gjs-block')).toHaveCount(19);
+  await expect(page.locator('#visual-blocks .gjs-block')).toHaveCount(20);
   const types = await page.evaluate(() => window.sjdVisualEditor.Blocks.getAll().map((block) => block.get('id')));
   expect(types).toContain('sjd-section-formulaire-contact');
   expect(types).toContain('sjd-section-chapter');
   const labels = await page.locator('.gjs-block').allTextContents();
   expect(labels.every((label) => !label.includes('HTML'))).toBe(true);
   await expect(page.locator('.gjs-sm-sectors')).toHaveCount(0);
+});
+
+test('renders the server preview and selects the corresponding section', async ({ page }) => {
+  await page.goto('/');
+  await page.waitForFunction(() => Boolean(window.sjdVisualEditor && document.documentElement.dataset.visualEditorReady));
+  await page.locator('#visual-blocks .gjs-block').filter({ hasText: 'Chapitre éditorial' }).click();
+  const preview = page.frameLocator('#visual-live-preview');
+  await expect(preview.locator('.s-chap h2')).toHaveText('Titre de chapitre');
+  await preview.locator('.sjd-block').click();
+  await expect.poll(() => page.evaluate(() => window.sjdVisualEditor.getSelected()?.getAttributes()['data-sjd-section'])).toBe('chapter');
+});
+
+test('composes a section with bounded columns, theme colors and a local background image', async ({ page }) => {
+  await page.route('**/api/editor/media', (route) => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ medias: [{ id: 77, path: 'medias/background.webp', alt: 'Fond', mime: 'image/webp' }] }),
+  }));
+  await page.goto('/');
+  await page.waitForFunction(() => Boolean(window.sjdVisualEditor && document.documentElement.dataset.visualEditorReady));
+  await page.locator('#visual-blocks .gjs-block').filter({ hasText: 'Section à composer' }).click();
+  const panel = page.locator('#visual-section-panel');
+  const addColumn = panel.locator('[data-repeat-path="columns"] + .section-repeat-add');
+  await addColumn.click();
+  await expect.poll(() => page.evaluate(() => JSON.parse(window.sjdVisualEditor.getSelected().getAttributes()['data-sjd-data']).columns.map((column) => column.span))).toEqual(['4', '4', '4']);
+  await panel.locator('[data-repeat-path="columns.0.elements"] + .section-repeat-add').click();
+  await panel.locator('[data-field-editor="columns.0.elements.0.type"]').selectOption('button');
+  await expect(panel.locator('[data-field-editor="columns.0.elements.0.text"]')).toHaveCount(0);
+  await panel.locator('[data-field-editor="columns.0.elements.0.label"]').fill('Découvrir');
+  await panel.locator('[data-field-editor="columns.0.elements.0.href"]').fill('/contact');
+  await panel.locator('[data-field-editor="background"]').selectOption('image');
+  await panel.locator('[data-field-editor="background_image"]').selectOption('/medias/background.webp');
+  const result = await page.evaluate(() => {
+    const component = window.sjdVisualEditor.getSelected();
+    return { data: JSON.parse(component.getAttributes()['data-sjd-data']), styles: window.sjdVisualEditor.getProjectData().styles };
+  });
+  expect(result.data.background_image).toBe('/medias/background.webp');
+  expect(result.data.columns.map((column) => Number(column.span)).reduce((sum, span) => sum + span, 0)).toBe(12);
+  expect(result.data.columns[0].elements[0]).toMatchObject({ type: 'button', label: 'Découvrir', href: '/contact' });
+  expect(result.styles).toEqual([]);
 });
 
 test('edits_each_schema_field_kind', async ({ page }) => {
@@ -99,21 +163,19 @@ test('adds an allowed theme section, edits its content and saves a versioned pro
   await page.goto('/');
   await page.waitForFunction(() => Boolean(window.sjdVisualEditor && document.documentElement.dataset.visualEditorReady));
   const blocks = page.locator('#visual-blocks .gjs-block');
-  await expect(blocks).toHaveCount(19);
+  await expect(blocks).toHaveCount(20);
   await blocks.filter({ hasText: 'Chapitre éditorial' }).click();
 
-  const canvas = page.frameLocator('iframe.gjs-frame');
-  const section = canvas.locator('[data-sjd-section="chapter"]');
+  const preview = page.frameLocator('#visual-live-preview');
+  const section = preview.locator('.sjd-block[data-block-type="chapter"] .s-chap');
   await expect(section).toBeVisible();
-  await expect(section.locator('[data-sjd-field="title"]')).toHaveText('Titre du chapitre');
-  await page.locator('#visual-traits select:not(#visual-media-picker)').selectOption('1');
+  await expect(section.locator('h2')).toHaveText('Titre de chapitre');
+  await page.locator('#visual-section-panel [data-field-editor="dark"]').check();
+  await expect.poll(() => page.evaluate(() => JSON.parse(window.sjdVisualEditor.getSelected().getAttributes()['data-sjd-data']).dark)).toBe(true);
   await expect(section).toHaveClass(/dark/);
 
-  await page.evaluate(() => {
-    const title = window.sjdVisualEditor.getWrapper().find('[data-sjd-field="title"]')[0];
-    title.set('content', 'Titre modifié');
-  });
-  await expect(section.locator('[data-sjd-field="title"]')).toHaveText('Titre modifié');
+  await page.locator('#visual-section-panel [data-field-editor="title"]').fill('Titre modifié');
+  await expect(section.locator('h2')).toHaveText('Titre modifié');
   await page.locator('#visual-save').click();
   await expect(page.locator('#visual-status')).toHaveText('Brouillon enregistré');
   expect(calls).toHaveLength(1);
@@ -122,8 +184,7 @@ test('adds an allowed theme section, edits its content and saves a versioned pro
   expect(JSON.stringify(savedProject)).toContain('Titre modifié');
   expect(JSON.stringify(savedProject)).toContain('sjd-section-chapter');
   await page.evaluate((project) => window.sjdVisualEditor.loadProjectData(project.project_data), savedProject);
-  await expect(page.frameLocator('iframe.gjs-frame').locator('[data-sjd-field="title"]'))
-    .toHaveText('Titre modifié');
+  await expect(preview.locator('.sjd-block[data-block-type="chapter"] h2')).toHaveText('Titre modifié');
 });
 
 test('loads a versioned server project and makes its authored fields editable', async ({ page }) => {
@@ -316,15 +377,16 @@ test('keeps the editor controls reachable at mobile, tablet and desktop widths',
   for (const width of [375, 768, 1280]) {
     await page.setViewportSize({ width, height: 800 });
     await expect(page.locator('#visual-blocks .gjs-block').first()).toBeVisible();
-    await expect(page.locator('#visual-canvas')).toBeVisible();
+    await expect(page.locator('#visual-preview-stage')).toBeVisible();
+    await expect(page.locator('#visual-live-preview')).toBeVisible();
     await expect(page.locator('#visual-traits')).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.clientWidth)).toBe(width);
     if (width <= 900) {
       const bounds = await page.evaluate(() => ({
-        canvasBottom: document.querySelector('#visual-canvas').getBoundingClientRect().bottom,
+        previewBottom: document.querySelector('#visual-preview-stage').getBoundingClientRect().bottom,
         traitsTop: document.querySelector('#visual-traits').getBoundingClientRect().top,
       }));
-      expect(bounds.traitsTop).toBeGreaterThanOrEqual(bounds.canvasBottom - 1);
+      expect(bounds.traitsTop).toBeGreaterThanOrEqual(bounds.previewBottom - 1);
     }
   }
 });
@@ -416,7 +478,7 @@ test('adds_all_types_and_round_trips_a_single_visual_project', async ({ page }) 
     const attributes = model.getAttributes();
     return { section: attributes['data-sjd-section'], data: attributes['data-sjd-data'] };
   }));
-  expect(components).toHaveLength(19);
+  expect(components).toHaveLength(20);
   expect(components.map((component) => component.section)).toEqual(expectedTypes);
   const faq = components.find((component) => component.section === 'faq');
   expect(faq).toBeTruthy();
@@ -428,7 +490,7 @@ test('adds_all_types_and_round_trips_a_single_visual_project', async ({ page }) 
   await page.waitForTimeout(1050);
   const project = await page.evaluate(() => window.sjdVisualEditor.getProjectData());
   const lastSave = calls.at(-1);
-  expect(lastSave.project.project_data.pages[0].frames[0].component.components).toHaveLength(19);
+  expect(lastSave.project.project_data.pages[0].frames[0].component.components).toHaveLength(20);
   await page.evaluate((value) => window.sjdLoadVisualProject(value), lastSave.project.project_data);
   const reloaded = await page.evaluate(() => window.sjdVisualEditor.getProjectData());
   const reloadedComponents = reloaded.pages[0].frames[0].component.components;

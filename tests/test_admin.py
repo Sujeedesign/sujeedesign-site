@@ -156,6 +156,23 @@ def test_section_lifecycle_and_order(client: TestClient) -> None:
     assert client.delete(f"/api/admin/sections/{first}").json()["ok"] is True
 
 
+def test_zone_free_legacy_section_api_rejects_invalid_layout_data(client: TestClient) -> None:
+    login(client)
+    page_id = client.post("/api/admin/pages", json={"title": "Zone contrôlée"}).json()["id"]
+    section_id = client.post(f"/api/admin/pages/{page_id}/sections", json={"type": "zone-libre"}).json()["id"]
+    original = client.get(f"/api/admin/pages/{page_id}/sections").json()["sections"][-1]["data"]
+
+    response = client.patch(
+        f"/api/admin/sections/{section_id}",
+        json={"data": {"background_image": "https://example.com/remote.webp"}},
+        headers={"Origin": "http://testserver", "X-SJD-CSRF": _csrf(client)},
+    )
+
+    assert response.status_code == 400
+    saved = client.get(f"/api/admin/pages/{page_id}/sections").json()["sections"][-1]["data"]
+    assert saved == original
+
+
 def test_revisions_are_restorable(client: TestClient) -> None:
     login(client)
     page_id = client.post("/api/admin/pages", json={"title": "Version un"}).json()["id"]
@@ -344,4 +361,4 @@ def test_export_includes_draft_and_published_visual_project(client: TestClient) 
     assert set(page["visual_project"]) == {
         "schema_version", "theme_id", "theme_version", "draft_version", "draft_project", "published_project"
     }
-    assert page["visual_project"]["theme_version"] == 2
+    assert page["visual_project"]["theme_version"] == 3

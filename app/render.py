@@ -11,6 +11,7 @@ import threading
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any, Iterable
+from urllib.parse import unquote, urlsplit
 
 from jinja2 import ChoiceLoader, Environment, FileSystemLoader, select_autoescape
 
@@ -153,6 +154,44 @@ def inline_html(raw: Any) -> str:
     return sanitize_html(text)
 
 
+def safe_href(raw: Any) -> str:
+    """Lien utilisable dans une composition, limité aux schémas sûrs."""
+    value = str(raw or "").strip()
+    if not value:
+        return ""
+    if chr(92) in value:
+        return ""
+    try:
+        parsed = urlsplit(value)
+    except ValueError:
+        return ""
+    if parsed.scheme:
+        return value if parsed.scheme.lower() in {"http", "https", "mailto"} else ""
+    if parsed.netloc or value.startswith("//"):
+        return ""
+    return value
+
+
+def safe_media_path(raw: Any) -> str:
+    """Chemin d'image local uniquement, sans traversée de répertoire."""
+    value = str(raw or "").strip()
+    if not value:
+        return ""
+    try:
+        parsed = urlsplit(value)
+    except ValueError:
+        return ""
+    if parsed.scheme or parsed.netloc or chr(92) in value or value.startswith("//"):
+        return ""
+    path = parsed.path
+    decoded_path = unquote(path)
+    if chr(92) in decoded_path or any(part in {".", ".."} for part in decoded_path.split("/")):
+        return ""
+    if not decoded_path.startswith(("/assets/", "/medias/", "assets/", "medias/")):
+        return ""
+    return "/" + path.lstrip("/")
+
+
 def build_env(templates_dir: Path | None = None) -> Environment:
     """Environnement Jinja du site.
 
@@ -177,6 +216,8 @@ def build_env(templates_dir: Path | None = None) -> Environment:
     env.filters["inline"] = lambda value: _mark_safe(inline_html(value))
     env.filters["svg"] = lambda value: _mark_safe(sanitize_svg(value))
     env.filters["json_array"] = lambda value: _as_list(value)
+    env.filters["safe_href"] = safe_href
+    env.filters["safe_media"] = safe_media_path
     return env
 
 
@@ -255,6 +296,7 @@ def envelope_html(section: dict) -> str:
     return (
         f'<div class="sjd-block" data-block-id="{int(section.get("id") or 0)}"'
         f' data-block-type="{type_}" data-block-label="{label}"'
+        f' data-block-position="{int(section.get("position") or 0)}"'
         f' data-block-visible="{1 if section.get("visible") else 0}"'
         f' data-block-revised="{1 if section.get("revised") else 0}">'
     )

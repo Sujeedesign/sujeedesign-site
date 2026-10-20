@@ -1,4 +1,4 @@
-"""Registre des types de blocs livrés avec l'éditeur (les 19 types du thème Sujee)."""
+"""Registre des types de blocs livrés avec l'éditeur (20 types du thème Sujee)."""
 
 from __future__ import annotations
 
@@ -324,6 +324,47 @@ def _blocks() -> dict[str, Block]:
             Field("src", IMAGE, "Fichier SVG ou image", inplace=False),
             Field("alt", TEXT, "Description pour les lecteurs d'écran", max_length=160, inplace=False),
             Field("svg", RICH, "SVG collé (HTML)", inplace=False),
+        ),
+    )
+    add(
+        "zone-libre",
+        "Section à composer",
+        (
+            Field("background", CHOICE, "Fond", choices=("none", "paper", "obsidian", "accent", "image"), default="none"),
+            Field("background_image", IMAGE, "Image de fond", inplace=False, default=""),
+            Field("width", CHOICE, "Largeur", choices=("container", "full"), default="container"),
+            Field("spacing", CHOICE, "Espacement vertical", choices=("compact", "normal", "generous"), default="normal"),
+            Field(
+                "columns",
+                ITEMS,
+                "Colonnes",
+                max_items=3,
+                default=[
+                    {"span": "6", "align": "left", "elements": []},
+                    {"span": "6", "align": "left", "elements": []},
+                ],
+                fields=(
+                    Field("span", CHOICE, "Largeur de colonne", choices=("2", "3", "4", "5", "6", "7", "8", "9", "10", "12"), default="6"),
+                    Field("align", CHOICE, "Alignement", choices=("left", "center", "right"), default="left"),
+                    Field(
+                        "elements",
+                        ITEMS,
+                        "Éléments",
+                        max_items=8,
+                        fields=(
+                            Field("type", CHOICE, "Type", choices=("heading", "text", "button", "image", "list", "divider"), default="heading"),
+                            Field("text", RICH, "Texte", max_length=4000),
+                            Field("level", CHOICE, "Niveau du titre", choices=("h2", "h3", "h4"), default="h2"),
+                            Field("label", TEXT, "Libellé du bouton", max_length=100),
+                            Field("href", TEXT, "Lien du bouton", max_length=300),
+                            Field("role", CHOICE, "Style du bouton", choices=("principal", "secondaire", "lien"), default="principal"),
+                            Field("src", IMAGE, "Image", inplace=False),
+                            Field("alt", TEXT, "Texte alternatif", max_length=160, inplace=False),
+                            Field("items", LINES, "Éléments de la liste"),
+                        ),
+                    ),
+                ),
+            ),
         ),
     )
     return catalogue

@@ -6,6 +6,7 @@ dépendance du paquet (`blocks/` ne dépend que de lui-même).
 
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass, field as dataclass_field
 from enum import Enum
 from typing import Any
@@ -126,7 +127,7 @@ def default_data(block: Block) -> dict[str, Any]:
 
 def _default_for(field: Field) -> Any:
     if field.has_default:
-        return field.default
+        return copy.deepcopy(field.default)
     if field.kind is Kind.BOOL:
         return False
     if field.kind is Kind.NUMBER:

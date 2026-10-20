@@ -67,9 +67,16 @@ def sample_value(field: dict):
 
 def build_section(type_: str, variant: str | None = None) -> dict:
     spec = sections_module.SECTION_TYPES[type_]
-    data = {}
-    for field in spec["fields"]:
-        data[field["name"]] = sample_value(field)
+    if type_ == "zone-libre":
+        data = sections_module.default_data(type_)
+        data["columns"][0]["elements"] = [{
+            "type": "text", "text": "<p>Un paragraphe de test.</p>", "level": "h2",
+            "label": "", "href": "", "role": "principal", "src": "", "alt": "", "items": [],
+        }]
+    else:
+        data = {}
+        for field in spec["fields"]:
+            data[field["name"]] = sample_value(field)
     if spec.get("variants"):
         data["_variant"] = variant or next(iter(spec["variants"]))
     return {
@@ -111,6 +118,13 @@ def test_every_section_type_renders(type_: str) -> None:
     assert "{{" not in html
     if type_ not in ("marquee", "citation", "manifeste"):
         assert "Valeur" in html or "Première ligne" in html or "Un paragraphe de test." in html or "Description" in html
+
+
+def test_zone_free_defaults_are_not_shared_between_sections():
+    first = sections_module.default_data("zone-libre")
+    first["columns"][0]["span"] = "8"
+    second = sections_module.default_data("zone-libre")
+    assert [column["span"] for column in second["columns"]] == ["6", "6"]
 
 
 def test_unknown_section_type_is_ignored() -> None:

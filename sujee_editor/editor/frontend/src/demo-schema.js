@@ -26,4 +26,24 @@ export const DEMO_BLOCKS = Object.fromEntries([
   ['bloc-liens', 'Bloc de liens', [t('label'), l('slugs'), f('exclude_current', 'bool')], { services: 'Services', realisations: 'Réalisations', manuel: 'Manuel' }],
   ['etude-de-cas', 'Étude de cas', [item('blocks', 'items', [f('kind', 'choice', 'Type', { choices: ['texte', 'liste', 'meta'] }), t('title'), f('body', 'html'), l('items'), l('meta')], 'Blocs')]],
   ['banniere', 'Bannière visuelle', [image('src'), t('alt'), f('svg', 'html')]],
+  ['zone-libre', 'Section à composer', [
+    f('background', 'choice', 'Fond', { choices: ['none', 'paper', 'obsidian', 'accent', 'image'], default: 'none' }),
+    f('background_image', 'image', 'Image de fond'),
+    f('width', 'choice', 'Largeur', { choices: ['container', 'full'], default: 'container' }),
+    f('spacing', 'choice', 'Espacement vertical', { choices: ['compact', 'normal', 'generous'], default: 'normal' }),
+    item('columns', 'items', [
+      f('span', 'choice', 'Largeur de colonne', { choices: ['2', '3', '4', '5', '6', '7', '8', '9', '10', '12'], default: '6' }),
+      f('align', 'choice', 'Alignement', { choices: ['left', 'center', 'right'], default: 'left' }),
+      item('elements', 'items', [
+        f('type', 'choice', 'Type', { choices: ['heading', 'text', 'button', 'image', 'list', 'divider'], default: 'heading' }),
+        f('text', 'html', 'Texte', { max_length: 4000 }),
+        f('level', 'choice', 'Niveau du titre', { choices: ['h2', 'h3', 'h4'], default: 'h2' }),
+        t('label', 'Libellé du bouton'), t('href', 'Lien du bouton'),
+        f('role', 'choice', 'Style du bouton', { choices: ['principal', 'secondaire', 'lien'], default: 'principal' }),
+        image('src', 'Image'), t('alt', 'Texte alternatif'), l('items', 'Éléments de la liste'),
+      ], 'Éléments', { max_items: 8 }),
+    ], 'Colonnes', { max_items: 3, default: [
+      { span: '6', align: 'left', elements: [] }, { span: '6', align: 'left', elements: [] },
+    ] }),
+  ]],
 ].map(([name, label, fields, variants = {}]) => [name, { name, label, variants, repeatable: true, fields }]));

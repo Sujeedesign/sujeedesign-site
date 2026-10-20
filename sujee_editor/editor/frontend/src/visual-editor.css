@@ -22,7 +22,10 @@ button, a { font: inherit; }
 #visual-blocks { border-right: 1px solid #e5e3df; }
 #visual-traits { border-left: 1px solid #e5e3df; }
 #visual-blocks h1, #visual-traits h1 { margin: 0 0 17px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #777; }
-#visual-canvas { min-width: 0; min-height: 0; height: 100%; background: #f3f2ef; }
+#visual-canvas { position: fixed; top: 68px; left: -16000px; width: 1280px; height: 900px; visibility: hidden; pointer-events: none; overflow: hidden; }
+#visual-preview-stage { position: relative; min-width: 0; min-height: 0; overflow: auto; background: #f3f2ef; }
+#visual-live-preview { display: block; width: 100%; height: 100%; min-height: 100%; border: 0; background: #fff; }
+#visual-preview-status { position: absolute; z-index: 1; top: 8px; right: 8px; padding: 4px 8px; border-radius: 5px; background: rgba(255,255,255,.92); color: #666; font-size: 11px; pointer-events: none; }
 .gjs-editor { min-height: 0; height: 100%; }
 .gjs-cv-canvas { top: 0; left: 0; width: 100%; height: 100%; }
 .gjs-block { width: 100%; min-height: 60px; margin: 0 0 9px; padding: 14px; border: 1px solid #e7e5e1; border-radius: 9px; background: #fff; box-shadow: none; text-align: left; font-size: 13px; }
@@ -76,7 +79,7 @@ button, a { font: inherit; }
 @media (max-width: 900px) {
   .visual-layout { grid-template-columns: 160px minmax(0, 1fr); grid-template-rows: minmax(280px, 1fr) 215px; }
   #visual-blocks { grid-column: 1; grid-row: 1; }
-  #visual-canvas { grid-column: 2; grid-row: 1; }
+  #visual-preview-stage { grid-column: 2; grid-row: 1; }
   #visual-traits { display: block; grid-column: 1 / -1; grid-row: 2; position: static; width: auto; border-top: 1px solid #e5e3df; border-left: 0; box-shadow: none; }
   .visual-topbar { gap: 12px; padding: 0 12px; }
   #visual-status { display: none; }

@@ -17,9 +17,9 @@ LEGACY_FIELDS = {
 }
 
 
-def test_catalogue_has_the_nineteen_legacy_types():
+def test_catalogue_has_all_theme_types_in_section_order():
     assert list(DEFAULT_BLOCKS) == list(sections_module.SECTION_ORDER)
-    assert len(DEFAULT_BLOCKS) == 19
+    assert len(DEFAULT_BLOCKS) == 20
 
 
 @pytest.mark.parametrize("name", sorted(LEGACY_FIELDS))

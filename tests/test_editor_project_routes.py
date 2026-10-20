@@ -589,19 +589,19 @@ def test_visual_project_get_migrates_v1_draft_after_validation(client: TestClien
     response = client.get(f"{BASE}/pages/{page_id}/visual-project", cookies=cookies)
 
     assert response.status_code == 200
-    assert response.json()["theme_version"] == THEME_VERSION == 2
+    assert response.json()["theme_version"] == THEME_VERSION == 3
     assert response.json()["draft_version"] == 7
     migrated = response.json()["project"]
-    assert migrated["theme_version"] == 2
+    assert migrated["theme_version"] == 3
     assert [item["attributes"]["data-sjd-section"] for item in migrated["project_data"]["pages"][0]["frames"][0]["component"]["components"]] == [
         "chapter", "image-pleine-largeur", "citation"
     ]
     conn = db_module.connect(db_file)
     try:
         row = conn.execute("SELECT draft_project_json, published_project_json, theme_version, draft_version FROM visual_projects WHERE page_id = ?", (page_id,)).fetchone()
-        assert json.loads(row["draft_project_json"])["theme_version"] == 2
-        assert json.loads(row["published_project_json"])["theme_version"] == 2
-        assert row["theme_version"] == 2 and row["draft_version"] == 7
+        assert json.loads(row["draft_project_json"])["theme_version"] == 3
+        assert json.loads(row["published_project_json"])["theme_version"] == 3
+        assert row["theme_version"] == 3 and row["draft_version"] == 7
     finally:
         conn.close()
 
@@ -678,7 +678,7 @@ def test_publish_all_nineteen_types_is_atomic_and_ordered(client: TestClient, db
     try:
         rows = conn.execute("SELECT id, type, position, data FROM sections WHERE page_id = ? ORDER BY position", (page_id,)).fetchall()
         assert [row["type"] for row in rows] == list(DEFAULT_BLOCKS)
-        assert [row["position"] for row in rows] == list(range(19))
+        assert [row["position"] for row in rows] == list(range(20))
         assert {row["type"]: int(row["id"]) for row in rows} == ids
         assert json.loads(rows[0]["data"])["title"] == "Contenu complet publié"
         stored = conn.execute("SELECT draft_project_json, published_project_json FROM visual_projects WHERE page_id = ?", (page_id,)).fetchone()

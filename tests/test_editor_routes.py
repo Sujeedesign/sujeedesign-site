@@ -138,7 +138,7 @@ def test_state_carries_the_schema_the_sections_and_a_csrf(client: TestClient, si
     response = client.get(f"{BASE}/pages/{page_id}/state", cookies=cookies, headers=headers)
     assert response.status_code == 200
     payload = response.json()
-    assert len(payload["blocks"]) == 19
+    assert len(payload["blocks"]) == 20
     assert {block["name"] for block in payload["blocks"]} >= {"hero", "chapter", "citation"}
     chapter = next(block for block in payload["blocks"] if block["name"] == "chapter")
     assert [field["name"] for field in chapter["fields"]][:3] == ["kicker", "title", "body"]

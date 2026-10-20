@@ -40,6 +40,8 @@ def sample_item(field: Field) -> dict[str, Any]:
 
 def sample_data(block: Block) -> dict[str, Any]:
     data = {field.name: sample_value(field) for field in block.fields}
+    if block.name == "zone-libre":
+        data["columns"][0]["span"] = "12"
     if block.variants:
         data["_variant"] = next(iter(block.variants))
     return data

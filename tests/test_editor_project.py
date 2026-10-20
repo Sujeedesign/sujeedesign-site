@@ -358,15 +358,15 @@ def _all_typed_sections() -> list[dict]:
     return sections
 
 
-def test_all_nineteen_block_types_round_trip_without_data_loss():
+def test_all_twenty_block_types_round_trip_without_data_loss():
     source = _all_typed_sections()
 
     result = project_to_sections(sections_to_project(source))
 
-    assert len(result) == 19
+    assert len(result) == 20
     assert [item["type"] for item in result] == [item["type"] for item in source]
     assert [item["id"] for item in result] == [item["id"] for item in source]
-    assert [item["position"] for item in result] == list(range(19))
+    assert [item["position"] for item in result] == list(range(20))
     assert [item["visible"] for item in result] == [item["visible"] for item in source]
     assert [item["variant"] for item in result] == [item["variant"] for item in source]
     assert [item["data"] for item in result] == [item["effective"] for item in source]
@@ -394,17 +394,18 @@ def test_all_block_variants_round_trip_without_data_loss():
     ]
 
 
-def test_migrate_theme_v1_project_preserves_content_and_is_idempotent():
+@pytest.mark.parametrize("legacy_version", [1, 2])
+def test_migrate_legacy_theme_project_preserves_content_and_is_idempotent(legacy_version: int):
     from sujee_editor.editor.project import migrate_project
 
     project = _three_section_project()
-    project["theme_version"] = 1
+    project["theme_version"] = legacy_version
     before = copy.deepcopy(project)
 
     migrated = migrate_project(project)
 
     assert project == before
-    assert migrated["theme_version"] == THEME_VERSION == 2
+    assert migrated["theme_version"] == THEME_VERSION == 3
     assert migrated["project_data"] == project["project_data"]
     assert migrate_project(migrated) == migrated
     assert [section["type"] for section in project_to_sections(migrated)] == [

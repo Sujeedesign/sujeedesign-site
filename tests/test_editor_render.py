@@ -256,7 +256,7 @@ def test_every_visible_section_is_wrapped_and_hidden_ones_are_not(client, db_fil
     assert 'data-block-visible="1"' in html
 
 
-def test_envelope_only_adds_the_envelope(db_file: Path, conn) -> None:
+def test_envelope_only_adds_the_envelope(db_file: Path, conn):
     page_id, _ = seed_page(db_file)
     page = conn.execute("SELECT * FROM pages WHERE id = ?", (page_id,)).fetchone()
     sections = conn.execute("SELECT * FROM sections WHERE page_id = ? ORDER BY position", (page_id,)).fetchall()
@@ -267,6 +267,60 @@ def test_envelope_only_adds_the_envelope(db_file: Path, conn) -> None:
     assert wrapped != plain
     assert unwrap_envelopes(wrapped) == plain
     assert 'class="sjd-block"' in wrapped and 'class="sjd-block"' not in plain
+
+
+def test_free_zone_renders_theme_background_columns_and_content(client, db_file: Path) -> None:
+    page_id, _ = seed_page(db_file)
+    data = {
+        "background": "image",
+        "background_image": "/medias/fond-atelier.webp",
+        "width": "container",
+        "spacing": "compact",
+        "columns": [
+            {"span": "8", "align": "left", "elements": [{
+                "type": "heading", "text": "Une vraie composition", "level": "h2", "label": "", "href": "",
+                "role": "principal", "src": "", "alt": "", "items": [],
+            }]},
+            {"span": "4", "align": "center", "elements": []},
+        ],
+    }
+    conn = connect(db_file)
+    try:
+        conn.execute(
+            "INSERT INTO sections (page_id, position, type, label, data) VALUES (?, 3, 'zone-libre', 'Composition', ?)",
+            (page_id, json.dumps(data, ensure_ascii=False)),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+    response = client.get(f"/{SLUG}")
+    assert response.status_code == 200
+    assert 'class="zone-libre zone-libre--image zone-libre--spacing-compact"' in response.text
+    assert 'src="/medias/fond-atelier.webp"' in response.text
+    assert 'zone-libre__column--span-8' in response.text
+    assert 'Une vraie composition' in response.text
+    assert 'data-block-position="3"' in response.text
+
+
+def test_zone_free_url_filters_restrict_links_and_media_to_safe_values():
+    assert render_module.safe_href("/contact") == "/contact"
+    assert render_module.safe_href("https://example.com") == "https://example.com"
+    assert render_module.safe_href("javascript:alert(1)") == ""
+    assert render_module.safe_href("//example.com/track") == ""
+    assert render_module.safe_href("http://[::1") == ""
+    assert render_module.safe_media_path("/medias/fond.webp") == "/medias/fond.webp"
+    assert render_module.safe_media_path("https://example.com/fond.webp") == ""
+    assert render_module.safe_media_path("/medias/../secret.webp") == ""
+    assert render_module.safe_media_path("/medias/%2e%2e/secret.webp") == ""
+
+
+def test_zone_free_renderer_ignores_corrupt_nested_data():
+    section = {"id": 1, "type": "zone-libre", "data": {"background_image": "https://example.com/x.jpg", "columns": ["bad", {"span": "wide", "align": "evil", "elements": "bad"}]}}
+    rendered = render_module.section_html(render_module.build_env(), section)
+    assert "zone-libre__column--span-12" in rendered
+    assert "zone-libre__column--align-left" in rendered
+    assert "https://example.com/x.jpg" not in rendered
 
 
 def test_edit_mode_does_not_serve_a_cached_page(client, db_file: Path) -> None:

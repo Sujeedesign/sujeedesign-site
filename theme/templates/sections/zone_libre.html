@@ -1,0 +1,55 @@
+{% set d = s.data %}
+{% set background = d.get('background', 'none') %}
+{% if background not in ('none', 'paper', 'obsidian', 'accent', 'image') %}{% set background = 'none' %}{% endif %}
+{% set width = d.get('width', 'container') %}
+{% if width not in ('container', 'full') %}{% set width = 'container' %}{% endif %}
+{% set spacing = d.get('spacing', 'normal') %}
+{% if spacing not in ('compact', 'normal', 'generous') %}{% set spacing = 'normal' %}{% endif %}
+{% set background_image = d.get('background_image', '')|safe_media %}
+{% set columns = d.get('columns', []) %}
+{% if columns is not sequence or columns is string %}{% set columns = [] %}{% endif %}
+<section class="zone-libre zone-libre--{{ background }} zone-libre--spacing-{{ spacing }}">
+  {% if background == 'image' and background_image %}
+  <div class="zone-libre__background" aria-hidden="true"><img src="{{ background_image }}" alt="" loading="lazy"></div>
+  {% endif %}
+  <div class="zone-libre__inner zone-libre__inner--{{ width }}">
+    <div class="zone-libre__columns">
+      {% for column in columns if column is mapping %}
+        {% set span = column.get('span', '12')|string %}
+        {% if span not in ('2', '3', '4', '5', '6', '7', '8', '9', '10', '12') %}{% set span = '12' %}{% endif %}
+        {% set align = column.get('align', 'left') %}
+        {% if align not in ('left', 'center', 'right') %}{% set align = 'left' %}{% endif %}
+        {% set elements = column.get('elements', []) %}
+        {% if elements is not sequence or elements is string %}{% set elements = [] %}{% endif %}
+        <div class="zone-libre__column zone-libre__column--span-{{ span }} zone-libre__column--align-{{ align }}">
+          {% for item in elements if item is mapping %}
+            {% set kind = item.get('type', '') %}
+            {% if kind == 'heading' %}
+              {% set level = item.get('level', 'h2') %}
+              {% if level == 'h2' %}<h2 class="zone-libre__heading">{{ item.get('text', '')|inline }}</h2>
+              {% elif level == 'h3' %}<h3 class="zone-libre__heading">{{ item.get('text', '')|inline }}</h3>
+              {% elif level == 'h4' %}<h4 class="zone-libre__heading">{{ item.get('text', '')|inline }}</h4>{% endif %}
+            {% elif kind == 'text' %}
+              <div class="zone-libre__text prose">{{ item.get('text', '')|rich }}</div>
+            {% elif kind == 'button' %}
+              {% set href = item.get('href', '')|safe_href %}
+              {% set role = item.get('role', 'principal') %}
+              {% if role == 'principal' %}{% set button_class = 'pill pill--filled' %}
+              {% elif role == 'secondaire' %}{% set button_class = 'pill' %}
+              {% else %}{% set button_class = 'text-link' %}{% endif %}
+              {% if href and item.get('label') %}<a class="{{ button_class }}" href="{{ href }}">{{ item.get('label') }}</a>{% endif %}
+            {% elif kind == 'image' %}
+              {% set src = item.get('src', '')|safe_media %}
+              {% if src %}<figure class="zone-libre__image"><img src="{{ src }}" alt="{{ item.get('alt', '') }}" loading="lazy"></figure>{% endif %}
+            {% elif kind == 'list' %}
+              {% set entries = item.get('items', []) %}
+              {% if entries is sequence and entries is not string and entries %}<ul class="zone-libre__list">{% for entry in entries %}<li>{{ entry }}</li>{% endfor %}</ul>{% endif %}
+            {% elif kind == 'divider' %}
+              <hr class="zone-libre__divider">
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>

@@ -36,6 +36,7 @@ def test_visual_admin_route_mounts_saved_project_and_theme(client: TestClient, d
     config = json.loads(match.group(1))
     assert config["page"]["id"] == page_id
     assert config["api"] == "/api/editor"
+    assert config["preview_api"] == f"/api/admin/pages/{page_id}/visual-preview"
     assert config["draft_version"] == 0
     assert config["project"]["project_data"]["pages"]
     assert config["theme_styles"] == ["/assets/site.css", "/assets/site-extras.css", "/assets/site-noscript.css"]
@@ -128,7 +129,7 @@ def test_visual_editor_rebuilds_legacy_pilot_projects_from_all_page_sections(cli
     config = json.loads(match.group(1))
     project = config["project"]
     components = project["project_data"]["pages"][0]["frames"][0]["component"]["components"]
-    assert project["theme_version"] == 2
+    assert project["theme_version"] == 3
     assert config["draft_version"] == 7
     assert [item["attributes"]["data-sjd-section"] for item in components] == ["chapter", "hero", "etude-de-cas", "cta-final"]
     assert [int(item["attributes"]["data-sjd-section-id"]) for item in components] == section_ids
@@ -140,7 +141,7 @@ def test_visual_editor_rebuilds_legacy_pilot_projects_from_all_page_sections(cli
         published_components = published["project_data"]["pages"][0]["frames"][0]["component"]["components"]
         assert [item["attributes"]["data-sjd-section"] for item in published_components] == ["chapter", "hero", "etude-de-cas", "cta-final"]
         assert json.loads(published_components[0]["attributes"]["data-sjd-data"])["title"] == "Titre publié"
-        assert row["draft_version"] == 7 and row["theme_version"] == 2
+        assert row["draft_version"] == 7 and row["theme_version"] == 3
     finally:
         conn.close()
 
@@ -200,3 +201,91 @@ def test_page_update_requires_valid_csrf(client: TestClient, db_file) -> None:
         cookies=session_cookies(),
     )
     assert response.status_code == 403
+
+
+def test_visual_preview_renders_unsaved_project_with_real_theme_markup(client: TestClient, db_file) -> None:
+    page_id, section_id = seed_page(db_file)
+    cookies = session_cookies()
+    editor_response = client.get(f"/admin/pages/{page_id}", cookies=cookies)
+    assert editor_response.status_code == 200
+    match = CONFIG_RE.search(editor_response.text)
+    assert match is not None
+    config = json.loads(match.group(1))
+    project = config["project"]
+    component = project["project_data"]["pages"][0]["frames"][0]["component"]["components"][0]
+    assert component["attributes"]["data-sjd-section-id"] == str(section_id)
+    data = json.loads(component["attributes"]["data-sjd-data"])
+    data["title"] = "Aperçu dynamique sans sauvegarde"
+    component["attributes"]["data-sjd-data"] = json.dumps(data, ensure_ascii=False)
+
+    response = client.post(
+        f"/api/admin/pages/{page_id}/visual-preview",
+        json={"project": project},
+        cookies=cookies,
+        headers={"Origin": "http://testserver", "X-SJD-CSRF": config["csrf"]},
+    )
+
+    assert response.status_code == 200, response.text
+    assert "Aperçu dynamique sans sauvegarde" in response.text
+    assert 'class="s-chap reveal"' in response.text
+    assert 'class="sjd-editor-preview sjd-editor-preview-chapter"' not in response.text
+    assert "/assets/site.css" in response.text
+    assert "data-edit-mode=\"1\"" not in response.text
+    conn = connect(db_file)
+    try:
+        saved = json.loads(conn.execute("SELECT data FROM sections WHERE id = ?", (section_id,)).fetchone()[0])
+        assert saved["title"] == "Titre publié"
+    finally:
+        conn.close()
+
+
+def test_visual_preview_requires_admin(client: TestClient, db_file) -> None:
+    page_id, _ = seed_page(db_file)
+    response = client.post(
+        f"/api/admin/pages/{page_id}/visual-preview",
+        json={"project": {}},
+        headers={"Origin": "http://testserver"},
+    )
+    assert response.status_code == 401
+
+
+def test_visual_preview_requires_csrf(client: TestClient, db_file) -> None:
+    page_id, _ = seed_page(db_file)
+    response = client.post(
+        f"/api/admin/pages/{page_id}/visual-preview",
+        json={"project": {}},
+        cookies=session_cookies(),
+        headers={"Origin": "http://testserver"},
+    )
+    assert response.status_code == 403
+
+
+def test_visual_preview_rejects_sections_owned_by_another_page(client: TestClient, db_file) -> None:
+    page_id, _ = seed_page(db_file)
+    conn = connect(db_file)
+    try:
+        other_page_id = conn.execute(
+            "INSERT INTO pages (slug, kind, title, status) VALUES ('autre-page', 'page', 'Autre page', 'publie')"
+        ).lastrowid
+        other_section_id = conn.execute(
+            "INSERT INTO sections (page_id, position, type, data) VALUES (?, 0, 'chapter', '{}')",
+            (other_page_id,),
+        ).lastrowid
+        conn.commit()
+    finally:
+        conn.close()
+    cookies = session_cookies()
+    config_response = client.get(f"/admin/pages/{page_id}", cookies=cookies)
+    match = CONFIG_RE.search(config_response.text)
+    assert match is not None
+    config = json.loads(match.group(1))
+    project = config["project"]
+    component = project["project_data"]["pages"][0]["frames"][0]["component"]["components"][0]
+    component["attributes"]["data-sjd-section-id"] = str(other_section_id)
+    response = client.post(
+        f"/api/admin/pages/{page_id}/visual-preview",
+        json={"project": project},
+        cookies=cookies,
+        headers={"Origin": "http://testserver", "X-SJD-CSRF": config["csrf"]},
+    )
+    assert response.status_code == 400

@@ -21,12 +21,17 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Resp
 from markupsafe import Markup
 
 from . import repo
+from . import public as public_module
 from . import security
 from . import sections as sections_module
 from . import settings as settings_module
 from .db import connect as db_connect
 from .db import content_revision
 from .render import build_env, json_load, render_page, sanitize_html
+from sujee_editor.blocks import DEFAULT_BLOCKS, validate_data
+from sujee_editor.editor.project import ProjectError, project_to_sections
+from sujee_editor.routes import MAX_VISUAL_PROJECT_BYTES
+from sujee_editor.tokens import CSRF_HEADER, verify_csrf
 
 router = APIRouter()
 api = APIRouter()
@@ -268,6 +273,7 @@ def _render_visual_page(request: Request, conn: sqlite3.Connection, page_id: int
         return HTMLResponse(f"Éditeur visuel indisponible : {html.escape(str(exc))}", status_code=409)
     config = {
         "api": "/api/editor",
+        "preview_api": f"/api/admin/pages/{page_id}/visual-preview",
         "page": _page_payload(page),
         "csrf": _admin_csrf(request),
         "draft_version": int(row["draft_version"]),
@@ -415,6 +421,64 @@ def api_page(request: Request, page_id: int, _: str = Depends(require_admin)) ->
                 }
             )
         return {"page": _page_payload(page), "sections": sections}
+    finally:
+        conn.close()
+
+
+@api.post("/pages/{page_id}/visual-preview", response_class=HTMLResponse)
+async def api_visual_preview(
+    request: Request,
+    page_id: int,
+    _: str = Depends(require_admin),
+    __: None = Depends(check_origin),
+) -> HTMLResponse:
+    """Render the unsaved visual project through the real public templates."""
+    editor = getattr(request.app.state, "editor", None)
+    if editor is None or not verify_csrf(request.headers.get(CSRF_HEADER, ""), editor.session_secret):
+        raise HTTPException(status_code=403, detail="jeton CSRF invalide")
+    raw_payload = await request.body()
+    if len(raw_payload) > MAX_VISUAL_PROJECT_BYTES:
+        raise HTTPException(status_code=413, detail="projet visuel trop volumineux")
+    try:
+        payload = json.loads(raw_payload)
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(status_code=400, detail="JSON invalide") from exc
+    if not isinstance(payload, dict) or not isinstance(payload.get("project"), dict):
+        raise HTTPException(status_code=400, detail="projet visuel manquant")
+    try:
+        sections = project_to_sections(payload["project"])
+    except ProjectError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    conn = _conn(request)
+    try:
+        page = _page_or_404(conn, page_id)
+        existing = {
+            int(row["id"]): str(row["type"])
+            for row in conn.execute("SELECT id, type FROM sections WHERE page_id = ?", (page_id,))
+        }
+        for section in sections:
+            identifier = section.get("id")
+            if identifier is not None and existing.get(int(identifier)) != section.get("type"):
+                raise HTTPException(status_code=400, detail="section étrangère ou type modifié")
+        extra: dict[str, Any] = {"editor_preview": True}
+        if page["kind"] == "realisation":
+            extra["breadcrumb"] = "Réalisations"
+        ctx = public_module.build_ctx(request, conn, page, extra)
+        ctx["body_class"] = "project-page" if page["kind"] == "realisation" else ""
+        ctx["editor_enabled"] = False
+        ctx["edit"] = False
+        ctx["form_token"] = ""
+        ctx["seo"]["robots"] = "noindex,nofollow"
+        rendered = render_page(
+            public_module.ENV,
+            page=page,
+            sections=sections,
+            ctx=ctx,
+            template="pages/page.html",
+            use_cache=False,
+        )
+        return HTMLResponse(rendered, headers={"Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow"})
     finally:
         conn.close()
 
@@ -586,6 +650,8 @@ async def api_update_section(request: Request, section_id: int, _: str = Depends
         if "data" in payload and isinstance(payload["data"], dict):
             current = json_load(row["data"], {})
             current.update(payload["data"])
+            if row["type"] == "zone-libre" and validate_data(DEFAULT_BLOCKS["zone-libre"], current):
+                raise HTTPException(status_code=400, detail="données de composition invalides")
             values["data"] = current
         repo.update_section(conn, section_id, values)
         conn.commit()

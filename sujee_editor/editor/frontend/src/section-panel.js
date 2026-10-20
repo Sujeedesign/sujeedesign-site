@@ -22,6 +22,41 @@ function setAtPath(data, path, value) {
   parent[/^\d+$/.test(key) ? Number(key) : key] = value;
 }
 
+function rebalanceColumns(columns, changedIndex = null) {
+  if (!Array.isArray(columns) || columns.length === 0) return;
+  const count = columns.length;
+  if (count === 1) {
+    columns[0].span = '12';
+    return;
+  }
+  const spans = columns.map((column) => Number(column?.span));
+  const valid = spans.every((span) => Number.isInteger(span) && span >= 2) && spans.reduce((sum, span) => sum + span, 0) === 12;
+  if (changedIndex == null && valid) return;
+
+  if (Number.isInteger(changedIndex) && columns[changedIndex]) {
+    const max = 12 - 2 * (count - 1);
+    const proposed = Number(columns[changedIndex].span);
+    const selected = Math.max(2, Math.min(max, Number.isFinite(proposed) ? proposed : Math.floor(12 / count)));
+    columns[changedIndex].span = String(selected);
+    const others = columns.map((_, index) => index).filter((index) => index !== changedIndex);
+    let remaining = 12 - selected;
+    const base = Math.floor(remaining / others.length);
+    let extra = remaining % others.length;
+    for (const index of others) {
+      columns[index].span = String(base + (extra > 0 ? 1 : 0));
+      extra -= 1;
+    }
+    return;
+  }
+
+  const base = Math.floor(12 / count);
+  let extra = 12 % count;
+  for (const [index, column] of columns.entries()) {
+    column.span = String(base + (extra > 0 ? 1 : 0));
+    extra -= 1;
+  }
+}
+
 function readData(component, schema) {
   try {
     const parsed = JSON.parse(component.getAttributes()['data-sjd-data'] || '{}');
@@ -48,10 +83,21 @@ export function mountSectionPanel({ root, editor, blockSchema, mediaClient }) {
     if (!selected || !schema) return;
     const next = readData(selected, schema);
     setAtPath(next, path, value);
-    selected.addAttributes({
+    if (schema.name === 'zone-libre') {
+      const parts = path.split('.');
+      if (path === 'columns') rebalanceColumns(next.columns);
+      else if (parts[0] === 'columns' && parts.length === 3 && parts[2] === 'span' && Number.isInteger(Number(parts[1]))) {
+        rebalanceColumns(next.columns, Number(parts[1]));
+      }
+    }
+    const attributes = {
       'data-sjd-data': JSON.stringify(next),
       'data-sjd-variant': String(next._variant || ''),
-    });
+    };
+    if (schema.name === 'chapter' && typeof next.dark === 'boolean') {
+      attributes['data-sjd-dark'] = next.dark ? '1' : '0';
+    }
+    selected.addAttributes(attributes);
     const plainField = selected.find(`[data-sjd-field="${CSS.escape(path)}"]`)[0];
     if (plainField && ['text', 'text/html'].includes(plainField.get('type'))) {
       plainField.set('content', String(value ?? ''));
@@ -71,13 +117,19 @@ export function mountSectionPanel({ root, editor, blockSchema, mediaClient }) {
         const card = element('fieldset', { class: 'section-repeat-item' });
         const legend = element('legend', {}, `${field.label || field.name} ${index + 1}`);
         card.append(legend);
-        for (const sub of field.fields || []) card.append(addControl(sub, `${path}.${index}.${sub.name}`, itemValue?.[sub.name] ?? fieldDefault(sub)));
+        const elementFields = schema?.name === 'zone-libre' && field.name === 'elements'
+          ? new Set(({ heading: ['type', 'text', 'level'], text: ['type', 'text'], button: ['type', 'label', 'href', 'role'], image: ['type', 'src', 'alt'], list: ['type', 'items'], divider: ['type'] })[itemValue?.type] || ['type'])
+          : null;
+        for (const sub of field.fields || []) {
+          if (!elementFields || elementFields.has(sub.name)) card.append(addControl(sub, `${path}.${index}.${sub.name}`, itemValue?.[sub.name] ?? fieldDefault(sub)));
+        }
         const actions = element('div', { class: 'section-repeat-actions' });
         const up = element('button', { type: 'button', 'aria-label': `Monter ${legend.textContent}` }, '↑');
         const down = element('button', { type: 'button', 'aria-label': `Descendre ${legend.textContent}` }, '↓');
         const remove = element('button', { type: 'button', 'aria-label': `Supprimer ${legend.textContent}` }, 'Supprimer');
         up.disabled = index === 0;
         down.disabled = index === list.length - 1;
+        remove.disabled = schema?.name === 'zone-libre' && field.name === 'columns' && list.length <= 1;
         up.addEventListener('click', () => reorder(path, index, index - 1));
         down.addEventListener('click', () => reorder(path, index, index + 1));
         remove.addEventListener('click', () => { const next = (getAtPath(readData(selected, schema), path) || []).map(clone); next.splice(index, 1); commit(path, next); refresh(); });
@@ -104,9 +156,21 @@ export function mountSectionPanel({ root, editor, blockSchema, mediaClient }) {
       control.addEventListener('change', () => commit(path, control.checked));
     } else if (field.kind === 'choice') {
       control = element('select', { id, 'data-field-editor': path });
-      for (const choice of field.choices || []) control.append(element('option', { value: choice }, choice));
+      const parts = path.split('.');
+      let choices = [...(field.choices || [])];
+      if (schema?.name === 'zone-libre' && parts[0] === 'columns' && parts.length === 3 && parts[2] === 'span') {
+        const count = (getAtPath(readData(selected, schema), 'columns') || []).length;
+        const max = count <= 1 ? 12 : 12 - 2 * (count - 1);
+        choices = choices.filter((choice) => Number(choice) <= max);
+      }
+      for (const choice of choices) control.append(element('option', { value: choice }, choice));
       control.value = String(value ?? '');
-      control.addEventListener('change', () => commit(path, control.value));
+      control.addEventListener('change', () => {
+        commit(path, control.value);
+        const spanChanged = schema?.name === 'zone-libre' && parts[0] === 'columns' && parts.length === 3 && parts[2] === 'span';
+        const elementTypeChanged = schema?.name === 'zone-libre' && parts[0] === 'columns' && parts[2] === 'elements' && parts[4] === 'type';
+        if (spanChanged || elementTypeChanged) refresh();
+      });
     } else if (field.kind === 'number') {
       control = element('input', { type: 'number', id, 'data-field-editor': path });
       control.value = Number.isFinite(Number(value)) ? String(value) : '';

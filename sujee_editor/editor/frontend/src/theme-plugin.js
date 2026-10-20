@@ -109,7 +109,7 @@ export function registerSujeeTheme(editor, blockSchema = {}) {
       droppable: false,
       stylable: false,
       resizable: false,
-      traits: key === 'chapter' ? [{ type: 'select', name: 'data-sjd-dark', label: 'Fond', options: [{ id: '0', name: 'Clair' }, { id: '1', name: 'Sombre' }] }] : [],
+      traits: [],
     };
     editor.DomComponents.addType(componentId, {
       isComponent(element) {
