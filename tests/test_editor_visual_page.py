@@ -6,7 +6,8 @@ import re
 from fastapi.testclient import TestClient
 
 from app.db import connect
-from sujee_editor.blocks import DEFAULT_BLOCKS
+from sujee_editor.blocks import DEFAULT_BLOCKS, default_data
+from sujee_editor.editor.project import sections_to_project
 from tests.test_editor_bootstrap import seed_page, session_cookies
 
 CONFIG_RE = re.compile(r'<script id="visual-config" type="application/json">(.*?)</script>', re.S)
@@ -81,6 +82,66 @@ def test_visual_config_contains_page_settings_and_csrf(client: TestClient, db_fi
     assert config["page"]["id"] == page_id
     assert {"title", "slug", "kind", "excerpt", "cover", "cover_alt", "client", "year", "num", "position", "categories", "external_url", "in_menu", "menu_label", "menu_position", "seo_title", "seo_description", "og_image", "robots", "meta"} <= set(config["page"])
     assert config["csrf"]
+
+
+def test_visual_editor_rebuilds_legacy_pilot_projects_from_all_page_sections(client: TestClient, db_file) -> None:
+    page_id, chapter_id = seed_page(db_file)
+    conn = connect(db_file)
+    try:
+        section_ids = [chapter_id]
+        for position, name in enumerate(("hero", "etude-de-cas", "cta-final"), start=1):
+            block = DEFAULT_BLOCKS[name]
+            data = default_data(block)
+            cursor = conn.execute(
+                "INSERT INTO sections (page_id, position, type, label, data) VALUES (?, ?, ?, ?, ?)",
+                (page_id, position, name, block.label, json.dumps(data, ensure_ascii=False)),
+            )
+            section_ids.append(int(cursor.lastrowid or 0))
+        legacy = sections_to_project([{
+            "id": chapter_id, "position": 0, "type": "chapter",
+            "data": {"title": "Titre publié", "body": "<p>Texte</p>", "dark": False},
+        }])
+        legacy["theme_version"] = 1
+        legacy["project_data"]["pages"][0]["frames"][0]["component"]["components"][0]["attributes"].pop("data-sjd-data")
+        draft = sections_to_project([{
+            "id": chapter_id, "position": 0, "type": "chapter",
+            "data": {"title": "Brouillon hérité", "body": "<p>Texte</p>", "dark": False},
+        }])
+        draft["theme_version"] = 1
+        encoded_draft = json.dumps(draft, ensure_ascii=False)
+        encoded_published = json.dumps(legacy, ensure_ascii=False)
+        conn.execute(
+            "INSERT INTO visual_projects (page_id, draft_project_json, published_project_json, draft_version, theme_id, theme_version) "
+            "VALUES (?, ?, ?, 7, 'sujee-site', 1)",
+            (page_id, encoded_draft, encoded_published),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+    response = client.get(f"/admin/pages/{page_id}", cookies=session_cookies())
+
+    assert response.status_code == 200, response.text
+    match = CONFIG_RE.search(response.text)
+    assert match is not None
+    config = json.loads(match.group(1))
+    project = config["project"]
+    components = project["project_data"]["pages"][0]["frames"][0]["component"]["components"]
+    assert project["theme_version"] == 2
+    assert config["draft_version"] == 7
+    assert [item["attributes"]["data-sjd-section"] for item in components] == ["chapter", "hero", "etude-de-cas", "cta-final"]
+    assert [int(item["attributes"]["data-sjd-section-id"]) for item in components] == section_ids
+    assert json.loads(components[0]["attributes"]["data-sjd-data"])["title"] == "Brouillon hérité"
+    conn = connect(db_file)
+    try:
+        row = conn.execute("SELECT draft_project_json, published_project_json, draft_version, theme_version FROM visual_projects WHERE page_id = ?", (page_id,)).fetchone()
+        published = json.loads(row["published_project_json"])
+        published_components = published["project_data"]["pages"][0]["frames"][0]["component"]["components"]
+        assert [item["attributes"]["data-sjd-section"] for item in published_components] == ["chapter", "hero", "etude-de-cas", "cta-final"]
+        assert json.loads(published_components[0]["attributes"]["data-sjd-data"])["title"] == "Titre publié"
+        assert row["draft_version"] == 7 and row["theme_version"] == 2
+    finally:
+        conn.close()
 
 
 def test_visual_editor_blocks_pages_with_unsupported_section_types(client: TestClient, db_file) -> None:

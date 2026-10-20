@@ -9,13 +9,13 @@ from __future__ import annotations
 import json
 import secrets
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, Mapping
 from urllib.parse import urlsplit
 
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse
 
-from .blocks import Block, ValidationError
+from .blocks import Block, DEFAULT_BLOCKS, Kind, ValidationError
 from .editor.project import ProjectError, migrate_project, project_to_sections, sections_to_project
 from .editor.theme import SUPPORTED_SECTION_TYPES, THEME_ID, THEME_VERSION
 from .store import (
@@ -67,6 +67,124 @@ def default_page_path(page: dict[str, Any]) -> str:
     if kind == "service":
         return f"/services/{slug}"
     return f"/{slug}"
+
+
+def ensure_visual_project(store: Store, conn: Any, page_id: int) -> Any:
+    """Create or migrate the editor project against the complete current page.
+
+    Pilot projects contain only the section types known at their creation. On
+    the GrapesJS cutover, import the missing sections from the authoritative
+    page state, while retaining compatible unsaved values from the old draft.
+    Refuse an ambiguous migration rather than discard content.
+    """
+    state = store.page_state(conn, int(page_id))
+    source_sections = [section.serialize() for section in state.sections]
+    source_project = sections_to_project(source_sections)
+    source_typed = project_to_sections(source_project)
+    row = conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (int(page_id),)).fetchone()
+
+    def normalized(section: Mapping[str, Any]) -> dict[str, Any]:
+        result = dict(section)
+        data = dict(section.get("data") or {})
+        block = DEFAULT_BLOCKS.get(str(section.get("type") or ""))
+        if block is not None:
+            for field in block.fields:
+                if field.kind is Kind.LINES and field.name in data:
+                    value = data[field.name]
+                    if value in (None, ""):
+                        data[field.name] = []
+                    elif isinstance(value, str):
+                        data[field.name] = value.splitlines()
+        result["data"] = data
+        return result
+
+    source_typed = [normalized(section) for section in source_typed]
+
+    def signature(section: Mapping[str, Any]) -> tuple[Any, ...]:
+        item = normalized(section)
+        return (item.get("type"), item.get("variant"), bool(item.get("visible", True)), item.get("data"))
+
+    if row is not None:
+        if row["theme_id"] != THEME_ID:
+            raise ProjectError("identifiant de thème non pris en charge")
+        draft_text = str(row["draft_project_json"] or "")
+        published_text = str(row["published_project_json"] or "")
+        old_theme = int(row["theme_version"])
+        try:
+            draft = migrate_project(json.loads(draft_text))
+            published = migrate_project(json.loads(published_text))
+            draft_sections = project_to_sections(draft)
+            published_sections = project_to_sections(published)
+            if old_theme < THEME_VERSION:
+                draft_sections = [normalized(section) for section in draft_sections]
+                published_sections = [normalized(section) for section in published_sections]
+            draft = sections_to_project(draft_sections)
+            published = sections_to_project(published_sections)
+        except (json.JSONDecodeError, TypeError, ProjectError) as exc:
+            raise ProjectError(f"projet visuel stocké invalide : {exc}") from exc
+        if old_theme < THEME_VERSION:
+            published_by_id = {section["id"]: section for section in published_sections if section["id"] is not None}
+            source_by_id = {section["id"]: section for section in source_typed if section["id"] is not None}
+            if any(identifier not in source_by_id for identifier in published_by_id):
+                raise ProjectError("la page a changé depuis le projet pilote; réconciliation manuelle requise")
+            for identifier, old_section in published_by_id.items():
+                current = source_by_id[identifier]
+                if signature(old_section) != signature(current):
+                    raise ProjectError("le contenu a changé depuis le projet pilote; réconciliation manuelle requise")
+
+            draft_by_id = {section["id"]: section for section in draft_sections if section["id"] is not None}
+            published_ids = [section["id"] for section in published_sections if section["id"] is not None]
+            draft_ids = [section["id"] for section in draft_sections if section["id"] is not None]
+            if draft_ids != [identifier for identifier in published_ids if identifier in draft_by_id]:
+                raise ProjectError("le brouillon pilote a réordonné des sections; réconciliation manuelle requise")
+            if any(identifier not in published_by_id for identifier in draft_by_id):
+                raise ProjectError("le brouillon pilote contient une section étrangère; réconciliation manuelle requise")
+
+            merged: list[dict[str, Any]] = []
+            for current in source_typed:
+                identifier = current["id"]
+                if identifier in published_by_id and identifier not in draft_by_id:
+                    continue
+                legacy_draft = draft_by_id.get(identifier)
+                if legacy_draft is not None and signature(legacy_draft) != signature(published_by_id[identifier]):
+                    current = {**current, "data": legacy_draft["data"], "visible": legacy_draft["visible"], "variant": legacy_draft["variant"]}
+                merged.append(current)
+            merged.extend(section for section in draft_sections if section["id"] is None)
+            draft = sections_to_project(merged)
+            published = source_project
+
+        encoded_draft = json.dumps(draft, ensure_ascii=False, separators=(",", ":"))
+        encoded_published = json.dumps(published, ensure_ascii=False, separators=(",", ":"))
+        if (
+            old_theme != THEME_VERSION
+            or draft_text != encoded_draft
+            or published_text != encoded_published
+        ):
+            conn.execute("BEGIN IMMEDIATE")
+            try:
+                updated = conn.execute(
+                    "UPDATE visual_projects SET draft_project_json = ?, published_project_json = ?, theme_id = ?, theme_version = ?, updated_at = datetime('now') "
+                    "WHERE page_id = ? AND draft_version = ? AND theme_id = ? AND theme_version = ? AND draft_project_json = ? AND published_project_json = ?",
+                    (encoded_draft, encoded_published, THEME_ID, THEME_VERSION, int(page_id), int(row["draft_version"]), row["theme_id"], old_theme, draft_text, published_text),
+                )
+                if updated.rowcount != 1:
+                    raise ProjectError("projet visuel modifié pendant sa migration")
+                conn.commit()
+            except Exception:
+                conn.rollback()
+                raise
+            row = conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (int(page_id),)).fetchone()
+        return row
+
+    encoded = json.dumps(source_project, ensure_ascii=False, separators=(",", ":"))
+    conn.execute(
+        "INSERT OR IGNORE INTO visual_projects "
+        "(page_id, draft_project_json, published_project_json, draft_version, theme_id, theme_version) "
+        "VALUES (?, ?, ?, 0, ?, ?)",
+        (int(page_id), encoded, encoded, THEME_ID, THEME_VERSION),
+    )
+    conn.commit()
+    return conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (int(page_id),)).fetchone()
 
 
 def build_router(
@@ -176,53 +294,7 @@ def build_router(
             conn.close()
 
     def _ensure_visual_project(conn: Any, page_id: int) -> Any:
-        state = store.page_state(conn, page_id)
-        row = conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (int(page_id),)).fetchone()
-        if row is not None:
-            if row["theme_id"] != THEME_ID:
-                raise ProjectError("identifiant de thème non pris en charge")
-            draft_text = str(row["draft_project_json"] or "")
-            published_text = str(row["published_project_json"] or "")
-            try:
-                draft = json.loads(draft_text)
-                published = json.loads(published_text)
-                draft = migrate_project(draft)
-                published = migrate_project(published)
-                # Canonical typed conversion adds the data attribute required by
-                # the schema panel while retaining the v1 section IDs and values.
-                draft = sections_to_project(project_to_sections(draft))
-                published = sections_to_project(project_to_sections(published))
-            except (json.JSONDecodeError, TypeError, ProjectError) as exc:
-                raise ProjectError(f"projet visuel stocké invalide : {exc}") from exc
-            if int(row["theme_version"]) != THEME_VERSION or draft_text != json.dumps(draft, ensure_ascii=False, separators=(",", ":")) or published_text != json.dumps(published, ensure_ascii=False, separators=(",", ":")):
-                encoded_draft = json.dumps(draft, ensure_ascii=False, separators=(",", ":"))
-                encoded_published = json.dumps(published, ensure_ascii=False, separators=(",", ":"))
-                conn.execute("BEGIN IMMEDIATE")
-                try:
-                    updated = conn.execute(
-                        "UPDATE visual_projects SET draft_project_json = ?, published_project_json = ?, theme_id = ?, theme_version = ?, updated_at = datetime('now') "
-                        "WHERE page_id = ? AND draft_version = ? AND theme_id = ? AND theme_version = ? AND draft_project_json = ? AND published_project_json = ?",
-                        (encoded_draft, encoded_published, THEME_ID, THEME_VERSION, int(page_id), int(row["draft_version"]), row["theme_id"], int(row["theme_version"]), draft_text, published_text),
-                    )
-                    if updated.rowcount != 1:
-                        raise ProjectError("projet visuel modifié pendant sa migration")
-                    conn.commit()
-                except Exception:
-                    conn.rollback()
-                    raise
-                row = conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (int(page_id),)).fetchone()
-            return row
-        supported = [section.serialize() for section in state.sections if section.type in SUPPORTED_SECTION_TYPES]
-        project = sections_to_project(supported)
-        encoded = json.dumps(project, ensure_ascii=False, separators=(",", ":"))
-        conn.execute(
-            "INSERT OR IGNORE INTO visual_projects "
-            "(page_id, draft_project_json, published_project_json, draft_version, theme_id, theme_version) "
-            "VALUES (?, ?, ?, 0, ?, ?)",
-            (int(page_id), encoded, encoded, THEME_ID, THEME_VERSION),
-        )
-        conn.commit()
-        return conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (int(page_id),)).fetchone()
+        return ensure_visual_project(store, conn, page_id)
 
     async def _visual_payload(request: Request) -> dict[str, Any]:
         content_length = request.headers.get("content-length", "")

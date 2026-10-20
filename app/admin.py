@@ -252,8 +252,9 @@ def _render_visual_page(request: Request, conn: sqlite3.Connection, page_id: int
     editor = request.app.state.editor
     state = editor.store.page_state(conn, page_id)
     from sujee_editor.blocks import DEFAULT_BLOCKS
-    from sujee_editor.editor.project import ProjectError, sections_to_project
-    from sujee_editor.editor.theme import SUPPORTED_SECTION_TYPES, THEME_ID, THEME_VERSION
+    from sujee_editor.editor.project import ProjectError
+    from sujee_editor.editor.theme import SUPPORTED_SECTION_TYPES
+    from sujee_editor.routes import ensure_visual_project
 
     unsupported = [section for section in state.sections if section.type not in SUPPORTED_SECTION_TYPES]
     if unsupported:
@@ -261,21 +262,10 @@ def _render_visual_page(request: Request, conn: sqlite3.Connection, page_id: int
         message = "Éditeur visuel indisponible : import non lossless pour ces sections : " + html.escape(", ".join(labels))
         return HTMLResponse(message + ". Les sections et le projet de la page restent inchangés.", status_code=409)
 
-    row = conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (page_id,)).fetchone()
-    if row is None:
-        try:
-            editable_sections = [section.serialize() for section in state.sections]
-            project = sections_to_project(editable_sections)
-        except ProjectError as exc:
-            return HTMLResponse(f"Éditeur visuel indisponible : {html.escape(str(exc))}", status_code=409)
-        encoded = json.dumps(project, ensure_ascii=False, separators=(",", ":"))
-        conn.execute(
-            "INSERT OR IGNORE INTO visual_projects (page_id, draft_project_json, published_project_json, "
-            "draft_version, theme_id, theme_version) VALUES (?, ?, ?, 0, ?, ?)",
-            (page_id, encoded, encoded, THEME_ID, THEME_VERSION),
-        )
-        conn.commit()
-        row = conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (page_id,)).fetchone()
+    try:
+        row = ensure_visual_project(editor.store, conn, page_id)
+    except ProjectError as exc:
+        return HTMLResponse(f"Éditeur visuel indisponible : {html.escape(str(exc))}", status_code=409)
     config = {
         "api": "/api/editor",
         "page": _page_payload(page),
