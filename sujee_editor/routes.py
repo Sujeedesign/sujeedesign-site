@@ -16,8 +16,8 @@ from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse
 
 from .blocks import Block, ValidationError
-from .editor.project import ProjectError, project_to_sections, sections_to_project
-from .editor.theme import PILOT_SECTION_TYPES, THEME_ID, THEME_VERSION
+from .editor.project import ProjectError, migrate_project, project_to_sections, sections_to_project
+from .editor.theme import SUPPORTED_SECTION_TYPES, THEME_ID, THEME_VERSION
 from .store import (
     PageState,
     SectionState,
@@ -179,8 +179,40 @@ def build_router(
         state = store.page_state(conn, page_id)
         row = conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (int(page_id),)).fetchone()
         if row is not None:
+            if row["theme_id"] != THEME_ID:
+                raise ProjectError("identifiant de thème non pris en charge")
+            draft_text = str(row["draft_project_json"] or "")
+            published_text = str(row["published_project_json"] or "")
+            try:
+                draft = json.loads(draft_text)
+                published = json.loads(published_text)
+                draft = migrate_project(draft)
+                published = migrate_project(published)
+                # Canonical typed conversion adds the data attribute required by
+                # the schema panel while retaining the v1 section IDs and values.
+                draft = sections_to_project(project_to_sections(draft))
+                published = sections_to_project(project_to_sections(published))
+            except (json.JSONDecodeError, TypeError, ProjectError) as exc:
+                raise ProjectError(f"projet visuel stocké invalide : {exc}") from exc
+            if int(row["theme_version"]) != THEME_VERSION or draft_text != json.dumps(draft, ensure_ascii=False, separators=(",", ":")) or published_text != json.dumps(published, ensure_ascii=False, separators=(",", ":")):
+                encoded_draft = json.dumps(draft, ensure_ascii=False, separators=(",", ":"))
+                encoded_published = json.dumps(published, ensure_ascii=False, separators=(",", ":"))
+                conn.execute("BEGIN IMMEDIATE")
+                try:
+                    updated = conn.execute(
+                        "UPDATE visual_projects SET draft_project_json = ?, published_project_json = ?, theme_id = ?, theme_version = ?, updated_at = datetime('now') "
+                        "WHERE page_id = ? AND draft_version = ? AND theme_id = ? AND theme_version = ? AND draft_project_json = ? AND published_project_json = ?",
+                        (encoded_draft, encoded_published, THEME_ID, THEME_VERSION, int(page_id), int(row["draft_version"]), row["theme_id"], int(row["theme_version"]), draft_text, published_text),
+                    )
+                    if updated.rowcount != 1:
+                        raise ProjectError("projet visuel modifié pendant sa migration")
+                    conn.commit()
+                except Exception:
+                    conn.rollback()
+                    raise
+                row = conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (int(page_id),)).fetchone()
             return row
-        supported = [section.serialize() for section in state.sections if section.type in PILOT_SECTION_TYPES]
+        supported = [section.serialize() for section in state.sections if section.type in SUPPORTED_SECTION_TYPES]
         project = sections_to_project(supported)
         encoded = json.dumps(project, ensure_ascii=False, separators=(",", ":"))
         conn.execute(
@@ -261,6 +293,7 @@ def build_router(
         project = payload.get("project")
         try:
             sections = project_to_sections(project)
+            project = sections_to_project(sections)
         except ProjectError as exc:
             return _fail(400, "bad_project", str(exc))
         encoded = json.dumps(project, ensure_ascii=False, separators=(",", ":"))

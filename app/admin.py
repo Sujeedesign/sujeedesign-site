@@ -860,17 +860,87 @@ def api_revisions(request: Request, entity_type: str = "page", entity_id: int | 
 
 
 @api.post("/revisions/{revision_id}/restaurer")
-def api_restore(request: Request, revision_id: int, _: str = Depends(require_admin), __: None = Depends(check_origin)) -> dict:
+async def api_restore(request: Request, revision_id: int, _: str = Depends(require_admin), __: None = Depends(check_origin)) -> dict:
+    payload = await request.json()
+    if not isinstance(payload, dict):
+        raise HTTPException(status_code=400, detail="objet JSON attendu")
     conn = _conn(request)
     try:
-        row = conn.execute("SELECT * FROM revisions WHERE id = ?", (revision_id,)).fetchone()
-        if row is None:
+        revision = conn.execute("SELECT * FROM revisions WHERE id = ?", (revision_id,)).fetchone()
+        if revision is None:
             raise HTTPException(status_code=404, detail="révision introuvable")
-        snapshot = json_load(row["snapshot"], {})
-        repo.save_revision(conn, row["entity_type"], int(row["entity_id"]), repo.snapshot_page(conn, int(row["entity_id"])), "avant restauration")
-        ok = repo.restore_snapshot(conn, int(row["entity_id"]), snapshot)
-        conn.commit()
-        return {"ok": ok}
+        if revision["entity_type"] != "page":
+            snapshot = json_load(revision["snapshot"], {})
+            repo.save_revision(conn, revision["entity_type"], int(revision["entity_id"]), repo.snapshot_page(conn, int(revision["entity_id"])), "avant restauration")
+            ok = repo.restore_snapshot(conn, int(revision["entity_id"]), snapshot)
+            conn.commit()
+            return {"ok": ok}
+
+        expected = payload.get("expected_visual_version")
+        confirm = payload.get("confirm_discard_draft")
+        if isinstance(expected, bool) or not isinstance(expected, int) or expected < 0:
+            raise HTTPException(status_code=400, detail="version visuelle attendue invalide")
+        if not isinstance(confirm, bool):
+            raise HTTPException(status_code=400, detail="confirmation de brouillon invalide")
+        editor = request.app.state.editor
+        from sujee_editor.editor.project import ProjectError, migrate_project, project_to_sections, sections_to_project
+        from sujee_editor.editor.theme import PROJECT_SCHEMA_VERSION, THEME_ID, THEME_VERSION
+        from sujee_editor.tokens import CSRF_HEADER, verify_csrf
+
+        if not verify_csrf(request.headers.get(CSRF_HEADER, ""), editor.session_secret):
+            raise HTTPException(status_code=403, detail="jeton CSRF invalide")
+        page_id = int(revision["entity_id"])
+        _page_or_404(conn, page_id)
+        conn.execute("BEGIN IMMEDIATE")
+        try:
+            visual = conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (page_id,)).fetchone()
+            if visual is None:
+                state = editor.store.page_state(conn, page_id)
+                project = sections_to_project([section.serialize() for section in state.sections])
+                encoded = json.dumps(project, ensure_ascii=False, separators=(",", ":"))
+                conn.execute(
+                    "INSERT INTO visual_projects (page_id, draft_project_json, published_project_json, draft_version, theme_id, theme_version) VALUES (?, ?, ?, 0, ?, ?)",
+                    (page_id, encoded, encoded, THEME_ID, THEME_VERSION),
+                )
+                visual = conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (page_id,)).fetchone()
+            else:
+                try:
+                    draft = migrate_project(json.loads(visual["draft_project_json"]))
+                    published = migrate_project(json.loads(visual["published_project_json"]))
+                    draft = sections_to_project(project_to_sections(draft))
+                    published = sections_to_project(project_to_sections(published))
+                except (TypeError, ValueError, ProjectError) as exc:
+                    raise HTTPException(status_code=409, detail=f"projet visuel stocké invalide : {exc}") from exc
+                encoded_draft = json.dumps(draft, ensure_ascii=False, separators=(",", ":"))
+                encoded_published = json.dumps(published, ensure_ascii=False, separators=(",", ":"))
+                if visual["theme_id"] != THEME_ID or int(visual["theme_version"]) != THEME_VERSION or visual["draft_project_json"] != encoded_draft or visual["published_project_json"] != encoded_published:
+                    conn.execute(
+                        "UPDATE visual_projects SET draft_project_json = ?, published_project_json = ?, theme_id = ?, theme_version = ? WHERE page_id = ? AND draft_version = ?",
+                        (encoded_draft, encoded_published, THEME_ID, THEME_VERSION, page_id, int(visual["draft_version"])),
+                    )
+                visual = conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (page_id,)).fetchone()
+            current_version = int(visual["draft_version"])
+            if current_version != expected:
+                conn.rollback()
+                raise HTTPException(status_code=409, detail=f"version visuelle courante : {current_version}")
+            if visual["draft_project_json"] != visual["published_project_json"] and not confirm:
+                conn.rollback()
+                raise HTTPException(status_code=409, detail="un brouillon visuel non publié serait remplacé")
+
+            snapshot = json_load(revision["snapshot"], {})
+            repo.save_revision(conn, "page", page_id, repo.snapshot_page(conn, page_id), "avant restauration")
+            if not repo.restore_snapshot(conn, page_id, snapshot):
+                raise HTTPException(status_code=409, detail="révision impossible à restaurer")
+            state = editor.store.page_state(conn, page_id)
+            restored_project = sections_to_project([section.serialize() for section in state.sections])
+            new_version = editor.store.synchronize_visual_project(
+                conn, page_id=page_id, expected_version=expected, project=restored_project
+            )
+            conn.commit()
+            return {"ok": True, "visual_draft_version": new_version, "schema_version": PROJECT_SCHEMA_VERSION}
+        except Exception:
+            conn.rollback()
+            raise
     finally:
         conn.close()
 
@@ -900,6 +970,21 @@ def api_export(request: Request, _: str = Depends(require_admin)) -> JSONRespons
                 }
                 for row in repo.sections_for(conn, int(page["id"]))
             ]
+            visual = conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (int(page["id"]),)).fetchone()
+            if visual is not None:
+                try:
+                    draft_project = json.loads(visual["draft_project_json"])
+                    published_project = json.loads(visual["published_project_json"])
+                except (TypeError, json.JSONDecodeError) as exc:
+                    raise HTTPException(status_code=409, detail=f"projet visuel invalide pour la page {page['id']}") from exc
+                entry["visual_project"] = {
+                    "schema_version": int(draft_project.get("schema_version", 0)),
+                    "theme_id": str(visual["theme_id"]),
+                    "theme_version": int(visual["theme_version"]),
+                    "draft_version": int(visual["draft_version"]),
+                    "draft_project": draft_project,
+                    "published_project": published_project,
+                }
             payload["pages"].append(entry)
         return JSONResponse(
             payload,
