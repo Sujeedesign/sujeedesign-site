@@ -222,6 +222,115 @@ test('keeps the editor controls reachable at mobile, tablet and desktop widths',
   }
 });
 
+test('settings_drawer_saves page metadata and retains edits after duplicate slug errors', async ({ page }) => {
+  let payload;
+  await page.route('**/api/admin/pages/1', async (route) => {
+    if (route.request().method() === 'PATCH') {
+      payload = route.request().postDataJSON();
+      await route.fulfill({ status: 409, contentType: 'application/json', body: JSON.stringify({ error: { detail: 'Ce slug est déjà utilisé.' } }) });
+    }
+  });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Paramètres de page' }).click();
+  const drawer = page.getByRole('dialog', { name: 'Paramètres de page' });
+  await drawer.getByRole('textbox', { name: 'Titre', exact: true }).fill('Une page éditée');
+  await drawer.getByLabel('Slug').fill('deja-pris');
+  await drawer.getByLabel('Métadonnées JSON').fill('{"custom":"Valeur"}');
+  await drawer.getByRole('button', { name: 'Enregistrer les paramètres' }).click();
+  await expect(drawer.getByRole('alert')).toContainText('déjà utilisé');
+  await expect(drawer.getByRole('textbox', { name: 'Titre', exact: true })).toHaveValue('Une page éditée');
+  expect(payload).toMatchObject({ title: 'Une page éditée', slug: 'deja-pris', meta: { custom: 'Valeur' } });
+});
+
+test('page_settings_media_selection_is_submitted_for_cover_and_social_image', async ({ page }) => {
+  let payload;
+  await page.route('**/api/editor/media', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ medias: [
+    { id: 12, path: 'medias/cover.webp', alt: 'Couverture', mime: 'image/webp' },
+    { id: 13, path: 'medias/og.webp', alt: 'Partage', mime: 'image/webp' },
+  ] }) }));
+  await page.route('**/api/admin/pages/1', async (route) => {
+    payload = route.request().postDataJSON();
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ page: { id: 1, ...payload } }) });
+  });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Paramètres de page' }).click();
+  const drawer = page.getByRole('dialog', { name: 'Paramètres de page' });
+  await drawer.getByLabel('Image de couverture').selectOption('/medias/cover.webp');
+  await drawer.getByLabel('Image Open Graph').selectOption('/medias/og.webp');
+  await drawer.getByRole('button', { name: 'Enregistrer les paramètres' }).click();
+  expect(payload).toMatchObject({ cover: '/medias/cover.webp', og_image: '/medias/og.webp' });
+});
+
+ test('keeps_page_settings_usable_when_the_media_api_fails', async ({ page }) => {
+  const pageErrors = [];
+  page.on('pageerror', (error) => pageErrors.push(error.message));
+  await page.route('**/api/editor/media', (route) => route.fulfill({ status: 503, contentType: 'application/json', body: '{"detail":"indisponible"}' }));
+  await page.goto('/');
+  await page.waitForFunction(() => Boolean(window.sjdVisualEditor && document.documentElement.dataset.visualEditorReady));
+  await page.getByRole('button', { name: 'Paramètres de page' }).click();
+  await expect(page.getByRole('dialog', { name: 'Paramètres de page' })).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});
+
+test('restores_page_revisions after confirming discard of a divergent draft', async ({ page }) => {
+  const restorePayloads = [];
+  await page.route('**/api/admin/revisions?**', (route) => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ revisions: [{ id: 77, created_at: '2026-09-03T10:00:00Z', summary: 'Titre précédent' }] }),
+  }));
+  await page.route('**/api/admin/revisions/77/restaurer', async (route) => {
+    const payload = route.request().postDataJSON();
+    restorePayloads.push(payload);
+    if (restorePayloads.length === 1) {
+      await route.fulfill({ status: 409, contentType: 'application/json', body: JSON.stringify({ error: { detail: 'Brouillon divergent.' } }) });
+      return;
+    }
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ page: { id: 1, title: 'Restauré' } }) });
+  });
+  page.on('dialog', (dialog) => dialog.accept());
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Historique des versions' }).click();
+  await expect(page.getByText('Titre précédent')).toBeVisible();
+  await page.getByRole('button', { name: 'Restaurer la version Titre précédent' }).click();
+  await expect.poll(() => restorePayloads.length).toBe(2);
+  expect(restorePayloads).toEqual([
+    { expected_visual_version: 0, confirm_discard_draft: false },
+    { expected_visual_version: 0, confirm_discard_draft: true },
+  ]);
+});
+
+test('adds_all_types_and_round_trips_a_single_visual_project', async ({ page }) => {
+  await page.goto('/');
+  await page.waitForFunction(() => Boolean(window.sjdVisualEditor && document.documentElement.dataset.visualEditorReady));
+  const expectedTypes = await page.evaluate(() => window.sjdVisualEditor.BlockManager.getAll().models.map((block) => String(block.get('id')).replace(/^sjd-section-/, '')));
+  await page.evaluate(() => window.sjdVisualEditor.getWrapper().set('components', []));
+  for (const block of await page.locator('#visual-blocks .gjs-block').all()) await block.click();
+  const components = await page.evaluate(() => window.sjdVisualEditor.getWrapper().get('components').models.map((model) => {
+    const attributes = model.getAttributes();
+    return { section: attributes['data-sjd-section'], data: attributes['data-sjd-data'] };
+  }));
+  expect(components).toHaveLength(19);
+  expect(components.map((component) => component.section)).toEqual(expectedTypes);
+  const faq = components.find((component) => component.section === 'faq');
+  expect(faq).toBeTruthy();
+  await page.evaluate(() => {
+    const models = window.sjdVisualEditor.getWrapper().get('components').models;
+    const faqComponent = models.find((model) => model.getAttributes()['data-sjd-section'] === 'faq');
+    faqComponent.addAttributes({ 'data-sjd-data': JSON.stringify({ title: 'FAQ persistée', items: [{ q: 'Question imbriquée', a: 'Réponse conservée' }] }) });
+  });
+  await page.waitForTimeout(1050);
+  const project = await page.evaluate(() => window.sjdVisualEditor.getProjectData());
+  const lastSave = calls.at(-1);
+  expect(lastSave.project.project_data.pages[0].frames[0].component.components).toHaveLength(19);
+  await page.evaluate((value) => window.sjdLoadVisualProject(value), lastSave.project.project_data);
+  const reloaded = await page.evaluate(() => window.sjdVisualEditor.getProjectData());
+  const reloadedComponents = reloaded.pages[0].frames[0].component.components;
+  expect(reloadedComponents.map((component) => component.attributes['data-sjd-section'])).toEqual(expectedTypes);
+  const reloadedFaq = reloadedComponents.find((component) => component.attributes['data-sjd-section'] === 'faq');
+  expect(JSON.parse(reloadedFaq.attributes['data-sjd-data'])).toEqual({ title: 'FAQ persistée', items: [{ q: 'Question imbriquée', a: 'Réponse conservée' }] });
+  expect(project.pages[0].frames[0].component.components.map((component) => component.attributes['data-sjd-section'])).toEqual(expectedTypes);
+});
+
 test('selects a managed media asset for the image section', async ({ page }) => {
   await page.route('**/api/editor/media', (route) => route.fulfill({
     status: 200,

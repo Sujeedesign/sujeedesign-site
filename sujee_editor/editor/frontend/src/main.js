@@ -4,6 +4,8 @@ import './visual-editor.css';
 import { registerSujeeTheme, prepareThemeProject } from './theme-plugin.js';
 import { DEMO_BLOCKS } from './demo-schema.js';
 import { mountSectionPanel } from './section-panel.js';
+import { mountPageSettings } from './page-settings.js';
+import { mountRevisionPanel } from './revision-panel.js';
 
 const config = JSON.parse(document.querySelector('#visual-config')?.textContent || '{}');
 const blockSchema = config.blocks || DEMO_BLOCKS;
@@ -126,7 +128,19 @@ async function loadMediaLibrary() {
 
 const mediaClient = {
   async populate(select, currentPath, onSelect) {
-    await loadMediaLibrary();
+    try {
+      await loadMediaLibrary();
+    } catch {
+      select.replaceChildren();
+      const current = String(currentPath || '');
+      const option = document.createElement('option');
+      option.value = current;
+      option.textContent = current ? `Média actuel (${current}) · médiathèque indisponible` : 'Médiathèque indisponible';
+      select.append(option);
+      select.value = current;
+      select.disabled = !current;
+      return;
+    }
     select.replaceChildren();
     const placeholder = document.createElement('option');
     placeholder.value = '';
@@ -138,7 +152,13 @@ const mediaClient = {
       option.textContent = item.alt || item.filename || `Image ${item.id}`;
       select.append(option);
     }
-    select.value = currentPath;
+    const current = String(currentPath || '');
+    if (current && !mediaItems.some((item) => `/${normaliseMediaPath(item.path)}` === current)) {
+      const preserved = document.createElement('option');
+      preserved.value = current; preserved.textContent = `Média actuelle (${current})`;
+      select.append(preserved);
+    }
+    select.value = current;
     select.addEventListener('change', () => onSelect(select.value));
   },
 };
@@ -150,6 +170,13 @@ sectionPanelRoot.hidden = true;
 document.querySelector('#visual-traits')?.append(sectionPanelRoot);
 const sectionPanel = mountSectionPanel({ root: sectionPanelRoot, editor, blockSchema, mediaClient });
 window.sjdSectionPanel = sectionPanel;
+const pageUiRoot = document.createElement('div');
+pageUiRoot.className = 'visual-page-tools';
+document.querySelector('.visual-actions')?.prepend(pageUiRoot);
+const pageSettings = mountPageSettings({ root: pageUiRoot, page: config.page || {}, mediaClient });
+const revisionPanel = mountRevisionPanel({ root: pageUiRoot, pageId: config.page?.id, getDraftVersion: () => draftVersion });
+window.sjdPageSettings = pageSettings;
+window.sjdRevisionPanel = revisionPanel;
 
 mediaPicker.addEventListener('change', () => {
   const selected = editor.getSelected();

@@ -10,8 +10,13 @@ from fastapi.testclient import TestClient
 
 from app import security
 from app.db import connect
+from sujee_editor.tokens import make_csrf
 
 PASSWORD = "mot-de-passe-de-test"
+
+
+def _csrf(client: TestClient) -> str:
+    return make_csrf(client.app.state.editor.session_secret)
 
 
 def login(client: TestClient) -> TestClient:
@@ -59,6 +64,41 @@ def test_schema_lists_section_types(client: TestClient) -> None:
     assert any(field["name"] == "title" for field in data["types"]["hero"]["fields"])
 
 
+def test_admin_page_route_renders_grapesjs_without_classic_section_controls(client: TestClient) -> None:
+    login(client)
+    page_id = client.post("/api/admin/pages", json={"title": "Édition visuelle"}).json()["id"]
+    response = client.get(f"/admin/pages/{page_id}")
+    assert response.status_code == 200
+    assert 'id="visual-config"' in response.text
+    assert "/assets/editor/visual/visual-editor.js" in response.text
+    assert 'id="sectionList"' not in response.text
+    assert 'id="newSectionType"' not in response.text
+    assert 'id="pageForm"' not in response.text
+
+
+def test_visual_route_redirects_to_canonical_page_editor(client: TestClient) -> None:
+    login(client)
+    page_id = client.post("/api/admin/pages", json={"title": "Page redirigée"}).json()["id"]
+    response = client.get(f"/admin/visual/{page_id}", follow_redirects=False)
+    assert response.status_code == 303
+    assert response.headers["location"] == f"/admin/pages/{page_id}"
+
+
+def test_pages_module_can_change_page_status(client: TestClient) -> None:
+    login(client)
+    page_id = client.post("/api/admin/pages", json={"title": "Page à publier"}).json()["id"]
+    response = client.get("/admin/pages")
+    assert f'data-page="{page_id}"' in response.text
+    assert 'data-status="publie"' in response.text
+
+
+def test_non_page_admin_modules_still_render(client: TestClient) -> None:
+    login(client)
+    for path in ("/admin/medias", "/admin/messages", "/admin/reglages", "/admin/sauvegarde"):
+        response = client.get(path)
+        assert response.status_code == 200, path
+
+
 def test_page_lifecycle(client: TestClient) -> None:
     login(client)
     created = client.post("/api/admin/pages", json={"title": "Nouvelle réalisation", "kind": "realisation"}).json()
@@ -72,6 +112,7 @@ def test_page_lifecycle(client: TestClient) -> None:
     updated = client.patch(
         f"/api/admin/pages/{page_id}",
         json={"title": "Réalisation renommée", "excerpt": "Accroche", "categories": ["Identité", "Web"], "seo_title": "Titre SEO"},
+        headers={"X-SJD-CSRF": _csrf(client)},
     ).json()
     assert updated["page"]["title"] == "Réalisation renommée"
     assert updated["page"]["categories"] == ["Identité", "Web"]
@@ -118,12 +159,12 @@ def test_section_lifecycle_and_order(client: TestClient) -> None:
 def test_revisions_are_restorable(client: TestClient) -> None:
     login(client)
     page_id = client.post("/api/admin/pages", json={"title": "Version un"}).json()["id"]
-    client.patch(f"/api/admin/pages/{page_id}", json={"title": "Version deux"})
+    client.patch(f"/api/admin/pages/{page_id}", json={"title": "Version deux"}, headers={"X-SJD-CSRF": _csrf(client)})
     revisions = client.get(f"/api/admin/revisions?entity_type=page&entity_id={page_id}").json()["revisions"]
     assert revisions, "aucune révision enregistrée"
     restored = client.post(
         f"/api/admin/revisions/{revisions[0]['id']}/restaurer",
-        headers={"Origin": "http://testserver", "X-SJD-CSRF": security.make_token("editor")},
+        headers={"Origin": "http://testserver", "X-SJD-CSRF": _csrf(client)},
         json={"expected_visual_version": 0, "confirm_discard_draft": True},
     ).json()
     assert restored["ok"] is True
@@ -219,7 +260,7 @@ def test_admin_screens_render(client: TestClient, path: str) -> None:
 def _saved_visual_revision(client: TestClient, title: str = "Nouveau titre") -> tuple[int, int, dict[str, str]]:
     login(client)
     page_id = client.post("/api/admin/pages", json={"title": "Titre original"}).json()["id"]
-    client.patch(f"/api/admin/pages/{page_id}", json={"title": title})
+    client.patch(f"/api/admin/pages/{page_id}", json={"title": title}, headers={"X-SJD-CSRF": _csrf(client)})
     revisions = client.get(f"/api/admin/revisions?entity_type=page&entity_id={page_id}").json()["revisions"]
     revision_id = revisions[0]["id"]
     cookies = {security.SESSION_COOKIE: client.cookies[security.SESSION_COOKIE]}

@@ -56,6 +56,13 @@ def media_root(request: Request) -> Path:
     return root
 
 
+def _admin_csrf(request: Request) -> str:
+    from sujee_editor.tokens import make_csrf
+
+    editor = getattr(request.app.state, "editor", None)
+    return make_csrf(editor.session_secret) if editor is not None else ""
+
+
 def current_admin(request: Request) -> str | None:
     token = request.cookies.get(SESSION_COOKIE, "")
     if token and security.verify_session(token):
@@ -92,6 +99,7 @@ def render_admin(request: Request, conn: sqlite3.Connection, template: str, **co
     context.setdefault("current_path", request.url.path)
     context.setdefault("year", datetime.now(timezone.utc).year)
     context.setdefault("messages_flash", request.cookies.get("sjd_flash", ""))
+    context.setdefault("csrf", _admin_csrf(request))
     html_out = ENV.get_template(f"admin/{template}").render(**context)
     response = HTMLResponse(html_out)
     if context.get("messages_flash"):
@@ -222,17 +230,7 @@ def page_editor(request: Request, page_id: int) -> Response:
         return login_redirect()
     conn = _conn(request)
     try:
-        page = _page_or_404(conn, page_id)
-        return render_admin(
-            request,
-            conn,
-            "page.html",
-            page=page,
-            page_path=repo.page_path(page),
-            sections=repo.sections_for(conn, page_id),
-            section_types=sections_module.SECTION_TYPES,
-            revisions=repo.list_revisions(conn, "page", page_id, limit=10),
-        )
+        return _render_visual_page(request, conn, page_id)
     finally:
         conn.close()
 
@@ -243,75 +241,55 @@ def visual_page_editor(request: Request, page_id: int) -> Response:
         return login_redirect()
     conn = _conn(request)
     try:
-        page = _page_or_404(conn, page_id)
-        editor = request.app.state.editor
-        state = editor.store.page_state(conn, page_id)
-        from sujee_editor.blocks import DEFAULT_BLOCKS
-        from sujee_editor.editor.project import ProjectError, sections_to_project
-        from sujee_editor.editor.theme import PILOT_SECTION_TYPES, THEME_ID, THEME_VERSION
-        from sujee_editor.tokens import make_csrf
-
-        omitted_labels = list(dict.fromkeys(
-            editor.store.block_for(section.type).label
-            for section in state.sections
-            if section.type not in PILOT_SECTION_TYPES
-        ))
-        warning_html = ""
-        if omitted_labels:
-            warning_html = (
-                "<p class='visual-preserved-note'>Mode pilote : seules les sections prises en charge sont affichées. "
-                "Les autres restent inchangées : "
-                + html.escape(", ".join(omitted_labels))
-                + ".</p>"
-            )
-        row = conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (page_id,)).fetchone()
-        if row is None:
-            try:
-                editable_sections = [
-                    section.serialize() for section in state.sections if section.type in PILOT_SECTION_TYPES
-                ]
-                project = sections_to_project(editable_sections)
-            except ProjectError as exc:
-                return HTMLResponse(f"Éditeur visuel indisponible : {html.escape(str(exc))}", status_code=409)
-            encoded = json.dumps(project, ensure_ascii=False, separators=(",", ":"))
-            conn.execute(
-                "INSERT OR IGNORE INTO visual_projects (page_id, draft_project_json, published_project_json, "
-                "draft_version, theme_id, theme_version) VALUES (?, ?, ?, 0, ?, ?)",
-                (page_id, encoded, encoded, THEME_ID, THEME_VERSION),
-            )
-            conn.commit()
-            row = conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (page_id,)).fetchone()
-        config = {
-            "api": "/api/editor",
-            "page": {"id": int(page_id), "title": str(page["title"] or ""), "path": repo.page_path(page)},
-            "csrf": make_csrf(editor.session_secret),
-            "draft_version": int(row["draft_version"]),
-            "project": json.loads(row["draft_project_json"]),
-            "theme_styles": ["/assets/site.css", "/assets/site-extras.css"],
-            "blocks": {name: block.serialize() for name, block in DEFAULT_BLOCKS.items()},
-        }
-        config_json = json.dumps(config, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
-        title_html = html.escape(str(page["title"] or "Page"))
-        return HTMLResponse(
-            "<!doctype html><html lang='fr'><head><meta charset='utf-8'>"
-            "<meta name='viewport' content='width=device-width,initial-scale=1'>"
-            "<title>Éditeur visuel pilote</title>"
-            "<link rel='stylesheet' href='/assets/editor/visual/visual-editor.css'>"
-            "</head><body><div class='visual-app'>"
-            "<header class='visual-topbar'><a class='visual-back' href='/admin/pages/" + str(page_id) + "'>← Retour</a>"
-            "<div class='visual-heading'><strong>" + title_html + "</strong><span>Éditeur visuel pilote</span></div>"
-            "<div class='visual-actions'><span id='visual-status' role='status' aria-live='polite'>Prêt</span>"
-            "<button id='visual-save' type='button'>Enregistrer</button>"
-            "<button id='visual-rebase' type='button' hidden>Recharger le contenu</button>"
-            "<button id='visual-publish' type='button' class='primary'>Publier</button></div></header>"
-            "<main class='visual-layout'><aside id='visual-blocks' aria-label='Sections disponibles'><h1>Sections</h1>" + warning_html + "</aside>"
-            "<section id='visual-canvas' aria-label='Aperçu de la page'></section>"
-            "<aside id='visual-traits' aria-label='Options de section'><h1>Options</h1></aside></main></div>"
-            "<script id=\"visual-config\" type=\"application/json\">" + config_json + "</script>"
-            "<script type='module' src='/assets/editor/visual/visual-editor.js'></script></body></html>"
-        )
+        _page_or_404(conn, page_id)
+        return RedirectResponse(f"/admin/pages/{page_id}", status_code=303)
     finally:
         conn.close()
+
+
+def _render_visual_page(request: Request, conn: sqlite3.Connection, page_id: int) -> Response:
+    page = _page_or_404(conn, page_id)
+    editor = request.app.state.editor
+    state = editor.store.page_state(conn, page_id)
+    from sujee_editor.blocks import DEFAULT_BLOCKS
+    from sujee_editor.editor.project import ProjectError, sections_to_project
+    from sujee_editor.editor.theme import SUPPORTED_SECTION_TYPES, THEME_ID, THEME_VERSION
+
+    unsupported = [section for section in state.sections if section.type not in SUPPORTED_SECTION_TYPES]
+    if unsupported:
+        labels = list(dict.fromkeys(section.type for section in unsupported))
+        message = "Éditeur visuel indisponible : import non lossless pour ces sections : " + html.escape(", ".join(labels))
+        return HTMLResponse(message + ". Les sections et le projet de la page restent inchangés.", status_code=409)
+
+    row = conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (page_id,)).fetchone()
+    if row is None:
+        try:
+            editable_sections = [section.serialize() for section in state.sections]
+            project = sections_to_project(editable_sections)
+        except ProjectError as exc:
+            return HTMLResponse(f"Éditeur visuel indisponible : {html.escape(str(exc))}", status_code=409)
+        encoded = json.dumps(project, ensure_ascii=False, separators=(",", ":"))
+        conn.execute(
+            "INSERT OR IGNORE INTO visual_projects (page_id, draft_project_json, published_project_json, "
+            "draft_version, theme_id, theme_version) VALUES (?, ?, ?, 0, ?, ?)",
+            (page_id, encoded, encoded, THEME_ID, THEME_VERSION),
+        )
+        conn.commit()
+        row = conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (page_id,)).fetchone()
+    config = {
+        "api": "/api/editor",
+        "page": _page_payload(page),
+        "csrf": _admin_csrf(request),
+        "draft_version": int(row["draft_version"]),
+        "project": json.loads(row["draft_project_json"]),
+        "theme_styles": ["/assets/site.css", "/assets/site-extras.css"],
+        "blocks": {name: block.serialize() for name, block in DEFAULT_BLOCKS.items()},
+    }
+    config_json = json.dumps(config, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
+    return render_admin(
+        request, conn, "visual_page.html", page=page, page_path=repo.page_path(page),
+        csrf=_admin_csrf(request), config_json=config_json,
+    )
 
 
 @router.get("/admin/apercu/{page_id}", response_class=HTMLResponse)
@@ -495,6 +473,11 @@ def api_delete_page(request: Request, page_id: int, _: str = Depends(require_adm
 
 @api.patch("/pages/{page_id}")
 async def api_update_page(request: Request, page_id: int, _: str = Depends(require_admin), __: None = Depends(check_origin)) -> dict:
+    from sujee_editor.tokens import CSRF_HEADER, verify_csrf
+
+    editor = request.app.state.editor
+    if not verify_csrf(request.headers.get(CSRF_HEADER, ""), editor.session_secret):
+        raise HTTPException(status_code=403, detail="jeton CSRF invalide")
     payload = await request.json()
     conn = _conn(request)
     try:

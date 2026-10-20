@@ -8,6 +8,8 @@
     const init = { method, headers: { Accept: "application/json" }, credentials: "same-origin" };
     if (body !== undefined) {
       init.headers["Content-Type"] = "application/json";
+      const csrf = document.querySelector('meta[name="sjd-csrf"]')?.content;
+      if (csrf) init.headers["X-SJD-CSRF"] = csrf;
       init.body = JSON.stringify(body);
     }
     const response = await fetch(url, init);
@@ -431,34 +433,35 @@
 
   function initPageEditor() {
     const list = document.getElementById("sectionList");
-    if (!list) return;
-    loadSections().catch((error) => notify(error.message, true));
+    if (list) {
+      loadSections().catch((error) => notify(error.message, true));
 
-    const addButton = document.getElementById("addSection");
-    if (addButton) {
-      addButton.addEventListener("click", async () => {
-        const type = document.getElementById("newSectionType").value;
-        try {
-          await api("POST", `/api/admin/pages/${list.dataset.page}/sections`, { type });
-          await loadSections();
-          notify("Section ajoutée.");
-        } catch (error) {
-          notify(error.message, true);
-        }
-      });
-    }
+      const addButton = document.getElementById("addSection");
+      if (addButton) {
+        addButton.addEventListener("click", async () => {
+          const type = document.getElementById("newSectionType").value;
+          try {
+            await api("POST", `/api/admin/pages/${list.dataset.page}/sections`, { type });
+            await loadSections();
+            notify("Section ajoutée.");
+          } catch (error) {
+            notify(error.message, true);
+          }
+        });
+      }
 
-    const savePage = document.getElementById("savePage");
-    if (savePage) {
-      savePage.addEventListener("click", async () => {
-        const values = collectPageValues();
-        try {
-          await api("PATCH", `/api/admin/pages/${list.dataset.page}`, values);
-          notify("Page enregistrée.");
-        } catch (error) {
-          notify(error.message, true);
-        }
-      });
+      const savePage = document.getElementById("savePage");
+      if (savePage) {
+        savePage.addEventListener("click", async () => {
+          const values = collectPageValues();
+          try {
+            await api("PATCH", `/api/admin/pages/${list.dataset.page}`, values);
+            notify("Page enregistrée.");
+          } catch (error) {
+            notify(error.message, true);
+          }
+        });
+      }
     }
 
     document.querySelectorAll("[data-status]").forEach((button) => {

@@ -16,6 +16,8 @@ import pytest
 from app import render as render_module
 from app import security
 from app.db import connect
+from editor_fixtures import sample_data
+from sujee_editor.blocks import DEFAULT_BLOCKS
 
 SLUG = "a-propos"
 PUBLIE = "Titre publié"
@@ -183,6 +185,64 @@ def test_the_edit_flag_is_advertised_to_the_template(client, db_file: Path) -> N
     assert 'data-edit-mode="1"' in client.get(f"/{SLUG}?edit=1", cookies=admin_cookies()).text
     assert 'data-edit-mode="1"' not in client.get(f"/{SLUG}", cookies=admin_cookies()).text
     assert 'data-edit-mode="1"' not in client.get(f"/{SLUG}?edit=1").text
+
+
+def test_published_all_types_render_through_jinja_without_draft_leak(client, db_file: Path) -> None:
+    slug = "tous-les-blocs"
+    cookies = admin_cookies()
+    conn = connect(db_file)
+    try:
+        page_id = int(conn.execute(
+            "INSERT INTO pages (slug, kind, title, status) VALUES (?, 'page', 'Tous les blocs', 'publie')",
+            (slug,),
+        ).lastrowid)
+        types = list(DEFAULT_BLOCKS)
+        section_ids = []
+        for position, (type_, block) in enumerate(DEFAULT_BLOCKS.items()):
+            cursor = conn.execute(
+                "INSERT INTO sections (page_id, position, type, label, visible, data) VALUES (?, ?, ?, ?, 1, ?)",
+                (page_id, position, type_, block.label, json.dumps(sample_data(block), ensure_ascii=False)),
+            )
+            section_ids.append(int(cursor.lastrowid))
+        conn.commit()
+    finally:
+        conn.close()
+
+    editor = client.get(f"/admin/pages/{page_id}", cookies=cookies)
+    assert editor.status_code == 200
+    config_match = re.search(r'<script id="visual-config" type="application/json">(.*?)</script>', editor.text, re.S)
+    assert config_match is not None
+    config = json.loads(config_match.group(1))
+    headers = {"X-SJD-CSRF": config["csrf"]}
+    api = f"/api/editor/pages/{page_id}/visual-project"
+    saved = client.put(
+        api, cookies=cookies, headers=headers,
+        json={"expected_version": config["draft_version"], "project": config["project"]},
+    )
+    assert saved.status_code == 200, saved.text
+    published = client.post(
+        f"{api}/publish", cookies=cookies, headers=headers,
+        json={"expected_version": saved.json()["draft_version"]},
+    )
+    assert published.status_code == 200, published.text
+
+    conn = connect(db_file)
+    try:
+        for section_id in section_ids:
+            conn.execute(
+                "UPDATE sections SET draft = ?, draft_version = draft_version + 1 WHERE id = ?",
+                (json.dumps({"title": "PRIVATE_DRAFT_DO_NOT_RENDER"}), section_id),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+
+    response = client.get(f"/{slug}")
+    assert response.status_code == 200
+    rendered_types = re.findall(r'data-block-type="([^"]+)"', response.text)
+    assert rendered_types == types
+    assert response.text.count('class="sjd-block"') == len(types)
+    assert "PRIVATE_DRAFT_DO_NOT_RENDER" not in response.text
 
 
 def test_every_visible_section_is_wrapped_and_hidden_ones_are_not(client, db_file: Path) -> None:

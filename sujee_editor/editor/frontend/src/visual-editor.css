@@ -39,6 +39,22 @@ button, a { font: inherit; }
 .visual-media-panel label { color: #666; font-size: 12px; }
 .visual-media-panel select { min-height: 38px; width: 100%; padding: 0 9px; border: 1px solid #d9d7d2; border-radius: 7px; background: white; font: inherit; }
 .visual-media-panel a { color: #555; font-size: 12px; }
+.visual-page-tools { display: flex; gap: 8px; }
+.visual-page-tools > button { min-height: 38px; padding: 0 12px; border: 1px solid #d9d7d2; border-radius: 8px; background: #fff; color: #222; cursor: pointer; white-space: nowrap; }
+.page-settings-drawer, .revision-panel { position: fixed; z-index: 10; top: 68px; right: 0; width: min(440px, 100vw); height: calc(100vh - 68px); overflow: auto; padding: 22px; background: #fff; border-left: 1px solid #dedbd6; box-shadow: -8px 0 28px rgba(0,0,0,.12); }
+.page-settings-drawer[hidden], .revision-panel[hidden] { display: none; }
+.page-settings-drawer h2, .revision-panel h2 { margin: 0 0 16px; font-size: 18px; }
+.page-settings-drawer form { display: grid; gap: 12px; }
+.page-settings-drawer label { display: grid; gap: 5px; color: #555; font-size: 12px; }
+.page-settings-drawer input, .page-settings-drawer textarea, .page-settings-drawer select { min-height: 36px; width: 100%; padding: 7px 9px; border: 1px solid #d9d7d2; border-radius: 6px; background: #fff; color: #181817; font: inherit; }
+.page-settings-drawer textarea { min-height: 70px; }
+.page-settings-drawer [role="alert"] { color: #b42318; }
+.page-settings-drawer form > button { min-height: 40px; border: 0; border-radius: 7px; color: #fff; background: #171717; cursor: pointer; }
+.revision-panel ol { display: grid; gap: 12px; padding-left: 22px; }
+.revision-panel li { display: grid; gap: 6px; padding-bottom: 12px; border-bottom: 1px solid #eee; }
+.revision-panel time { color: #777; font-size: 12px; }
+@media (max-width: 700px) { .visual-page-tools { gap: 4px; } .visual-page-tools > button { padding: 0 7px; font-size: 11px; } }
+
 .visual-section-panel { display: grid; gap: 12px; margin-top: 18px; padding-top: 16px; border-top: 1px solid #e5e3df; }
 .visual-section-panel[hidden] { display: none; }
 .section-panel-title { margin: 0; color: #222; font-size: 14px; font-weight: 650; }
