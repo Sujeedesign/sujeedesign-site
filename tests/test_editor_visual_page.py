@@ -6,6 +6,7 @@ import re
 from fastapi.testclient import TestClient
 
 from app.db import connect
+from sujee_editor.blocks import DEFAULT_BLOCKS
 from tests.test_editor_bootstrap import seed_page, session_cookies
 
 CONFIG_RE = re.compile(r'<script id="visual-config" type="application/json">(.*?)</script>', re.S)
@@ -34,9 +35,11 @@ def test_visual_admin_route_mounts_saved_project_and_theme(client: TestClient, d
     assert config["draft_version"] == 0
     assert config["project"]["project_data"]["pages"]
     assert config["csrf"]
+    assert list(config["blocks"]) == list(DEFAULT_BLOCKS)
+    assert all("fields" in block and "variants" in block for block in config["blocks"].values())
 
 
-def test_visual_pilot_displays_supported_sections_and_warns_about_preserved_content(client: TestClient, db_file) -> None:
+def test_visual_editor_includes_all_supported_sections_in_project(client: TestClient, db_file) -> None:
     page_id, _ = seed_page(db_file)
     conn = connect(db_file)
     try:
@@ -51,13 +54,13 @@ def test_visual_pilot_displays_supported_sections_and_warns_about_preserved_cont
     response = client.get(f"/admin/visual/{page_id}", cookies=session_cookies())
 
     assert response.status_code == 200
-    assert "autres restent inchangées" in response.text
+    assert "Mode pilote" not in response.text
     assert "Questions fréquentes" in response.text
     match = CONFIG_RE.search(response.text)
     assert match is not None
     config = json.loads(match.group(1))
     components = config["project"]["project_data"]["pages"][0]["frames"][0]["component"]["components"]
-    assert [component["attributes"]["data-sjd-section"] for component in components] == ["chapter"]
+    assert [component["attributes"]["data-sjd-section"] for component in components] == ["chapter", "faq"]
 
 
 def test_visual_admin_route_rejects_unknown_page(client: TestClient) -> None:

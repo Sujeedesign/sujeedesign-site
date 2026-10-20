@@ -14,11 +14,91 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
+test('registers_all_nineteen_theme_blocks', async ({ page }) => {
+  await page.goto('/');
+  await page.waitForFunction(() => Boolean(window.sjdVisualEditor && document.documentElement.dataset.visualEditorReady));
+  await expect(page.locator('#visual-blocks .gjs-block')).toHaveCount(19);
+  const types = await page.evaluate(() => window.sjdVisualEditor.Blocks.getAll().map((block) => block.get('id')));
+  expect(types).toContain('sjd-section-formulaire-contact');
+  expect(types).toContain('sjd-section-chapter');
+  const labels = await page.locator('.gjs-block').allTextContents();
+  expect(labels.every((label) => !label.includes('HTML'))).toBe(true);
+  await expect(page.locator('.gjs-sm-sectors')).toHaveCount(0);
+});
+
+test('edits_each_schema_field_kind', async ({ page }) => {
+  await page.goto('/');
+  await page.waitForFunction(() => Boolean(window.sjdVisualEditor && document.documentElement.dataset.visualEditorReady));
+  const kinds = new Set();
+  for (const block of await page.locator('#visual-blocks .gjs-block').all()) {
+    await block.click();
+    const current = await page.locator('#visual-section-panel [data-field-kind]').evaluateAll((nodes) => nodes.map((node) => node.dataset.fieldKind));
+    current.forEach((kind) => kinds.add(kind));
+  }
+  expect([...kinds].sort()).toEqual(['bool', 'choice', 'ctas', 'html', 'html-line', 'image', 'images', 'items', 'lines', 'number', 'text', 'textarea'].sort());
+});
+
+test('preserves_nested_fields_and_variants_after_reload', async ({ page }) => {
+  await page.goto('/');
+  await page.waitForFunction(() => Boolean(window.sjdVisualEditor && document.documentElement.dataset.visualEditorReady));
+  await page.locator('#visual-blocks .gjs-block').filter({ hasText: "Bandeau d'ouverture" }).click();
+  await page.locator('#visual-section-panel [data-field-editor="title"]').fill('Accueil de marque');
+  await page.locator('#visual-section-panel [data-field-editor="ctas.0.label"]').fill('Découvrir');
+  await page.locator('#visual-section-panel [data-field-editor="ctas.0.href"]').fill('/services');
+  await page.locator('#visual-section-panel [data-section-variant]').selectOption('page');
+  const component = await page.evaluate(() => {
+    const model = window.sjdVisualEditor.getWrapper().find('[data-sjd-section="hero"]')[0];
+    return JSON.parse(model.getAttributes()['data-sjd-data']);
+  });
+  expect(component.title).toBe('Accueil de marque');
+  expect(component.ctas[0]).toMatchObject({ label: 'Découvrir', href: '/services' });
+  expect(component._variant).toBe('page');
+  const project = await page.evaluate(() => window.sjdVisualEditor.getProjectData());
+  await page.evaluate((data) => window.sjdLoadVisualProject(data), project);
+  const reloaded = await page.evaluate(() => JSON.parse(window.sjdVisualEditor.getWrapper().find('[data-sjd-section="hero"]')[0].getAttributes()['data-sjd-data']));
+  expect(reloaded).toEqual(component);
+
+  await page.route('**/api/editor/media', (route) => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ medias: [
+      { id: 42, path: 'medias/first.webp', alt: 'Première', mime: 'image/webp' },
+      { id: 43, path: 'medias/second.webp', alt: 'Deuxième', mime: 'image/webp' },
+    ] }),
+  }));
+  await page.locator('#visual-blocks .gjs-block').filter({ hasText: "Galerie d'images" }).click();
+  const addImage = page.locator('#visual-section-panel [data-repeat-path="images"] + .section-repeat-add');
+  await addImage.click();
+  await page.locator('#visual-section-panel [data-field-editor="images.0.caption"]').fill('Image A');
+  await page.locator('#visual-section-panel [data-field-editor="images.0.src"]').selectOption('/medias/first.webp');
+  await addImage.click();
+  await page.locator('#visual-section-panel [data-field-editor="images.1.caption"]').fill('Image B');
+  await page.locator('#visual-section-panel [data-field-editor="images.1.src"]').selectOption('/medias/second.webp');
+  await page.getByRole('button', { name: 'Descendre Images 1' }).click();
+  const galleryData = await page.evaluate(() => JSON.parse(window.sjdVisualEditor.getWrapper().find('[data-sjd-section="galerie"]')[0].getAttributes()['data-sjd-data']));
+  expect(galleryData.images.map((image) => [image.caption, image.src])).toEqual([
+    ['Image B', '/medias/second.webp'], ['Image A', '/medias/first.webp'],
+  ]);
+  const galleryProject = await page.evaluate(() => window.sjdVisualEditor.getProjectData());
+  await page.evaluate((data) => window.sjdLoadVisualProject(data), galleryProject);
+  const galleryReloaded = await page.evaluate(() => JSON.parse(window.sjdVisualEditor.getWrapper().find('[data-sjd-section="galerie"]')[0].getAttributes()['data-sjd-data']));
+  expect(galleryReloaded.images).toEqual(galleryData.images);
+});
+
+test('keeps_dynamic_blocks_typed', async ({ page }) => {
+  await page.goto('/');
+  await page.waitForFunction(() => Boolean(window.sjdVisualEditor && document.documentElement.dataset.visualEditorReady));
+  await page.locator('#visual-blocks .gjs-block').filter({ hasText: 'Grille de réalisations' }).click();
+  const root = await page.evaluate(() => window.sjdVisualEditor.getWrapper().find('[data-sjd-section="realisations-grid"]')[0].getAttributes());
+  expect(root['data-sjd-data']).toBeTruthy();
+  expect(root['data-sjd-data']).not.toContain('<article');
+  expect(root['data-sjd-section']).toBe('realisations-grid');
+});
+
 test('adds an allowed theme section, edits its content and saves a versioned project', async ({ page }) => {
   await page.goto('/');
   await page.waitForFunction(() => Boolean(window.sjdVisualEditor && document.documentElement.dataset.visualEditorReady));
   const blocks = page.locator('#visual-blocks .gjs-block');
-  await expect(blocks).toHaveCount(3);
+  await expect(blocks).toHaveCount(19);
   await blocks.filter({ hasText: 'Chapitre éditorial' }).click();
 
   const canvas = page.frameLocator('iframe.gjs-frame');

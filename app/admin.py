@@ -246,6 +246,7 @@ def visual_page_editor(request: Request, page_id: int) -> Response:
         page = _page_or_404(conn, page_id)
         editor = request.app.state.editor
         state = editor.store.page_state(conn, page_id)
+        from sujee_editor.blocks import DEFAULT_BLOCKS
         from sujee_editor.editor.project import ProjectError, sections_to_project
         from sujee_editor.editor.theme import PILOT_SECTION_TYPES, THEME_ID, THEME_VERSION
         from sujee_editor.tokens import make_csrf
@@ -287,6 +288,7 @@ def visual_page_editor(request: Request, page_id: int) -> Response:
             "draft_version": int(row["draft_version"]),
             "project": json.loads(row["draft_project_json"]),
             "theme_styles": ["/assets/site.css", "/assets/site-extras.css"],
+            "blocks": {name: block.serialize() for name, block in DEFAULT_BLOCKS.items()},
         }
         config_json = json.dumps(config, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
         title_html = html.escape(str(page["title"] or "Page"))

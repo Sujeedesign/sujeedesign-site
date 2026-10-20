@@ -2,8 +2,11 @@ import grapesjs from 'grapesjs';
 import 'grapesjs/dist/css/grapes.min.css';
 import './visual-editor.css';
 import { registerSujeeTheme, prepareThemeProject } from './theme-plugin.js';
+import { DEMO_BLOCKS } from './demo-schema.js';
+import { mountSectionPanel } from './section-panel.js';
 
 const config = JSON.parse(document.querySelector('#visual-config')?.textContent || '{}');
+const blockSchema = config.blocks || DEMO_BLOCKS;
 const status = document.querySelector('#visual-status');
 const saveButton = document.querySelector('#visual-save');
 const rebaseButton = document.querySelector('#visual-rebase');
@@ -29,7 +32,7 @@ export const editor = grapesjs.init({
   traitManager: { appendTo: '#visual-traits' }, styleManager: { sectors: [] },
   selectorManager: { componentFirst: true },
   canvas: { styles: config.theme_styles || ['/assets/site.css'] },
-  plugins: [registerSujeeTheme],
+  plugins: [(instance) => registerSujeeTheme(instance, blockSchema)],
 });
 window.sjdVisualEditor = editor;
 window.sjdLoadVisualProject = (projectData) => {
@@ -120,6 +123,33 @@ async function loadMediaLibrary() {
   mediaPicker.disabled = mediaItems.length === 0;
   mediaLoaded = true;
 }
+
+const mediaClient = {
+  async populate(select, currentPath, onSelect) {
+    await loadMediaLibrary();
+    select.replaceChildren();
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = mediaItems.length ? 'Choisir une image…' : 'Aucune image disponible';
+    select.append(placeholder);
+    for (const item of mediaItems) {
+      const option = document.createElement('option');
+      option.value = `/${normaliseMediaPath(item.path)}`;
+      option.textContent = item.alt || item.filename || `Image ${item.id}`;
+      select.append(option);
+    }
+    select.value = currentPath;
+    select.addEventListener('change', () => onSelect(select.value));
+  },
+};
+
+const sectionPanelRoot = document.createElement('section');
+sectionPanelRoot.id = 'visual-section-panel';
+sectionPanelRoot.className = 'visual-section-panel';
+sectionPanelRoot.hidden = true;
+document.querySelector('#visual-traits')?.append(sectionPanelRoot);
+const sectionPanel = mountSectionPanel({ root: sectionPanelRoot, editor, blockSchema, mediaClient });
+window.sjdSectionPanel = sectionPanel;
 
 mediaPicker.addEventListener('change', () => {
   const selected = editor.getSelected();

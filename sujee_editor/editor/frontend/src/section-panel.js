@@ -1,0 +1,181 @@
+function clone(value) {
+  return value == null ? value : structuredClone(value);
+}
+
+function fieldDefault(field) {
+  if (Object.hasOwn(field, 'default')) return clone(field.default);
+  if (field.kind === 'bool') return false;
+  if (field.kind === 'number') return 0;
+  if (field.kind === 'choice') return field.choices?.[0] || '';
+  if (['lines', 'items', 'images', 'ctas'].includes(field.kind)) return [];
+  return '';
+}
+
+function getAtPath(data, path) {
+  return path.split('.').reduce((value, key) => value?.[/^\d+$/.test(key) ? Number(key) : key], data);
+}
+
+function setAtPath(data, path, value) {
+  const parts = path.split('.');
+  const key = parts.pop();
+  const parent = parts.reduce((current, part) => current[/^\d+$/.test(part) ? Number(part) : part], data);
+  parent[/^\d+$/.test(key) ? Number(key) : key] = value;
+}
+
+function readData(component, schema) {
+  try {
+    const parsed = JSON.parse(component.getAttributes()['data-sjd-data'] || '{}');
+    return { ...Object.fromEntries(schema.fields.map((field) => [field.name, fieldDefault(field)])), ...parsed };
+  } catch {
+    return Object.fromEntries(schema.fields.map((field) => [field.name, fieldDefault(field)]));
+  }
+}
+
+function element(tag, attrs = {}, text = null) {
+  const node = document.createElement(tag);
+  for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, value);
+  if (text != null) node.textContent = text;
+  return node;
+}
+
+export function mountSectionPanel({ root, editor, blockSchema, mediaClient }) {
+  const panel = root || document.querySelector('#visual-section-panel');
+  if (!panel) return { refresh() {}, destroy() {} };
+  let selected = null;
+  let schema = null;
+
+  function commit(path, value) {
+    if (!selected || !schema) return;
+    const next = readData(selected, schema);
+    setAtPath(next, path, value);
+    selected.addAttributes({
+      'data-sjd-data': JSON.stringify(next),
+      'data-sjd-variant': String(next._variant || ''),
+    });
+    const plainField = selected.find(`[data-sjd-field="${CSS.escape(path)}"]`)[0];
+    if (plainField && ['text', 'text/html'].includes(plainField.get('type'))) {
+      plainField.set('content', String(value ?? ''));
+    }
+    panel.dataset.changed = 'true';
+  }
+
+  function addControl(field, path, value) {
+    const group = element('div', { class: `section-field section-field-${field.kind}`, 'data-field-kind': field.kind });
+    const id = `section-field-${path.replaceAll('.', '-')}`;
+    const label = element('label', { for: id }, field.label || field.name);
+    group.append(label);
+    if (['items', 'images', 'ctas'].includes(field.kind)) {
+      const list = Array.isArray(value) ? value : [];
+      const rows = element('div', { class: 'section-repeat-list', 'data-repeat-path': path });
+      list.forEach((itemValue, index) => {
+        const card = element('fieldset', { class: 'section-repeat-item' });
+        const legend = element('legend', {}, `${field.label || field.name} ${index + 1}`);
+        card.append(legend);
+        for (const sub of field.fields || []) card.append(addControl(sub, `${path}.${index}.${sub.name}`, itemValue?.[sub.name] ?? fieldDefault(sub)));
+        const actions = element('div', { class: 'section-repeat-actions' });
+        const up = element('button', { type: 'button', 'aria-label': `Monter ${legend.textContent}` }, '↑');
+        const down = element('button', { type: 'button', 'aria-label': `Descendre ${legend.textContent}` }, '↓');
+        const remove = element('button', { type: 'button', 'aria-label': `Supprimer ${legend.textContent}` }, 'Supprimer');
+        up.disabled = index === 0;
+        down.disabled = index === list.length - 1;
+        up.addEventListener('click', () => reorder(path, index, index - 1));
+        down.addEventListener('click', () => reorder(path, index, index + 1));
+        remove.addEventListener('click', () => { const next = (getAtPath(readData(selected, schema), path) || []).map(clone); next.splice(index, 1); commit(path, next); refresh(); });
+        actions.append(up, down, remove);
+        card.append(actions);
+        rows.append(card);
+      });
+      const add = element('button', { type: 'button', class: 'section-repeat-add' }, `Ajouter ${field.label || field.name}`);
+      add.disabled = Number.isInteger(field.max_items) && list.length >= field.max_items;
+      add.addEventListener('click', () => {
+        const next = (getAtPath(readData(selected, schema), path) || []).map(clone);
+        next.push(Object.fromEntries((field.fields || []).map((sub) => [sub.name, fieldDefault(sub)])));
+        commit(path, next);
+        refresh();
+      });
+      group.append(rows, add);
+      return group;
+    }
+
+    let control;
+    if (field.kind === 'bool') {
+      control = element('input', { type: 'checkbox', id, 'data-field-editor': path });
+      control.checked = Boolean(value);
+      control.addEventListener('change', () => commit(path, control.checked));
+    } else if (field.kind === 'choice') {
+      control = element('select', { id, 'data-field-editor': path });
+      for (const choice of field.choices || []) control.append(element('option', { value: choice }, choice));
+      control.value = String(value ?? '');
+      control.addEventListener('change', () => commit(path, control.value));
+    } else if (field.kind === 'number') {
+      control = element('input', { type: 'number', id, 'data-field-editor': path });
+      control.value = Number.isFinite(Number(value)) ? String(value) : '';
+      control.addEventListener('input', () => commit(path, control.value === '' ? 0 : Number(control.value)));
+    } else if (field.kind === 'image') {
+      control = element('select', { id, 'data-field-editor': path, 'aria-label': field.label || field.name });
+      control.append(element('option', { value: '' }, 'Choisir une image…'));
+      if (mediaClient?.populate) {
+        void mediaClient.populate(control, String(value || ''), (src) => commit(path, src)).catch((error) => {
+          control.replaceChildren(element('option', { value: '' }, error.message || 'Médiathèque indisponible'));
+          control.disabled = true;
+        });
+      }
+    } else {
+      control = element('textarea', { id, 'data-field-editor': path, 'data-field-kind': field.kind });
+      control.value = Array.isArray(value) ? value.join('\n') : String(value ?? '');
+      if (Number.isInteger(field.max_length)) control.maxLength = field.max_length;
+      control.addEventListener('input', () => {
+        const nextValue = field.kind === 'lines' && Array.isArray(value)
+          ? control.value.split('\n')
+          : control.value;
+        commit(path, nextValue);
+      });
+    }
+    control.dataset.fieldKind = field.kind;
+    group.append(control);
+    return group;
+  }
+
+  function reorder(path, from, to) {
+    if (to < 0) return;
+    const list = getAtPath(readData(selected, schema), path) || [];
+    if (to >= list.length) return;
+    const next = list.map(clone);
+    [next[from], next[to]] = [next[to], next[from]];
+    commit(path, next);
+    refresh();
+  }
+
+  function refresh() {
+    const component = selected;
+    schema = component ? blockSchema?.[component.getAttributes?.()['data-sjd-section']] : null;
+    panel.replaceChildren();
+    if (!component || !schema) {
+      panel.hidden = true;
+      return;
+    }
+    panel.hidden = false;
+    panel.dataset.changed = 'false';
+    panel.append(element('h2', { class: 'section-panel-title' }, schema.label));
+    const data = readData(component, schema);
+    const variants = Object.entries(schema.variants || {});
+    if (variants.length) {
+      const group = element('div', { class: 'section-field section-variant' });
+      const select = element('select', { 'data-section-variant': '' });
+      group.append(element('label', {}, 'Variante'));
+      for (const [value, label] of variants) select.append(element('option', { value }, label));
+      select.value = data._variant || variants[0][0];
+      select.addEventListener('change', () => commit('_variant', select.value));
+      group.append(select);
+      panel.append(group);
+    }
+    for (const field of schema.fields || []) panel.append(addControl(field, field.name, data[field.name] ?? fieldDefault(field)));
+  }
+
+  editor.on('component:selected', (component) => {
+    selected = component?.getAttributes?.()['data-sjd-section'] ? component : null;
+    refresh();
+  });
+  editor.on('component:deselected', () => { selected = null; refresh(); });
+  return { refresh, destroy() { editor.off('component:selected'); editor.off('component:deselected'); panel.replaceChildren(); } };
+}
