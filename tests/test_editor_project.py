@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import json
 
 import pytest
 
@@ -12,6 +13,8 @@ from sujee_editor.editor.project import (
     project_to_sections,
     sections_to_project,
 )
+from sujee_editor.blocks import DEFAULT_BLOCKS
+from editor_fixtures import sample_data
 
 
 def _field(tag: str, name: str, content: str = "") -> dict:
@@ -240,9 +243,9 @@ def test_import_uses_effective_draft_content_and_sorts_by_position():
 
 def test_import_rejects_a_page_with_any_unsupported_section():
     sections = _source_sections()
-    sections.append({"id": 10, "type": "faq", "position": 3, "visible": True, "effective": {}})
+    sections.append({"id": 10, "type": "not-a-block", "position": 3, "visible": True, "effective": {}})
 
-    with pytest.raises(ProjectError, match="faq"):
+    with pytest.raises(ProjectError, match="not-a-block"):
         sections_to_project(sections)
 
 
@@ -338,3 +341,113 @@ def test_input_objects_are_not_mutated():
     sections_to_project(source)
 
     assert source == before
+
+
+def _all_typed_sections() -> list[dict]:
+    sections = []
+    for position, block in enumerate(DEFAULT_BLOCKS.values()):
+        data = sample_data(block)
+        sections.append({
+            "id": position + 1,
+            "type": block.name,
+            "variant": data.get("_variant", ""),
+            "visible": position % 2 == 0,
+            "position": position,
+            "effective": data,
+        })
+    return sections
+
+
+def test_all_nineteen_block_types_round_trip_without_data_loss():
+    source = _all_typed_sections()
+
+    result = project_to_sections(sections_to_project(source))
+
+    assert len(result) == 19
+    assert [item["type"] for item in result] == [item["type"] for item in source]
+    assert [item["id"] for item in result] == [item["id"] for item in source]
+    assert [item["position"] for item in result] == list(range(19))
+    assert [item["visible"] for item in result] == [item["visible"] for item in source]
+    assert [item["variant"] for item in result] == [item["variant"] for item in source]
+    assert [item["data"] for item in result] == [item["effective"] for item in source]
+
+
+def test_all_block_variants_round_trip_without_data_loss():
+    source = []
+    for position, block in enumerate(DEFAULT_BLOCKS.values()):
+        for variant in block.variants:
+            data = sample_data(block)
+            data["_variant"] = variant
+            source.append({
+                "id": len(source) + 1,
+                "type": block.name,
+                "variant": variant,
+                "visible": True,
+                "position": len(source),
+                "effective": data,
+            })
+
+    result = project_to_sections(sections_to_project(source))
+
+    assert [(item["type"], item["variant"], item["data"]) for item in result] == [
+        (item["type"], item["variant"], item["effective"]) for item in source
+    ]
+
+
+def test_migrate_theme_v1_project_preserves_content_and_is_idempotent():
+    from sujee_editor.editor.project import migrate_project
+
+    project = _three_section_project()
+    project["theme_version"] = 1
+    before = copy.deepcopy(project)
+
+    migrated = migrate_project(project)
+
+    assert project == before
+    assert migrated["theme_version"] == THEME_VERSION == 2
+    assert migrated["project_data"] == project["project_data"]
+    assert migrate_project(migrated) == migrated
+    assert [section["type"] for section in project_to_sections(migrated)] == [
+        "chapter", "image-pleine-largeur", "citation"
+    ]
+
+
+def test_invalid_theme_v1_project_raises_without_mutation():
+    from sujee_editor.editor.project import migrate_project
+
+    project = _three_section_project()
+    project["theme_version"] = 1
+    project["project_data"]["pages"][0]["frames"][0]["component"]["components"][0]["type"] = "arbitrary"
+    before = copy.deepcopy(project)
+
+    with pytest.raises(ProjectError):
+        migrate_project(project)
+
+    assert project == before
+
+
+def test_typed_rich_text_rejects_active_markup_and_sanitizes_attributes():
+    source = _all_typed_sections()
+    hero = next(section for section in source if section["type"] == "hero")
+    hero["effective"]["title"] = "<script>alert(1)</script>"
+
+    with pytest.raises(ProjectError, match="HTML rich non autorisé"):
+        sections_to_project(source)
+
+    hero["effective"]["title"] = '<em onclick="alert(1)">Titre</em>'
+    result = project_to_sections(sections_to_project(source))
+    saved_hero = next(section for section in result if section["type"] == "hero")
+    assert saved_hero["data"]["title"] == "<em>Titre</em>"
+
+
+def test_project_data_rejects_external_nested_image_urls():
+    source = _all_typed_sections()
+    project = sections_to_project(source)
+    components = project["project_data"]["pages"][0]["frames"][0]["component"]["components"]
+    gallery_component = next(item for item in components if item["attributes"]["data-sjd-section"] == "galerie")
+    data = json.loads(gallery_component["attributes"]["data-sjd-data"])
+    data["images"][0]["src"] = "https://evil.example/image.png"
+    gallery_component["attributes"]["data-sjd-data"] = json.dumps(data)
+
+    with pytest.raises(ProjectError, match="image hors des médias locaux autorisés"):
+        project_to_sections(project)
