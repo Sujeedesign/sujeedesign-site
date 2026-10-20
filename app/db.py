@@ -5,7 +5,7 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 # Colonnes ajoutées après la première mise en production. Chaque entrée est
 # appliquée une seule fois, dans l'ordre, par `migrate` (idempotent).
@@ -17,6 +17,7 @@ MIGRATIONS: tuple[tuple[str, str, str], ...] = (
 REQUIRED_TABLES = (
     "pages",
     "sections",
+    "visual_projects",
     "medias",
     "messages",
     "reglages",
@@ -69,6 +70,17 @@ CREATE TABLE IF NOT EXISTS sections (
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_sections_page ON sections(page_id, position);
+
+CREATE TABLE IF NOT EXISTS visual_projects (
+  page_id INTEGER PRIMARY KEY REFERENCES pages(id) ON DELETE CASCADE,
+  draft_project_json TEXT NOT NULL DEFAULT '{}',
+  published_project_json TEXT NOT NULL DEFAULT '{}',
+  draft_version INTEGER NOT NULL DEFAULT 0,
+  theme_id TEXT NOT NULL DEFAULT '',
+  theme_version INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 
 CREATE TABLE IF NOT EXISTS medias (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

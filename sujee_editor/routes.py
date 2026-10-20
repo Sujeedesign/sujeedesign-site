@@ -6,19 +6,24 @@ sous `/api/editor` avec son propre secret de session.
 
 from __future__ import annotations
 
+import json
 import secrets
 from pathlib import Path
 from typing import Any, Callable
+from urllib.parse import urlsplit
 
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse
 
 from .blocks import Block, ValidationError
+from .editor.project import ProjectError, project_to_sections, sections_to_project
+from .editor.theme import PILOT_SECTION_TYPES, THEME_ID, THEME_VERSION
 from .store import (
     PageState,
     SectionState,
     Store,
     StoreNotReady,
+    SourceConflict,
     UnknownPage,
     UnknownRevision,
     UnknownSection,
@@ -49,6 +54,7 @@ MAX_UPLOAD_BYTES = 8 * 1024 * 1024
 SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
 API_PREFIX = "/api/editor"
 ASSETS_PREFIX = "/assets/editor"
+MAX_VISUAL_PROJECT_BYTES = 1024 * 1024
 
 
 def default_page_path(page: dict[str, Any]) -> str:
@@ -102,7 +108,18 @@ def build_router(
             return
         origin = request.headers.get("origin") or ""
         host = request.headers.get("host") or ""
-        if origin and host and host not in origin:
+        if not origin:
+            return
+        parsed = urlsplit(origin)
+        if (
+            parsed.scheme not in {"http", "https"}
+            or not parsed.netloc
+            or parsed.path not in {"", "/"}
+            or parsed.query
+            or parsed.fragment
+            or not host
+            or parsed.netloc.casefold() != host.casefold()
+        ):
             raise HTTPException(status_code=403, detail="origine refusée")
 
     guarded = [Depends(check_origin), Depends(require_session), Depends(check_csrf)]
@@ -155,6 +172,200 @@ def build_router(
             return _state_payload(store.page_state(conn, page_id))
         except UnknownPage as exc:
             raise HTTPException(status_code=404, detail="page introuvable") from exc
+        finally:
+            conn.close()
+
+    def _ensure_visual_project(conn: Any, page_id: int) -> Any:
+        state = store.page_state(conn, page_id)
+        row = conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (int(page_id),)).fetchone()
+        if row is not None:
+            return row
+        supported = [section.serialize() for section in state.sections if section.type in PILOT_SECTION_TYPES]
+        project = sections_to_project(supported)
+        encoded = json.dumps(project, ensure_ascii=False, separators=(",", ":"))
+        conn.execute(
+            "INSERT OR IGNORE INTO visual_projects "
+            "(page_id, draft_project_json, published_project_json, draft_version, theme_id, theme_version) "
+            "VALUES (?, ?, ?, 0, ?, ?)",
+            (int(page_id), encoded, encoded, THEME_ID, THEME_VERSION),
+        )
+        conn.commit()
+        return conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (int(page_id),)).fetchone()
+
+    async def _visual_payload(request: Request) -> dict[str, Any]:
+        content_length = request.headers.get("content-length", "")
+        if content_length:
+            try:
+                if int(content_length) > MAX_VISUAL_PROJECT_BYTES:
+                    raise HTTPException(status_code=400, detail="projet trop volumineux")
+            except ValueError as exc:
+                raise HTTPException(status_code=400, detail="taille de requête invalide") from exc
+        body = bytearray()
+        async for chunk in request.stream():
+            body.extend(chunk)
+            if len(body) > MAX_VISUAL_PROJECT_BYTES:
+                raise HTTPException(status_code=400, detail="projet trop volumineux")
+        try:
+            payload = json.loads(body)
+        except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+            raise HTTPException(status_code=400, detail="JSON invalide") from exc
+        if not isinstance(payload, dict):
+            raise HTTPException(status_code=400, detail="objet JSON attendu")
+        return payload
+
+    def _expected_version(payload: dict[str, Any]) -> int:
+        value = payload.get("expected_version")
+        if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+            raise HTTPException(status_code=400, detail="version attendue invalide")
+        return value
+
+    def _check_visual_section_ids(conn: Any, page_id: int, sections: list[dict[str, Any]]) -> None:
+        rows = conn.execute("SELECT id, type FROM sections WHERE page_id = ?", (int(page_id),)).fetchall()
+        existing = {int(row["id"]): str(row["type"]) for row in rows}
+        for section in sections:
+            identifier = section.get("id")
+            if identifier is None:
+                continue
+            current_type = existing.get(int(identifier))
+            if current_type is None:
+                raise ProjectError("identifiant de section étranger à cette page")
+            if current_type != section.get("type"):
+                raise ProjectError("type d’une section existante modifié")
+
+    @router.get("/pages/{page_id}/visual-project")
+    def read_visual_project(page_id: int, _: None = Depends(require_session)) -> Any:
+        conn = store.connect()
+        try:
+            try:
+                row = _ensure_visual_project(conn, page_id)
+            except UnknownPage as exc:
+                raise HTTPException(status_code=404, detail="page introuvable") from exc
+            except ProjectError as exc:
+                return _fail(409, "unsupported_section", str(exc))
+            return {
+                "project": json.loads(row["draft_project_json"]),
+                "draft_version": int(row["draft_version"]),
+                "theme_id": str(row["theme_id"]),
+                "theme_version": int(row["theme_version"]),
+                "csrf": make_csrf(secret()),
+            }
+        finally:
+            conn.close()
+
+    @router.put("/pages/{page_id}/visual-project")
+    async def save_visual_project(page_id: int, request: Request, _: None = Depends(check_origin)) -> Any:
+        require_session(request)
+        check_csrf(request)
+        payload = await _visual_payload(request)
+        expected = _expected_version(payload)
+        project = payload.get("project")
+        try:
+            sections = project_to_sections(project)
+        except ProjectError as exc:
+            return _fail(400, "bad_project", str(exc))
+        encoded = json.dumps(project, ensure_ascii=False, separators=(",", ":"))
+        if len(encoded.encode("utf-8")) > MAX_VISUAL_PROJECT_BYTES:
+            return _fail(400, "too_large")
+        conn = store.connect()
+        try:
+            try:
+                row = _ensure_visual_project(conn, page_id)
+            except UnknownPage as exc:
+                raise HTTPException(status_code=404, detail="page introuvable") from exc
+            except ProjectError as exc:
+                return _fail(409, "unsupported_section", str(exc))
+            try:
+                _check_visual_section_ids(conn, page_id, sections)
+            except ProjectError as exc:
+                return _fail(400, "bad_project", str(exc))
+            conn.execute("BEGIN IMMEDIATE")
+            current = conn.execute("SELECT draft_version FROM visual_projects WHERE page_id = ?", (int(page_id),)).fetchone()
+            if current is None:
+                conn.rollback()
+                raise HTTPException(status_code=404, detail="projet visuel introuvable")
+            current_version = int(current["draft_version"])
+            if current_version != expected:
+                conn.rollback()
+                return _fail(409, "version", f"version courante {current_version}", current_version=current_version)
+            updated = conn.execute(
+                "UPDATE visual_projects SET draft_project_json = ?, theme_id = ?, theme_version = ?, "
+                "draft_version = draft_version + 1, updated_at = datetime('now') "
+                "WHERE page_id = ? AND draft_version = ?",
+                (encoded, THEME_ID, THEME_VERSION, int(page_id), expected),
+            )
+            if updated.rowcount == 0:
+                conn.rollback()
+                return _fail(409, "version")
+            conn.commit()
+            return {"ok": True, "draft_version": expected + 1}
+        finally:
+            conn.close()
+
+    @router.post("/pages/{page_id}/visual-project/rebase")
+    async def rebase_visual_project(page_id: int, request: Request, _: None = Depends(check_origin)) -> Any:
+        require_session(request)
+        check_csrf(request)
+        payload = await _visual_payload(request)
+        expected = _expected_version(payload)
+        conn = store.connect()
+        try:
+            try:
+                _ensure_visual_project(conn, page_id)
+                return store.reset_visual_project(conn, page_id=page_id, expected_version=expected)
+            except UnknownPage as exc:
+                raise HTTPException(status_code=404, detail="page introuvable") from exc
+            except VersionConflict as exc:
+                return _fail(409, "version", f"version courante {exc.current}", current_version=exc.current)
+            except StoreNotReady as exc:
+                raise HTTPException(status_code=503, detail=str(exc)) from exc
+        finally:
+            conn.close()
+
+    @router.post("/pages/{page_id}/visual-project/publish")
+    async def publish_visual_project(page_id: int, request: Request, _: None = Depends(check_origin)) -> Any:
+        require_session(request)
+        check_csrf(request)
+        payload = await _visual_payload(request)
+        expected = _expected_version(payload)
+        conn = store.connect()
+        try:
+            try:
+                row = _ensure_visual_project(conn, page_id)
+            except UnknownPage as exc:
+                raise HTTPException(status_code=404, detail="page introuvable") from exc
+            except ProjectError as exc:
+                return _fail(409, "unsupported_section", str(exc))
+            if int(row["draft_version"]) != expected:
+                return _fail(409, "version", f"version courante {row['draft_version']}", current_version=int(row["draft_version"]))
+            project_json = str(row["draft_project_json"])
+            try:
+                project = json.loads(project_json)
+                sections = project_to_sections(project)
+                _check_visual_section_ids(conn, page_id, sections)
+                result = store.publish_visual_project(
+                    conn,
+                    page_id=page_id,
+                    expected_version=expected,
+                    project_json=project_json,
+                    sections=sections,
+                    theme_id=str(project["theme_id"]),
+                    theme_version=int(project["theme_version"]),
+                )
+            except ProjectError as exc:
+                return _fail(400, "bad_project", str(exc))
+            except SourceConflict as exc:
+                return _fail(409, "source_changed", str(exc))
+            except VersionConflict as exc:
+                return _fail(409, "version", f"version courante {exc.current}", current_version=exc.current)
+            except UnknownSection as exc:
+                return _fail(400, "bad_project", f"section inconnue : {exc}")
+            except UnknownPage as exc:
+                raise HTTPException(status_code=404, detail="page introuvable") from exc
+            except ValidationFailed as exc:
+                return _validation_fail(exc)
+            except StoreNotReady as exc:
+                raise HTTPException(status_code=503, detail=str(exc)) from exc
+            return result
         finally:
             conn.close()
 

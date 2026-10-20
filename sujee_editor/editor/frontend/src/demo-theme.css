@@ -1,0 +1,10 @@
+html, body { margin: 0; min-height: 100%; background: #f7f6f2; color: #171717; font-family: system-ui, sans-serif; }
+body { padding: 4rem; }
+.container { max-width: 54rem; margin: 0 auto; }
+.s-chap { padding: 3rem 0; }
+.chap { display: grid; grid-template-columns: 1fr 1.5fr; gap: 3rem; }
+.chap-title { font-size: clamp(2rem, 5vw, 4rem); line-height: 1.05; letter-spacing: -.04em; }
+.chap-body { max-width: 42rem; font-size: 1.125rem; line-height: 1.65; }
+.citation { padding: 4rem 0; }
+.quote-text { font-size: 2rem; }
+.full-bleed img { width: 100%; min-height: 240px; object-fit: cover; }

@@ -10,3 +10,9 @@ data/
 
 # Recette locale de l'éditeur (base et médias jetables)
 .recette/
+
+# Worktrees locaux de développement
+.worktrees/
+
+# Bundle GrapesJS généré au build (copié dans l'image de l'application)
+sujee_editor/editor/static/visual/
