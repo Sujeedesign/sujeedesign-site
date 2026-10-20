@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
 
 const calls = [];
 
@@ -126,6 +127,13 @@ test('adds an allowed theme section, edits its content and saves a versioned pro
 });
 
 test('loads a versioned server project and makes its authored fields editable', async ({ page }) => {
+  const fallbackCss = await readFile(new URL('../../../../theme/assets/site-noscript.css', import.meta.url), 'utf8');
+  await page.route('**/src/demo-theme.css', (route) => route.fulfill({
+    status: 200, contentType: 'text/css', body: '.reveal { opacity: 0; transform: translateY(52px); }',
+  }));
+  await page.route('**/assets/site-noscript.css', (route) => route.fulfill({
+    status: 200, contentType: 'text/css', body: fallbackCss,
+  }));
   await page.goto('/');
   await page.waitForFunction(() => Boolean(window.sjdVisualEditor && document.documentElement.dataset.visualEditorReady));
   const project = {
@@ -147,6 +155,11 @@ test('loads a versioned server project and makes its authored fields editable', 
   await page.evaluate((data) => window.sjdLoadVisualProject(data), project);
   const canvas = page.frameLocator('iframe.gjs-frame');
   await expect(canvas.locator('.s-chap .container .chap .chap-title')).toHaveText('Projet chargé');
+  const revealStyle = await canvas.locator('.s-chap').evaluate((node) => ({
+    opacity: getComputedStyle(node).opacity,
+    transform: getComputedStyle(node).transform,
+  }));
+  expect(revealStyle).toEqual({ opacity: '1', transform: 'none' });
   const editable = await page.evaluate(() => window.sjdVisualEditor.getWrapper().find('[data-sjd-field="title"]')[0].get('editable'));
   expect(editable).toBe(true);
 });

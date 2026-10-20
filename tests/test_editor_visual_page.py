@@ -38,6 +38,7 @@ def test_visual_admin_route_mounts_saved_project_and_theme(client: TestClient, d
     assert config["api"] == "/api/editor"
     assert config["draft_version"] == 0
     assert config["project"]["project_data"]["pages"]
+    assert config["theme_styles"] == ["/assets/site.css", "/assets/site-extras.css", "/assets/site-noscript.css"]
     assert config["csrf"]
     assert list(config["blocks"]) == list(DEFAULT_BLOCKS)
     assert all("fields" in block and "variants" in block for block in config["blocks"].values())
