@@ -164,6 +164,100 @@ test('loads a versioned server project and makes its authored fields editable', 
   expect(editable).toBe(true);
 });
 
+test('renders existing dynamic Vaasam sections with their content in the canvas', async ({ page }) => {
+  await page.route('**/assets/projects/project-vaasam.svg', (route) => route.fulfill({
+    status: 200, contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><rect width="2" height="2" fill="#ddd"/></svg>',
+  }));
+  await page.goto('/');
+  await page.waitForFunction(() => Boolean(window.sjdVisualEditor && document.documentElement.dataset.visualEditorReady));
+  const citationShell = () => [{ tagName: 'div', attributes: { class: 'container' }, components: [{
+    tagName: 'blockquote', attributes: { class: 'quote' }, components: [
+      { tagName: 'p', attributes: { class: 'quote-text', 'data-sjd-field': 'quote' }, content: '' },
+      { tagName: 'footer', attributes: { class: 'quote-source' }, components: [
+        { tagName: 'cite', attributes: { 'data-sjd-field': 'author' }, content: '' },
+        { tagName: 'span', attributes: { class: 'quote-role', 'data-sjd-field': 'role' }, content: '' },
+      ] },
+    ],
+  }] }];
+  const dynamicSection = (name, data, variant = '') => ({
+    type: `sjd-section-${name}`,
+    tagName: 'section',
+    attributes: {
+      class: 'citation reveal legacy-theme-token',
+      'data-sjd-section': name,
+      'data-sjd-visible': '1',
+      'data-sjd-variant': variant,
+      'data-sjd-data': JSON.stringify(data),
+    },
+    components: citationShell(),
+  });
+  const project = {
+    pages: [{ id: 'vaasam', frames: [{ id: 'frame', component: { type: 'wrapper', components: [
+      dynamicSection('hero', {
+        kicker: 'Projet — Identité de marque',
+        title: 'Vaasam Paris.<br>Identité & direction artistique.',
+        intro: 'Une identité complète pour une adresse parisienne.',
+        cover: '/assets/projects/project-vaasam.svg',
+        cover_alt: '',
+        _variant: 'projet',
+      }, 'projet'),
+      dynamicSection('etude-de-cas', { blocks: [
+        { kind: 'liste', title: 'Mission', items: ['Stratégie de marque', 'Logotype et déclinaisons'] },
+        { kind: 'texte', title: 'Approche', body: '<p>Une marque fonctionnelle et lisible.</p>' },
+      ] }),
+      dynamicSection('cta-final', {
+        kicker: 'La suite',
+        title: 'Votre projet mérite la même exigence.',
+        intro: 'Un premier échange pour comprendre votre activité.',
+        ctas: [{ label: 'Parlons de votre projet', href: '/contact', style: 'pill--filled' }],
+        _variant: 'interne',
+      }, 'interne'),
+      dynamicSection('galerie', {
+        label: 'Visuels',
+        images: [
+          { src: '/assets/projects/project-vaasam.svg', alt: 'Logo Vaasam', caption: 'Logo principal' },
+          { src: '/assets/projects/project-vaasam.svg', alt: 'Système graphique', caption: 'Système graphique' },
+        ],
+        columns: 3,
+      }),
+    ] } }] }], styles: [], assets: [],
+  };
+  await page.evaluate((data) => window.sjdLoadVisualProject(data), project);
+  const canvas = page.frameLocator('iframe.gjs-frame');
+  await expect(canvas.locator('[data-sjd-section="hero"]')).toHaveClass(/sjd-editor-section-hero/);
+  await expect(canvas.locator('[data-sjd-section="hero"]')).toHaveClass(/legacy-theme-token/);
+  await expect(canvas.locator('[data-sjd-section="hero"]')).toHaveClass(/citation/);
+  await expect(canvas.locator('[data-sjd-section="hero"]')).toContainText('Vaasam Paris.');
+  await expect(canvas.locator('[data-sjd-section="hero"]')).toContainText('Une identité complète pour une adresse parisienne.');
+  await expect(canvas.locator('[data-sjd-section="hero"] img')).toHaveAttribute('src', '/assets/projects/project-vaasam.svg');
+  await expect(canvas.locator('[data-sjd-section="etude-de-cas"]')).toContainText('Approche');
+  await expect(canvas.locator('[data-sjd-section="etude-de-cas"]')).toContainText('Une marque fonctionnelle et lisible.');
+  await expect(canvas.locator('[data-sjd-section="cta-final"]')).toContainText('Votre projet mérite la même exigence.');
+  await expect(canvas.locator('[data-sjd-section="cta-final"]')).toContainText('Parlons de votre projet');
+  await expect(canvas.locator('[data-sjd-section="galerie"] img')).toHaveCount(2);
+  await expect(canvas.locator('[data-sjd-section="galerie"] img').nth(0)).toHaveAttribute('src', '/assets/projects/project-vaasam.svg');
+  await expect(canvas.locator('[data-sjd-section="galerie"]')).toContainText('Logo principal');
+  await expect(canvas.locator('[data-sjd-section="galerie"]')).toContainText('Système graphique');
+  await page.evaluate(() => { window.sjdVisualEditor.select(window.sjdVisualEditor.getWrapper().find('[data-sjd-section="hero"]')[0]); });
+  await page.locator('[data-field-editor="title"]').fill('Vaasam révisé');
+  await expect(canvas.locator('[data-sjd-section="hero"]')).toContainText('Vaasam révisé');
+  const savedProject = await page.evaluate(() => window.sjdVisualEditor.getProjectData());
+  const hero = savedProject.pages[0].frames[0].component.components.find((item) => item.attributes['data-sjd-section'] === 'hero');
+  expect(hero.classes).toEqual(expect.arrayContaining(['citation', 'reveal', 'legacy-theme-token', 'sjd-editor-section', 'sjd-editor-section-hero']));
+  await page.evaluate((data) => window.sjdLoadVisualProject(data), savedProject);
+  await expect(canvas.locator('[data-sjd-section="hero"]')).toContainText('Vaasam révisé');
+  await expect(canvas.locator('[data-sjd-section="hero"]')).toHaveClass(/legacy-theme-token/);
+  await expect(canvas.locator('[data-sjd-section="galerie"] img')).toHaveCount(2);
+  await expect(canvas.locator('[data-sjd-section="galerie"] img').nth(0)).toHaveAttribute('src', '/assets/projects/project-vaasam.svg');
+  await expect(canvas.locator('[data-sjd-section="galerie"] img').nth(1)).toHaveAttribute('src', '/assets/projects/project-vaasam.svg');
+  await page.evaluate(() => { window.sjdVisualEditor.select(window.sjdVisualEditor.getWrapper().find('[data-sjd-section="etude-de-cas"]')[0]); });
+  await page.locator('[data-field-editor="blocks.0.title"]').fill('Mission révisée');
+  await expect(canvas.locator('[data-sjd-section="etude-de-cas"]')).toContainText('Mission révisée');
+  await page.evaluate(() => { window.sjdVisualEditor.select(window.sjdVisualEditor.getWrapper().find('[data-sjd-section="cta-final"]')[0]); });
+  await page.locator('[data-field-editor="title"]').fill('CTA révisé');
+  await expect(canvas.locator('[data-sjd-section="cta-final"]')).toContainText('CTA révisé');
+});
+
 test('publishes only after saving the current draft version', async ({ page }) => {
   let publishedPayload;
   await page.route('**/api/editor/pages/1/visual-project/publish', async (route) => {

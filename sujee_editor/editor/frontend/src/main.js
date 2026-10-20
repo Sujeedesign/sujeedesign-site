@@ -41,7 +41,7 @@ window.sjdLoadVisualProject = (projectData) => {
   loadingProject = true;
   try {
     editor.loadProjectData(projectData);
-    prepareThemeProject(editor);
+    prepareThemeProject(editor, blockSchema);
     savedProjectSnapshot = JSON.stringify(editor.getProjectData());
     changed = false;
     clearTimeout(saveTimer);

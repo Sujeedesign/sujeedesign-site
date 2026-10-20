@@ -8,6 +8,93 @@ function dataFor(component, schema) {
   }
 }
 
+function previewText(value) {
+  if (typeof value === 'string') {
+    const markup = value
+      .replaceAll('<br>', ' ')
+      .replaceAll('<br/>', ' ')
+      .replaceAll('<br />', ' ')
+      .replaceAll('</p>', ' ')
+      .replaceAll('</div>', ' ')
+      .replaceAll('</li>', ' ');
+    const text = new DOMParser().parseFromString(markup, 'text/html').body.textContent || '';
+    return text.replaceAll(String.fromCharCode(10), ' ').replaceAll(String.fromCharCode(9), ' ').split(' ').filter(Boolean).join(' ');
+  }
+  if (typeof value === 'number') return value ? String(value) : '';
+  if (typeof value === 'boolean') return value ? 'Activé' : '';
+  if (Array.isArray(value)) return value.map(previewText).filter(Boolean).join(' · ');
+  if (value && typeof value === 'object') {
+    return Object.entries(value)
+      .filter(([key]) => !['href', 'style', 'kind', '_variant', 'src', 'path', 'alt'].includes(key))
+      .map(([, child]) => previewText(child))
+      .filter(Boolean)
+      .join(' · ');
+  }
+  return '';
+}
+
+function safePreviewImage(value) {
+  if (typeof value !== 'string' || !(value.startsWith('/assets/') || value.startsWith('/medias/'))) return false;
+  return !value.split('/').some((part) => part === '.' || part === '..');
+}
+
+function collectPreviewImages(value) {
+  if (Array.isArray(value)) return value.flatMap(collectPreviewImages);
+  if (!value || typeof value !== 'object') return [];
+  const source = value.src || value.path;
+  if (safePreviewImage(source)) return [{ src: source, alt: String(value.alt || value.caption || '') }];
+  return Object.entries(value)
+    .filter(([key]) => !['href', 'style', 'kind', '_variant', 'alt', 'caption'].includes(key))
+    .flatMap(([, child]) => collectPreviewImages(child));
+}
+
+function imagePreview(source, alt) {
+  return {
+    type: 'image', tagName: 'img',
+    attributes: { class: 'sjd-editor-preview-image', src: source, alt },
+    editable: false, removable: false, draggable: false,
+  };
+}
+
+function dynamicPreview(name, schema, data) {
+  const components = [{
+    tagName: 'strong', attributes: { class: 'sjd-editor-preview-title' }, content: schema.label || name,
+  }];
+  for (const field of schema.fields || []) {
+    const value = data[field.name];
+    if (field.kind === 'image') {
+      if (safePreviewImage(value)) {
+        components.push(imagePreview(value, String(data[`${field.name}_alt`] || field.label || '')));
+      }
+      continue;
+    }
+    if (field.kind === 'images') {
+      for (const image of collectPreviewImages(value)) components.push(imagePreview(image.src, image.alt));
+    }
+    const text = previewText(value);
+    if (!text) continue;
+    components.push({
+      tagName: 'div',
+      attributes: { class: 'sjd-editor-preview-field' },
+      components: [
+        { tagName: 'span', attributes: { class: 'sjd-editor-preview-label' }, content: field.label || field.name, editable: false },
+        { tagName: 'p', attributes: { class: 'sjd-editor-preview-value' }, content: text, editable: false },
+      ],
+      editable: false,
+      removable: false,
+      draggable: false,
+    });
+  }
+  return [{
+    tagName: 'div',
+    attributes: { class: `sjd-editor-preview sjd-editor-preview-${name}` },
+    components,
+    editable: false,
+    removable: false,
+    draggable: false,
+  }];
+}
+
 export function registerSujeeTheme(editor, blockSchema = {}) {
   const definitions = createThemeComponents(blockSchema);
   for (const [key, definition] of Object.entries(definitions)) {
@@ -34,6 +121,10 @@ export function registerSujeeTheme(editor, blockSchema = {}) {
         init() {
           this.listenTo(this, 'change:attributes', this.syncThemeAttributes);
           if (key === 'chapter') this.syncDarkClass();
+          else if (!['image-pleine-largeur', 'citation'].includes(key)) {
+            this.listenTo(this, 'change:attributes', this.syncDynamicPreview);
+            this.syncDynamicPreview();
+          }
           for (const field of this.find('[data-sjd-field]')) {
             const fieldName = field.getAttributes()['data-sjd-field'];
             if (!['src', 'list'].includes(fieldName)) {
@@ -41,6 +132,10 @@ export function registerSujeeTheme(editor, blockSchema = {}) {
               this.listenTo(field, 'change:content', () => this.syncInlineField(fieldName, field));
             }
           }
+        },
+        syncDynamicPreview() {
+          if (!schema) return;
+          this.components(dynamicPreview(key, schema, dataFor(this, schema)));
         },
         syncThemeAttributes() {
           if (key !== 'chapter') return;
@@ -81,9 +176,22 @@ export function registerSujeeTheme(editor, blockSchema = {}) {
   }
 }
 
-export function prepareThemeProject(editor) {
+export function prepareThemeProject(editor, blockSchema = {}) {
   for (const component of editor.getWrapper().find('[data-sjd-section]')) {
     const sectionName = component.getAttributes()['data-sjd-section'];
+    if (!['chapter', 'image-pleine-largeur', 'citation'].includes(sectionName)) {
+      const schema = blockSchema[sectionName];
+      if (schema) {
+        const attrs = component.getAttributes();
+        const classes = new Set(String(attrs.class || '').split(' ').filter(Boolean));
+        classes.add('sjd-editor-section');
+        classes.add(`sjd-editor-section-${sectionName}`);
+        const className = [...classes].join(' ');
+        if (attrs.class !== className) component.addAttributes({ class: className });
+        component.components(dynamicPreview(sectionName, schema, dataFor(component, schema)));
+      }
+      continue;
+    }
     if (sectionName === 'chapter') {
       const attrs = component.getAttributes();
       const data = dataFor(component, { fields: [] });
