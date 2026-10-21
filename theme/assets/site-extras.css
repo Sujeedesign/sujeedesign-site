@@ -513,3 +513,59 @@ figcaption:empty {
   .zone-libre__column[class*="zone-libre__column--span-"] { grid-column: 1 / -1; }
   .zone-libre__inner--container { width: min(calc(100% - 36px), var(--content-max-width)); }
 }
+
+/* Fonds de section réglables depuis l'éditeur, sans CSS libre. */
+.sjd-section-background--paper,
+.sjd-section-background--obsidian,
+.sjd-section-background--accent,
+.sjd-section-background--gradient,
+.sjd-section-background--custom {
+  isolation: isolate;
+  --sjd-section-text: var(--color-obsidian-solid);
+}
+.sjd-section-background--paper { background: var(--color-paper-solid) !important; color: var(--color-obsidian-solid) !important; }
+.sjd-section-background--obsidian { background: var(--color-obsidian-solid) !important; color: var(--color-paper-solid) !important; --sjd-section-text: var(--color-paper-solid); }
+.sjd-section-background--accent { background: var(--color-accent) !important; color: var(--color-accent-ink) !important; --sjd-section-text: var(--color-accent-ink); }
+.sjd-section-background--gradient {
+  background: linear-gradient(rgba(255,255,255,.55), rgba(255,255,255,.55)), var(--gradient-iridescent) !important;
+  background-size: 220% 220% !important;
+  animation: gradient-pan 24s ease-in-out infinite;
+  color: var(--color-obsidian-solid) !important;
+}
+.sjd-section-background--custom { background: var(--sjd-section-background) !important; color: var(--sjd-section-foreground) !important; --sjd-section-text: var(--sjd-section-foreground); }
+.sjd-section-background--paper :is(h1, h2, h3, h4, p, li, span, small, strong, em, cite, figcaption, blockquote, dt, dd, time, label, legend, summary, a:not(.pill):not(.pill--filled)):not(.pill *):not(.pill--filled *),
+.sjd-section-background--obsidian :is(h1, h2, h3, h4, p, li, span, small, strong, em, cite, figcaption, blockquote, dt, dd, time, label, legend, summary, a:not(.pill):not(.pill--filled)):not(.pill *):not(.pill--filled *),
+.sjd-section-background--accent :is(h1, h2, h3, h4, p, li, span, small, strong, em, cite, figcaption, blockquote, dt, dd, time, label, legend, summary, a:not(.pill):not(.pill--filled)):not(.pill *):not(.pill--filled *),
+.sjd-section-background--gradient :is(h1, h2, h3, h4, p, li, span, small, strong, em, cite, figcaption, blockquote, dt, dd, time, label, legend, summary, a:not(.pill):not(.pill--filled)):not(.pill *):not(.pill--filled *),
+.sjd-section-background--custom :is(h1, h2, h3, h4, p, li, span, small, strong, em, cite, figcaption, blockquote, dt, dd, time, label, legend, summary, a:not(.pill):not(.pill--filled)):not(.pill *):not(.pill--filled *) {
+  color: var(--sjd-section-text) !important;
+}
+.sjd-section-background--paper :is(.hero-bg, .hero-shader, .project-cover__media, .project-cover__shade),
+.sjd-section-background--obsidian :is(.hero-bg, .hero-shader, .project-cover__media, .project-cover__shade),
+.sjd-section-background--accent :is(.hero-bg, .hero-shader, .project-cover__media, .project-cover__shade),
+.sjd-section-background--gradient :is(.hero-bg, .hero-shader, .project-cover__media, .project-cover__shade),
+.sjd-section-background--custom :is(.hero-bg, .hero-shader, .project-cover__media, .project-cover__shade) { display: none !important; }
+.hero.sjd-section-background--paper::after,
+.hero.sjd-section-background--obsidian::after,
+.hero.sjd-section-background--accent::after,
+.hero.sjd-section-background--gradient::after,
+.hero.sjd-section-background--custom::after,
+.p-final--home.sjd-section-background--paper::before,
+.p-final--home.sjd-section-background--obsidian::before,
+.p-final--home.sjd-section-background--accent::before,
+.p-final--home.sjd-section-background--gradient::before,
+.p-final--home.sjd-section-background--custom::before,
+.page-hero.sjd-section-background--paper::before,
+.page-hero.sjd-section-background--obsidian::before,
+.page-hero.sjd-section-background--accent::before,
+.page-hero.sjd-section-background--gradient::before,
+.page-hero.sjd-section-background--custom::before,
+.p-hero.sjd-section-background--paper::before,
+.p-hero.sjd-section-background--obsidian::before,
+.p-hero.sjd-section-background--accent::before,
+.p-hero.sjd-section-background--gradient::before,
+.p-hero.sjd-section-background--custom::before { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sjd-section-background--gradient { animation: none !important; background-size: 100% 100% !important; }
+}

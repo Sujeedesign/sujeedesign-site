@@ -13,7 +13,7 @@ from sujee_editor.editor.project import (
     project_to_sections,
     sections_to_project,
 )
-from sujee_editor.blocks import DEFAULT_BLOCKS
+from sujee_editor.blocks import DEFAULT_BLOCKS, default_data
 from editor_fixtures import sample_data
 
 
@@ -217,6 +217,8 @@ def test_project_to_sections_restores_fields_visibility_and_order():
         "src": "/medias/projet.webp",
         "alt": "Affiche de projet",
         "caption": "Une légende",
+        "section_background": "default",
+        "section_background_color": "#f2f2f4",
     }
     assert sections[2]["data"]["author"] == "Sujee"
 
@@ -411,7 +413,62 @@ def test_all_block_variants_round_trip_without_data_loss():
     ]
 
 
-@pytest.mark.parametrize("legacy_version", [1, 2])
+def test_section_background_mode_and_color_round_trip():
+    data = default_data(DEFAULT_BLOCKS["chapter"])
+    data.update(section_background="custom", section_background_color="#123456")
+    source = [{"id": 1, "type": "chapter", "position": 0, "effective": data}]
+
+    saved = project_to_sections(sections_to_project(source))[0]["data"]
+
+    assert saved["section_background"] == "custom"
+    assert saved["section_background_color"] == "#123456"
+
+
+def test_theme_v3_project_gains_default_background_fields_without_content_changes():
+    from sujee_editor.editor.project import migrate_project
+
+    project = _three_section_project()
+    project["theme_version"] = 3
+    components = project["project_data"]["pages"][0]["frames"][0]["component"]["components"]
+    for component in components:
+        raw_data = component["attributes"].get("data-sjd-data")
+        if raw_data:
+            data = json.loads(raw_data)
+            data.pop("section_background", None)
+            data.pop("section_background_color", None)
+            component["attributes"]["data-sjd-data"] = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+
+    migrated = migrate_project(project)
+    sections = project_to_sections(migrated)
+
+    assert migrated["theme_version"] == THEME_VERSION == 4
+    assert all(section["data"]["section_background"] == "default" for section in sections)
+    assert all(section["data"]["section_background_color"] == "#f2f2f4" for section in sections)
+
+
+@pytest.mark.parametrize("legacy_background", ["none", "paper", "obsidian", "accent", "image"])
+def test_theme_v3_zone_free_background_mode_survives_migration(legacy_background: str):
+    from sujee_editor.editor.project import migrate_project
+
+    data = default_data(DEFAULT_BLOCKS["zone-libre"])
+    data["background"] = legacy_background
+    if legacy_background == "image":
+        data["background_image"] = "/medias/legacy-background.webp"
+    project = sections_to_project([{"id": 1, "type": "zone-libre", "position": 0, "effective": data}])
+    project["theme_version"] = 3
+    components = project["project_data"]["pages"][0]["frames"][0]["component"]["components"]
+    component_data = json.loads(components[0]["attributes"]["data-sjd-data"])
+    component_data.pop("section_background_color", None)
+    components[0]["attributes"]["data-sjd-data"] = json.dumps(component_data, ensure_ascii=False, separators=(",", ":"))
+
+    migrated = migrate_project(project)
+    section = project_to_sections(migrated)[0]
+
+    assert section["data"]["background"] == legacy_background
+    assert section["data"]["section_background_color"] == "#f2f2f4"
+
+
+@pytest.mark.parametrize("legacy_version", [1, 2, 3])
 def test_migrate_legacy_theme_project_preserves_content_and_is_idempotent(legacy_version: int):
     from sujee_editor.editor.project import migrate_project
 
@@ -422,7 +479,7 @@ def test_migrate_legacy_theme_project_preserves_content_and_is_idempotent(legacy
     migrated = migrate_project(project)
 
     assert project == before
-    assert migrated["theme_version"] == THEME_VERSION == 3
+    assert migrated["theme_version"] == THEME_VERSION == 4
     assert migrated["project_data"] == project["project_data"]
     assert migrate_project(migrated) == migrated
     assert [section["type"] for section in project_to_sections(migrated)] == [

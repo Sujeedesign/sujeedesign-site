@@ -212,6 +212,36 @@ def test_free_zone_rejects_remote_or_traversal_image_paths():
     assert any(error.rule == "unsafe_media" for error in validate_data(zone, data))
 
 
+def test_all_sections_have_controlled_background_modes_and_hex_color_validation():
+    chapter = DEFAULT_BLOCKS["chapter"]
+    data = default_data(chapter)
+    assert data["section_background"] == "default"
+    assert data["section_background_color"] == "#f2f2f4"
+
+    data["section_background"] = "gradient"
+    assert validate_data(chapter, data) == []
+    data["section_background"] = "custom"
+    data["section_background_color"] = "#123456"
+    assert validate_data(chapter, data) == []
+
+    for invalid in ("red", "#fff", "#123456; background:url(x)", "var(--color-accent)"):
+        assert rules(validate_data(chapter, {**data, "section_background_color": invalid})) == [
+            ("section_background_color", "bad_color")
+        ]
+
+
+def test_free_zone_supports_animated_gradient_and_custom_color():
+    zone = DEFAULT_BLOCKS["zone-libre"]
+    data = default_data(zone)
+    data["background"] = "gradient"
+    assert validate_data(zone, data) == []
+    data["background"] = "custom"
+    data["section_background_color"] = "#ffcc88"
+    assert validate_data(zone, data) == []
+    data["section_background_color"] = "#fff"
+    assert rules(validate_data(zone, data)) == [("section_background_color", "bad_color")]
+
+
 def test_free_zone_rejects_backslashes_in_links_and_media_paths():
     zone = DEFAULT_BLOCKS["zone-libre"]
     data = default_data(zone)

@@ -129,7 +129,7 @@ def test_visual_editor_rebuilds_legacy_pilot_projects_from_all_page_sections(cli
     config = json.loads(match.group(1))
     project = config["project"]
     components = project["project_data"]["pages"][0]["frames"][0]["component"]["components"]
-    assert project["theme_version"] == 3
+    assert project["theme_version"] == 4
     assert config["draft_version"] == 7
     assert [item["attributes"]["data-sjd-section"] for item in components] == ["chapter", "hero", "etude-de-cas", "cta-final"]
     assert [int(item["attributes"]["data-sjd-section-id"]) for item in components] == section_ids
@@ -141,7 +141,7 @@ def test_visual_editor_rebuilds_legacy_pilot_projects_from_all_page_sections(cli
         published_components = published["project_data"]["pages"][0]["frames"][0]["component"]["components"]
         assert [item["attributes"]["data-sjd-section"] for item in published_components] == ["chapter", "hero", "etude-de-cas", "cta-final"]
         assert json.loads(published_components[0]["attributes"]["data-sjd-data"])["title"] == "Titre publié"
-        assert row["draft_version"] == 7 and row["theme_version"] == 3
+        assert row["draft_version"] == 7 and row["theme_version"] == 4
     finally:
         conn.close()
 

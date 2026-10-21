@@ -186,3 +186,55 @@ def test_templates_directory_exists() -> None:
     assert (Path(render_module.TEMPLATES_DIR) / "base.html").is_file()
     for type_, template in sections_module.TEMPLATE_BY_TYPE.items():
         assert (Path(render_module.TEMPLATES_DIR) / template).is_file(), f"gabarit manquant : {type_}"
+
+
+@pytest.mark.parametrize(("background", "foreground"), [("#000000", "#ffffff"), ("#ffffff", "#000000")])
+def test_custom_section_background_renders_safe_color_and_contrasting_text(background: str, foreground: str):
+    section = build_section("chapter")
+    section["data"]["section_background"] = "custom"
+    section["data"]["section_background_color"] = background
+
+    html = render_module.section_html(ENV, section, CTX, envelopes=False)
+
+    assert "sjd-section-background--custom" in html
+    assert f"--sjd-section-background:{background}" in html
+    assert f"--sjd-section-foreground:{foreground}" in html
+
+
+def test_invalid_custom_section_background_is_ignored():
+    section = build_section("chapter")
+    section["data"]["section_background"] = "custom"
+    section["data"]["section_background_color"] = "#000000; background:url(javascript:alert(1))"
+
+    html = render_module.section_html(ENV, section, CTX, envelopes=False)
+
+    assert "sjd-section-background--custom" not in html
+    assert "javascript:" not in html
+
+
+def test_zone_free_animated_gradient_is_applied_to_the_section_root():
+    section = build_section("zone-libre")
+    section["data"]["background"] = "gradient"
+
+    html = render_module.section_html(ENV, section, CTX, envelopes=False)
+
+    assert 'class="zone-libre zone-libre--gradient' in html
+    assert "sjd-section-background--gradient" in html
+
+
+def test_zone_free_custom_background_uses_hex_and_rejects_css_payloads():
+    section = build_section("zone-libre")
+    section["data"].update(background="custom", section_background_color="#ffcc88")
+
+    html = render_module.section_html(ENV, section, CTX, envelopes=False)
+
+    assert "sjd-section-background--custom" in html
+    assert "--sjd-section-background:#ffcc88" in html
+    assert "--sjd-section-foreground:#000000" in html
+
+    section["data"]["section_background_color"] = "#ffcc88; background:url(javascript:alert(1))"
+    unsafe_html = render_module.section_html(ENV, section, CTX, envelopes=False)
+
+    assert "sjd-section-background--custom" not in unsafe_html
+    assert "--sjd-section-background:" not in unsafe_html
+    assert "javascript:" not in unsafe_html

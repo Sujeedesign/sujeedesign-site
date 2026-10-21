@@ -589,19 +589,19 @@ def test_visual_project_get_migrates_v1_draft_after_validation(client: TestClien
     response = client.get(f"{BASE}/pages/{page_id}/visual-project", cookies=cookies)
 
     assert response.status_code == 200
-    assert response.json()["theme_version"] == THEME_VERSION == 3
+    assert response.json()["theme_version"] == THEME_VERSION == 4
     assert response.json()["draft_version"] == 7
     migrated = response.json()["project"]
-    assert migrated["theme_version"] == 3
+    assert migrated["theme_version"] == 4
     assert [item["attributes"]["data-sjd-section"] for item in migrated["project_data"]["pages"][0]["frames"][0]["component"]["components"]] == [
         "chapter", "image-pleine-largeur", "citation"
     ]
     conn = db_module.connect(db_file)
     try:
         row = conn.execute("SELECT draft_project_json, published_project_json, theme_version, draft_version FROM visual_projects WHERE page_id = ?", (page_id,)).fetchone()
-        assert json.loads(row["draft_project_json"])["theme_version"] == 3
-        assert json.loads(row["published_project_json"])["theme_version"] == 3
-        assert row["theme_version"] == 3 and row["draft_version"] == 7
+        assert json.loads(row["draft_project_json"])["theme_version"] == 4
+        assert json.loads(row["published_project_json"])["theme_version"] == 4
+        assert row["theme_version"] == 4 and row["draft_version"] == 7
     finally:
         conn.close()
 

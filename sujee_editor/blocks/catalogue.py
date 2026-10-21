@@ -15,9 +15,17 @@ IMAGE = Kind.IMAGE
 BOOL = Kind.BOOL
 NUMBER = Kind.NUMBER
 CHOICE = Kind.CHOICE
+COLOR = Kind.COLOR
 CTAS = Kind.CTAS
 
 CTA_STYLE = ("pill", "pill--filled", "text-link")
+SECTION_BACKGROUND_CHOICES = ("default", "paper", "obsidian", "accent", "gradient", "custom")
+SECTION_BACKGROUND = Field(
+    "section_background", CHOICE, "Arrière-plan", choices=SECTION_BACKGROUND_CHOICES, default="default", inplace=False
+)
+SECTION_BACKGROUND_COLOR = Field(
+    "section_background_color", COLOR, "Couleur personnalisée", default="#f2f2f4", inplace=False
+)
 
 CTA_ITEM = Field(
     "ctas",
@@ -43,6 +51,8 @@ def _blocks() -> dict[str, Block]:
     catalogue: dict[str, Block] = {}
 
     def add(name: str, label: str, fields: tuple[Field, ...], variants: dict[str, str] | None = None) -> None:
+        if name != "zone-libre":
+            fields = (*fields, SECTION_BACKGROUND, SECTION_BACKGROUND_COLOR)
         catalogue[name] = Block(
             name=name,
             label=label,
@@ -330,7 +340,8 @@ def _blocks() -> dict[str, Block]:
         "zone-libre",
         "Section à composer",
         (
-            Field("background", CHOICE, "Fond", choices=("none", "paper", "obsidian", "accent", "image"), default="none"),
+            Field("background", CHOICE, "Arrière-plan", choices=("none", "paper", "obsidian", "accent", "gradient", "custom", "image"), default="none"),
+            SECTION_BACKGROUND_COLOR,
             Field("background_image", IMAGE, "Image de fond", inplace=False, default=""),
             Field("width", CHOICE, "Largeur", choices=("container", "full"), default="container"),
             Field("spacing", CHOICE, "Espacement vertical", choices=("compact", "normal", "generous"), default="normal"),

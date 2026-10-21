@@ -47,6 +47,11 @@ SVG_ATTRS = {
 
 _cache: dict[str, tuple[str, str]] = {}
 _cache_lock = threading.Lock()
+_SECTION_BACKGROUND_MODES = {"paper", "obsidian", "accent", "gradient", "custom"}
+_COLOR_HEX = re.compile(r"#[0-9a-fA-F]{6}\Z")
+_ROOT_OPEN_TAG = re.compile(r"<(?P<tag>[A-Za-z][A-Za-z0-9:_-]*)(?P<attrs>[^<>]*)>")
+_CLASS_ATTRIBUTE = re.compile(r"(?P<prefix>\sclass\s*=\s*)(?P<quote>[\"'])(?P<value>.*?)(?P=quote)", re.IGNORECASE)
+_STYLE_ATTRIBUTE = re.compile(r"(?P<prefix>\sstyle\s*=\s*)(?P<quote>[\"'])(?P<value>.*?)(?P=quote)", re.IGNORECASE)
 
 
 class _Sanitizer(HTMLParser):
@@ -299,6 +304,76 @@ def envelope_html(section: dict) -> str:
     )
 
 
+def _contrast_foreground(color: str) -> str:
+    """Choisit entre noir et blanc selon le contraste WCAG du fond hexadécimal."""
+    channels = [int(color[index:index + 2], 16) / 255 for index in (1, 3, 5)]
+    linear = [channel / 12.92 if channel <= 0.04045 else ((channel + 0.055) / 1.055) ** 2.4 for channel in channels]
+    luminance = 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2]
+    black_contrast = (luminance + 0.05) / 0.05
+    white_contrast = 1.05 / (luminance + 0.05)
+    return "#000000" if black_contrast >= white_contrast else "#ffffff"
+
+
+def _apply_section_background(rendered: str, section_type: str, data: dict) -> str:
+    """Applique une variante contrôlée au premier élément racine du gabarit.
+
+    Le projet ne fournit jamais de CSS : seules des classes prédéfinies et une
+    couleur hexadécimale strictement validée peuvent être émises ici.
+    """
+    if section_type == "zone-libre":
+        mode = data.get("background", "none")
+        if mode in {"none", "image"}:
+            return rendered
+    else:
+        mode = data.get("section_background", "default")
+    if mode not in _SECTION_BACKGROUND_MODES:
+        return rendered
+
+    style_declaration = ""
+    if mode == "custom":
+        color = data.get("section_background_color", "")
+        if not isinstance(color, str) or not _COLOR_HEX.fullmatch(color):
+            return rendered
+        style_declaration = (
+            f"--sjd-section-background:{color.lower()};"
+            f"--sjd-section-foreground:{_contrast_foreground(color)}"
+        )
+
+    class_name = f"sjd-section-background--{mode}"
+
+    def decorate(match: re.Match[str]) -> str:
+        tag = match.group("tag")
+        attrs = match.group("attrs")
+        class_match = _CLASS_ATTRIBUTE.search(attrs)
+        if class_match:
+            classes = class_match.group("value").split()
+            if class_name not in classes:
+                classes.append(class_name)
+            replacement = (
+                f"{class_match.group('prefix')}{class_match.group('quote')}"
+                f"{html_module.escape(' '.join(classes), quote=True)}{class_match.group('quote')}"
+            )
+            attrs = attrs[:class_match.start()] + replacement + attrs[class_match.end():]
+        else:
+            attrs += f' class="{class_name}"'
+
+        if style_declaration:
+            style_match = _STYLE_ATTRIBUTE.search(attrs)
+            if style_match:
+                existing = style_match.group("value").rstrip("; ")
+                value = f"{existing};{style_declaration}" if existing else style_declaration
+                replacement = (
+                    f"{style_match.group('prefix')}{style_match.group('quote')}"
+                    f"{html_module.escape(value, quote=True)}{style_match.group('quote')}"
+                )
+                attrs = attrs[:style_match.start()] + replacement + attrs[style_match.end():]
+            else:
+                attrs += f' style="{html_module.escape(style_declaration, quote=True)}"'
+        return f"<{tag}{attrs}>"
+
+    return _ROOT_OPEN_TAG.sub(decorate, rendered, count=1)
+
+
 def _get(obj: Any, key: str, default: Any = "") -> Any:
     if isinstance(obj, dict):
         return obj.get(key, default)
@@ -321,6 +396,7 @@ def section_html(env: Environment, section: sqlite3.Row | dict, ctx: dict | None
     except Exception:  # gabarit absent : on n'empêche pas la page de s'afficher
         return ""
     rendered = template.render(s=normalized, **{k: v for k, v in context.items() if k != "s"})
+    rendered = _apply_section_background(rendered, normalized["type"], normalized["data"])
     if not envelopes:
         return rendered
     return envelope_html(normalized) + rendered + "</div>"

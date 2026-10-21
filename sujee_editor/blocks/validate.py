@@ -8,6 +8,7 @@ la liste complète des erreurs.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Any
 from urllib.parse import unquote, urlsplit
@@ -113,6 +114,10 @@ def _errors_for(field: Field, value: Any, path: str) -> list[ValidationError]:
         if isinstance(value, str) and value in field.choices:
             return []
         return [ValidationError(path, "bad_choice", "|".join(field.choices))]
+    if kind is Kind.COLOR:
+        if isinstance(value, str) and re.fullmatch(r"#[0-9a-fA-F]{6}", value):
+            return []
+        return [ValidationError(path, "bad_color")]
     if kind is Kind.LINES:
         if isinstance(value, str):
             return []

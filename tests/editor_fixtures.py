@@ -15,6 +15,8 @@ from sujee_editor.blocks import DEFAULT_BLOCKS, Block, Field, Kind, default_data
 
 def sample_value(field: Field) -> Any:
     """Une valeur réaliste et non vide pour un champ, selon sa nature."""
+    if field.kind is Kind.COLOR:
+        return field.default or "#f2f2f4"
     if field.kind is Kind.BOOL:
         return True
     if field.kind is Kind.NUMBER:

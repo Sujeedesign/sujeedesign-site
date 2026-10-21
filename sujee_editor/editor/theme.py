@@ -5,7 +5,7 @@ from __future__ import annotations
 from sujee_editor.blocks import DEFAULT_BLOCKS
 
 THEME_ID = "sujee-site"
-THEME_VERSION = 3
+THEME_VERSION = 4
 PROJECT_SCHEMA_VERSION = 1
 
 # Identifiants stables enregistrés dans le project JSON GrapesJS. Les trois

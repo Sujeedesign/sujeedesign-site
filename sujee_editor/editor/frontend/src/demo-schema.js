@@ -5,6 +5,10 @@ const l = (name, label = name) => f(name, 'lines', label);
 const image = (name, label = name) => f(name, 'image', label);
 const item = (name, kind, fields, label = name, extra = {}) => f(name, kind, label, { fields, ...extra });
 const ctaFields = [t('label', 'Libellé'), t('href', 'Lien'), f('style', 'choice', 'Style', { choices: ['pill', 'pill--filled', 'text-link'] })];
+const sectionBackgroundFields = [
+  f('section_background', 'choice', 'Arrière-plan', { choices: ['default', 'paper', 'obsidian', 'accent', 'gradient', 'custom'], default: 'default' }),
+  f('section_background_color', 'color', 'Couleur personnalisée', { default: '#f2f2f4' }),
+];
 
 export const DEMO_BLOCKS = Object.fromEntries([
   ['hero', "Bandeau d'ouverture", [t('kicker'), f('title', 'html-line', 'Titre'), a('intro'), l('meta'), l('rotator'), image('cover'), t('cover_alt'), image('image'), t('image_alt'), f('image_width', 'number'), f('image_height', 'number'), t('back_label'), t('back_href'), f('dense', 'bool'), f('wide_title', 'bool'), item('ctas', 'ctas', ctaFields, 'Boutons', { default: [{ label: 'Découvrir', href: '/services', style: 'pill' }] }), f('shader', 'bool')], { accueil: 'Accueil', page: 'Page interne', simple: 'Page simple', projet: 'Réalisation' }],
@@ -27,7 +31,8 @@ export const DEMO_BLOCKS = Object.fromEntries([
   ['etude-de-cas', 'Étude de cas', [item('blocks', 'items', [f('kind', 'choice', 'Type', { choices: ['texte', 'liste', 'meta'] }), t('title'), f('body', 'html'), l('items'), l('meta')], 'Blocs')]],
   ['banniere', 'Bannière visuelle', [image('src'), t('alt'), f('svg', 'html')]],
   ['zone-libre', 'Section à composer', [
-    f('background', 'choice', 'Fond', { choices: ['none', 'paper', 'obsidian', 'accent', 'image'], default: 'none' }),
+    f('background', 'choice', 'Arrière-plan', { choices: ['none', 'paper', 'obsidian', 'accent', 'gradient', 'custom', 'image'], default: 'none' }),
+    sectionBackgroundFields[1],
     f('background_image', 'image', 'Image de fond'),
     f('width', 'choice', 'Largeur', { choices: ['container', 'full'], default: 'container' }),
     f('spacing', 'choice', 'Espacement vertical', { choices: ['compact', 'normal', 'generous'], default: 'normal' }),
@@ -46,4 +51,10 @@ export const DEMO_BLOCKS = Object.fromEntries([
       { span: '6', align: 'left', elements: [] }, { span: '6', align: 'left', elements: [] },
     ] }),
   ]],
-].map(([name, label, fields, variants = {}]) => [name, { name, label, variants, repeatable: true, fields }]));
+].map(([name, label, fields, variants = {}]) => [name, {
+  name,
+  label,
+  variants,
+  repeatable: true,
+  fields: [...fields, ...(name === 'zone-libre' ? [] : sectionBackgroundFields)],
+}]));

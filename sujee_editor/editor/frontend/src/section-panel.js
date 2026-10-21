@@ -2,6 +2,11 @@ function clone(value) {
   return value == null ? value : structuredClone(value);
 }
 
+const BACKGROUND_LABELS = {
+  default: 'Par défaut', none: 'Par défaut', paper: 'Clair', obsidian: 'Sombre',
+  accent: 'Accent bronze', gradient: 'Dégradé animé', custom: 'Couleur personnalisée', image: 'Image de fond',
+};
+
 function fieldDefault(field) {
   if (Object.hasOwn(field, 'default')) return clone(field.default);
   if (field.kind === 'bool') return false;
@@ -163,18 +168,28 @@ export function mountSectionPanel({ root, editor, blockSchema, mediaClient }) {
         const max = count <= 1 ? 12 : 12 - 2 * (count - 1);
         choices = choices.filter((choice) => Number(choice) <= max);
       }
-      for (const choice of choices) control.append(element('option', { value: choice }, choice));
+      const isBackgroundChoice = field.name === 'section_background'
+        || (schema?.name === 'zone-libre' && field.name === 'background' && parts.length === 1);
+      for (const choice of choices) {
+        const label = isBackgroundChoice ? (BACKGROUND_LABELS[choice] || choice) : choice;
+        control.append(element('option', { value: choice }, label));
+      }
       control.value = String(value ?? '');
       control.addEventListener('change', () => {
         commit(path, control.value);
         const spanChanged = schema?.name === 'zone-libre' && parts[0] === 'columns' && parts.length === 3 && parts[2] === 'span';
         const elementTypeChanged = schema?.name === 'zone-libre' && parts[0] === 'columns' && parts[2] === 'elements' && parts[4] === 'type';
-        if (spanChanged || elementTypeChanged) refresh();
+        if (spanChanged || elementTypeChanged || isBackgroundChoice) refresh();
       });
     } else if (field.kind === 'number') {
       control = element('input', { type: 'number', id, 'data-field-editor': path });
       control.value = Number.isFinite(Number(value)) ? String(value) : '';
       control.addEventListener('input', () => commit(path, control.value === '' ? 0 : Number(control.value)));
+    } else if (field.kind === 'color') {
+      control = element('input', { type: 'color', id, 'data-field-editor': path });
+      const color = String(value || '#f2f2f4');
+      control.value = /^#[0-9a-f]{6}$/i.test(color) ? color : '#f2f2f4';
+      control.addEventListener('input', () => commit(path, control.value));
     } else if (field.kind === 'image') {
       control = element('select', { id, 'data-field-editor': path, 'aria-label': field.label || field.name });
       control.append(element('option', { value: '' }, 'Choisir une image…'));
@@ -233,7 +248,15 @@ export function mountSectionPanel({ root, editor, blockSchema, mediaClient }) {
       group.append(select);
       panel.append(group);
     }
-    for (const field of schema.fields || []) panel.append(addControl(field, field.name, data[field.name] ?? fieldDefault(field)));
+    for (const field of schema.fields || []) {
+      const group = addControl(field, field.name, data[field.name] ?? fieldDefault(field));
+      if (field.name === 'section_background_color') {
+        const mode = schema.name === 'zone-libre' ? data.background : data.section_background;
+        group.hidden = mode !== 'custom';
+        group.dataset.backgroundColorControl = '';
+      }
+      panel.append(group);
+    }
     const remove = element('button', {
       type: 'button',
       class: 'section-panel-delete',

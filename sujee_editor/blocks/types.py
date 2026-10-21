@@ -26,6 +26,7 @@ class Kind(str, Enum):
     BOOL = "bool"
     NUMBER = "number"
     CHOICE = "choice"
+    COLOR = "color"
     CTAS = "ctas"
 
 

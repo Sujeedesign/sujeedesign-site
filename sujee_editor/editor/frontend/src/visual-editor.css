@@ -62,8 +62,10 @@ button, a { font: inherit; }
 .visual-section-panel[hidden] { display: none; }
 .section-panel-title { margin: 0; color: #222; font-size: 14px; font-weight: 650; }
 .section-field { display: grid; gap: 6px; min-width: 0; }
+.section-field[hidden] { display: none; }
 .section-field > label, .section-variant > label { color: #555; font-size: 12px; }
 .section-field input:not([type="checkbox"]), .section-field textarea, .section-field select, .section-variant select { width: 100%; min-height: 36px; padding: 7px 9px; border: 1px solid #d9d7d2; border-radius: 6px; background: #fff; color: #181817; font: inherit; }
+.section-field input[type="color"] { min-height: 38px; padding: 3px; cursor: pointer; }
 .section-field textarea { min-height: 72px; resize: vertical; }
 .section-field input[type="checkbox"] { justify-self: start; width: 18px; height: 18px; accent-color: #171717; }
 .section-repeat-item { display: grid; gap: 9px; min-width: 0; margin: 0 0 9px; padding: 10px; border: 1px solid #e7e5e1; border-radius: 7px; }

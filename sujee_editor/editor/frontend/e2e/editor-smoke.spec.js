@@ -85,6 +85,24 @@ test('deletes the selected section only after confirmation and saves the draft',
   await expect.poll(() => calls.at(-1)?.project?.project_data?.pages?.[0]?.frames?.[0]?.component?.components?.length ?? 0).toBe(before);
 });
 
+test('edits a section background with an animated gradient or a custom color', async ({ page }) => {
+  await page.goto('/');
+  await page.waitForFunction(() => Boolean(window.sjdVisualEditor && document.documentElement.dataset.visualEditorReady));
+  await page.locator('#visual-blocks .gjs-block').filter({ hasText: 'Chapitre éditorial' }).click();
+  const panel = page.locator('#visual-section-panel');
+  const background = panel.locator('[data-field-editor="section_background"]');
+  const color = panel.locator('[data-field-editor="section_background_color"]');
+  await expect(background.locator('option[value="gradient"]')).toHaveText('Dégradé animé');
+  await expect(color).toBeHidden();
+
+  await background.selectOption('gradient');
+  await expect.poll(() => page.evaluate(() => JSON.parse(window.sjdVisualEditor.getSelected().getAttributes()['data-sjd-data']).section_background)).toBe('gradient');
+  await background.selectOption('custom');
+  await expect(color).toBeVisible();
+  await color.fill('#123456');
+  await expect.poll(() => page.evaluate(() => JSON.parse(window.sjdVisualEditor.getSelected().getAttributes()['data-sjd-data']).section_background_color)).toBe('#123456');
+});
+
 test('composes a section with bounded columns, theme colors and a local background image', async ({ page }) => {
   await page.route('**/api/editor/media', (route) => route.fulfill({
     status: 200, contentType: 'application/json',
@@ -123,7 +141,7 @@ test('edits_each_schema_field_kind', async ({ page }) => {
     const current = await page.locator('#visual-section-panel [data-field-kind]').evaluateAll((nodes) => nodes.map((node) => node.dataset.fieldKind));
     current.forEach((kind) => kinds.add(kind));
   }
-  expect([...kinds].sort()).toEqual(['bool', 'choice', 'ctas', 'html', 'html-line', 'image', 'images', 'items', 'lines', 'number', 'text', 'textarea'].sort());
+  expect([...kinds].sort()).toEqual(['bool', 'choice', 'color', 'ctas', 'html', 'html-line', 'image', 'images', 'items', 'lines', 'number', 'text', 'textarea'].sort());
 });
 
 test('preserves_nested_fields_and_variants_after_reload', async ({ page }) => {
