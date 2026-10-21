@@ -18,6 +18,7 @@ from fastapi.responses import JSONResponse
 from .blocks import Block, DEFAULT_BLOCKS, Kind, ValidationError
 from .editor.project import ProjectError, migrate_project, project_to_sections, sections_to_project
 from .editor.theme import SUPPORTED_SECTION_TYPES, THEME_ID, THEME_VERSION
+from .media import safe_original_filename
 from .store import (
     PageState,
     SectionState,
@@ -674,7 +675,7 @@ def build_router(
             conn = store.connect()
             try:
                 rows = conn.execute(
-                    "SELECT id, filename, path, alt, caption, credit, mime, width, height, size, created_at "
+                    "SELECT id, filename, original_filename, path, alt, caption, credit, mime, width, height, size, created_at "
                     "FROM medias ORDER BY created_at DESC, id DESC"
                 ).fetchall()
                 return {"medias": [dict(row) for row in rows]}
@@ -686,6 +687,7 @@ def build_router(
             require_session(request)
             check_csrf(request)
             extension = Path(str(file.filename or "")).suffix.lower()
+            original_filename = safe_original_filename(file.filename)
             if extension not in ALLOWED_EXTENSIONS:
                 return _fail(400, "bad_extension", extension)
             data = await file.read()
@@ -701,8 +703,8 @@ def build_router(
             try:
                 try:
                     cursor = conn.execute(
-                        "INSERT INTO medias (filename, path, mime, size) VALUES (?, ?, ?, ?)",
-                        (filename, f"medias/{filename}", MIME_BY_EXTENSION.get(extension, ""), len(data)),
+                        "INSERT INTO medias (filename, original_filename, path, mime, size) VALUES (?, ?, ?, ?, ?)",
+                        (filename, original_filename, f"medias/{filename}", MIME_BY_EXTENSION.get(extension, ""), len(data)),
                     )
                     conn.commit()
                 except Exception:

@@ -101,6 +101,34 @@ def test_migration_adds_draft_columns_to_an_existing_db(tmp_path: Path) -> None:
         conn.close()
 
 
+def test_migration_adds_original_filename_to_existing_media(tmp_path: Path) -> None:
+    conn = connect(tmp_path / "legacy-media.db")
+    try:
+        conn.executescript(LEGACY_SECTIONS_TABLE)
+        conn.executescript("""
+            CREATE TABLE medias (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              filename TEXT NOT NULL UNIQUE,
+              path TEXT NOT NULL DEFAULT '',
+              alt TEXT NOT NULL DEFAULT '',
+              caption TEXT NOT NULL DEFAULT '',
+              credit TEXT NOT NULL DEFAULT '',
+              mime TEXT NOT NULL DEFAULT '',
+              width INTEGER NOT NULL DEFAULT 0,
+              height INTEGER NOT NULL DEFAULT 0,
+              size INTEGER NOT NULL DEFAULT 0,
+              variants TEXT NOT NULL DEFAULT '{}',
+              created_at TEXT NOT NULL DEFAULT (datetime('now'))
+            );
+            INSERT INTO medias (filename, path) VALUES ('random.webp', 'medias/random.webp');
+        """)
+        assert migrate(conn) == ["draft", "draft_version", "original_filename"]
+        row = conn.execute("SELECT filename, path, original_filename FROM medias WHERE id = 1").fetchone()
+        assert tuple(row) == ("random.webp", "medias/random.webp", "")
+    finally:
+        conn.close()
+
+
 def test_migrate_is_idempotent(tmp_path: Path) -> None:
     conn = connect(tmp_path / "site.db")
     try:
@@ -108,7 +136,7 @@ def test_migrate_is_idempotent(tmp_path: Path) -> None:
         assert migrate(conn) == []
         init_db(conn)
         assert migrate(conn) == []
-        assert get_meta(conn, "schema_version") == "3"
+        assert get_meta(conn, "schema_version") == "4"
     finally:
         conn.close()
 
@@ -125,7 +153,7 @@ def test_init_db_adds_visual_projects_table_to_an_existing_db(tmp_path: Path) ->
         assert row["title"] == "À propos"
         columns = {row["name"] for row in conn.execute("PRAGMA table_info(visual_projects)")}
         assert {"page_id", "draft_project_json", "published_project_json", "draft_version", "theme_id", "theme_version"} <= columns
-        assert get_meta(conn, "schema_version") == "3"
+        assert get_meta(conn, "schema_version") == "4"
         assert migrate(conn) == []
     finally:
         conn.close()

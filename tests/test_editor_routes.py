@@ -327,12 +327,15 @@ def test_media_routes(db_file: Path, tmp_path: Path) -> None:
             headers=headers,
         )
         assert upload.status_code == 201
-        name = upload.json()["media"]["filename"]
+        media = upload.json()["media"]
+        name = media["filename"]
         assert name.endswith(".png")
         assert "visuel" not in name
+        assert media["original_filename"] == "visuel.png"
+        assert media["path"] == f"medias/{name}"
         assert (tmp_path / "medias" / name).is_file()
         listing = client.get(f"{BASE}/media", cookies=cookies, headers=headers).json()["medias"]
-        assert [media["filename"] for media in listing] == [name]
+        assert [item["original_filename"] for item in listing] == ["visuel.png"]
         refused = client.post(
             f"{BASE}/media",
             files={"file": ("virus.exe", b"MZ", "application/octet-stream")},

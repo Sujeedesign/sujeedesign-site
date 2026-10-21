@@ -155,6 +155,7 @@ export function mountSectionPanel({ root, editor, blockSchema, mediaClient }) {
     }
 
     let control;
+    let mediaBinding = null;
     if (field.kind === 'bool') {
       control = element('input', { type: 'checkbox', id, 'data-field-editor': path });
       control.checked = Boolean(value);
@@ -209,12 +210,8 @@ export function mountSectionPanel({ root, editor, blockSchema, mediaClient }) {
       control.addEventListener('input', () => commit(path, control.value));
     } else if (field.kind === 'image') {
       control = element('select', { id, 'data-field-editor': path, 'aria-label': field.label || field.name });
-      control.append(element('option', { value: '' }, 'Choisir une image…'));
       if (mediaClient?.populate) {
-        void mediaClient.populate(control, String(value || ''), (src) => commit(path, src)).catch((error) => {
-          control.replaceChildren(element('option', { value: '' }, error.message || 'Médiathèque indisponible'));
-          control.disabled = true;
-        });
+        mediaBinding = mediaClient.populate(control, String(value || ''), (src) => commit(path, src));
       }
     } else {
       control = element('textarea', { id, 'data-field-editor': path, 'data-field-kind': field.kind });
@@ -229,6 +226,7 @@ export function mountSectionPanel({ root, editor, blockSchema, mediaClient }) {
     }
     control.dataset.fieldKind = field.kind;
     group.append(control);
+    if (mediaBinding?.trigger && !mediaBinding.trigger.isConnected) group.append(mediaBinding.trigger);
     return group;
   }
 

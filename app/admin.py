@@ -31,6 +31,7 @@ from .render import build_env, json_load, render_page, sanitize_html
 from sujee_editor.blocks import DEFAULT_BLOCKS, validate_data
 from sujee_editor.editor.project import ProjectError, project_to_sections
 from sujee_editor.routes import MAX_VISUAL_PROJECT_BYTES
+from sujee_editor.media import safe_original_filename
 from sujee_editor.tokens import CSRF_HEADER, verify_csrf
 
 router = APIRouter()
@@ -717,7 +718,7 @@ def api_medias(request: Request, _: str = Depends(require_admin)) -> dict:
     try:
         return {
             "medias": [
-                {"id": row["id"], "filename": row["filename"], "path": f"/medias/{row['filename']}", "alt": row["alt"], "credit": row["credit"]}
+                {"id": row["id"], "filename": row["filename"], "original_filename": row["original_filename"], "path": f"/medias/{row['filename']}", "alt": row["alt"], "credit": row["credit"]}
                 for row in repo.list_medias(conn)
             ]
         }
@@ -727,8 +728,8 @@ def api_medias(request: Request, _: str = Depends(require_admin)) -> dict:
 
 @api.post("/medias")
 async def api_upload(request: Request, file: UploadFile = File(...), _: str = Depends(require_admin), __: None = Depends(check_origin)) -> dict:
-    filename = Path(file.filename or "fichier").name
-    extension = Path(filename).suffix.lower()
+    original_filename = safe_original_filename(file.filename)
+    extension = Path(original_filename).suffix.lower()
     if extension not in ALLOWED_UPLOADS:
         raise HTTPException(status_code=400, detail=f"extension non autorisée : {extension or 'aucune'}")
     root = media_root(request)
@@ -760,6 +761,7 @@ async def api_upload(request: Request, file: UploadFile = File(...), _: str = De
             conn,
             {
                 "filename": target_name,
+                "original_filename": original_filename,
                 "path": f"/medias/{target_name}",
                 "alt": "",
                 "caption": "",
@@ -770,7 +772,7 @@ async def api_upload(request: Request, file: UploadFile = File(...), _: str = De
             },
         )
         conn.commit()
-        return {"ok": True, "id": media_id, "path": f"/medias/{target_name}", "filename": target_name}
+        return {"ok": True, "id": media_id, "path": f"/medias/{target_name}", "filename": target_name, "original_filename": original_filename}
     finally:
         conn.close()
 

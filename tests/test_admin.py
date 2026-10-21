@@ -201,10 +201,12 @@ def test_upload_registers_media(client: TestClient, db_file) -> None:
     assert response.status_code == 200, response.text
     payload = response.json()
     assert payload["path"].startswith("/medias/")
+    assert payload["original_filename"] == "visuel.png"
     assert client.get(payload["path"]).status_code == 200
     conn = connect(db_file)
     try:
         row = conn.execute("SELECT * FROM medias WHERE id = ?", (payload["id"],)).fetchone()
+        assert row["original_filename"] == "visuel.png"
         assert row["width"] == 40 and row["height"] == 30
     finally:
         conn.close()

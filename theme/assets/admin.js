@@ -413,8 +413,8 @@
     const grid = el("div", { class: "media-grid" });
     medias.forEach((media) => {
       const tile = el("button", { class: "media-tile", type: "button" });
-      tile.appendChild(el("img", { src: media.path, alt: media.alt || media.filename, loading: "lazy" }));
-      tile.appendChild(el("span", { text: media.filename }));
+      tile.appendChild(el("img", { src: media.path, alt: media.alt || media.original_filename || media.filename, loading: "lazy" }));
+      tile.appendChild(el("span", { text: media.original_filename || media.filename }));
       tile.addEventListener("click", () => {
         targetInput.value = media.path;
         targetInput.dispatchEvent(new Event("change"));

@@ -17,9 +17,9 @@
 <div class="media-grid">
   {% for media in medias %}
   <article class="media-tile" data-media-id="{{ media.id }}" style="cursor:default">
-    <img src="/medias/{{ media.filename }}" alt="{{ media.alt or media.filename }}" loading="lazy">
+    <img src="/medias/{{ media.filename }}" alt="{{ media.alt or media.original_filename or media.filename }}" loading="lazy">
     <div style="padding:8px">
-      <p class="muted" style="margin:0 0 8px; word-break:break-all">{{ media.filename }}</p>
+      <p class="muted" style="margin:0 0 8px; word-break:break-all">{{ media.original_filename or media.filename }}</p>
       <div class="field"><label for="alt-{{ media.id }}">Alt</label><input id="alt-{{ media.id }}" name="alt" value="{{ media.alt }}"></div>
       <div class="field"><label for="caption-{{ media.id }}">Légende</label><input id="caption-{{ media.id }}" name="caption" value="{{ media.caption }}"></div>
       <div class="field"><label for="credit-{{ media.id }}">Crédit</label><input id="credit-{{ media.id }}" name="credit" value="{{ media.credit }}"></div>

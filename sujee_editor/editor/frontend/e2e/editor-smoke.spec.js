@@ -9,6 +9,13 @@ function escapeText(value) {
   })[character]);
 }
 
+async function chooseMedia(page, trigger, filename) {
+  await trigger.click();
+  const dialog = page.getByRole('dialog', { name: 'Médiathèque d’images' });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole('button', { name: `Sélectionner ${filename}` }).click();
+}
+
 test.beforeEach(async ({ page }) => {
   calls.length = 0;
   await page.route('**/api/editor/pages/1/visual-project', async (route) => {
@@ -265,7 +272,7 @@ test('homepage CSS fallback remains visible when WebGL is unavailable', async ({
 test('composes a section with bounded columns, theme colors and a local background image', async ({ page }) => {
   await page.route('**/api/editor/media', (route) => route.fulfill({
     status: 200, contentType: 'application/json',
-    body: JSON.stringify({ medias: [{ id: 77, path: 'medias/background.webp', alt: 'Fond', mime: 'image/webp' }] }),
+    body: JSON.stringify({ medias: [{ id: 77, path: 'medias/background.webp', filename: 'random.webp', original_filename: 'background.webp', alt: 'Fond', mime: 'image/webp' }] }),
   }));
   await page.goto('/');
   await page.waitForFunction(() => Boolean(window.sjdVisualEditor && document.documentElement.dataset.visualEditorReady));
@@ -281,7 +288,7 @@ test('composes a section with bounded columns, theme colors and a local backgrou
   await panel.locator('[data-field-editor="columns.0.elements.0.label"]').fill('Découvrir');
   await panel.locator('[data-field-editor="columns.0.elements.0.href"]').fill('/contact');
   await panel.locator('[data-field-editor="background"]').selectOption('image');
-  await panel.locator('[data-field-editor="background_image"]').selectOption('/medias/background.webp');
+  await chooseMedia(page, panel.locator('[data-field-editor="background_image"] + .visual-media-picker-trigger'), 'background.webp');
   const result = await page.evaluate(() => {
     const component = window.sjdVisualEditor.getSelected();
     return { data: JSON.parse(component.getAttributes()['data-sjd-data']), styles: window.sjdVisualEditor.getProjectData().styles };
@@ -327,18 +334,18 @@ test('preserves_nested_fields_and_variants_after_reload', async ({ page }) => {
   await page.route('**/api/editor/media', (route) => route.fulfill({
     status: 200, contentType: 'application/json',
     body: JSON.stringify({ medias: [
-      { id: 42, path: 'medias/first.webp', alt: 'Première', mime: 'image/webp' },
-      { id: 43, path: 'medias/second.webp', alt: 'Deuxième', mime: 'image/webp' },
+      { id: 42, path: 'medias/first.webp', filename: 'random-a.webp', original_filename: 'first.webp', alt: 'Première', mime: 'image/webp' },
+      { id: 43, path: 'medias/second.webp', filename: 'random-b.webp', original_filename: 'second.webp', alt: 'Deuxième', mime: 'image/webp' },
     ] }),
   }));
   await page.locator('#visual-blocks .gjs-block').filter({ hasText: "Galerie d'images" }).click();
   const addImage = page.locator('#visual-section-panel [data-repeat-path="images"] + .section-repeat-add');
   await addImage.click();
   await page.locator('#visual-section-panel [data-field-editor="images.0.caption"]').fill('Image A');
-  await page.locator('#visual-section-panel [data-field-editor="images.0.src"]').selectOption('/medias/first.webp');
+  await chooseMedia(page, page.locator('#visual-section-panel [data-field-editor="images.0.src"] + .visual-media-picker-trigger'), 'first.webp');
   await addImage.click();
   await page.locator('#visual-section-panel [data-field-editor="images.1.caption"]').fill('Image B');
-  await page.locator('#visual-section-panel [data-field-editor="images.1.src"]').selectOption('/medias/second.webp');
+  await chooseMedia(page, page.locator('#visual-section-panel [data-field-editor="images.1.src"] + .visual-media-picker-trigger'), 'second.webp');
   await page.getByRole('button', { name: 'Descendre Images 1' }).click();
   const galleryData = await page.evaluate(() => JSON.parse(window.sjdVisualEditor.getWrapper().find('[data-sjd-section="galerie"]')[0].getAttributes()['data-sjd-data']));
   expect(galleryData.images.map((image) => [image.caption, image.src])).toEqual([
@@ -615,8 +622,8 @@ test('settings_drawer_saves page metadata and retains edits after duplicate slug
 test('page_settings_media_selection_is_submitted_for_cover_and_social_image', async ({ page }) => {
   let payload;
   await page.route('**/api/editor/media', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ medias: [
-    { id: 12, path: 'medias/cover.webp', alt: 'Couverture', mime: 'image/webp' },
-    { id: 13, path: 'medias/og.webp', alt: 'Partage', mime: 'image/webp' },
+    { id: 12, path: 'medias/cover.webp', filename: 'random-cover.webp', original_filename: 'cover.webp', alt: 'Couverture', mime: 'image/webp' },
+    { id: 13, path: 'medias/og.webp', filename: 'random-og.webp', original_filename: 'og.webp', alt: 'Partage', mime: 'image/webp' },
   ] }) }));
   await page.route('**/api/admin/pages/1', async (route) => {
     payload = route.request().postDataJSON();
@@ -625,8 +632,8 @@ test('page_settings_media_selection_is_submitted_for_cover_and_social_image', as
   await page.goto('/');
   await page.getByRole('button', { name: 'Paramètres de page' }).click();
   const drawer = page.getByRole('dialog', { name: 'Paramètres de page' });
-  await drawer.getByLabel('Image de couverture').selectOption('/medias/cover.webp');
-  await drawer.getByLabel('Image Open Graph').selectOption('/medias/og.webp');
+  await chooseMedia(page, drawer.locator('[data-media-picker-trigger][aria-label="Image de couverture"]'), 'cover.webp');
+  await chooseMedia(page, drawer.locator('[data-media-picker-trigger][aria-label="Image Open Graph"]'), 'og.webp');
   await drawer.getByRole('button', { name: 'Enregistrer les paramètres' }).click();
   expect(payload).toMatchObject({ cover: '/medias/cover.webp', og_image: '/medias/og.webp' });
 });
@@ -705,7 +712,7 @@ test('selects a managed media asset for the image section', async ({ page }) => 
   await page.route('**/api/editor/media', (route) => route.fulfill({
     status: 200,
     contentType: 'application/json',
-    body: JSON.stringify({ medias: [{ id: 42, path: 'medias/portfolio.webp', alt: 'Portfolio créatif', mime: 'image/webp' }] }),
+    body: JSON.stringify({ medias: [{ id: 42, path: 'medias/portfolio.webp', filename: 'random.webp', original_filename: 'portfolio.webp', alt: 'Portfolio créatif', mime: 'image/webp' }] }),
   }));
   await page.route('**/medias/portfolio.webp', (route) => route.fulfill({
     status: 200,
@@ -719,9 +726,8 @@ test('selects a managed media asset for the image section', async ({ page }) => 
     const image = window.sjdVisualEditor.getWrapper().find('[data-sjd-field="src"]')[0];
     window.sjdVisualEditor.select(image);
   });
-  const picker = page.locator('#visual-media-picker');
-  await expect(picker).toBeVisible();
-  await picker.selectOption('42');
+  const picker = page.locator('#visual-media-picker + .visual-media-picker-trigger');
+  await chooseMedia(page, picker, 'portfolio.webp');
   const image = page.frameLocator('iframe.gjs-frame').locator('[data-sjd-field="src"]');
   await expect(image).toHaveAttribute('src', '/medias/portfolio.webp');
   await expect(image).toHaveAttribute('alt', 'Portfolio créatif');
@@ -772,8 +778,8 @@ test('adds and reorders multiple images in a vertical container inside a column'
   await page.route('**/api/editor/media', (route) => route.fulfill({
     status: 200, contentType: 'application/json',
     body: JSON.stringify({ medias: [
-      { id: 71, path: 'medias/first.webp', alt: 'Première', mime: 'image/webp' },
-      { id: 72, path: 'medias/second.webp', alt: 'Deuxième', mime: 'image/webp' },
+      { id: 71, path: 'medias/first.webp', filename: 'random-a.webp', original_filename: 'first.webp', alt: 'Première', mime: 'image/webp' },
+      { id: 72, path: 'medias/second.webp', filename: 'random-b.webp', original_filename: 'second.webp', alt: 'Deuxième', mime: 'image/webp' },
     ] }),
   }));
   await page.goto('/');
@@ -785,10 +791,10 @@ test('adds and reorders multiple images in a vertical container inside a column'
   await panel.locator('[data-field-editor="columns.0.elements.0.type"]').selectOption('image-stack');
   const addImage = panel.locator('[data-repeat-path="columns.0.elements.0.images"] + .section-repeat-add');
   await addImage.click();
-  await panel.locator('[data-field-editor="columns.0.elements.0.images.0.src"]').selectOption('/medias/first.webp');
+  await chooseMedia(page, panel.locator('[data-field-editor="columns.0.elements.0.images.0.src"] + .visual-media-picker-trigger'), 'first.webp');
   await panel.locator('[data-field-editor="columns.0.elements.0.images.0.alt"]').fill('Première');
   await addImage.click();
-  await panel.locator('[data-field-editor="columns.0.elements.0.images.1.src"]').selectOption('/medias/second.webp');
+  await chooseMedia(page, panel.locator('[data-field-editor="columns.0.elements.0.images.1.src"] + .visual-media-picker-trigger'), 'second.webp');
   await panel.locator('[data-field-editor="columns.0.elements.0.images.1.alt"]').fill('Deuxième');
   await panel.getByRole('button', { name: 'Monter Images empilées 2' }).click();
   const imageStack = await page.evaluate(() => JSON.parse(window.sjdVisualEditor.getSelected().getAttributes()['data-sjd-data']).columns[0].elements[0]);
@@ -829,4 +835,47 @@ test('removes the default bottom margin from standalone composed images', async 
   await page.setContent(`<style>${css}</style><div id="image-stack"><figure id="first-image" class="zone-libre__image" style="--spacing-24:24px"></figure><figure class="zone-libre__image"></figure></div>`);
   const margin = await page.locator('#first-image').evaluate((image) => getComputedStyle(image).marginBottom);
   expect(margin).toBe('0px');
+});
+
+test('selects and uploads images in the thumbnail library from a composed section', async ({ page }) => {
+  let uploadIncludedOriginalName = false;
+  await page.route('**/api/editor/media', async (route) => {
+    if (route.request().method() === 'POST') {
+      uploadIncludedOriginalName = (route.request().postData() || '').includes('nouvelle-image.webp');
+      await route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ media: {
+        id: 43, filename: 'f0a1b2c3.webp', original_filename: 'nouvelle-image.webp',
+        path: 'medias/f0a1b2c3.webp', alt: 'Nouveau visuel', mime: 'image/webp',
+      } }) });
+      return;
+    }
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ medias: [
+      { id: 42, filename: 'a9b8c7.webp', original_filename: 'portrait-original.webp', path: 'medias/a9b8c7.webp', alt: 'Portrait', mime: 'image/webp' },
+      { id: 44, filename: 'dot-traversal.png', original_filename: 'dot-traversal.png', path: 'medias/%2e%2e/admin.png', mime: 'image/png' },
+      { id: 45, filename: 'slash-traversal.png', original_filename: 'slash-traversal.png', path: 'medias/images%2f..%2fadmin.png', mime: 'image/png' },
+      { id: 46, filename: 'backslash-traversal.png', original_filename: 'backslash-traversal.png', path: 'medias/%5c..%5cadmin.png', mime: 'image/png' },
+    ] }) });
+  });
+  await page.goto('/');
+  await page.waitForFunction(() => Boolean(window.sjdVisualEditor && document.documentElement.dataset.visualEditorReady));
+  await page.locator('#visual-blocks .gjs-block').filter({ hasText: 'Section à composer' }).click();
+  const panel = page.locator('#visual-section-panel');
+  await panel.locator('[data-field-editor="background"]').selectOption('image');
+  const imageField = panel.locator('[data-field-editor="background_image"] + .visual-media-picker-trigger');
+  await imageField.click();
+  const dialog = page.getByRole('dialog', { name: 'Médiathèque d’images' });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole('button', { name: 'Sélectionner dot-traversal.png' })).toHaveCount(0);
+  await expect(dialog.getByRole('button', { name: 'Sélectionner slash-traversal.png' })).toHaveCount(0);
+  await expect(dialog.getByRole('button', { name: 'Sélectionner backslash-traversal.png' })).toHaveCount(0);
+  await expect(dialog.getByRole('img', { name: 'Portrait' })).toHaveAttribute('src', '/medias/a9b8c7.webp');
+  await dialog.getByRole('button', { name: 'Sélectionner portrait-original.webp' }).click();
+  await expect.poll(() => page.evaluate(() => JSON.parse(window.sjdVisualEditor.getSelected().getAttributes()['data-sjd-data']).background_image)).toBe('/medias/a9b8c7.webp');
+
+  await imageField.click();
+  await dialog.getByLabel('Image à téléverser').setInputFiles({ name: 'nouvelle-image.webp', mimeType: 'image/webp', buffer: Buffer.from('image-test') });
+  await dialog.getByRole('button', { name: 'Importer dans la médiathèque' }).click();
+  await expect(dialog.getByRole('button', { name: 'Sélectionner nouvelle-image.webp' })).toBeVisible();
+  expect(uploadIncludedOriginalName).toBe(true);
+  await dialog.getByRole('button', { name: 'Sélectionner nouvelle-image.webp' }).click();
+  await expect.poll(() => page.evaluate(() => JSON.parse(window.sjdVisualEditor.getSelected().getAttributes()['data-sjd-data']).background_image)).toBe('/medias/f0a1b2c3.webp');
 });

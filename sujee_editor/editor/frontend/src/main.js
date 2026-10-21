@@ -6,6 +6,7 @@ import { DEMO_BLOCKS } from './demo-schema.js';
 import { mountSectionPanel } from './section-panel.js';
 import { mountPageSettings } from './page-settings.js';
 import { mountRevisionPanel } from './revision-panel.js';
+import { mountMediaLibrary, mediaName, mediaUrl } from './media-library.js';
 
 const config = JSON.parse(document.querySelector('#visual-config')?.textContent || '{}');
 const blockSchema = config.blocks || DEMO_BLOCKS;
@@ -155,6 +156,51 @@ async function request(path, method, payload) {
   return data;
 }
 
+const mediaLibrary = mountMediaLibrary({ endpoint: `${config.api}/media`, csrf: config.csrf });
+const mediaClient = {
+  populate(select, currentPath, onSelect) {
+    const trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'visual-media-picker-trigger';
+    trigger.dataset.mediaPickerTrigger = '';
+    trigger.setAttribute('aria-label', select.getAttribute('aria-label') || 'Choisir une image');
+    select.hidden = true;
+    select.setAttribute('aria-hidden', 'true');
+    select.tabIndex = -1;
+
+    const update = (path, item = null) => {
+      const value = String(path || '');
+      select.replaceChildren();
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = value;
+      select.append(option);
+      select.value = value;
+      trigger.textContent = item ? `Changer l’image · ${mediaName(item)}` : value ? 'Changer l’image' : 'Choisir une image…';
+      trigger.title = item ? mediaName(item) : value;
+    };
+
+    update(currentPath);
+    if (select.parentNode) select.after(trigger);
+    trigger.addEventListener('click', async () => {
+      trigger.disabled = true;
+      try {
+        const item = await mediaLibrary.open(select.value);
+        if (!item) return;
+        const path = mediaUrl(item);
+        if (!path) return;
+        update(path, item);
+        onSelect?.(path, item);
+      } catch (error) {
+        setStatus(error.message || 'Impossible d’ouvrir la médiathèque', 'error');
+      } finally {
+        trigger.disabled = false;
+      }
+    });
+    return { trigger, update: (path) => update(path) };
+  },
+};
+
 const mediaPanel = document.createElement('section');
 mediaPanel.className = 'visual-media-panel';
 mediaPanel.hidden = true;
@@ -164,11 +210,6 @@ mediaLabel.textContent = 'Médiathèque';
 const mediaPicker = document.createElement('select');
 mediaPicker.id = 'visual-media-picker';
 mediaPicker.setAttribute('aria-label', 'Choisir une image dans la médiathèque');
-mediaPicker.disabled = true;
-const emptyOption = document.createElement('option');
-emptyOption.value = '';
-emptyOption.textContent = 'Chargement des images…';
-mediaPicker.append(emptyOption);
 const mediaLink = document.createElement('a');
 mediaLink.href = '/admin/medias';
 mediaLink.target = '_blank';
@@ -176,77 +217,15 @@ mediaLink.rel = 'noopener';
 mediaLink.textContent = 'Gérer les images';
 mediaPanel.append(mediaLabel, mediaPicker, mediaLink);
 document.querySelector('#visual-traits')?.append(mediaPanel);
-let mediaItems = [];
-let mediaLoaded = false;
-
-function normaliseMediaPath(path) {
-  let value = String(path || '');
-  while (value.startsWith('/')) value = value.slice(1);
-  return value;
-}
-
-async function loadMediaLibrary() {
-  if (mediaLoaded) return;
-  const response = await fetch(`${config.api}/media`, { credentials: 'same-origin' });
-  if (!response.ok) throw new Error(`Médiathèque indisponible (${response.status})`);
-  const data = await response.json();
-  mediaItems = (Array.isArray(data.medias) ? data.medias : []).filter((item) => {
-    const relative = normaliseMediaPath(item.path);
-    return item.mime?.startsWith('image/')
-      && (relative.startsWith('medias/') || relative.startsWith('assets/'))
-      && !relative.split('/').some((part) => part === '.' || part === '..');
-  });
-  mediaPicker.replaceChildren();
-  const placeholder = document.createElement('option');
-  placeholder.value = '';
-  placeholder.textContent = mediaItems.length ? 'Choisir une image…' : 'Aucune image disponible';
-  mediaPicker.append(placeholder);
-  for (const item of mediaItems) {
-    const option = document.createElement('option');
-    option.value = String(item.id);
-    option.textContent = item.alt || item.filename || `Image ${item.id}`;
-    mediaPicker.append(option);
-  }
-  mediaPicker.disabled = mediaItems.length === 0;
-  mediaLoaded = true;
-}
-
-const mediaClient = {
-  async populate(select, currentPath, onSelect) {
-    try {
-      await loadMediaLibrary();
-    } catch {
-      select.replaceChildren();
-      const current = String(currentPath || '');
-      const option = document.createElement('option');
-      option.value = current;
-      option.textContent = current ? `Média actuel (${current}) · médiathèque indisponible` : 'Médiathèque indisponible';
-      select.append(option);
-      select.value = current;
-      select.disabled = !current;
-      return;
-    }
-    select.replaceChildren();
-    const placeholder = document.createElement('option');
-    placeholder.value = '';
-    placeholder.textContent = mediaItems.length ? 'Choisir une image…' : 'Aucune image disponible';
-    select.append(placeholder);
-    for (const item of mediaItems) {
-      const option = document.createElement('option');
-      option.value = `/${normaliseMediaPath(item.path)}`;
-      option.textContent = item.alt || item.filename || `Image ${item.id}`;
-      select.append(option);
-    }
-    const current = String(currentPath || '');
-    if (current && !mediaItems.some((item) => `/${normaliseMediaPath(item.path)}` === current)) {
-      const preserved = document.createElement('option');
-      preserved.value = current; preserved.textContent = `Média actuelle (${current})`;
-      select.append(preserved);
-    }
-    select.value = current;
-    select.addEventListener('change', () => onSelect(select.value));
-  },
-};
+const mediaPickerBinding = mediaClient.populate(mediaPicker, '', (src, media) => {
+  const selected = editor.getSelected();
+  if (!selected || !media) return;
+  selected.set('src', src);
+  selected.addAttributes({ src, alt: String(media.alt || '') });
+  changed = true;
+  editRevision += 1;
+  setStatus('Image modifiée, brouillon non enregistré', 'pending');
+});
 
 const sectionPanelRoot = document.createElement('section');
 sectionPanelRoot.id = 'visual-section-panel';
@@ -263,38 +242,13 @@ const revisionPanel = mountRevisionPanel({ root: pageUiRoot, pageId: config.page
 window.sjdPageSettings = pageSettings;
 window.sjdRevisionPanel = revisionPanel;
 
-mediaPicker.addEventListener('change', () => {
-  const selected = editor.getSelected();
-  const media = mediaItems.find((item) => String(item.id) === mediaPicker.value);
-  if (!selected || !media) return;
-  const relative = normaliseMediaPath(media.path);
-  const src = `/${relative}`;
-  selected.set('src', src);
-  selected.addAttributes({ src, alt: String(media.alt || '') });
-  changed = true;
-  editRevision += 1;
-  setStatus('Image modifiée, brouillon non enregistré', 'pending');
-});
-
-editor.on('component:selected', async (component) => {
+editor.on('component:selected', (component) => {
   highlightPreviewSelection();
   const isImage = component?.get('type') === 'image'
     || component?.getAttributes?.()['data-sjd-field'] === 'src';
   mediaPanel.hidden = !isImage;
   if (!isImage) return;
-  try {
-    await loadMediaLibrary();
-    const currentSrc = component.getAttributes().src || '';
-    const current = mediaItems.find((item) => `/${normaliseMediaPath(item.path)}` === currentSrc);
-    mediaPicker.value = current ? String(current.id) : '';
-  } catch (error) {
-    mediaPicker.replaceChildren();
-    const option = document.createElement('option');
-    option.value = '';
-    option.textContent = error.message || 'Médiathèque indisponible';
-    mediaPicker.append(option);
-    mediaPicker.disabled = true;
-  }
+  mediaPickerBinding.update(component.getAttributes().src || '');
 });
 
 async function saveDraft() {

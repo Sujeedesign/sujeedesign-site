@@ -403,10 +403,11 @@ def update_message(conn: sqlite3.Connection, message_id: int, values: dict[str, 
 
 def register_media(conn: sqlite3.Connection, values: dict[str, Any]) -> int:
     cursor = conn.execute(
-        "INSERT INTO medias (filename, path, alt, caption, credit, width, height, mime, size) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO medias (filename, original_filename, path, alt, caption, credit, width, height, mime, size) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
             values.get("filename", ""),
+            values.get("original_filename", ""),
             values.get("path", ""),
             values.get("alt", ""),
             values.get("caption", ""),

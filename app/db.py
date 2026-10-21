@@ -5,13 +5,14 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 
 # Colonnes ajoutées après la première mise en production. Chaque entrée est
 # appliquée une seule fois, dans l'ordre, par `migrate` (idempotent).
 MIGRATIONS: tuple[tuple[str, str, str], ...] = (
     ("sections", "draft", "TEXT"),
     ("sections", "draft_version", "INTEGER NOT NULL DEFAULT 0"),
+    ("medias", "original_filename", "TEXT NOT NULL DEFAULT ''"),
 )
 
 REQUIRED_TABLES = (
@@ -85,6 +86,7 @@ CREATE TABLE IF NOT EXISTS visual_projects (
 CREATE TABLE IF NOT EXISTS medias (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   filename TEXT NOT NULL UNIQUE,
+  original_filename TEXT NOT NULL DEFAULT '',
   path TEXT NOT NULL DEFAULT '',
   alt TEXT NOT NULL DEFAULT '',
   caption TEXT NOT NULL DEFAULT '',

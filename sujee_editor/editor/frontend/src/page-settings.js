@@ -41,20 +41,31 @@ export function mountPageSettings({ root, page, savePage: persist = savePage, me
   form.append(error);
   const controls = new Map();
   for (const [key, labelText, type, choices] of FIELDS) {
+    if (type === 'media') {
+      const field = document.createElement('div');
+      field.className = 'page-settings-media-field';
+      const label = document.createElement('label'); label.textContent = labelText;
+      const input = document.createElement('select'); input.dataset.media = 'true';
+      input.name = key; input.setAttribute('aria-label', labelText);
+      input.append(new Option('', page[key] || ''));
+      input.value = page[key] || '';
+      field.append(label, input);
+      if (mediaClient?.populate) mediaClient.populate(input, page[key] || '', () => {});
+      form.append(field); controls.set(key, input);
+      continue;
+    }
     const label = document.createElement('label'); label.textContent = labelText;
     let input;
     if (type === 'textarea' || type === 'json') input = document.createElement('textarea');
     else if (type === 'choice') {
       input = document.createElement('select');
       for (const choice of choices) { const option = document.createElement('option'); option.value = choice; option.textContent = choice; input.append(option); }
-    } else if (type === 'media') { input = document.createElement('select'); input.dataset.media = 'true'; }
-    else { input = document.createElement('input'); input.type = type; }
+    } else { input = document.createElement('input'); input.type = type; }
     input.name = key; input.setAttribute('aria-label', labelText);
     if (type === 'checkbox') input.checked = Boolean(page[key]);
     else if (type === 'json') input.value = JSON.stringify(page[key] || {}, null, 2);
     else input.value = Array.isArray(page[key]) ? page[key].join(', ') : (page[key] ?? '');
     label.append(input); form.append(label); controls.set(key, input);
-    if (type === 'media' && mediaClient?.populate) void mediaClient.populate(input, page[key] || '', () => {});
   }
   form.append(save); dialog.append(heading, close, form); root.append(launcher, dialog);
   const open = () => { dialog.hidden = false; controls.get('title')?.focus(); };
