@@ -77,12 +77,9 @@ class _Sanitizer(HTMLParser):
         self.parts.append(f"<{tag}{suffix}>")
 
     def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        if self._dropped or tag not in self.allowed_tags:
-            return
-        if tag in VOID_TAGS:
-            self.parts.append(f"<{tag}>")
-        else:
-            self.parts.append(f"<{tag}></{tag}>")
+        self.handle_starttag(tag, attrs)
+        if tag not in VOID_TAGS:
+            self.handle_endtag(tag)
 
     def handle_endtag(self, tag: str) -> None:
         if self._dropped:

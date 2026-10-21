@@ -27,6 +27,8 @@ def sample_value(field: Field) -> Any:
         return ["Première ligne", "Deuxième ligne"]
     if field.kind in (Kind.ITEMS, Kind.IMAGES, Kind.CTAS):
         return [sample_item(field)]
+    if field.name == "svg":
+        return '<svg viewbox="0 0 10 10"><path d="M0 0h10v10z"></path></svg>'
     if field.kind is Kind.RICH:
         return "<p>Un paragraphe de test.</p>"
     if field.kind is Kind.RICH_LINE:

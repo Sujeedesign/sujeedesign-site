@@ -220,6 +220,13 @@ def _sanitize_typed_data(block: Any, data: Any) -> dict[str, Any]:
         raise ProjectError(f"validation {block.name}.{first.field}: {first.rule}")
 
     def clean(field: Field, value: Any) -> Any:
+        if block.name == "banniere" and field.name == "svg":
+            # Les bannières SVG historiques sont du HTML actif potentiel : on
+            # conserve le SVG autorisé par le filtre public, sans le traiter
+            # comme du rich-text éditorial classique.
+            from app.render import sanitize_svg
+
+            return sanitize_svg(value)
         if field.kind is Kind.IMAGE:
             if not _safe_media_path(value):
                 raise ProjectError(f"image hors des médias locaux autorisés : {field.name}")

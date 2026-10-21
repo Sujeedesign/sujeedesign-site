@@ -23,7 +23,7 @@ CTA_ITEM = Field(
     "ctas",
     CTAS,
     "Boutons",
-    max_items=2,
+    max_items=3,
     fields=(
         Field("label", TEXT, "Libellé", max_length=60),
         Field("href", TEXT, "Lien", max_length=300),

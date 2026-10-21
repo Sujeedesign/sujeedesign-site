@@ -140,6 +140,17 @@ def test_a_cta_field_defaults_to_an_empty_list():
     assert default_data(cta)["ctas"] == []
 
 
+def test_cta_field_accepts_three_existing_buttons():
+    cta = DEFAULT_BLOCKS["cta-final"]
+    data = default_data(cta)
+    data["ctas"] = [
+        {"label": f"Bouton {index}", "href": "/contact", "style": "pill"}
+        for index in range(3)
+    ]
+
+    assert validate_data(cta, data) == []
+
+
 def test_free_zone_defaults_to_a_valid_two_column_layout():
     zone = DEFAULT_BLOCKS["zone-libre"]
     data = default_data(zone)

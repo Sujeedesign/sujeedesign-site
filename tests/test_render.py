@@ -106,6 +106,16 @@ def test_sanitize_blocks_javascript_urls() -> None:
     assert "lien" in cleaned
 
 
+def test_sanitize_svg_keeps_attributes_on_self_closing_shapes():
+    cleaned = render_module.sanitize_svg(
+        '<svg viewBox="0 0 10 10"><path d="M0 0h10v10z" onclick="alert(1)"/></svg>'
+    )
+
+    assert 'd="M0 0h10v10z"' in cleaned
+    assert "onclick" not in cleaned
+    assert "alert(1)" not in cleaned
+
+
 def test_text_to_html_wraps_paragraphs() -> None:
     assert render_module.text_to_html("Bonjour\n\nLe monde") == "<p>Bonjour</p><p>Le monde</p>"
 

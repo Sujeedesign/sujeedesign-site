@@ -227,6 +227,23 @@ def test_project_and_sections_round_trip_without_losing_theme_content():
     assert project_to_sections(imported) == project_to_sections(_three_section_project())
 
 
+def test_banniere_svg_survives_project_round_trip():
+    svg = '<svg viewBox="0 0 10 10"><path d="M0 0h10v10z"/></svg>'
+    source = [{
+        "id": 21,
+        "type": "banniere",
+        "variant": "",
+        "visible": True,
+        "position": 0,
+        "effective": {"svg": svg},
+    }]
+
+    result = project_to_sections(sections_to_project(source))
+
+    assert result[0]["data"]["svg"].startswith("<svg")
+    assert "M0 0h10v10z" in result[0]["data"]["svg"]
+
+
 def test_import_uses_effective_draft_content_and_sorts_by_position():
     sections = _source_sections()
     sections[0]["position"] = 2
