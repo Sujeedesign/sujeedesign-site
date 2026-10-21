@@ -504,7 +504,7 @@ figcaption:empty {
 .zone-libre__heading:is(h3) { font-size: var(--fs-h3); line-height: var(--lh-h3); }
 .zone-libre__heading:is(h4) { font-size: var(--fs-body); line-height: var(--lh-body); font-weight: 600; }
 .zone-libre__text { margin-bottom: var(--spacing-24); }
-.zone-libre__image { margin: 0 0 var(--spacing-24); }
+.zone-libre__image { margin: 0; }
 .zone-libre__image-stack { display: flex; flex-direction: column; gap: 0; }
 .zone-libre__image-stack .zone-libre__image { margin: 0; }
 .zone-libre__image img { display: block; width: 100%; height: auto; object-fit: cover; }

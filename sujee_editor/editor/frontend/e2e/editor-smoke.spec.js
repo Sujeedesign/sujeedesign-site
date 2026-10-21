@@ -823,3 +823,10 @@ test('uses no default gap between images in a composed section', async ({ page }
   const gap = await page.locator('#image-stack').evaluate((stack) => getComputedStyle(stack).rowGap);
   expect(gap).toBe('0px');
 });
+
+test('removes the default bottom margin from standalone composed images', async ({ page }) => {
+  const css = await readFile(new URL('../../../../theme/assets/site-extras.css', import.meta.url), 'utf8');
+  await page.setContent(`<style>${css}</style><div id="image-stack"><figure id="first-image" class="zone-libre__image" style="--spacing-24:24px"></figure><figure class="zone-libre__image"></figure></div>`);
+  const margin = await page.locator('#first-image').evaluate((image) => getComputedStyle(image).marginBottom);
+  expect(margin).toBe('0px');
+});
