@@ -192,10 +192,10 @@ body.loaded .hu{opacity:1;transform:none}
 .pill--filled:hover{background:#d9bb8b;color:var(--color-accent-ink);border-color:#d9bb8b;transform:translateY(-2px)}
 .contact-links{display:flex;flex-wrap:wrap;align-items:center;gap:24px 40px}
 /* Accessibilite : sans animation, les trois lignes du titre doivent se lire et rester dans le cadre */
-@media (prefers-reduced-motion:reduce){.ht-word{white-space:normal;opacity:1 !important;transform:none !important;animation:none !important;position:static !important}
+@media (prefers-reduced-motion:reduce){.ht-word{display:block !important;white-space:normal;opacity:1 !important;transform:none !important;animation:none !important;position:static !important}
 *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;transition-delay:0ms !important}
 html{scroll-behavior:auto}
-.hu,.reveal,.reveal-line>span,.mw{opacity:1 !important;transform:none !important;animation:none !important;position:static !important}
+.hu,.reveal,.reveal-line>span,.mw{opacity:1 !important;transform:none !important;animation:none !important}
 .project-cover__media{animation:none;transition:none}
 .p-hero .p-kicker,.p-hero .p-title,.p-hero .p-meta,.p-hero .p-intro,.p-banner .visual{opacity:1 !important;transform:none !important;animation:none !important}
 .marquee-track{animation:none}

@@ -11,6 +11,15 @@
   opacity: 1 !important;
   transform: none !important;
   animation: none !important;
+}
+
+/* Le rotateur du hero reste lisible sans le script qui active ses lignes. */
+.ht-word {
+  display: block;
+  white-space: normal;
+  opacity: 1 !important;
+  transform: none !important;
+  animation: none !important;
   position: static !important;
 }
 
