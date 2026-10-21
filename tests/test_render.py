@@ -67,9 +67,16 @@ def sample_value(field: dict):
 
 def build_section(type_: str, variant: str | None = None) -> dict:
     spec = sections_module.SECTION_TYPES[type_]
-    data = {}
-    for field in spec["fields"]:
-        data[field["name"]] = sample_value(field)
+    if type_ == "zone-libre":
+        data = sections_module.default_data(type_)
+        data["columns"][0]["elements"] = [{
+            "type": "text", "text": "<p>Un paragraphe de test.</p>", "level": "h2",
+            "label": "", "href": "", "role": "principal", "src": "", "alt": "", "items": [],
+        }]
+    else:
+        data = {}
+        for field in spec["fields"]:
+            data[field["name"]] = sample_value(field)
     if spec.get("variants"):
         data["_variant"] = variant or next(iter(spec["variants"]))
     return {
@@ -99,6 +106,16 @@ def test_sanitize_blocks_javascript_urls() -> None:
     assert "lien" in cleaned
 
 
+def test_sanitize_svg_keeps_attributes_on_self_closing_shapes():
+    cleaned = render_module.sanitize_svg(
+        '<svg viewBox="0 0 10 10"><path d="M0 0h10v10z" onclick="alert(1)"/></svg>'
+    )
+
+    assert 'd="M0 0h10v10z"' in cleaned
+    assert "onclick" not in cleaned
+    assert "alert(1)" not in cleaned
+
+
 def test_text_to_html_wraps_paragraphs() -> None:
     assert render_module.text_to_html("Bonjour\n\nLe monde") == "<p>Bonjour</p><p>Le monde</p>"
 
@@ -111,6 +128,13 @@ def test_every_section_type_renders(type_: str) -> None:
     assert "{{" not in html
     if type_ not in ("marquee", "citation", "manifeste"):
         assert "Valeur" in html or "Première ligne" in html or "Un paragraphe de test." in html or "Description" in html
+
+
+def test_zone_free_defaults_are_not_shared_between_sections():
+    first = sections_module.default_data("zone-libre")
+    first["columns"][0]["span"] = "8"
+    second = sections_module.default_data("zone-libre")
+    assert [column["span"] for column in second["columns"]] == ["6", "6"]
 
 
 def test_unknown_section_type_is_ignored() -> None:
@@ -162,3 +186,118 @@ def test_templates_directory_exists() -> None:
     assert (Path(render_module.TEMPLATES_DIR) / "base.html").is_file()
     for type_, template in sections_module.TEMPLATE_BY_TYPE.items():
         assert (Path(render_module.TEMPLATES_DIR) / template).is_file(), f"gabarit manquant : {type_}"
+
+
+@pytest.mark.parametrize(("background", "foreground"), [("#000000", "#ffffff"), ("#ffffff", "#000000")])
+def test_custom_section_background_renders_safe_color_and_contrasting_text(background: str, foreground: str):
+    section = build_section("chapter")
+    section["data"]["section_background"] = "custom"
+    section["data"]["section_background_color"] = background
+
+    html = render_module.section_html(ENV, section, CTX, envelopes=False)
+
+    assert "sjd-section-background--custom" in html
+    assert f"--sjd-section-background:{background}" in html
+    assert f"--sjd-section-foreground:{foreground}" in html
+
+
+def test_invalid_custom_section_background_is_ignored():
+    section = build_section("chapter")
+    section["data"]["section_background"] = "custom"
+    section["data"]["section_background_color"] = "#000000; background:url(javascript:alert(1))"
+
+    html = render_module.section_html(ENV, section, CTX, envelopes=False)
+
+    assert "sjd-section-background--custom" not in html
+    assert "javascript:" not in html
+
+
+def test_zone_free_animated_gradient_is_applied_to_the_section_root():
+    section = build_section("zone-libre")
+    section["data"]["background"] = "gradient"
+
+    html = render_module.section_html(ENV, section, CTX, envelopes=False)
+
+    assert 'class="zone-libre zone-libre--gradient' in html
+    assert "sjd-section-background--gradient" in html
+
+
+def test_zone_free_custom_background_uses_hex_and_rejects_css_payloads():
+    section = build_section("zone-libre")
+    section["data"].update(background="custom", section_background_color="#ffcc88")
+
+    html = render_module.section_html(ENV, section, CTX, envelopes=False)
+
+    assert "sjd-section-background--custom" in html
+    assert "--sjd-section-background:#ffcc88" in html
+    assert "--sjd-section-foreground:#000000" in html
+
+    section["data"]["section_background_color"] = "#ffcc88; background:url(javascript:alert(1))"
+    unsafe_html = render_module.section_html(ENV, section, CTX, envelopes=False)
+
+    assert "sjd-section-background--custom" not in unsafe_html
+    assert "--sjd-section-background:" not in unsafe_html
+    assert "javascript:" not in unsafe_html
+
+
+@pytest.mark.parametrize(("type_", "field"), [("chapter", "section_background"), ("zone-libre", "background")])
+def test_home_hero_animation_injects_its_background_layers(type_: str, field: str):
+    section = build_section(type_)
+    section["data"][field] = "hero-gradient"
+
+    html = render_module.section_html(ENV, section, CTX, envelopes=False)
+
+    assert "sjd-section-background--hero-gradient" in html
+    assert html.count('class="hero-bg"') == 1
+    assert html.count('class="hero-shader"') == 1
+    assert html.count('class="hero-grain"') == 1
+    assert html.count('class="sjd-home-hero-veil"') == 1
+
+
+def test_home_hero_animation_reuses_existing_layers_without_duplicates():
+    section = build_section("hero", "accueil")
+    section["data"]["section_background"] = "hero-gradient"
+
+    html = render_module.section_html(ENV, section, CTX, envelopes=False)
+
+    assert html.count('class="hero-bg"') == 1
+    assert html.count('class="hero-shader"') == 1
+    assert html.count('class="hero-grain"') == 1
+    assert "sjd-home-hero-veil" not in html
+
+
+def test_nested_hero_layer_classes_do_not_block_root_layer_injection():
+    template = (
+        '<section><div class="nested">'
+        '<span class="hero-bg"></span><span class="hero-shader"></span>'
+        '<span class="hero-grain"></span><span class="sjd-home-hero-veil"></span>'
+        '</div></section>'
+    )
+
+    html = render_module._apply_section_background(
+        template, "chapter", {"section_background": "hero-gradient"}
+    )
+
+    assert html.count('class="hero-bg"') == 2
+    assert html.count('class="hero-shader"') == 2
+    assert html.count('class="hero-grain"') == 2
+    assert html.count('class="sjd-home-hero-veil"') == 2
+
+
+def test_home_hero_animation_reuses_webgl_shader_and_reduced_motion_support():
+    assets = Path(__file__).parents[1] / "theme" / "assets"
+    home_styles = (assets / "site.css").read_text()
+    editor_styles = (assets / "site-extras.css").read_text()
+    script = (assets / "site.js").read_text()
+    reduced_motion = editor_styles.split("@media (prefers-reduced-motion: reduce)", 1)[1]
+
+    assert ".hero-bg{position:absolute;inset:0;z-index:0" in home_styles
+    assert ".hero-shader{position:absolute;inset:0;z-index:1" in home_styles
+    assert ".hero-grain{position:absolute;inset:0;z-index:3" in home_styles
+    assert 'document.querySelectorAll(".hero-shader")' in script
+    assert "if (!reduced) requestAnimationFrame(frame)" in script
+    assert ".hero::after{content:\"\"" in home_styles
+    assert ".sjd-home-hero-veil {" in editor_styles
+    assert ".sjd-section-background--hero-gradient .hero-bg" in editor_styles
+    assert ".sjd-section-background--hero-gradient" in reduced_motion
+    assert "animation: none !important" in reduced_motion

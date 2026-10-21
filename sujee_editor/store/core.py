@@ -15,8 +15,8 @@ from pathlib import Path
 from typing import Any, Iterable, Mapping
 
 from ..blocks import Block, ValidationError, default_data, validate_data, validate_field
-from ..editor.project import sections_to_project
-from ..editor.theme import PILOT_SECTION_TYPES
+from ..editor.project import project_to_sections, sections_to_project
+from ..editor.theme import SUPPORTED_SECTION_TYPES
 
 READY_TABLES = ("pages", "sections", "medias", "revisions")
 
@@ -475,7 +475,7 @@ class Store:
                 raise VersionConflict(current_version)
             state = self.page_state(conn, page_id)
             project = sections_to_project(
-                [section.serialize() for section in state.sections if section.type in PILOT_SECTION_TYPES]
+                [section.serialize() for section in state.sections if section.type in SUPPORTED_SECTION_TYPES]
             )
             encoded = _dump_json(project)
             updated = conn.execute(
@@ -491,6 +491,42 @@ class Store:
         except Exception:
             conn.rollback()
             raise
+
+    def synchronize_visual_project(
+        self,
+        conn: sqlite3.Connection,
+        *,
+        page_id: int,
+        expected_version: int,
+        project: Mapping[str, Any],
+    ) -> int:
+        """Synchronize restored typed sections to both visual snapshots using CAS.
+
+        The caller owns the transaction and must commit or roll it back together
+        with any related page/section restoration.
+        """
+        from ..editor.theme import THEME_ID, THEME_VERSION
+
+        row = conn.execute(
+            "SELECT draft_version FROM visual_projects WHERE page_id = ?", (int(page_id),)
+        ).fetchone()
+        if row is None:
+            raise StoreNotReady("projet visuel non initialisé")
+        current = int(row["draft_version"])
+        if current != int(expected_version):
+            raise VersionConflict(current)
+        sections = project_to_sections(project)
+        canonical = sections_to_project(sections)
+        encoded = _dump_json(canonical)
+        updated = conn.execute(
+            "UPDATE visual_projects SET draft_project_json = ?, published_project_json = ?, theme_id = ?, theme_version = ?, "
+            "draft_version = draft_version + 1, updated_at = datetime('now') WHERE page_id = ? AND draft_version = ?",
+            (encoded, encoded, THEME_ID, THEME_VERSION, int(page_id), int(expected_version)),
+        )
+        if updated.rowcount != 1:
+            latest = conn.execute("SELECT draft_version FROM visual_projects WHERE page_id = ?", (int(page_id),)).fetchone()
+            raise VersionConflict(int(latest["draft_version"]) if latest else current)
+        return int(expected_version) + 1
 
     def publish_visual_project(
         self,
@@ -519,7 +555,7 @@ class Store:
 
             state = self.page_state(conn, page_id)
             source = sections_to_project(
-                [section.serialize() for section in state.sections if section.type in PILOT_SECTION_TYPES]
+                [section.serialize() for section in state.sections if section.type in SUPPORTED_SECTION_TYPES]
             )
             try:
                 published_source = json.loads(str(project_row["published_project_json"]))
@@ -533,7 +569,7 @@ class Store:
                 "sections": [self._snapshot_row(section) for section in state.sections],
             }
             existing = {section.id: section for section in state.sections}
-            editable_existing = [section for section in state.sections if section.type in PILOT_SECTION_TYPES]
+            editable_existing = [section for section in state.sections if section.type in SUPPORTED_SECTION_TYPES]
             editable_ids = {section.id for section in editable_existing}
             editable_slots = sorted(section.position for section in editable_existing)
             last_slot = max(editable_slots, default=max((section.position for section in state.sections), default=-1))

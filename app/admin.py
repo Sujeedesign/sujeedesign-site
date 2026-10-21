@@ -21,12 +21,17 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Resp
 from markupsafe import Markup
 
 from . import repo
+from . import public as public_module
 from . import security
 from . import sections as sections_module
 from . import settings as settings_module
 from .db import connect as db_connect
 from .db import content_revision
 from .render import build_env, json_load, render_page, sanitize_html
+from sujee_editor.blocks import DEFAULT_BLOCKS, validate_data
+from sujee_editor.editor.project import ProjectError, project_to_sections
+from sujee_editor.routes import MAX_VISUAL_PROJECT_BYTES
+from sujee_editor.tokens import CSRF_HEADER, verify_csrf
 
 router = APIRouter()
 api = APIRouter()
@@ -54,6 +59,13 @@ def media_root(request: Request) -> Path:
     root = Path(request.app.state.db_path).parent / "medias"
     root.mkdir(parents=True, exist_ok=True)
     return root
+
+
+def _admin_csrf(request: Request) -> str:
+    from sujee_editor.tokens import make_csrf
+
+    editor = getattr(request.app.state, "editor", None)
+    return make_csrf(editor.session_secret) if editor is not None else ""
 
 
 def current_admin(request: Request) -> str | None:
@@ -92,6 +104,7 @@ def render_admin(request: Request, conn: sqlite3.Connection, template: str, **co
     context.setdefault("current_path", request.url.path)
     context.setdefault("year", datetime.now(timezone.utc).year)
     context.setdefault("messages_flash", request.cookies.get("sjd_flash", ""))
+    context.setdefault("csrf", _admin_csrf(request))
     html_out = ENV.get_template(f"admin/{template}").render(**context)
     response = HTMLResponse(html_out)
     if context.get("messages_flash"):
@@ -222,17 +235,7 @@ def page_editor(request: Request, page_id: int) -> Response:
         return login_redirect()
     conn = _conn(request)
     try:
-        page = _page_or_404(conn, page_id)
-        return render_admin(
-            request,
-            conn,
-            "page.html",
-            page=page,
-            page_path=repo.page_path(page),
-            sections=repo.sections_for(conn, page_id),
-            section_types=sections_module.SECTION_TYPES,
-            revisions=repo.list_revisions(conn, "page", page_id, limit=10),
-        )
+        return _render_visual_page(request, conn, page_id)
     finally:
         conn.close()
 
@@ -243,73 +246,46 @@ def visual_page_editor(request: Request, page_id: int) -> Response:
         return login_redirect()
     conn = _conn(request)
     try:
-        page = _page_or_404(conn, page_id)
-        editor = request.app.state.editor
-        state = editor.store.page_state(conn, page_id)
-        from sujee_editor.editor.project import ProjectError, sections_to_project
-        from sujee_editor.editor.theme import PILOT_SECTION_TYPES, THEME_ID, THEME_VERSION
-        from sujee_editor.tokens import make_csrf
-
-        omitted_labels = list(dict.fromkeys(
-            editor.store.block_for(section.type).label
-            for section in state.sections
-            if section.type not in PILOT_SECTION_TYPES
-        ))
-        warning_html = ""
-        if omitted_labels:
-            warning_html = (
-                "<p class='visual-preserved-note'>Mode pilote : seules les sections prises en charge sont affichées. "
-                "Les autres restent inchangées : "
-                + html.escape(", ".join(omitted_labels))
-                + ".</p>"
-            )
-        row = conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (page_id,)).fetchone()
-        if row is None:
-            try:
-                editable_sections = [
-                    section.serialize() for section in state.sections if section.type in PILOT_SECTION_TYPES
-                ]
-                project = sections_to_project(editable_sections)
-            except ProjectError as exc:
-                return HTMLResponse(f"Éditeur visuel indisponible : {html.escape(str(exc))}", status_code=409)
-            encoded = json.dumps(project, ensure_ascii=False, separators=(",", ":"))
-            conn.execute(
-                "INSERT OR IGNORE INTO visual_projects (page_id, draft_project_json, published_project_json, "
-                "draft_version, theme_id, theme_version) VALUES (?, ?, ?, 0, ?, ?)",
-                (page_id, encoded, encoded, THEME_ID, THEME_VERSION),
-            )
-            conn.commit()
-            row = conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (page_id,)).fetchone()
-        config = {
-            "api": "/api/editor",
-            "page": {"id": int(page_id), "title": str(page["title"] or ""), "path": repo.page_path(page)},
-            "csrf": make_csrf(editor.session_secret),
-            "draft_version": int(row["draft_version"]),
-            "project": json.loads(row["draft_project_json"]),
-            "theme_styles": ["/assets/site.css", "/assets/site-extras.css"],
-        }
-        config_json = json.dumps(config, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
-        title_html = html.escape(str(page["title"] or "Page"))
-        return HTMLResponse(
-            "<!doctype html><html lang='fr'><head><meta charset='utf-8'>"
-            "<meta name='viewport' content='width=device-width,initial-scale=1'>"
-            "<title>Éditeur visuel pilote</title>"
-            "<link rel='stylesheet' href='/assets/editor/visual/visual-editor.css'>"
-            "</head><body><div class='visual-app'>"
-            "<header class='visual-topbar'><a class='visual-back' href='/admin/pages/" + str(page_id) + "'>← Retour</a>"
-            "<div class='visual-heading'><strong>" + title_html + "</strong><span>Éditeur visuel pilote</span></div>"
-            "<div class='visual-actions'><span id='visual-status' role='status' aria-live='polite'>Prêt</span>"
-            "<button id='visual-save' type='button'>Enregistrer</button>"
-            "<button id='visual-rebase' type='button' hidden>Recharger le contenu</button>"
-            "<button id='visual-publish' type='button' class='primary'>Publier</button></div></header>"
-            "<main class='visual-layout'><aside id='visual-blocks' aria-label='Sections disponibles'><h1>Sections</h1>" + warning_html + "</aside>"
-            "<section id='visual-canvas' aria-label='Aperçu de la page'></section>"
-            "<aside id='visual-traits' aria-label='Options de section'><h1>Options</h1></aside></main></div>"
-            "<script id=\"visual-config\" type=\"application/json\">" + config_json + "</script>"
-            "<script type='module' src='/assets/editor/visual/visual-editor.js'></script></body></html>"
-        )
+        _page_or_404(conn, page_id)
+        return RedirectResponse(f"/admin/pages/{page_id}", status_code=303)
     finally:
         conn.close()
+
+
+def _render_visual_page(request: Request, conn: sqlite3.Connection, page_id: int) -> Response:
+    page = _page_or_404(conn, page_id)
+    editor = request.app.state.editor
+    state = editor.store.page_state(conn, page_id)
+    from sujee_editor.blocks import DEFAULT_BLOCKS
+    from sujee_editor.editor.project import ProjectError
+    from sujee_editor.editor.theme import SUPPORTED_SECTION_TYPES
+    from sujee_editor.routes import ensure_visual_project
+
+    unsupported = [section for section in state.sections if section.type not in SUPPORTED_SECTION_TYPES]
+    if unsupported:
+        labels = list(dict.fromkeys(section.type for section in unsupported))
+        message = "Éditeur visuel indisponible : import non lossless pour ces sections : " + html.escape(", ".join(labels))
+        return HTMLResponse(message + ". Les sections et le projet de la page restent inchangés.", status_code=409)
+
+    try:
+        row = ensure_visual_project(editor.store, conn, page_id)
+    except ProjectError as exc:
+        return HTMLResponse(f"Éditeur visuel indisponible : {html.escape(str(exc))}", status_code=409)
+    config = {
+        "api": "/api/editor",
+        "preview_api": f"/api/admin/pages/{page_id}/visual-preview",
+        "page": _page_payload(page),
+        "csrf": _admin_csrf(request),
+        "draft_version": int(row["draft_version"]),
+        "project": json.loads(row["draft_project_json"]),
+        "theme_styles": ["/assets/site.css", "/assets/site-extras.css", "/assets/site-noscript.css"],
+        "blocks": {name: block.serialize() for name, block in DEFAULT_BLOCKS.items()},
+    }
+    config_json = json.dumps(config, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
+    return render_admin(
+        request, conn, "visual_page.html", page=page, page_path=repo.page_path(page),
+        csrf=_admin_csrf(request), config_json=config_json,
+    )
 
 
 @router.get("/admin/apercu/{page_id}", response_class=HTMLResponse)
@@ -449,6 +425,64 @@ def api_page(request: Request, page_id: int, _: str = Depends(require_admin)) ->
         conn.close()
 
 
+@api.post("/pages/{page_id}/visual-preview", response_class=HTMLResponse)
+async def api_visual_preview(
+    request: Request,
+    page_id: int,
+    _: str = Depends(require_admin),
+    __: None = Depends(check_origin),
+) -> HTMLResponse:
+    """Render the unsaved visual project through the real public templates."""
+    editor = getattr(request.app.state, "editor", None)
+    if editor is None or not verify_csrf(request.headers.get(CSRF_HEADER, ""), editor.session_secret):
+        raise HTTPException(status_code=403, detail="jeton CSRF invalide")
+    raw_payload = await request.body()
+    if len(raw_payload) > MAX_VISUAL_PROJECT_BYTES:
+        raise HTTPException(status_code=413, detail="projet visuel trop volumineux")
+    try:
+        payload = json.loads(raw_payload)
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(status_code=400, detail="JSON invalide") from exc
+    if not isinstance(payload, dict) or not isinstance(payload.get("project"), dict):
+        raise HTTPException(status_code=400, detail="projet visuel manquant")
+    try:
+        sections = project_to_sections(payload["project"])
+    except ProjectError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    conn = _conn(request)
+    try:
+        page = _page_or_404(conn, page_id)
+        existing = {
+            int(row["id"]): str(row["type"])
+            for row in conn.execute("SELECT id, type FROM sections WHERE page_id = ?", (page_id,))
+        }
+        for section in sections:
+            identifier = section.get("id")
+            if identifier is not None and existing.get(int(identifier)) != section.get("type"):
+                raise HTTPException(status_code=400, detail="section étrangère ou type modifié")
+        extra: dict[str, Any] = {"editor_preview": True}
+        if page["kind"] == "realisation":
+            extra["breadcrumb"] = "Réalisations"
+        ctx = public_module.build_ctx(request, conn, page, extra)
+        ctx["body_class"] = "project-page" if page["kind"] == "realisation" else ""
+        ctx["editor_enabled"] = False
+        ctx["edit"] = False
+        ctx["form_token"] = ""
+        ctx["seo"]["robots"] = "noindex,nofollow"
+        rendered = render_page(
+            public_module.ENV,
+            page=page,
+            sections=sections,
+            ctx=ctx,
+            template="pages/page.html",
+            use_cache=False,
+        )
+        return HTMLResponse(rendered, headers={"Cache-Control": "no-store", "X-Robots-Tag": "noindex, nofollow"})
+    finally:
+        conn.close()
+
+
 @api.post("/pages")
 async def api_create_page(request: Request, _: str = Depends(require_admin), __: None = Depends(check_origin)) -> dict:
     payload = await request.json()
@@ -493,6 +527,11 @@ def api_delete_page(request: Request, page_id: int, _: str = Depends(require_adm
 
 @api.patch("/pages/{page_id}")
 async def api_update_page(request: Request, page_id: int, _: str = Depends(require_admin), __: None = Depends(check_origin)) -> dict:
+    from sujee_editor.tokens import CSRF_HEADER, verify_csrf
+
+    editor = request.app.state.editor
+    if not verify_csrf(request.headers.get(CSRF_HEADER, ""), editor.session_secret):
+        raise HTTPException(status_code=403, detail="jeton CSRF invalide")
     payload = await request.json()
     conn = _conn(request)
     try:
@@ -611,6 +650,8 @@ async def api_update_section(request: Request, section_id: int, _: str = Depends
         if "data" in payload and isinstance(payload["data"], dict):
             current = json_load(row["data"], {})
             current.update(payload["data"])
+            if row["type"] == "zone-libre" and validate_data(DEFAULT_BLOCKS["zone-libre"], current):
+                raise HTTPException(status_code=400, detail="données de composition invalides")
             values["data"] = current
         repo.update_section(conn, section_id, values)
         conn.commit()
@@ -858,17 +899,87 @@ def api_revisions(request: Request, entity_type: str = "page", entity_id: int | 
 
 
 @api.post("/revisions/{revision_id}/restaurer")
-def api_restore(request: Request, revision_id: int, _: str = Depends(require_admin), __: None = Depends(check_origin)) -> dict:
+async def api_restore(request: Request, revision_id: int, _: str = Depends(require_admin), __: None = Depends(check_origin)) -> dict:
+    payload = await request.json()
+    if not isinstance(payload, dict):
+        raise HTTPException(status_code=400, detail="objet JSON attendu")
     conn = _conn(request)
     try:
-        row = conn.execute("SELECT * FROM revisions WHERE id = ?", (revision_id,)).fetchone()
-        if row is None:
+        revision = conn.execute("SELECT * FROM revisions WHERE id = ?", (revision_id,)).fetchone()
+        if revision is None:
             raise HTTPException(status_code=404, detail="révision introuvable")
-        snapshot = json_load(row["snapshot"], {})
-        repo.save_revision(conn, row["entity_type"], int(row["entity_id"]), repo.snapshot_page(conn, int(row["entity_id"])), "avant restauration")
-        ok = repo.restore_snapshot(conn, int(row["entity_id"]), snapshot)
-        conn.commit()
-        return {"ok": ok}
+        if revision["entity_type"] != "page":
+            snapshot = json_load(revision["snapshot"], {})
+            repo.save_revision(conn, revision["entity_type"], int(revision["entity_id"]), repo.snapshot_page(conn, int(revision["entity_id"])), "avant restauration")
+            ok = repo.restore_snapshot(conn, int(revision["entity_id"]), snapshot)
+            conn.commit()
+            return {"ok": ok}
+
+        expected = payload.get("expected_visual_version")
+        confirm = payload.get("confirm_discard_draft")
+        if isinstance(expected, bool) or not isinstance(expected, int) or expected < 0:
+            raise HTTPException(status_code=400, detail="version visuelle attendue invalide")
+        if not isinstance(confirm, bool):
+            raise HTTPException(status_code=400, detail="confirmation de brouillon invalide")
+        editor = request.app.state.editor
+        from sujee_editor.editor.project import ProjectError, migrate_project, project_to_sections, sections_to_project
+        from sujee_editor.editor.theme import PROJECT_SCHEMA_VERSION, THEME_ID, THEME_VERSION
+        from sujee_editor.tokens import CSRF_HEADER, verify_csrf
+
+        if not verify_csrf(request.headers.get(CSRF_HEADER, ""), editor.session_secret):
+            raise HTTPException(status_code=403, detail="jeton CSRF invalide")
+        page_id = int(revision["entity_id"])
+        _page_or_404(conn, page_id)
+        conn.execute("BEGIN IMMEDIATE")
+        try:
+            visual = conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (page_id,)).fetchone()
+            if visual is None:
+                state = editor.store.page_state(conn, page_id)
+                project = sections_to_project([section.serialize() for section in state.sections])
+                encoded = json.dumps(project, ensure_ascii=False, separators=(",", ":"))
+                conn.execute(
+                    "INSERT INTO visual_projects (page_id, draft_project_json, published_project_json, draft_version, theme_id, theme_version) VALUES (?, ?, ?, 0, ?, ?)",
+                    (page_id, encoded, encoded, THEME_ID, THEME_VERSION),
+                )
+                visual = conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (page_id,)).fetchone()
+            else:
+                try:
+                    draft = migrate_project(json.loads(visual["draft_project_json"]))
+                    published = migrate_project(json.loads(visual["published_project_json"]))
+                    draft = sections_to_project(project_to_sections(draft))
+                    published = sections_to_project(project_to_sections(published))
+                except (TypeError, ValueError, ProjectError) as exc:
+                    raise HTTPException(status_code=409, detail=f"projet visuel stocké invalide : {exc}") from exc
+                encoded_draft = json.dumps(draft, ensure_ascii=False, separators=(",", ":"))
+                encoded_published = json.dumps(published, ensure_ascii=False, separators=(",", ":"))
+                if visual["theme_id"] != THEME_ID or int(visual["theme_version"]) != THEME_VERSION or visual["draft_project_json"] != encoded_draft or visual["published_project_json"] != encoded_published:
+                    conn.execute(
+                        "UPDATE visual_projects SET draft_project_json = ?, published_project_json = ?, theme_id = ?, theme_version = ? WHERE page_id = ? AND draft_version = ?",
+                        (encoded_draft, encoded_published, THEME_ID, THEME_VERSION, page_id, int(visual["draft_version"])),
+                    )
+                visual = conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (page_id,)).fetchone()
+            current_version = int(visual["draft_version"])
+            if current_version != expected:
+                conn.rollback()
+                raise HTTPException(status_code=409, detail=f"version visuelle courante : {current_version}")
+            if visual["draft_project_json"] != visual["published_project_json"] and not confirm:
+                conn.rollback()
+                raise HTTPException(status_code=409, detail="un brouillon visuel non publié serait remplacé")
+
+            snapshot = json_load(revision["snapshot"], {})
+            repo.save_revision(conn, "page", page_id, repo.snapshot_page(conn, page_id), "avant restauration")
+            if not repo.restore_snapshot(conn, page_id, snapshot):
+                raise HTTPException(status_code=409, detail="révision impossible à restaurer")
+            state = editor.store.page_state(conn, page_id)
+            restored_project = sections_to_project([section.serialize() for section in state.sections])
+            new_version = editor.store.synchronize_visual_project(
+                conn, page_id=page_id, expected_version=expected, project=restored_project
+            )
+            conn.commit()
+            return {"ok": True, "visual_draft_version": new_version, "schema_version": PROJECT_SCHEMA_VERSION}
+        except Exception:
+            conn.rollback()
+            raise
     finally:
         conn.close()
 
@@ -898,6 +1009,21 @@ def api_export(request: Request, _: str = Depends(require_admin)) -> JSONRespons
                 }
                 for row in repo.sections_for(conn, int(page["id"]))
             ]
+            visual = conn.execute("SELECT * FROM visual_projects WHERE page_id = ?", (int(page["id"]),)).fetchone()
+            if visual is not None:
+                try:
+                    draft_project = json.loads(visual["draft_project_json"])
+                    published_project = json.loads(visual["published_project_json"])
+                except (TypeError, json.JSONDecodeError) as exc:
+                    raise HTTPException(status_code=409, detail=f"projet visuel invalide pour la page {page['id']}") from exc
+                entry["visual_project"] = {
+                    "schema_version": int(draft_project.get("schema_version", 0)),
+                    "theme_id": str(visual["theme_id"]),
+                    "theme_version": int(visual["theme_version"]),
+                    "draft_version": int(visual["draft_version"]),
+                    "draft_project": draft_project,
+                    "published_project": published_project,
+                }
             payload["pages"].append(entry)
         return JSONResponse(
             payload,

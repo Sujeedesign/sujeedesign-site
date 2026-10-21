@@ -6,13 +6,15 @@ composants et de champs est convertie vers les données typées du renderer Jinj
 
 from __future__ import annotations
 
+import copy
+import json
 from collections.abc import Mapping, Sequence
 from html import escape
 from html.parser import HTMLParser
 from typing import Any
 from urllib.parse import urlsplit
 
-from sujee_editor.blocks import DEFAULT_BLOCKS, default_data, validate_data
+from sujee_editor.blocks import DEFAULT_BLOCKS, Field, Kind, default_data, validate_data
 
 from .theme import (
     COMPONENT_SECTIONS,
@@ -21,6 +23,7 @@ from .theme import (
     RICH_TEXT_CLASSES,
     RICH_TEXT_TAGS,
     SECTION_COMPONENTS,
+    SUPPORTED_SECTION_TYPES,
     THEME_ID,
     THEME_VERSION,
 )
@@ -154,6 +157,7 @@ def _component(section_type: str, section: Mapping[str, Any], data: Mapping[str,
         "data-sjd-section": section_type,
         "data-sjd-visible": "1" if bool(section.get("visible", True)) else "0",
         "data-sjd-variant": str(section.get("variant") or data.get("_variant") or ""),
+        "data-sjd-data": json.dumps(data, ensure_ascii=False, separators=(",", ":"), allow_nan=False),
     }
     identifier = section.get("id")
     if identifier is not None:
@@ -206,6 +210,53 @@ def _component(section_type: str, section: Mapping[str, Any], data: Mapping[str,
     }
 
 
+def _sanitize_typed_data(block: Any, data: Any) -> dict[str, Any]:
+    """Validate typed fields and normalize rich text/media before save or publish."""
+    if not isinstance(data, dict):
+        raise ProjectError("données de section invalides")
+    errors = validate_data(block, data)
+    if errors:
+        first = errors[0]
+        raise ProjectError(f"validation {block.name}.{first.field}: {first.rule}")
+
+    def clean(field: Field, value: Any) -> Any:
+        if block.name == "banniere" and field.name == "svg":
+            # Les bannières SVG historiques sont du HTML actif potentiel : on
+            # conserve le SVG autorisé par le filtre public, sans le traiter
+            # comme du rich-text éditorial classique.
+            from app.render import sanitize_svg
+
+            return sanitize_svg(value)
+        if field.kind is Kind.IMAGE:
+            if not _safe_media_path(value):
+                raise ProjectError(f"image hors des médias locaux autorisés : {field.name}")
+            return value
+        if field.kind in {Kind.RICH, Kind.RICH_LINE}:
+            nodes = _markup_components(value)
+            return "".join(_render_rich_node(node) for node in nodes)
+        if field.fields and isinstance(value, list):
+            cleaned_items = []
+            for item in value:
+                if not isinstance(item, Mapping):
+                    raise ProjectError(f"élément invalide : {field.name}")
+                cleaned_items.append({
+                    sub.name: clean(sub, item[sub.name])
+                    for sub in field.fields
+                    if sub.name in item
+                })
+            return cleaned_items
+        return value
+
+    normalized = dict(data)
+    for key in normalized:
+        if key.startswith("_") and key != "_variant":
+            raise ProjectError("champ interne de section non autorisé")
+    for field in block.fields:
+        if field.name in normalized:
+            normalized[field.name] = clean(field, normalized[field.name])
+    return normalized
+
+
 def sections_to_project(sections: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     """Convertit sans mutation les sections supportées en projet GrapesJS versionné."""
     if not isinstance(sections, Sequence) or isinstance(sections, (str, bytes)):
@@ -217,7 +268,7 @@ def sections_to_project(sections: Sequence[Mapping[str, Any]]) -> dict[str, Any]
         if not isinstance(section, Mapping):
             raise ProjectError("section invalide")
         section_type = section.get("type")
-        if section_type not in PILOT_SECTION_TYPES:
+        if section_type not in SUPPORTED_SECTION_TYPES:
             raise ProjectError(f"section non prise en charge : {section_type}")
         identifier = section.get("id")
         if identifier is not None:
@@ -240,10 +291,7 @@ def sections_to_project(sections: Sequence[Mapping[str, Any]]) -> dict[str, Any]
         variant = str(section.get("variant") or data.get("_variant") or "")
         if block.variants:
             data["_variant"] = variant or next(iter(block.variants))
-        errors = validate_data(block, data)
-        if errors:
-            first = errors[0]
-            raise ProjectError(f"validation {section_type}.{first.field}: {first.rule}")
+        data = _sanitize_typed_data(block, data)
         components.append(_component(section_type, section, data))
 
     return {
@@ -386,6 +434,23 @@ def _get_field_value(fields: Mapping[str, Mapping[str, Any]], name: str, default
 def _section_data(component: Mapping[str, Any], section_type: str) -> dict[str, Any]:
     block = DEFAULT_BLOCKS[section_type]
     data = default_data(block)
+    attrs = component.get("attributes") or {}
+    raw_data = attrs.get("data-sjd-data") if isinstance(attrs, Mapping) else None
+    if raw_data is not None:
+        if not isinstance(raw_data, str):
+            raise ProjectError("données de section invalides")
+        try:
+            saved = json.loads(raw_data)
+        except (TypeError, ValueError) as exc:
+            raise ProjectError("données de section invalides") from exc
+        if not isinstance(saved, dict):
+            raise ProjectError("données de section invalides")
+        if any(key.startswith("_") and key != "_variant" for key in saved):
+            raise ProjectError("champ interne de section non autorisé")
+        data.update(saved)
+        return _sanitize_typed_data(block, data)
+    if section_type not in {"chapter", "image-pleine-largeur", "citation"}:
+        raise ProjectError("données de section absentes")
     fields = _fields(component, section_type)
     if section_type == "chapter":
         for name in ("kicker", "title"):
@@ -506,4 +571,18 @@ def project_to_sections(project: Any) -> list[dict[str, Any]]:
     return sections
 
 
-__all__ = ["ProjectError", "project_to_sections", "sections_to_project"]
+def migrate_project(project: Mapping[str, Any]) -> dict[str, Any]:
+    """Valide puis migre sans mutation un projet thème v1 vers la version active."""
+    if not isinstance(project, Mapping):
+        raise ProjectError("projet invalide")
+    version = project.get("theme_version")
+    if version not in {1, 2, 3, 4, 5, THEME_VERSION}:
+        raise ProjectError("version de thème non prise en charge")
+    candidate = copy.deepcopy(dict(project))
+    candidate["theme_version"] = THEME_VERSION
+    # Valider l'intégralité du contenu avant de retourner la copie migrée.
+    project_to_sections(candidate)
+    return candidate
+
+
+__all__ = ["ProjectError", "migrate_project", "project_to_sections", "sections_to_project"]

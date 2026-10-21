@@ -111,8 +111,13 @@ def truly_empty(block) -> dict:
         Kind.BOOL: False,
         Kind.NUMBER: 0,
         Kind.CHOICE: "",
+        Kind.COLOR: "",
     }
-    data = {field.name: EMPTY[field.kind] for field in block.fields}
+    presentation_fields = {"background", "section_background", "section_background_color"}
+    data = {
+        field.name: field.default if field.name in presentation_fields and field.has_default else EMPTY[field.kind]
+        for field in block.fields
+    }
     if block.variants:
         data["_variant"] = next(iter(block.variants))
     return data

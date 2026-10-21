@@ -2,26 +2,37 @@
 
 from __future__ import annotations
 
+from sujee_editor.blocks import DEFAULT_BLOCKS
+
 THEME_ID = "sujee-site"
-THEME_VERSION = 1
+THEME_VERSION = 6
 PROJECT_SCHEMA_VERSION = 1
 
-# Identifiants stables enregistrés dans le project JSON GrapesJS.
+# Identifiants stables enregistrés dans le project JSON GrapesJS. Les trois
+# identifiants du pilote restent inchangés pour préserver les projets stockés.
 SECTION_COMPONENTS: dict[str, str] = {
-    "chapter": "sjd-section-chapter",
-    "image-pleine-largeur": "sjd-section-image-pleine-largeur",
-    "citation": "sjd-section-citation",
+    name: (
+        f"sjd-section-{name}"
+    )
+    for name in DEFAULT_BLOCKS
 }
 COMPONENT_SECTIONS = {component: section for section, component in SECTION_COMPONENTS.items()}
-PILOT_SECTION_TYPES = tuple(SECTION_COMPONENTS)
+SUPPORTED_SECTION_TYPES = tuple(DEFAULT_BLOCKS)
+# Alias temporaire pour les routes/store qui basculeront dans le Task 3.
+PILOT_SECTION_TYPES = SUPPORTED_SECTION_TYPES
 
 # Classes existantes nécessaires au contenu éditorial du thème. Les classes
 # arbitraires et les styles en ligne ne sont jamais importés dans un projet.
 RICH_TEXT_CLASSES = frozenset(
     {"timeline", "reveal", "tl-yr", "tl-role", "tl-firme", "tl-desc"}
 )
+# Balises autorisées pour le rich text : reprend le sanitizer public. `div`
+# reste permis pour préserver les listes de parcours historiques.
 RICH_TEXT_TAGS = frozenset(
-    {"a", "b", "blockquote", "br", "div", "em", "h3", "i", "li", "ol", "p", "span", "strong", "ul"}
+    {
+        "a", "b", "blockquote", "br", "cite", "div", "em", "h2", "h3", "h4",
+        "i", "li", "mark", "ol", "p", "small", "span", "strong", "sub", "sup", "u", "ul",
+    }
 )
 
 __all__ = [
@@ -31,6 +42,7 @@ __all__ = [
     "SECTION_COMPONENTS",
     "COMPONENT_SECTIONS",
     "PILOT_SECTION_TYPES",
+    "SUPPORTED_SECTION_TYPES",
     "RICH_TEXT_CLASSES",
     "RICH_TEXT_TAGS",
 ]

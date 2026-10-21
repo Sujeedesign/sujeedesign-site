@@ -8,8 +8,10 @@ la liste complète des erreurs.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Any
+from urllib.parse import unquote, urlsplit
 
 from .types import Block, Field, Kind
 
@@ -56,6 +58,8 @@ def validate_data(block: Block, data: Any) -> list[ValidationError]:
             errors.append(ValidationError(field.name, "required"))
             continue
         errors.extend(_top_errors(field, data[field.name]))
+    if block.name == "zone-libre":
+        errors.extend(_free_zone_errors(data))
     return errors
 
 
@@ -75,12 +79,14 @@ def validate_field(block: Block, name: str, value: Any) -> list[ValidationError]
 
 def _top_errors(field: Field, value: Any) -> list[ValidationError]:
     if field.kind in ITEM_KINDS:
-        return _item_errors(field, value)
+        return _item_errors(field, value, field.name)
     return _errors_for(field, value, field.name)
 
 
 def _errors_for(field: Field, value: Any, path: str) -> list[ValidationError]:
     kind = field.kind
+    if kind in ITEM_KINDS:
+        return _item_errors(field, value, path)
     if kind is Kind.IMAGE:
         # Une image est un chemin (média du site ou URL), jamais un objet : le
         # panneau choisit le fichier, le champ ne porte que son adresse. Sans
@@ -108,6 +114,10 @@ def _errors_for(field: Field, value: Any, path: str) -> list[ValidationError]:
         if isinstance(value, str) and value in field.choices:
             return []
         return [ValidationError(path, "bad_choice", "|".join(field.choices))]
+    if kind is Kind.COLOR:
+        if isinstance(value, str) and re.fullmatch(r"#[0-9a-fA-F]{6}", value):
+            return []
+        return [ValidationError(path, "bad_color")]
     if kind is Kind.LINES:
         if isinstance(value, str):
             return []
@@ -121,25 +131,93 @@ def _errors_for(field: Field, value: Any, path: str) -> list[ValidationError]:
     return [ValidationError(path, "bad_type", str(kind.value))]
 
 
-def _item_errors(field: Field, value: Any) -> list[ValidationError]:
-    """Erreur d'une liste d'éléments : la règle reste `bad_item` avec le chemin exact."""
+def _item_errors(field: Field, value: Any, base_path: str | None = None) -> list[ValidationError]:
+    """Valide récursivement les listes, en gardant le chemin de chaque sous-champ."""
+    path_prefix = base_path or field.name
     if not isinstance(value, (list, tuple)):
         return [ValidationError(field.name, "bad_type", str(field.kind.value))]
     if field.max_items is not None and len(value) > field.max_items:
         return [ValidationError(field.name, "too_many", str(field.max_items))]
     errors: list[ValidationError] = []
     for index, item in enumerate(value):
-        path = f"{field.name}[{index}]"
+        item_path = f"{path_prefix}[{index}]"
         if not isinstance(item, dict):
-            errors.append(ValidationError(field.name, "bad_item", path))
+            errors.append(ValidationError(field.name, "bad_item", item_path))
             continue
         for key in item:
             if field.sub(key) is None:
-                errors.append(ValidationError(field.name, "bad_item", f"{path}.{key}"))
+                errors.append(ValidationError(field.name, "bad_item", f"{item_path}.{key}"))
         for sub in field.fields:
             if sub.name not in item or is_empty(item[sub.name]):
                 continue
-            sub_path = f"{path}.{sub.name}"
+            sub_path = f"{item_path}.{sub.name}"
             if _errors_for(sub, item[sub.name], sub_path):
                 errors.append(ValidationError(field.name, "bad_item", sub_path))
+    return errors
+
+
+def _safe_local_image(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    value = value.strip()
+    if not value:
+        return True
+    try:
+        parsed = urlsplit(value)
+    except ValueError:
+        return False
+    if parsed.scheme or parsed.netloc or chr(92) in value or value.startswith("//"):
+        return False
+    path = unquote(parsed.path)
+    if chr(92) in path or any(segment in {".", ".."} for segment in path.split("/")):
+        return False
+    return path.startswith(("/assets/", "/medias/", "assets/", "medias/"))
+
+
+def _safe_layout_href(value: str) -> bool:
+    value = value.strip()
+    if chr(92) in value:
+        return False
+    try:
+        parsed = urlsplit(value)
+    except ValueError:
+        return False
+    if parsed.scheme:
+        return parsed.scheme.lower() in {"http", "https", "mailto"}
+    return not parsed.netloc and not value.startswith("//")
+
+
+def _free_zone_errors(data: dict[str, Any]) -> list[ValidationError]:
+    errors: list[ValidationError] = []
+    columns = data.get("columns")
+    if isinstance(columns, (list, tuple)):
+        if not 1 <= len(columns) <= 3:
+            errors.append(ValidationError("columns", "bad_layout", "1 à 3 colonnes requises"))
+        spans: list[int] = []
+        for column_index, column in enumerate(columns):
+            if not isinstance(column, dict):
+                continue
+            span_value = column.get("span")
+            try:
+                if isinstance(span_value, bool) or not isinstance(span_value, (str, int)):
+                    continue
+                spans.append(int(span_value))
+            except (TypeError, ValueError):
+                continue
+            elements = column.get("elements", [])
+            for element in elements if isinstance(elements, list) else []:
+                if not isinstance(element, dict):
+                    continue
+                path = f"columns[{column_index}].elements"
+                if element.get("type") == "button":
+                    href = element.get("href")
+                    if href and (not isinstance(href, str) or not _safe_layout_href(href)):
+                        errors.append(ValidationError("columns", "unsafe_href", path))
+                if element.get("type") == "image" and not _safe_local_image(element.get("src", "")):
+                    errors.append(ValidationError("columns", "unsafe_media", path))
+        if len(spans) == len(columns) and (any(span < 2 for span in spans) or sum(spans) != 12):
+            errors.append(ValidationError("columns", "bad_layout", "les largeurs doivent totaliser 12"))
+    background_image = data.get("background_image", "")
+    if background_image and not _safe_local_image(background_image):
+        errors.append(ValidationError("background_image", "unsafe_media"))
     return errors

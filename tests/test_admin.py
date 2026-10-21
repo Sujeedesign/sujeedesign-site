@@ -8,9 +8,15 @@ import json
 import pytest
 from fastapi.testclient import TestClient
 
+from app import security
 from app.db import connect
+from sujee_editor.tokens import make_csrf
 
 PASSWORD = "mot-de-passe-de-test"
+
+
+def _csrf(client: TestClient) -> str:
+    return make_csrf(client.app.state.editor.session_secret)
 
 
 def login(client: TestClient) -> TestClient:
@@ -58,6 +64,41 @@ def test_schema_lists_section_types(client: TestClient) -> None:
     assert any(field["name"] == "title" for field in data["types"]["hero"]["fields"])
 
 
+def test_admin_page_route_renders_grapesjs_without_classic_section_controls(client: TestClient) -> None:
+    login(client)
+    page_id = client.post("/api/admin/pages", json={"title": "Édition visuelle"}).json()["id"]
+    response = client.get(f"/admin/pages/{page_id}")
+    assert response.status_code == 200
+    assert 'id="visual-config"' in response.text
+    assert "/assets/editor/visual/visual-editor.js" in response.text
+    assert 'id="sectionList"' not in response.text
+    assert 'id="newSectionType"' not in response.text
+    assert 'id="pageForm"' not in response.text
+
+
+def test_visual_route_redirects_to_canonical_page_editor(client: TestClient) -> None:
+    login(client)
+    page_id = client.post("/api/admin/pages", json={"title": "Page redirigée"}).json()["id"]
+    response = client.get(f"/admin/visual/{page_id}", follow_redirects=False)
+    assert response.status_code == 303
+    assert response.headers["location"] == f"/admin/pages/{page_id}"
+
+
+def test_pages_module_can_change_page_status(client: TestClient) -> None:
+    login(client)
+    page_id = client.post("/api/admin/pages", json={"title": "Page à publier"}).json()["id"]
+    response = client.get("/admin/pages")
+    assert f'data-page="{page_id}"' in response.text
+    assert 'data-status="publie"' in response.text
+
+
+def test_non_page_admin_modules_still_render(client: TestClient) -> None:
+    login(client)
+    for path in ("/admin/medias", "/admin/messages", "/admin/reglages", "/admin/sauvegarde"):
+        response = client.get(path)
+        assert response.status_code == 200, path
+
+
 def test_page_lifecycle(client: TestClient) -> None:
     login(client)
     created = client.post("/api/admin/pages", json={"title": "Nouvelle réalisation", "kind": "realisation"}).json()
@@ -71,6 +112,7 @@ def test_page_lifecycle(client: TestClient) -> None:
     updated = client.patch(
         f"/api/admin/pages/{page_id}",
         json={"title": "Réalisation renommée", "excerpt": "Accroche", "categories": ["Identité", "Web"], "seo_title": "Titre SEO"},
+        headers={"X-SJD-CSRF": _csrf(client)},
     ).json()
     assert updated["page"]["title"] == "Réalisation renommée"
     assert updated["page"]["categories"] == ["Identité", "Web"]
@@ -114,13 +156,34 @@ def test_section_lifecycle_and_order(client: TestClient) -> None:
     assert client.delete(f"/api/admin/sections/{first}").json()["ok"] is True
 
 
+def test_zone_free_legacy_section_api_rejects_invalid_layout_data(client: TestClient) -> None:
+    login(client)
+    page_id = client.post("/api/admin/pages", json={"title": "Zone contrôlée"}).json()["id"]
+    section_id = client.post(f"/api/admin/pages/{page_id}/sections", json={"type": "zone-libre"}).json()["id"]
+    original = client.get(f"/api/admin/pages/{page_id}/sections").json()["sections"][-1]["data"]
+
+    response = client.patch(
+        f"/api/admin/sections/{section_id}",
+        json={"data": {"background_image": "https://example.com/remote.webp"}},
+        headers={"Origin": "http://testserver", "X-SJD-CSRF": _csrf(client)},
+    )
+
+    assert response.status_code == 400
+    saved = client.get(f"/api/admin/pages/{page_id}/sections").json()["sections"][-1]["data"]
+    assert saved == original
+
+
 def test_revisions_are_restorable(client: TestClient) -> None:
     login(client)
     page_id = client.post("/api/admin/pages", json={"title": "Version un"}).json()["id"]
-    client.patch(f"/api/admin/pages/{page_id}", json={"title": "Version deux"})
+    client.patch(f"/api/admin/pages/{page_id}", json={"title": "Version deux"}, headers={"X-SJD-CSRF": _csrf(client)})
     revisions = client.get(f"/api/admin/revisions?entity_type=page&entity_id={page_id}").json()["revisions"]
     assert revisions, "aucune révision enregistrée"
-    restored = client.post(f"/api/admin/revisions/{revisions[0]['id']}/restaurer", json={}).json()
+    restored = client.post(
+        f"/api/admin/revisions/{revisions[0]['id']}/restaurer",
+        headers={"Origin": "http://testserver", "X-SJD-CSRF": _csrf(client)},
+        json={"expected_visual_version": 0, "confirm_discard_draft": True},
+    ).json()
     assert restored["ok"] is True
 
 
@@ -209,3 +272,93 @@ def test_admin_screens_render(client: TestClient, path: str) -> None:
     response = client.get(path)
     assert response.status_code == 200
     assert "admin-nav" in response.text
+
+
+def _saved_visual_revision(client: TestClient, title: str = "Nouveau titre") -> tuple[int, int, dict[str, str]]:
+    login(client)
+    page_id = client.post("/api/admin/pages", json={"title": "Titre original"}).json()["id"]
+    client.patch(f"/api/admin/pages/{page_id}", json={"title": title}, headers={"X-SJD-CSRF": _csrf(client)})
+    revisions = client.get(f"/api/admin/revisions?entity_type=page&entity_id={page_id}").json()["revisions"]
+    revision_id = revisions[0]["id"]
+    cookies = {security.SESSION_COOKIE: client.cookies[security.SESSION_COOKIE]}
+    editor_url = f"/api/editor/pages/{page_id}/visual-project"
+    project = client.get(editor_url, cookies=cookies).json()["project"]
+    sections = project["project_data"]["pages"][0]["frames"][0]["component"]["components"]
+    hero = next(section for section in sections if section["attributes"]["data-sjd-section"] == "hero")
+    data = json.loads(hero["attributes"]["data-sjd-data"])
+    data["title"] = "Brouillon visuel"
+    hero["attributes"]["data-sjd-data"] = json.dumps(data, ensure_ascii=False)
+    headers = {"Origin": "http://testserver", "X-SJD-CSRF": security.make_token("editor")}
+    saved = client.put(editor_url, cookies=cookies, headers=headers, json={"expected_version": 0, "project": project})
+    assert saved.status_code == 200
+    return page_id, revision_id, cookies
+
+
+def test_revision_restore_requires_csrf(client: TestClient) -> None:
+    page_id, revision_id, cookies = _saved_visual_revision(client)
+    response = client.post(
+        f"/api/admin/revisions/{revision_id}/restaurer",
+        cookies=cookies,
+        headers={"Origin": "http://testserver"},
+        json={"expected_visual_version": 1, "confirm_discard_draft": True},
+    )
+    assert response.status_code == 403
+    assert client.get(f"/api/admin/pages/{page_id}", cookies=cookies).json()["page"]["title"] == "Nouveau titre"
+
+
+def test_restore_with_unsaved_visual_draft_requires_confirmation(client: TestClient) -> None:
+    page_id, revision_id, cookies = _saved_visual_revision(client)
+    headers = {"Origin": "http://testserver", "X-SJD-CSRF": security.make_token("editor")}
+
+    response = client.post(
+        f"/api/admin/revisions/{revision_id}/restaurer",
+        cookies=cookies,
+        headers=headers,
+        json={"expected_visual_version": 1, "confirm_discard_draft": False},
+    )
+
+    assert response.status_code == 409
+    assert client.get(f"/api/admin/pages/{page_id}", cookies=cookies).json()["page"]["title"] == "Nouveau titre"
+
+
+def test_confirmed_restore_updates_sections_and_visual_project_atomically(client: TestClient) -> None:
+    page_id, revision_id, cookies = _saved_visual_revision(client)
+    headers = {"Origin": "http://testserver", "X-SJD-CSRF": security.make_token("editor")}
+
+    response = client.post(
+        f"/api/admin/revisions/{revision_id}/restaurer",
+        cookies=cookies,
+        headers=headers,
+        json={"expected_visual_version": 1, "confirm_discard_draft": True},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["visual_draft_version"] == 2
+    detail = client.get(f"/api/admin/pages/{page_id}", cookies=cookies).json()
+    assert detail["page"]["title"] == "Titre original"
+    assert detail["sections"][0]["data"]["title"] != "Brouillon visuel"
+    conn = connect(client.app.state.db_path)
+    try:
+        row = conn.execute("SELECT draft_version, draft_project_json, published_project_json FROM visual_projects WHERE page_id = ?", (page_id,)).fetchone()
+        assert row["draft_version"] == 2
+        assert row["draft_project_json"] == row["published_project_json"]
+        project = json.loads(row["draft_project_json"])
+        assert "Titre original" in json.dumps(project, ensure_ascii=False)
+        assert "Brouillon visuel" not in json.dumps(project, ensure_ascii=False)
+    finally:
+        conn.close()
+
+
+def test_export_includes_draft_and_published_visual_project(client: TestClient) -> None:
+    login(client)
+    page_id = client.post("/api/admin/pages", json={"title": "Export visuel"}).json()["id"]
+    client.get(f"/admin/visual/{page_id}")
+
+    payload = client.get("/api/admin/export").json()
+    page = next(item for item in payload["pages"] if item["id"] == page_id)
+
+    assert page["sections"]
+    assert set(page["visual_project"]) == {
+        "schema_version", "theme_id", "theme_version", "draft_version", "draft_project", "published_project"
+    }
+    assert page["visual_project"]["theme_version"] == 6

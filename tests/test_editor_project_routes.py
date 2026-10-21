@@ -9,7 +9,10 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from app import db as db_module
-from sujee_editor.blocks import DEFAULT_BLOCKS
+from sujee_editor.blocks import DEFAULT_BLOCKS, default_data
+from editor_fixtures import sample_data
+from sujee_editor.editor.project import sections_to_project
+from sujee_editor.editor.theme import THEME_ID, THEME_VERSION
 from sujee_editor.routes import build_router
 from sujee_editor.store import Store
 from sujee_editor.tokens import CSRF_HEADER, SESSION_COOKIE, make_csrf, make_session
@@ -80,8 +83,17 @@ def _find_field_component(nodes: list[dict[str, Any]], field: str) -> dict[str, 
 def _change_title(project: dict[str, Any], value: str) -> dict[str, Any]:
     result = json.loads(json.dumps(project))
     sections = result["project_data"]["pages"][0]["frames"][0]["component"]["components"]
+    component = next((item for item in sections if item.get("attributes", {}).get("data-sjd-section") == "chapter"), None)
+    if component is None:
+        component = sections[0]
     title = _find_field_component(sections, "title")
     title["content"] = value
+    try:
+        data = json.loads(component["attributes"]["data-sjd-data"])
+        data["title"] = value
+        component["attributes"]["data-sjd-data"] = json.dumps(data, ensure_ascii=False)
+    except (KeyError, json.JSONDecodeError):
+        pass
     return result
 
 
@@ -240,7 +252,7 @@ def test_visual_project_rejects_unknown_components_and_oversized_payload(client:
     assert large.status_code == 400
 
 
-def test_visual_project_imports_supported_sections_and_excludes_uneditable_sections(
+def test_visual_project_imports_supported_sections_and_includes_formerly_omitted_types(
     db_file: Path,
 ) -> None:
     page_id = _seed(db_file, unsupported=True)
@@ -252,7 +264,7 @@ def test_visual_project_imports_supported_sections_and_excludes_uneditable_secti
     assert response.status_code == 200
     sections = response.json()["project"]["project_data"]["pages"][0]["frames"][0]["component"]["components"]
     assert [section["attributes"]["data-sjd-section"] for section in sections] == [
-        "chapter", "image-pleine-largeur", "citation"
+        "chapter", "image-pleine-largeur", "citation", "faq"
     ]
     conn = db_module.connect(db_file)
     try:
@@ -352,7 +364,7 @@ def test_visual_publish_assigns_ids_to_new_sections_and_reopens_without_duplicat
         conn.close()
 
 
-def test_pilot_publishes_supported_sections_without_deleting_other_theme_sections(
+def test_visual_publish_keeps_and_updates_all_supported_theme_sections(
     client: TestClient, db_file: Path
 ) -> None:
     page_id = client.app.state.visual_test_page_id
@@ -370,11 +382,14 @@ def test_pilot_publishes_supported_sections_without_deleting_other_theme_section
     initial = client.get(f"{BASE}/pages/{page_id}/visual-project", cookies=cookies)
     assert initial.status_code == 200
     editable = initial.json()["project"]["project_data"]["pages"][0]["frames"][0]["component"]["components"]
-    assert len(editable) == 3
+    assert len(editable) == 4
     changed = _change_title(initial.json()["project"], "Chapitre modifié")
     added = json.loads(json.dumps(changed["project_data"]["pages"][0]["frames"][0]["component"]["components"][0]))
     added["attributes"].pop("data-sjd-section-id", None)
     _find_field_component([added], "title")["content"] = "Nouveau chapitre"
+    added_data = json.loads(added["attributes"]["data-sjd-data"])
+    added_data["title"] = "Nouveau chapitre"
+    added["attributes"]["data-sjd-data"] = json.dumps(added_data, ensure_ascii=False)
     changed["project_data"]["pages"][0]["frames"][0]["component"]["components"].append(added)
     assert client.put(
         f"{BASE}/pages/{page_id}/visual-project",
@@ -393,11 +408,13 @@ def test_pilot_publishes_supported_sections_without_deleting_other_theme_section
     conn = db_module.connect(db_file)
     try:
         rows = conn.execute("SELECT type, position, data FROM sections WHERE page_id = ? ORDER BY position", (page_id,)).fetchall()
-        assert [row["type"] for row in rows] == ["chapter", "image-pleine-largeur", "citation", "chapter", "faq"]
+        assert [row["type"] for row in rows] == ["chapter", "image-pleine-largeur", "citation", "faq", "chapter"]
         assert [row["position"] for row in rows] == [0, 1, 2, 3, 4]
-        assert json.loads(rows[-1]["data"]) == {"title": "FAQ conservée", "items": []}
+        faq_data = json.loads(rows[3]["data"])
+        assert faq_data["title"] == "FAQ conservée"
+        assert faq_data["items"] == []
         assert json.loads(rows[0]["data"])["title"] == "Chapitre modifié"
-        assert json.loads(rows[3]["data"])["title"] == "Nouveau chapitre"
+        assert json.loads(rows[4]["data"])["title"] == "Nouveau chapitre"
     finally:
         conn.close()
 
@@ -541,5 +558,130 @@ def test_publish_with_a_stale_project_version_keeps_draft_and_public_data(client
     try:
         section = conn.execute("SELECT data FROM sections WHERE page_id = ? AND type = 'chapter'", (page_id,)).fetchone()
         assert json.loads(section["data"])["title"] == "Titre publié"
+    finally:
+        conn.close()
+
+
+def _legacy_project_for_page(client: TestClient, page_id: int, cookies: dict[str, str]) -> dict[str, Any]:
+    project = client.get(f"{BASE}/pages/{page_id}/visual-project", cookies=cookies).json()["project"]
+    project["theme_version"] = 1
+    components = project["project_data"]["pages"][0]["frames"][0]["component"]["components"]
+    for component in components:
+        component["attributes"].pop("data-sjd-data", None)
+    return project
+
+
+def test_visual_project_get_migrates_v1_draft_after_validation(client: TestClient, db_file: Path) -> None:
+    page_id = client.app.state.visual_test_page_id
+    cookies, _ = _auth()
+    legacy = _legacy_project_for_page(client, page_id, cookies)
+    conn = db_module.connect(db_file)
+    try:
+        encoded = json.dumps(legacy, ensure_ascii=False)
+        conn.execute(
+            "UPDATE visual_projects SET draft_project_json = ?, published_project_json = ?, draft_version = 7, theme_version = 1 WHERE page_id = ?",
+            (encoded, encoded, page_id),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+    response = client.get(f"{BASE}/pages/{page_id}/visual-project", cookies=cookies)
+
+    assert response.status_code == 200
+    assert response.json()["theme_version"] == THEME_VERSION == 6
+    assert response.json()["draft_version"] == 7
+    migrated = response.json()["project"]
+    assert migrated["theme_version"] == 6
+    assert [item["attributes"]["data-sjd-section"] for item in migrated["project_data"]["pages"][0]["frames"][0]["component"]["components"]] == [
+        "chapter", "image-pleine-largeur", "citation"
+    ]
+    conn = db_module.connect(db_file)
+    try:
+        row = conn.execute("SELECT draft_project_json, published_project_json, theme_version, draft_version FROM visual_projects WHERE page_id = ?", (page_id,)).fetchone()
+        assert json.loads(row["draft_project_json"])["theme_version"] == 6
+        assert json.loads(row["published_project_json"])["theme_version"] == 6
+        assert row["theme_version"] == 6 and row["draft_version"] == 7
+    finally:
+        conn.close()
+
+
+def test_failed_project_migration_keeps_both_json_columns_unchanged(client: TestClient, db_file: Path) -> None:
+    page_id = client.app.state.visual_test_page_id
+    cookies, _ = _auth()
+    legacy = _legacy_project_for_page(client, page_id, cookies)
+    legacy["project_data"]["pages"][0]["frames"][0]["component"]["components"][0]["type"] = "not-allowed"
+    conn = db_module.connect(db_file)
+    try:
+        draft = json.dumps(legacy, ensure_ascii=False)
+        published = json.dumps(_legacy_project_for_page(client, page_id, cookies), ensure_ascii=False)
+        conn.execute(
+            "UPDATE visual_projects SET draft_project_json = ?, published_project_json = ?, draft_version = 4, theme_version = 1 WHERE page_id = ?",
+            (draft, published, page_id),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+    response = client.get(f"{BASE}/pages/{page_id}/visual-project", cookies=cookies)
+
+    assert response.status_code == 409
+    conn = db_module.connect(db_file)
+    try:
+        row = conn.execute("SELECT draft_project_json, published_project_json, theme_version, draft_version FROM visual_projects WHERE page_id = ?", (page_id,)).fetchone()
+        assert row["draft_project_json"] == draft
+        assert row["published_project_json"] == published
+        assert row["theme_version"] == 1 and row["draft_version"] == 4
+    finally:
+        conn.close()
+
+
+def test_publish_all_nineteen_types_is_atomic_and_ordered(client: TestClient, db_file: Path) -> None:
+    page_id = client.app.state.visual_test_page_id
+    conn = db_module.connect(db_file)
+    try:
+        conn.execute("DELETE FROM sections WHERE page_id = ?", (page_id,))
+        ids = {}
+        for position, block in enumerate(DEFAULT_BLOCKS.values()):
+            data = sample_data(block)
+            variant = data.get("_variant", "")
+            cursor = conn.execute(
+                "INSERT INTO sections (page_id, position, type, variant, label, visible, data) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (page_id, position, block.name, variant, block.label, int(position % 2 == 0), json.dumps(data, ensure_ascii=False)),
+            )
+            ids[block.name] = int(cursor.lastrowid)
+        conn.commit()
+    finally:
+        conn.close()
+    cookies, headers = _auth()
+    response = client.get(f"{BASE}/pages/{page_id}/visual-project", cookies=cookies)
+    assert response.status_code == 200
+    project = response.json()["project"]
+    components = project["project_data"]["pages"][0]["frames"][0]["component"]["components"]
+    assert [component["attributes"]["data-sjd-section"] for component in components] == list(DEFAULT_BLOCKS)
+    hero = next(item for item in components if item["attributes"]["data-sjd-section"] == "hero")
+    data = json.loads(hero["attributes"]["data-sjd-data"])
+    data["title"] = "Contenu complet publié"
+    hero["attributes"]["data-sjd-data"] = json.dumps(data, ensure_ascii=False)
+    saved = client.put(
+        f"{BASE}/pages/{page_id}/visual-project", cookies=cookies, headers=headers,
+        json={"expected_version": 0, "project": project},
+    )
+    assert saved.status_code == 200
+    published = client.post(
+        f"{BASE}/pages/{page_id}/visual-project/publish", cookies=cookies, headers=headers,
+        json={"expected_version": 1},
+    )
+
+    assert published.status_code == 200
+    conn = db_module.connect(db_file)
+    try:
+        rows = conn.execute("SELECT id, type, position, data FROM sections WHERE page_id = ? ORDER BY position", (page_id,)).fetchall()
+        assert [row["type"] for row in rows] == list(DEFAULT_BLOCKS)
+        assert [row["position"] for row in rows] == list(range(20))
+        assert {row["type"]: int(row["id"]) for row in rows} == ids
+        assert json.loads(rows[0]["data"])["title"] == "Contenu complet publié"
+        stored = conn.execute("SELECT draft_project_json, published_project_json FROM visual_projects WHERE page_id = ?", (page_id,)).fetchone()
+        assert stored["draft_project_json"] == stored["published_project_json"]
     finally:
         conn.close()

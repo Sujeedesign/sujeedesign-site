@@ -138,3 +138,130 @@ def test_every_block_accepts_its_own_defaults(name):
 def test_a_cta_field_defaults_to_an_empty_list():
     cta = DEFAULT_BLOCKS["cta-final"]
     assert default_data(cta)["ctas"] == []
+
+
+def test_cta_field_accepts_three_existing_buttons():
+    cta = DEFAULT_BLOCKS["cta-final"]
+    data = default_data(cta)
+    data["ctas"] = [
+        {"label": f"Bouton {index}", "href": "/contact", "style": "pill"}
+        for index in range(3)
+    ]
+
+    assert validate_data(cta, data) == []
+
+
+def test_free_zone_defaults_to_a_valid_two_column_layout():
+    zone = DEFAULT_BLOCKS["zone-libre"]
+    data = default_data(zone)
+    assert data["background"] == "none"
+    assert [column["span"] for column in data["columns"]] == ["6", "6"]
+    assert validate_data(zone, data) == []
+
+
+def test_free_zone_defaults_are_fresh_nested_values():
+    zone = DEFAULT_BLOCKS["zone-libre"]
+    first = default_data(zone)
+    first["columns"][0]["span"] = "8"
+    second = default_data(zone)
+    assert [column["span"] for column in second["columns"]] == ["6", "6"]
+
+
+def test_free_zone_accepts_local_background_image_and_twelve_column_grid():
+    zone = DEFAULT_BLOCKS["zone-libre"]
+    data = default_data(zone)
+    data["background"] = "image"
+    data["background_image"] = "/medias/fond-atelier.webp"
+    data["columns"] = [
+        {"span": "8", "align": "left", "elements": [{"type": "heading", "text": "Titre", "level": "h2", "label": "", "href": "", "role": "principal", "src": "", "alt": "", "items": []}]},
+        {"span": "4", "align": "center", "elements": []},
+    ]
+    assert validate_data(zone, data) == []
+
+
+def test_free_zone_rejects_unbalanced_columns_and_remote_backgrounds():
+    zone = DEFAULT_BLOCKS["zone-libre"]
+    data = default_data(zone)
+    data["columns"][0]["span"] = "8"
+    data["background"] = "image"
+    data["background_image"] = "https://example.com/fond.jpg"
+    errors = validate_data(zone, data)
+    assert {error.rule for error in errors} >= {"bad_layout", "unsafe_media"}
+
+
+def test_free_zone_rejects_dangerous_button_links():
+    zone = DEFAULT_BLOCKS["zone-libre"]
+    data = default_data(zone)
+    data["columns"][0]["elements"] = [{
+        "type": "button", "text": "", "level": "h2", "label": "Voir", "href": "javascript:alert(1)",
+        "role": "principal", "src": "", "alt": "", "items": [],
+    }]
+    assert any(error.rule == "unsafe_href" for error in validate_data(zone, data))
+
+
+def test_free_zone_rejects_remote_or_traversal_image_paths():
+    zone = DEFAULT_BLOCKS["zone-libre"]
+    data = default_data(zone)
+    data["columns"][0]["elements"] = [{
+        "type": "image", "text": "", "level": "h2", "label": "", "href": "",
+        "role": "principal", "src": "/medias/../private.jpg", "alt": "", "items": [],
+    }]
+    assert any(error.rule == "unsafe_media" for error in validate_data(zone, data))
+    data["columns"][0]["elements"] = []
+    data["background_image"] = "/medias/%2e%2e/private.webp"
+    assert any(error.rule == "unsafe_media" for error in validate_data(zone, data))
+
+
+def test_all_sections_have_controlled_background_modes_and_hex_color_validation():
+    chapter = DEFAULT_BLOCKS["chapter"]
+    data = default_data(chapter)
+    assert data["section_background"] == "default"
+    assert data["section_background_color"] == "#f2f2f4"
+
+    data["section_background"] = "gradient"
+    assert validate_data(chapter, data) == []
+    data["section_background"] = "custom"
+    data["section_background_color"] = "#123456"
+    assert validate_data(chapter, data) == []
+
+    for invalid in ("red", "#fff", "#123456; background:url(x)", "var(--color-accent)"):
+        assert rules(validate_data(chapter, {**data, "section_background_color": invalid})) == [
+            ("section_background_color", "bad_color")
+        ]
+
+
+def test_free_zone_supports_animated_gradient_and_custom_color():
+    zone = DEFAULT_BLOCKS["zone-libre"]
+    data = default_data(zone)
+    data["background"] = "gradient"
+    assert validate_data(zone, data) == []
+    data["background"] = "custom"
+    data["section_background_color"] = "#ffcc88"
+    assert validate_data(zone, data) == []
+    data["section_background_color"] = "#fff"
+    assert rules(validate_data(zone, data)) == [("section_background_color", "bad_color")]
+
+
+@pytest.mark.parametrize("section_type", sorted(DEFAULT_BLOCKS))
+def test_hero_animated_gradient_is_an_allowed_background_choice_for_every_section(section_type: str):
+    block = DEFAULT_BLOCKS[section_type]
+    data = default_data(block)
+    background_field = "background" if section_type == "zone-libre" else "section_background"
+    data[background_field] = "hero-gradient"
+
+    assert validate_data(block, data) == []
+
+
+def test_free_zone_rejects_backslashes_in_links_and_media_paths():
+    zone = DEFAULT_BLOCKS["zone-libre"]
+    data = default_data(zone)
+    data["background_image"] = "/medias/.." + chr(92) + "private.webp"
+    assert any(error.rule == "unsafe_media" for error in validate_data(zone, data))
+    data["background_image"] = ""
+    data["columns"][0]["elements"] = [{
+        "type": "button", "text": "", "level": "h2", "label": "Voir",
+        "href": "https://example.com" + chr(92) + "@evil", "role": "principal",
+    }]
+    assert any(error.rule == "unsafe_href" for error in validate_data(zone, data))
+    data["columns"][0]["elements"][0]["href"] = "http://[::1"
+    assert any(error.rule == "unsafe_href" for error in validate_data(zone, data))

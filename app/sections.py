@@ -8,6 +8,7 @@ dans la forme historique, sans rien y ajouter.
 
 from __future__ import annotations
 
+import copy
 from typing import Any
 
 from sujee_editor.blocks import DEFAULT_BLOCKS, Block, Field
@@ -51,7 +52,7 @@ def template_for(type_: str) -> str:
 
 def default_value(field: dict[str, Any]) -> Any:
     if "default" in field:
-        return field["default"]
+        return copy.deepcopy(field["default"])
     kind = field.get("type", "text")
     if kind == "bool":
         return field["name"] in {"shader"}

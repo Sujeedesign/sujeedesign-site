@@ -2,8 +2,13 @@ import grapesjs from 'grapesjs';
 import 'grapesjs/dist/css/grapes.min.css';
 import './visual-editor.css';
 import { registerSujeeTheme, prepareThemeProject } from './theme-plugin.js';
+import { DEMO_BLOCKS } from './demo-schema.js';
+import { mountSectionPanel } from './section-panel.js';
+import { mountPageSettings } from './page-settings.js';
+import { mountRevisionPanel } from './revision-panel.js';
 
 const config = JSON.parse(document.querySelector('#visual-config')?.textContent || '{}');
+const blockSchema = config.blocks || DEMO_BLOCKS;
 const status = document.querySelector('#visual-status');
 const saveButton = document.querySelector('#visual-save');
 const rebaseButton = document.querySelector('#visual-rebase');
@@ -16,11 +21,95 @@ let editRevision = 0;
 let savePromise = null;
 let savedProjectSnapshot = '';
 let saveTimer;
+let previewTimer;
+let previewSequence = 0;
+const livePreviewFrame = document.querySelector('#visual-live-preview');
+const previewStatus = document.querySelector('#visual-preview-status');
 
 function setStatus(message, kind = '') {
   if (!status) return;
   status.textContent = message;
   status.dataset.state = kind;
+}
+
+function highlightPreviewSelection() {
+  const doc = livePreviewFrame?.contentDocument;
+  if (!doc) return;
+  doc.querySelectorAll('.sjd-block.sjd-editor-selected').forEach((node) => node.classList.remove('sjd-editor-selected'));
+  const selected = editor.getSelected();
+  if (!selected) return;
+  const position = editor.getWrapper().components().indexOf(selected);
+  if (position >= 0) doc.querySelector(`.sjd-block[data-block-position="${position}"]`)?.classList.add('sjd-editor-selected');
+}
+
+function installPreviewInteractions() {
+  const doc = livePreviewFrame?.contentDocument;
+  if (!doc) return;
+  const previewStyle = doc.createElement('style');
+  previewStyle.textContent = `
+    .reveal { opacity: 1 !important; transform: none !important; animation: none !important; }
+    .sjd-block[data-block-position] { cursor: pointer; outline: 1px solid transparent; outline-offset: -1px; }
+    .sjd-block[data-block-position]:hover { outline: 1px solid rgba(203, 161, 94, .9) !important; }
+    .sjd-block.sjd-editor-selected { outline: 2px solid #cba15e !important; outline-offset: -2px; }
+  `;
+  doc.head?.append(previewStyle);
+  doc.addEventListener('click', (event) => {
+    const target = event.target;
+    const link = target?.closest?.('a');
+    if (link) event.preventDefault();
+    const block = target?.closest?.('.sjd-block[data-block-position]');
+    if (!block) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const position = Number(block.dataset.blockPosition);
+    const component = editor.getWrapper().components().at(position);
+    if (component) editor.select(component);
+  }, true);
+  highlightPreviewSelection();
+}
+
+async function refreshLivePreview() {
+  if (!livePreviewFrame || !config.preview_api || !ready || loadingProject) return;
+  const sequence = ++previewSequence;
+  const projectData = editor.getProjectData();
+  const scroll = {
+    x: livePreviewFrame.contentWindow?.scrollX || 0,
+    y: livePreviewFrame.contentWindow?.scrollY || 0,
+  };
+  if (previewStatus) previewStatus.textContent = 'Rendu du thème…';
+  try {
+    const response = await fetch(config.preview_api, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'X-SJD-CSRF': config.csrf },
+      body: JSON.stringify({
+        project: {
+          schema_version: config.project?.schema_version,
+          theme_id: config.project?.theme_id,
+          theme_version: config.project?.theme_version,
+          project_data: projectData,
+        },
+      }),
+    });
+    if (!response.ok) throw new Error(`Aperçu indisponible (${response.status})`);
+    const rendered = await response.text();
+    if (sequence !== previewSequence) return;
+    livePreviewFrame.onload = () => {
+      if (sequence !== previewSequence) return;
+      installPreviewInteractions();
+      livePreviewFrame.contentWindow?.scrollTo(scroll.x, scroll.y);
+      if (previewStatus) previewStatus.textContent = 'Aperçu fidèle au site';
+    };
+    livePreviewFrame.srcdoc = rendered;
+  } catch (error) {
+    if (sequence === previewSequence && previewStatus) previewStatus.textContent = error.message || 'Aperçu indisponible';
+  }
+}
+
+function scheduleLivePreview() {
+  if (!config.preview_api || !livePreviewFrame) return;
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(() => { void refreshLivePreview(); }, 250);
 }
 
 export const editor = grapesjs.init({
@@ -29,20 +118,21 @@ export const editor = grapesjs.init({
   traitManager: { appendTo: '#visual-traits' }, styleManager: { sectors: [] },
   selectorManager: { componentFirst: true },
   canvas: { styles: config.theme_styles || ['/assets/site.css'] },
-  plugins: [registerSujeeTheme],
+  plugins: [(instance) => registerSujeeTheme(instance, blockSchema)],
 });
 window.sjdVisualEditor = editor;
 window.sjdLoadVisualProject = (projectData) => {
   loadingProject = true;
   try {
     editor.loadProjectData(projectData);
-    prepareThemeProject(editor);
+    prepareThemeProject(editor, blockSchema);
     savedProjectSnapshot = JSON.stringify(editor.getProjectData());
     changed = false;
     clearTimeout(saveTimer);
   } finally {
     loadingProject = false;
   }
+  if (ready) scheduleLivePreview();
 };
 if (config.project?.project_data) window.sjdLoadVisualProject(config.project.project_data);
 
@@ -121,6 +211,58 @@ async function loadMediaLibrary() {
   mediaLoaded = true;
 }
 
+const mediaClient = {
+  async populate(select, currentPath, onSelect) {
+    try {
+      await loadMediaLibrary();
+    } catch {
+      select.replaceChildren();
+      const current = String(currentPath || '');
+      const option = document.createElement('option');
+      option.value = current;
+      option.textContent = current ? `Média actuel (${current}) · médiathèque indisponible` : 'Médiathèque indisponible';
+      select.append(option);
+      select.value = current;
+      select.disabled = !current;
+      return;
+    }
+    select.replaceChildren();
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = mediaItems.length ? 'Choisir une image…' : 'Aucune image disponible';
+    select.append(placeholder);
+    for (const item of mediaItems) {
+      const option = document.createElement('option');
+      option.value = `/${normaliseMediaPath(item.path)}`;
+      option.textContent = item.alt || item.filename || `Image ${item.id}`;
+      select.append(option);
+    }
+    const current = String(currentPath || '');
+    if (current && !mediaItems.some((item) => `/${normaliseMediaPath(item.path)}` === current)) {
+      const preserved = document.createElement('option');
+      preserved.value = current; preserved.textContent = `Média actuelle (${current})`;
+      select.append(preserved);
+    }
+    select.value = current;
+    select.addEventListener('change', () => onSelect(select.value));
+  },
+};
+
+const sectionPanelRoot = document.createElement('section');
+sectionPanelRoot.id = 'visual-section-panel';
+sectionPanelRoot.className = 'visual-section-panel';
+sectionPanelRoot.hidden = true;
+document.querySelector('#visual-traits')?.append(sectionPanelRoot);
+const sectionPanel = mountSectionPanel({ root: sectionPanelRoot, editor, blockSchema, mediaClient });
+window.sjdSectionPanel = sectionPanel;
+const pageUiRoot = document.createElement('div');
+pageUiRoot.className = 'visual-page-tools';
+document.querySelector('.visual-actions')?.prepend(pageUiRoot);
+const pageSettings = mountPageSettings({ root: pageUiRoot, page: config.page || {}, mediaClient });
+const revisionPanel = mountRevisionPanel({ root: pageUiRoot, pageId: config.page?.id, getDraftVersion: () => draftVersion });
+window.sjdPageSettings = pageSettings;
+window.sjdRevisionPanel = revisionPanel;
+
 mediaPicker.addEventListener('change', () => {
   const selected = editor.getSelected();
   const media = mediaItems.find((item) => String(item.id) === mediaPicker.value);
@@ -135,6 +277,7 @@ mediaPicker.addEventListener('change', () => {
 });
 
 editor.on('component:selected', async (component) => {
+  highlightPreviewSelection();
   const isImage = component?.get('type') === 'image'
     || component?.getAttributes?.()['data-sjd-field'] === 'src';
   mediaPanel.hidden = !isImage;
@@ -242,6 +385,7 @@ publishButton?.addEventListener('click', async () => {
 editor.on('load', () => {
   ready = true;
   document.documentElement.dataset.visualEditorReady = '1';
+  scheduleLivePreview();
 });
 editor.on('update', () => {
   if (!ready || loadingProject) return;
@@ -249,6 +393,7 @@ editor.on('update', () => {
   editRevision += 1;
   changed = true;
   setStatus('Modifications non enregistrées', 'pending');
+  scheduleLivePreview();
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => { void saveDraft(); }, 900);
 });

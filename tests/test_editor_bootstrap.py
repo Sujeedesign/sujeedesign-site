@@ -79,7 +79,7 @@ def test_edit_mode_injects_the_state_and_the_assets(client: TestClient, db_file:
     assert data["api"] == "/api/editor"
     assert data["page"]["id"] == page_id
     assert data["page"]["path"] == f"/{SLUG}"
-    assert len(data["blocks"]) == 19
+    assert len(data["blocks"]) == 20
     assert [section["type"] for section in data["sections"]] == ["chapter"]
     assert data["sections"][0]["id"] == section_id
     assert data["sections"][0]["draft_version"] == 0

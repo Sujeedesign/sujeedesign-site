@@ -346,7 +346,7 @@ def sections_rows(conn, page_id):
 
 
 def test_every_declared_block_type_can_be_added_to_a_page(store: Store, conn, page_id: int) -> None:
-    """Fix [C1/C2] : 4 types sur 19 refusaient toute creation (image, ctas)."""
+    """Fix [C1/C2] : plusieurs types historiques refusaient toute creation (image, ctas)."""
     for name in DEFAULT_BLOCKS:
         state = store.add_section(conn, page_id=page_id, type=name)
         assert state.id > 0, name

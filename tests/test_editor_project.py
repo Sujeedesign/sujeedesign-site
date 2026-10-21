@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import json
 
 import pytest
 
@@ -12,6 +13,8 @@ from sujee_editor.editor.project import (
     project_to_sections,
     sections_to_project,
 )
+from sujee_editor.blocks import DEFAULT_BLOCKS, default_data
+from editor_fixtures import sample_data
 
 
 def _field(tag: str, name: str, content: str = "") -> dict:
@@ -214,6 +217,8 @@ def test_project_to_sections_restores_fields_visibility_and_order():
         "src": "/medias/projet.webp",
         "alt": "Affiche de projet",
         "caption": "Une légende",
+        "section_background": "default",
+        "section_background_color": "#f2f2f4",
     }
     assert sections[2]["data"]["author"] == "Sujee"
 
@@ -222,6 +227,23 @@ def test_project_and_sections_round_trip_without_losing_theme_content():
     imported = sections_to_project(_source_sections())
 
     assert project_to_sections(imported) == project_to_sections(_three_section_project())
+
+
+def test_banniere_svg_survives_project_round_trip():
+    svg = '<svg viewBox="0 0 10 10"><path d="M0 0h10v10z"/></svg>'
+    source = [{
+        "id": 21,
+        "type": "banniere",
+        "variant": "",
+        "visible": True,
+        "position": 0,
+        "effective": {"svg": svg},
+    }]
+
+    result = project_to_sections(sections_to_project(source))
+
+    assert result[0]["data"]["svg"].startswith("<svg")
+    assert "M0 0h10v10z" in result[0]["data"]["svg"]
 
 
 def test_import_uses_effective_draft_content_and_sorts_by_position():
@@ -240,9 +262,9 @@ def test_import_uses_effective_draft_content_and_sorts_by_position():
 
 def test_import_rejects_a_page_with_any_unsupported_section():
     sections = _source_sections()
-    sections.append({"id": 10, "type": "faq", "position": 3, "visible": True, "effective": {}})
+    sections.append({"id": 10, "type": "not-a-block", "position": 3, "visible": True, "effective": {}})
 
-    with pytest.raises(ProjectError, match="faq"):
+    with pytest.raises(ProjectError, match="not-a-block"):
         sections_to_project(sections)
 
 
@@ -338,3 +360,218 @@ def test_input_objects_are_not_mutated():
     sections_to_project(source)
 
     assert source == before
+
+
+def _all_typed_sections() -> list[dict]:
+    sections = []
+    for position, block in enumerate(DEFAULT_BLOCKS.values()):
+        data = sample_data(block)
+        sections.append({
+            "id": position + 1,
+            "type": block.name,
+            "variant": data.get("_variant", ""),
+            "visible": position % 2 == 0,
+            "position": position,
+            "effective": data,
+        })
+    return sections
+
+
+def test_all_twenty_block_types_round_trip_without_data_loss():
+    source = _all_typed_sections()
+
+    result = project_to_sections(sections_to_project(source))
+
+    assert len(result) == 20
+    assert [item["type"] for item in result] == [item["type"] for item in source]
+    assert [item["id"] for item in result] == [item["id"] for item in source]
+    assert [item["position"] for item in result] == list(range(20))
+    assert [item["visible"] for item in result] == [item["visible"] for item in source]
+    assert [item["variant"] for item in result] == [item["variant"] for item in source]
+    assert [item["data"] for item in result] == [item["effective"] for item in source]
+
+
+def test_all_block_variants_round_trip_without_data_loss():
+    source = []
+    for position, block in enumerate(DEFAULT_BLOCKS.values()):
+        for variant in block.variants:
+            data = sample_data(block)
+            data["_variant"] = variant
+            source.append({
+                "id": len(source) + 1,
+                "type": block.name,
+                "variant": variant,
+                "visible": True,
+                "position": len(source),
+                "effective": data,
+            })
+
+    result = project_to_sections(sections_to_project(source))
+
+    assert [(item["type"], item["variant"], item["data"]) for item in result] == [
+        (item["type"], item["variant"], item["effective"]) for item in source
+    ]
+
+
+def test_section_background_mode_and_color_round_trip():
+    data = default_data(DEFAULT_BLOCKS["chapter"])
+    data.update(section_background="custom", section_background_color="#123456")
+    source = [{"id": 1, "type": "chapter", "position": 0, "effective": data}]
+
+    saved = project_to_sections(sections_to_project(source))[0]["data"]
+
+    assert saved["section_background"] == "custom"
+    assert saved["section_background_color"] == "#123456"
+
+
+def test_theme_v3_project_gains_default_background_fields_without_content_changes():
+    from sujee_editor.editor.project import migrate_project
+
+    project = _three_section_project()
+    project["theme_version"] = 3
+    components = project["project_data"]["pages"][0]["frames"][0]["component"]["components"]
+    for component in components:
+        raw_data = component["attributes"].get("data-sjd-data")
+        if raw_data:
+            data = json.loads(raw_data)
+            data.pop("section_background", None)
+            data.pop("section_background_color", None)
+            component["attributes"]["data-sjd-data"] = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+
+    migrated = migrate_project(project)
+    sections = project_to_sections(migrated)
+
+    assert migrated["theme_version"] == THEME_VERSION == 6
+    assert all(section["data"]["section_background"] == "default" for section in sections)
+    assert all(section["data"]["section_background_color"] == "#f2f2f4" for section in sections)
+
+
+@pytest.mark.parametrize("legacy_background", ["none", "paper", "obsidian", "accent", "image"])
+def test_theme_v3_zone_free_background_mode_survives_migration(legacy_background: str):
+    from sujee_editor.editor.project import migrate_project
+
+    data = default_data(DEFAULT_BLOCKS["zone-libre"])
+    data["background"] = legacy_background
+    if legacy_background == "image":
+        data["background_image"] = "/medias/legacy-background.webp"
+    project = sections_to_project([{"id": 1, "type": "zone-libre", "position": 0, "effective": data}])
+    project["theme_version"] = 3
+    components = project["project_data"]["pages"][0]["frames"][0]["component"]["components"]
+    component_data = json.loads(components[0]["attributes"]["data-sjd-data"])
+    component_data.pop("section_background_color", None)
+    components[0]["attributes"]["data-sjd-data"] = json.dumps(component_data, ensure_ascii=False, separators=(",", ":"))
+
+    migrated = migrate_project(project)
+    section = project_to_sections(migrated)[0]
+
+    assert section["data"]["background"] == legacy_background
+    assert section["data"]["section_background_color"] == "#f2f2f4"
+
+
+@pytest.mark.parametrize("legacy_background", ["none", "paper", "obsidian", "accent", "gradient", "custom", "image"])
+def test_theme_v4_zone_free_background_settings_survive_migration(legacy_background: str):
+    from sujee_editor.editor.project import migrate_project
+
+    data = default_data(DEFAULT_BLOCKS["zone-libre"])
+    data.update(background=legacy_background, section_background_color="#123456")
+    if legacy_background == "image":
+        data["background_image"] = "/medias/legacy-background.webp"
+    project = sections_to_project([{"id": 1, "type": "zone-libre", "position": 0, "effective": data}])
+    project["theme_version"] = 4
+    before = copy.deepcopy(project["project_data"])
+
+    migrated = migrate_project(project)
+    section = project_to_sections(migrated)[0]
+
+    assert migrated["theme_version"] == THEME_VERSION == 6
+    assert migrated["project_data"] == before
+    assert section["data"]["background"] == legacy_background
+    assert section["data"]["section_background_color"] == "#123456"
+
+
+def test_theme_v5_home_hero_animation_choice_survives_migration():
+    from sujee_editor.editor.project import migrate_project
+
+    data = default_data(DEFAULT_BLOCKS["zone-libre"])
+    data["background"] = "hero-gradient"
+    project = sections_to_project([{"id": 1, "type": "zone-libre", "position": 0, "effective": data}])
+    project["theme_version"] = 5
+    before = copy.deepcopy(project["project_data"])
+
+    migrated = migrate_project(project)
+    section = project_to_sections(migrated)[0]
+
+    assert migrated["theme_version"] == THEME_VERSION == 6
+    assert migrated["project_data"] == before
+    assert section["data"]["background"] == "hero-gradient"
+
+
+@pytest.mark.parametrize("legacy_version", [1, 2, 3, 4, 5])
+def test_migrate_legacy_theme_project_preserves_content_and_is_idempotent(legacy_version: int):
+    from sujee_editor.editor.project import migrate_project
+
+    project = _three_section_project()
+    project["theme_version"] = legacy_version
+    before = copy.deepcopy(project)
+
+    migrated = migrate_project(project)
+
+    assert project == before
+    assert migrated["theme_version"] == THEME_VERSION == 6
+    assert migrated["project_data"] == project["project_data"]
+    assert migrate_project(migrated) == migrated
+    assert [section["type"] for section in project_to_sections(migrated)] == [
+        "chapter", "image-pleine-largeur", "citation"
+    ]
+
+
+def test_invalid_theme_v1_project_raises_without_mutation():
+    from sujee_editor.editor.project import migrate_project
+
+    project = _three_section_project()
+    project["theme_version"] = 1
+    project["project_data"]["pages"][0]["frames"][0]["component"]["components"][0]["type"] = "arbitrary"
+    before = copy.deepcopy(project)
+
+    with pytest.raises(ProjectError):
+        migrate_project(project)
+
+    assert project == before
+
+
+def test_typed_rich_text_rejects_active_markup_and_sanitizes_attributes():
+    source = _all_typed_sections()
+    hero = next(section for section in source if section["type"] == "hero")
+    hero["effective"]["title"] = "<script>alert(1)</script>"
+
+    with pytest.raises(ProjectError, match="HTML rich non autorisé"):
+        sections_to_project(source)
+
+    hero["effective"]["title"] = '<em onclick="alert(1)">Titre</em>'
+    result = project_to_sections(sections_to_project(source))
+    saved_hero = next(section for section in result if section["type"] == "hero")
+    assert saved_hero["data"]["title"] == "<em>Titre</em>"
+
+
+def test_existing_small_tags_in_rich_text_survive_editor_round_trip():
+    source = _all_typed_sections()
+    text_section = next(section for section in source if section["type"] == "texte-riche")
+    text_section["effective"]["body"] = "<p>Projet publié — <small>6 octobre 2025</small></p>"
+
+    result = project_to_sections(sections_to_project(source))
+    saved = next(section for section in result if section["type"] == "texte-riche")
+
+    assert saved["data"]["body"] == text_section["effective"]["body"]
+
+
+def test_project_data_rejects_external_nested_image_urls():
+    source = _all_typed_sections()
+    project = sections_to_project(source)
+    components = project["project_data"]["pages"][0]["frames"][0]["component"]["components"]
+    gallery_component = next(item for item in components if item["attributes"]["data-sjd-section"] == "galerie")
+    data = json.loads(gallery_component["attributes"]["data-sjd-data"])
+    data["images"][0]["src"] = "https://evil.example/image.png"
+    gallery_component["attributes"]["data-sjd-data"] = json.dumps(data)
+
+    with pytest.raises(ProjectError, match="image hors des médias locaux autorisés"):
+        project_to_sections(project)

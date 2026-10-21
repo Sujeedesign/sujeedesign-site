@@ -16,6 +16,8 @@ import pytest
 from app import render as render_module
 from app import security
 from app.db import connect
+from editor_fixtures import sample_data
+from sujee_editor.blocks import DEFAULT_BLOCKS
 
 SLUG = "a-propos"
 PUBLIE = "Titre publié"
@@ -185,6 +187,64 @@ def test_the_edit_flag_is_advertised_to_the_template(client, db_file: Path) -> N
     assert 'data-edit-mode="1"' not in client.get(f"/{SLUG}?edit=1").text
 
 
+def test_published_all_types_render_through_jinja_without_draft_leak(client, db_file: Path) -> None:
+    slug = "tous-les-blocs"
+    cookies = admin_cookies()
+    conn = connect(db_file)
+    try:
+        page_id = int(conn.execute(
+            "INSERT INTO pages (slug, kind, title, status) VALUES (?, 'page', 'Tous les blocs', 'publie')",
+            (slug,),
+        ).lastrowid)
+        types = list(DEFAULT_BLOCKS)
+        section_ids = []
+        for position, (type_, block) in enumerate(DEFAULT_BLOCKS.items()):
+            cursor = conn.execute(
+                "INSERT INTO sections (page_id, position, type, label, visible, data) VALUES (?, ?, ?, ?, 1, ?)",
+                (page_id, position, type_, block.label, json.dumps(sample_data(block), ensure_ascii=False)),
+            )
+            section_ids.append(int(cursor.lastrowid))
+        conn.commit()
+    finally:
+        conn.close()
+
+    editor = client.get(f"/admin/pages/{page_id}", cookies=cookies)
+    assert editor.status_code == 200
+    config_match = re.search(r'<script id="visual-config" type="application/json">(.*?)</script>', editor.text, re.S)
+    assert config_match is not None
+    config = json.loads(config_match.group(1))
+    headers = {"X-SJD-CSRF": config["csrf"]}
+    api = f"/api/editor/pages/{page_id}/visual-project"
+    saved = client.put(
+        api, cookies=cookies, headers=headers,
+        json={"expected_version": config["draft_version"], "project": config["project"]},
+    )
+    assert saved.status_code == 200, saved.text
+    published = client.post(
+        f"{api}/publish", cookies=cookies, headers=headers,
+        json={"expected_version": saved.json()["draft_version"]},
+    )
+    assert published.status_code == 200, published.text
+
+    conn = connect(db_file)
+    try:
+        for section_id in section_ids:
+            conn.execute(
+                "UPDATE sections SET draft = ?, draft_version = draft_version + 1 WHERE id = ?",
+                (json.dumps({"title": "PRIVATE_DRAFT_DO_NOT_RENDER"}), section_id),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+
+    response = client.get(f"/{slug}")
+    assert response.status_code == 200
+    rendered_types = re.findall(r'data-block-type="([^"]+)"', response.text)
+    assert rendered_types == types
+    assert response.text.count('class="sjd-block"') == len(types)
+    assert "PRIVATE_DRAFT_DO_NOT_RENDER" not in response.text
+
+
 def test_every_visible_section_is_wrapped_and_hidden_ones_are_not(client, db_file: Path) -> None:
     seed_page(db_file)
     html = client.get(f"/{SLUG}").text
@@ -196,7 +256,7 @@ def test_every_visible_section_is_wrapped_and_hidden_ones_are_not(client, db_fil
     assert 'data-block-visible="1"' in html
 
 
-def test_envelope_only_adds_the_envelope(db_file: Path, conn) -> None:
+def test_envelope_only_adds_the_envelope(db_file: Path, conn):
     page_id, _ = seed_page(db_file)
     page = conn.execute("SELECT * FROM pages WHERE id = ?", (page_id,)).fetchone()
     sections = conn.execute("SELECT * FROM sections WHERE page_id = ? ORDER BY position", (page_id,)).fetchall()
@@ -207,6 +267,60 @@ def test_envelope_only_adds_the_envelope(db_file: Path, conn) -> None:
     assert wrapped != plain
     assert unwrap_envelopes(wrapped) == plain
     assert 'class="sjd-block"' in wrapped and 'class="sjd-block"' not in plain
+
+
+def test_free_zone_renders_theme_background_columns_and_content(client, db_file: Path) -> None:
+    page_id, _ = seed_page(db_file)
+    data = {
+        "background": "image",
+        "background_image": "/medias/fond-atelier.webp",
+        "width": "container",
+        "spacing": "compact",
+        "columns": [
+            {"span": "8", "align": "left", "elements": [{
+                "type": "heading", "text": "Une vraie composition", "level": "h2", "label": "", "href": "",
+                "role": "principal", "src": "", "alt": "", "items": [],
+            }]},
+            {"span": "4", "align": "center", "elements": []},
+        ],
+    }
+    conn = connect(db_file)
+    try:
+        conn.execute(
+            "INSERT INTO sections (page_id, position, type, label, data) VALUES (?, 3, 'zone-libre', 'Composition', ?)",
+            (page_id, json.dumps(data, ensure_ascii=False)),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+    response = client.get(f"/{SLUG}")
+    assert response.status_code == 200
+    assert 'class="zone-libre zone-libre--image zone-libre--spacing-compact"' in response.text
+    assert 'src="/medias/fond-atelier.webp"' in response.text
+    assert 'zone-libre__column--span-8' in response.text
+    assert 'Une vraie composition' in response.text
+    assert 'data-block-position="3"' in response.text
+
+
+def test_zone_free_url_filters_restrict_links_and_media_to_safe_values():
+    assert render_module.safe_href("/contact") == "/contact"
+    assert render_module.safe_href("https://example.com") == "https://example.com"
+    assert render_module.safe_href("javascript:alert(1)") == ""
+    assert render_module.safe_href("//example.com/track") == ""
+    assert render_module.safe_href("http://[::1") == ""
+    assert render_module.safe_media_path("/medias/fond.webp") == "/medias/fond.webp"
+    assert render_module.safe_media_path("https://example.com/fond.webp") == ""
+    assert render_module.safe_media_path("/medias/../secret.webp") == ""
+    assert render_module.safe_media_path("/medias/%2e%2e/secret.webp") == ""
+
+
+def test_zone_free_renderer_ignores_corrupt_nested_data():
+    section = {"id": 1, "type": "zone-libre", "data": {"background_image": "https://example.com/x.jpg", "columns": ["bad", {"span": "wide", "align": "evil", "elements": "bad"}]}}
+    rendered = render_module.section_html(render_module.build_env(), section)
+    assert "zone-libre__column--span-12" in rendered
+    assert "zone-libre__column--align-left" in rendered
+    assert "https://example.com/x.jpg" not in rendered
 
 
 def test_edit_mode_does_not_serve_a_cached_page(client, db_file: Path) -> None:

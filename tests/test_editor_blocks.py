@@ -17,14 +17,14 @@ LEGACY_FIELDS = {
 }
 
 
-def test_catalogue_has_the_nineteen_legacy_types():
+def test_catalogue_has_all_theme_types_in_section_order():
     assert list(DEFAULT_BLOCKS) == list(sections_module.SECTION_ORDER)
-    assert len(DEFAULT_BLOCKS) == 19
+    assert len(DEFAULT_BLOCKS) == 20
 
 
 @pytest.mark.parametrize("name", sorted(LEGACY_FIELDS))
 def test_field_order_is_preserved(name):
-    assert [f.name for f in DEFAULT_BLOCKS[name].fields] == LEGACY_FIELDS[name]
+    assert [f.name for f in DEFAULT_BLOCKS[name].fields][:len(LEGACY_FIELDS[name])] == LEGACY_FIELDS[name]
 
 
 def test_legacy_registry_shape_is_unchanged():
@@ -52,6 +52,15 @@ def test_form_type_maps_rich_line_to_html():
     assert Field("body", Kind.RICH, "Texte").form_type == "html"
     assert Field("ctas", Kind.CTAS, "Boutons").form_type == "items"
     assert Field("kicker", Kind.TEXT, "Sur-titre").form_type == "text"
+    assert Field("background", Kind.COLOR, "Couleur").form_type == "color"
+
+
+def test_section_background_fields_are_shared_across_theme_blocks():
+    for block in DEFAULT_BLOCKS.values():
+        names = {field.name for field in block.fields}
+        assert "section_background_color" in names
+        if block.name != "zone-libre":
+            assert "section_background" in names
 
 
 def test_inplace_defaults_by_kind():

@@ -11,6 +11,7 @@ import threading
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any, Iterable
+from urllib.parse import unquote, urlsplit
 
 from jinja2 import ChoiceLoader, Environment, FileSystemLoader, select_autoescape
 
@@ -46,6 +47,11 @@ SVG_ATTRS = {
 
 _cache: dict[str, tuple[str, str]] = {}
 _cache_lock = threading.Lock()
+_SECTION_BACKGROUND_MODES = {"paper", "obsidian", "accent", "gradient", "hero-gradient", "custom"}
+_COLOR_HEX = re.compile(r"#[0-9a-fA-F]{6}\Z")
+_ROOT_OPEN_TAG = re.compile(r"<(?P<tag>[A-Za-z][A-Za-z0-9:_-]*)(?P<attrs>[^<>]*)>")
+_CLASS_ATTRIBUTE = re.compile(r"(?P<prefix>\sclass\s*=\s*)(?P<quote>[\"'])(?P<value>.*?)(?P=quote)", re.IGNORECASE)
+_STYLE_ATTRIBUTE = re.compile(r"(?P<prefix>\sstyle\s*=\s*)(?P<quote>[\"'])(?P<value>.*?)(?P=quote)", re.IGNORECASE)
 
 
 class _Sanitizer(HTMLParser):
@@ -76,12 +82,9 @@ class _Sanitizer(HTMLParser):
         self.parts.append(f"<{tag}{suffix}>")
 
     def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        if self._dropped or tag not in self.allowed_tags:
-            return
-        if tag in VOID_TAGS:
-            self.parts.append(f"<{tag}>")
-        else:
-            self.parts.append(f"<{tag}></{tag}>")
+        self.handle_starttag(tag, attrs)
+        if tag not in VOID_TAGS:
+            self.handle_endtag(tag)
 
     def handle_endtag(self, tag: str) -> None:
         if self._dropped:
@@ -153,6 +156,44 @@ def inline_html(raw: Any) -> str:
     return sanitize_html(text)
 
 
+def safe_href(raw: Any) -> str:
+    """Lien utilisable dans une composition, limité aux schémas sûrs."""
+    value = str(raw or "").strip()
+    if not value:
+        return ""
+    if chr(92) in value:
+        return ""
+    try:
+        parsed = urlsplit(value)
+    except ValueError:
+        return ""
+    if parsed.scheme:
+        return value if parsed.scheme.lower() in {"http", "https", "mailto"} else ""
+    if parsed.netloc or value.startswith("//"):
+        return ""
+    return value
+
+
+def safe_media_path(raw: Any) -> str:
+    """Chemin d'image local uniquement, sans traversée de répertoire."""
+    value = str(raw or "").strip()
+    if not value:
+        return ""
+    try:
+        parsed = urlsplit(value)
+    except ValueError:
+        return ""
+    if parsed.scheme or parsed.netloc or chr(92) in value or value.startswith("//"):
+        return ""
+    path = parsed.path
+    decoded_path = unquote(path)
+    if chr(92) in decoded_path or any(part in {".", ".."} for part in decoded_path.split("/")):
+        return ""
+    if not decoded_path.startswith(("/assets/", "/medias/", "assets/", "medias/")):
+        return ""
+    return "/" + path.lstrip("/")
+
+
 def build_env(templates_dir: Path | None = None) -> Environment:
     """Environnement Jinja du site.
 
@@ -177,6 +218,8 @@ def build_env(templates_dir: Path | None = None) -> Environment:
     env.filters["inline"] = lambda value: _mark_safe(inline_html(value))
     env.filters["svg"] = lambda value: _mark_safe(sanitize_svg(value))
     env.filters["json_array"] = lambda value: _as_list(value)
+    env.filters["safe_href"] = safe_href
+    env.filters["safe_media"] = safe_media_path
     return env
 
 
@@ -255,9 +298,152 @@ def envelope_html(section: dict) -> str:
     return (
         f'<div class="sjd-block" data-block-id="{int(section.get("id") or 0)}"'
         f' data-block-type="{type_}" data-block-label="{label}"'
+        f' data-block-position="{int(section.get("position") or 0)}"'
         f' data-block-visible="{1 if section.get("visible") else 0}"'
         f' data-block-revised="{1 if section.get("revised") else 0}">'
     )
+
+
+def _contrast_foreground(color: str) -> str:
+    """Choisit entre noir et blanc selon le contraste WCAG du fond hexadécimal."""
+    channels = [int(color[index:index + 2], 16) / 255 for index in (1, 3, 5)]
+    linear = [channel / 12.92 if channel <= 0.04045 else ((channel + 0.055) / 1.055) ** 2.4 for channel in channels]
+    luminance = 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2]
+    black_contrast = (luminance + 0.05) / 0.05
+    white_contrast = 1.05 / (luminance + 0.05)
+    return "#000000" if black_contrast >= white_contrast else "#ffffff"
+
+
+class _DirectChildClassParser(HTMLParser):
+    """Collecte uniquement les classes des enfants directs du premier élément."""
+
+    _VOID_TAGS = {
+        "area", "base", "br", "col", "embed", "hr", "img", "input", "link",
+        "meta", "param", "source", "track", "wbr",
+    }
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.root_seen = False
+        self.stack: list[str] = []
+        self.classes: set[str] = set()
+
+    def _collect(self, attrs: list[tuple[str, str | None]]) -> None:
+        for name, value in attrs:
+            if name.lower() == "class" and value:
+                self.classes.update(value.split())
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if not self.root_seen:
+            self.root_seen = True
+            self.stack.append(tag.lower())
+            return
+        if len(self.stack) == 1:
+            self._collect(attrs)
+        if tag.lower() not in self._VOID_TAGS:
+            self.stack.append(tag.lower())
+
+    def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if not self.root_seen:
+            self.root_seen = True
+            self.stack.append(tag.lower())
+        elif len(self.stack) == 1:
+            self._collect(attrs)
+
+    def handle_endtag(self, tag: str) -> None:
+        tag = tag.lower()
+        for index in range(len(self.stack) - 1, -1, -1):
+            if self.stack[index] == tag:
+                del self.stack[index:]
+                return
+
+
+def _ensure_home_hero_layers(rendered: str) -> str:
+    """Ajoute les couches réutilisables du hero d’accueil sans doublonner le gabarit."""
+    root = _ROOT_OPEN_TAG.search(rendered)
+    if not root:
+        return rendered
+    root_attrs = root.group("attrs")
+    class_match = _CLASS_ATTRIBUTE.search(root_attrs)
+    root_classes = set(class_match.group("value").split()) if class_match else set()
+    parser = _DirectChildClassParser()
+    parser.feed(rendered)
+    parser.close()
+    present_classes = parser.classes
+    layers = (
+        ("hero-bg", '<div class="hero-bg" aria-hidden="true"></div>'),
+        ("hero-shader", '<canvas class="hero-shader" aria-hidden="true"></canvas>'),
+        ("hero-grain", '<div class="hero-grain" aria-hidden="true"></div>'),
+    )
+    additions = [markup for class_name, markup in layers if class_name not in present_classes]
+    if "hero" not in root_classes and "sjd-home-hero-veil" not in present_classes:
+        additions.append('<div class="sjd-home-hero-veil" aria-hidden="true"></div>')
+    if not additions:
+        return rendered
+    return _ROOT_OPEN_TAG.sub(lambda match: match.group(0) + "".join(additions), rendered, count=1)
+
+
+def _apply_section_background(rendered: str, section_type: str, data: dict) -> str:
+    """Applique une variante contrôlée au premier élément racine du gabarit.
+
+    Le projet ne fournit jamais de CSS : seules des classes prédéfinies et une
+    couleur hexadécimale strictement validée peuvent être émises ici.
+    """
+    if section_type == "zone-libre":
+        mode = data.get("background", "none")
+        if mode in {"none", "image"}:
+            return rendered
+    else:
+        mode = data.get("section_background", "default")
+    if mode not in _SECTION_BACKGROUND_MODES:
+        return rendered
+
+    style_declaration = ""
+    if mode == "custom":
+        color = data.get("section_background_color", "")
+        if not isinstance(color, str) or not _COLOR_HEX.fullmatch(color):
+            return rendered
+        style_declaration = (
+            f"--sjd-section-background:{color.lower()};"
+            f"--sjd-section-foreground:{_contrast_foreground(color)}"
+        )
+
+    class_name = f"sjd-section-background--{mode}"
+
+    def decorate(match: re.Match[str]) -> str:
+        tag = match.group("tag")
+        attrs = match.group("attrs")
+        class_match = _CLASS_ATTRIBUTE.search(attrs)
+        if class_match:
+            classes = class_match.group("value").split()
+            if class_name not in classes:
+                classes.append(class_name)
+            replacement = (
+                f"{class_match.group('prefix')}{class_match.group('quote')}"
+                f"{html_module.escape(' '.join(classes), quote=True)}{class_match.group('quote')}"
+            )
+            attrs = attrs[:class_match.start()] + replacement + attrs[class_match.end():]
+        else:
+            attrs += f' class="{class_name}"'
+
+        if style_declaration:
+            style_match = _STYLE_ATTRIBUTE.search(attrs)
+            if style_match:
+                existing = style_match.group("value").rstrip("; ")
+                value = f"{existing};{style_declaration}" if existing else style_declaration
+                replacement = (
+                    f"{style_match.group('prefix')}{style_match.group('quote')}"
+                    f"{html_module.escape(value, quote=True)}{style_match.group('quote')}"
+                )
+                attrs = attrs[:style_match.start()] + replacement + attrs[style_match.end():]
+            else:
+                attrs += f' style="{html_module.escape(style_declaration, quote=True)}"'
+        return f"<{tag}{attrs}>"
+
+    rendered = _ROOT_OPEN_TAG.sub(decorate, rendered, count=1)
+    if mode == "hero-gradient":
+        rendered = _ensure_home_hero_layers(rendered)
+    return rendered
 
 
 def _get(obj: Any, key: str, default: Any = "") -> Any:
@@ -282,6 +468,7 @@ def section_html(env: Environment, section: sqlite3.Row | dict, ctx: dict | None
     except Exception:  # gabarit absent : on n'empêche pas la page de s'afficher
         return ""
     rendered = template.render(s=normalized, **{k: v for k, v in context.items() if k != "s"})
+    rendered = _apply_section_background(rendered, normalized["type"], normalized["data"])
     if not envelopes:
         return rendered
     return envelope_html(normalized) + rendered + "</div>"
