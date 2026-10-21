@@ -458,6 +458,17 @@ def test_typed_rich_text_rejects_active_markup_and_sanitizes_attributes():
     assert saved_hero["data"]["title"] == "<em>Titre</em>"
 
 
+def test_existing_small_tags_in_rich_text_survive_editor_round_trip():
+    source = _all_typed_sections()
+    text_section = next(section for section in source if section["type"] == "texte-riche")
+    text_section["effective"]["body"] = "<p>Projet publié — <small>6 octobre 2025</small></p>"
+
+    result = project_to_sections(sections_to_project(source))
+    saved = next(section for section in result if section["type"] == "texte-riche")
+
+    assert saved["data"]["body"] == text_section["effective"]["body"]
+
+
 def test_project_data_rejects_external_nested_image_urls():
     source = _all_typed_sections()
     project = sections_to_project(source)

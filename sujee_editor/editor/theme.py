@@ -26,8 +26,13 @@ PILOT_SECTION_TYPES = SUPPORTED_SECTION_TYPES
 RICH_TEXT_CLASSES = frozenset(
     {"timeline", "reveal", "tl-yr", "tl-role", "tl-firme", "tl-desc"}
 )
+# Balises autorisées pour le rich text : reprend le sanitizer public. `div`
+# reste permis pour préserver les listes de parcours historiques.
 RICH_TEXT_TAGS = frozenset(
-    {"a", "b", "blockquote", "br", "div", "em", "h3", "i", "li", "ol", "p", "span", "strong", "ul"}
+    {
+        "a", "b", "blockquote", "br", "cite", "div", "em", "h2", "h3", "h4",
+        "i", "li", "mark", "ol", "p", "small", "span", "strong", "sub", "sup", "u", "ul",
+    }
 )
 
 __all__ = [
