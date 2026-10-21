@@ -728,3 +728,75 @@ test('selects a managed media asset for the image section', async ({ page }) => 
   await page.locator('#visual-blocks .gjs-block').filter({ hasText: 'Citation' }).click();
   await expect(page.frameLocator('iframe.gjs-frame').locator('[data-sjd-section="citation"]')).toHaveCount(1);
 });
+
+test('moves sections up and down in the saved order', async ({ page }) => {
+  await page.goto('/');
+  await page.waitForFunction(() => Boolean(window.sjdVisualEditor && document.documentElement.dataset.visualEditorReady));
+  await page.locator('#visual-blocks .gjs-block').filter({ hasText: 'Chapitre éditorial' }).click();
+  await page.locator('#visual-blocks .gjs-block').filter({ hasText: 'Citation' }).click();
+  const order = () => page.evaluate(() => window.sjdVisualEditor.getWrapper().components().models.map((model) => model.getAttributes()['data-sjd-section']));
+  await expect.poll(order).toEqual(['chapter', 'citation']);
+  await page.getByRole('button', { name: 'Monter cette section' }).click();
+  await expect.poll(order).toEqual(['citation', 'chapter']);
+  await page.getByRole('button', { name: 'Descendre cette section' }).click();
+  await expect.poll(order).toEqual(['chapter', 'citation']);
+  await expect.poll(() => calls.at(-1)?.project?.project_data?.pages?.[0]?.frames?.[0]?.component?.components?.map((component) => component.attributes['data-sjd-section'])).toEqual(['chapter', 'citation']);
+});
+
+test('edits internal and external section spacing with bounded pixel values', async ({ page }) => {
+  await page.goto('/');
+  await page.waitForFunction(() => Boolean(window.sjdVisualEditor && document.documentElement.dataset.visualEditorReady));
+  await page.locator('#visual-blocks .gjs-block').filter({ hasText: 'Chapitre éditorial' }).click();
+  const panel = page.locator('#visual-section-panel');
+  const paddingTop = panel.locator('[data-field-editor="padding_top"]');
+  const marginBottom = panel.locator('[data-field-editor="margin_bottom"]');
+  await expect(paddingTop).toHaveAttribute('min', '0');
+  await expect(paddingTop).toHaveAttribute('max', '240');
+  await paddingTop.fill('48');
+  await marginBottom.fill('32');
+  await expect.poll(() => page.evaluate(() => JSON.parse(window.sjdVisualEditor.getSelected().getAttributes()['data-sjd-data']))).toMatchObject({
+    padding_top: 48,
+    margin_bottom: 32,
+  });
+  await paddingTop.fill('241');
+  await expect(paddingTop).toHaveAttribute('aria-invalid', 'true');
+  await expect.poll(() => page.evaluate(() => JSON.parse(window.sjdVisualEditor.getSelected().getAttributes()['data-sjd-data']).padding_top)).toBe(48);
+  for (const invalidValue of ['-1', '24.5']) {
+    await paddingTop.fill(invalidValue);
+    await expect(paddingTop).toHaveAttribute('aria-invalid', 'true');
+    await expect.poll(() => page.evaluate(() => JSON.parse(window.sjdVisualEditor.getSelected().getAttributes()['data-sjd-data']).padding_top)).toBe(48);
+  }
+});
+
+test('adds and reorders multiple images in a vertical container inside a column', async ({ page }) => {
+  await page.route('**/api/editor/media', (route) => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ medias: [
+      { id: 71, path: 'medias/first.webp', alt: 'Première', mime: 'image/webp' },
+      { id: 72, path: 'medias/second.webp', alt: 'Deuxième', mime: 'image/webp' },
+    ] }),
+  }));
+  await page.goto('/');
+  await page.waitForFunction(() => Boolean(window.sjdVisualEditor && document.documentElement.dataset.visualEditorReady));
+  await page.locator('#visual-blocks .gjs-block').filter({ hasText: 'Section à composer' }).click();
+  const panel = page.locator('#visual-section-panel');
+  await panel.locator('[data-repeat-path="columns.0.elements"] + .section-repeat-add').click();
+  await panel.locator('[data-field-editor="columns.0.elements.0.type"]').selectOption('image-stack');
+  const addImage = panel.locator('[data-repeat-path="columns.0.elements.0.images"] + .section-repeat-add');
+  await addImage.click();
+  await panel.locator('[data-field-editor="columns.0.elements.0.images.0.src"]').selectOption('/medias/first.webp');
+  await panel.locator('[data-field-editor="columns.0.elements.0.images.0.alt"]').fill('Première');
+  await addImage.click();
+  await panel.locator('[data-field-editor="columns.0.elements.0.images.1.src"]').selectOption('/medias/second.webp');
+  await panel.locator('[data-field-editor="columns.0.elements.0.images.1.alt"]').fill('Deuxième');
+  await panel.getByRole('button', { name: 'Monter Images empilées 2' }).click();
+  const imageStack = await page.evaluate(() => JSON.parse(window.sjdVisualEditor.getSelected().getAttributes()['data-sjd-data']).columns[0].elements[0]);
+  expect(imageStack.type).toBe('image-stack');
+  expect(imageStack.images.map((image) => image.src)).toEqual(['/medias/second.webp', '/medias/first.webp']);
+  await expect.poll(() => {
+    const components = calls.at(-1)?.project?.project_data?.pages?.[0]?.frames?.[0]?.component?.components || [];
+    const savedData = components.map((component) => JSON.parse(component.attributes['data-sjd-data'] || '{}'));
+    return savedData.flatMap((data) => data.columns || []).flatMap((column) => column.elements || [])
+      .find((item) => item.type === 'image-stack')?.images?.map((image) => image.src);
+  }).toEqual(['/medias/second.webp', '/medias/first.webp']);
+});

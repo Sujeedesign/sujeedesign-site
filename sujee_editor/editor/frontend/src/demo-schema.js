@@ -9,6 +9,9 @@ const sectionBackgroundFields = [
   f('section_background', 'choice', 'Arrière-plan', { choices: ['default', 'paper', 'obsidian', 'accent', 'gradient', 'hero-gradient', 'custom'], default: 'default' }),
   f('section_background_color', 'color', 'Couleur personnalisée', { default: '#f2f2f4' }),
 ];
+const sectionSpacingFields = ['padding', 'margin'].flatMap((property) =>
+  ['top', 'right', 'bottom', 'left'].map((side) => f(`${property}_${side}`, 'number', `Marge ${property === 'padding' ? 'interne' : 'externe'} · ${({ top: 'haut', right: 'droite', bottom: 'bas', left: 'gauche' })[side]} (px)`, { default: null })),
+);
 
 export const DEMO_BLOCKS = Object.fromEntries([
   ['hero', "Bandeau d'ouverture", [t('kicker'), f('title', 'html-line', 'Titre'), a('intro'), l('meta'), l('rotator'), image('cover'), t('cover_alt'), image('image'), t('image_alt'), f('image_width', 'number'), f('image_height', 'number'), t('back_label'), t('back_href'), f('dense', 'bool'), f('wide_title', 'bool'), item('ctas', 'ctas', ctaFields, 'Boutons', { default: [{ label: 'Découvrir', href: '/services', style: 'pill' }] }), f('shader', 'bool')], { accueil: 'Accueil', page: 'Page interne', simple: 'Page simple', projet: 'Réalisation' }],
@@ -40,12 +43,14 @@ export const DEMO_BLOCKS = Object.fromEntries([
       f('span', 'choice', 'Largeur de colonne', { choices: ['2', '3', '4', '5', '6', '7', '8', '9', '10', '12'], default: '6' }),
       f('align', 'choice', 'Alignement', { choices: ['left', 'center', 'right'], default: 'left' }),
       item('elements', 'items', [
-        f('type', 'choice', 'Type', { choices: ['heading', 'text', 'button', 'image', 'list', 'divider'], default: 'heading' }),
+        f('type', 'choice', 'Type', { choices: ['heading', 'text', 'button', 'image', 'image-stack', 'list', 'divider'], default: 'heading' }),
         f('text', 'html', 'Texte', { max_length: 4000 }),
         f('level', 'choice', 'Niveau du titre', { choices: ['h2', 'h3', 'h4'], default: 'h2' }),
         t('label', 'Libellé du bouton'), t('href', 'Lien du bouton'),
         f('role', 'choice', 'Style du bouton', { choices: ['principal', 'secondaire', 'lien'], default: 'principal' }),
-        image('src', 'Image'), t('alt', 'Texte alternatif'), l('items', 'Éléments de la liste'),
+        image('src', 'Image'), t('alt', 'Texte alternatif'),
+        item('images', 'images', [image('src', 'Fichier'), t('alt', 'Texte alternatif')], 'Images empilées', { max_items: 12 }),
+        l('items', 'Éléments de la liste'),
       ], 'Éléments', { max_items: 8 }),
     ], 'Colonnes', { max_items: 3, default: [
       { span: '6', align: 'left', elements: [] }, { span: '6', align: 'left', elements: [] },
@@ -56,5 +61,5 @@ export const DEMO_BLOCKS = Object.fromEntries([
   label,
   variants,
   repeatable: true,
-  fields: [...fields, ...(name === 'zone-libre' ? [] : sectionBackgroundFields)],
+  fields: [...fields, ...(name === 'zone-libre' ? [] : sectionBackgroundFields), ...sectionSpacingFields],
 }]));

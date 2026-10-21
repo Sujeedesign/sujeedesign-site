@@ -576,7 +576,7 @@ def migrate_project(project: Mapping[str, Any]) -> dict[str, Any]:
     if not isinstance(project, Mapping):
         raise ProjectError("projet invalide")
     version = project.get("theme_version")
-    if version not in {1, 2, 3, 4, 5, THEME_VERSION}:
+    if version not in {1, 2, 3, 4, 5, 6, THEME_VERSION}:
         raise ProjectError("version de thème non prise en charge")
     candidate = copy.deepcopy(dict(project))
     candidate["theme_version"] = THEME_VERSION

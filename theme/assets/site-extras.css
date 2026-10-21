@@ -505,6 +505,8 @@ figcaption:empty {
 .zone-libre__heading:is(h4) { font-size: var(--fs-body); line-height: var(--lh-body); font-weight: 600; }
 .zone-libre__text { margin-bottom: var(--spacing-24); }
 .zone-libre__image { margin: 0 0 var(--spacing-24); }
+.zone-libre__image-stack { display: flex; flex-direction: column; gap: var(--spacing-24); }
+.zone-libre__image-stack .zone-libre__image { margin: 0; }
 .zone-libre__image img { display: block; width: 100%; height: auto; object-fit: cover; }
 .zone-libre__list { display: grid; gap: var(--spacing-12); margin: 0 0 var(--spacing-24); padding-inline-start: 1.25em; }
 .zone-libre__divider { width: 100%; margin-block: var(--spacing-24); border: 0; border-top: 1px solid currentColor; opacity: .35; }

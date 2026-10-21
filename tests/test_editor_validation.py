@@ -265,3 +265,18 @@ def test_free_zone_rejects_backslashes_in_links_and_media_paths():
     assert any(error.rule == "unsafe_href" for error in validate_data(zone, data))
     data["columns"][0]["elements"][0]["href"] = "http://[::1"
     assert any(error.rule == "unsafe_href" for error in validate_data(zone, data))
+
+
+def test_free_zone_accepts_an_ordered_image_stack_and_rejects_remote_images():
+    zone = DEFAULT_BLOCKS["zone-libre"]
+    data = default_data(zone)
+    data["columns"][0]["elements"] = [{
+        "type": "image-stack",
+        "images": [
+            {"src": "/medias/one.webp", "alt": "Première"},
+            {"src": "/assets/two.png", "alt": "Deuxième"},
+        ],
+    }]
+    assert validate_data(zone, data) == []
+    data["columns"][0]["elements"][0]["images"][1]["src"] = "https://evil.test/image.webp"
+    assert any(error.rule == "unsafe_media" for error in validate_data(zone, data))

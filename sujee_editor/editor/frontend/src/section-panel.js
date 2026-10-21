@@ -123,7 +123,7 @@ export function mountSectionPanel({ root, editor, blockSchema, mediaClient }) {
         const legend = element('legend', {}, `${field.label || field.name} ${index + 1}`);
         card.append(legend);
         const elementFields = schema?.name === 'zone-libre' && field.name === 'elements'
-          ? new Set(({ heading: ['type', 'text', 'level'], text: ['type', 'text'], button: ['type', 'label', 'href', 'role'], image: ['type', 'src', 'alt'], list: ['type', 'items'], divider: ['type'] })[itemValue?.type] || ['type'])
+          ? new Set(({ heading: ['type', 'text', 'level'], text: ['type', 'text'], button: ['type', 'label', 'href', 'role'], image: ['type', 'src', 'alt'], 'image-stack': ['type', 'images'], list: ['type', 'items'], divider: ['type'] })[itemValue?.type] || ['type'])
           : null;
         for (const sub of field.fields || []) {
           if (!elementFields || elementFields.has(sub.name)) card.append(addControl(sub, `${path}.${index}.${sub.name}`, itemValue?.[sub.name] ?? fieldDefault(sub)));
@@ -183,8 +183,23 @@ export function mountSectionPanel({ root, editor, blockSchema, mediaClient }) {
       });
     } else if (field.kind === 'number') {
       control = element('input', { type: 'number', id, 'data-field-editor': path });
-      control.value = Number.isFinite(Number(value)) ? String(value) : '';
-      control.addEventListener('input', () => commit(path, control.value === '' ? 0 : Number(control.value)));
+      const isSpacing = /^(padding|margin)_(top|right|bottom|left)$/.test(field.name);
+      if (isSpacing) {
+        control.min = '0'; control.max = '240'; control.step = '1';
+      }
+      control.value = value == null || !Number.isFinite(Number(value)) ? '' : String(value);
+      control.addEventListener('input', () => {
+        const nextValue = control.value === '' ? null : Number(control.value);
+        const invalidSpacing = isSpacing && nextValue !== null
+          && (!Number.isInteger(nextValue) || nextValue < 0 || nextValue > 240);
+        control.setCustomValidity(invalidSpacing ? 'Saisissez un nombre entier entre 0 et 240 px.' : '');
+        if (invalidSpacing) {
+          control.setAttribute('aria-invalid', 'true');
+          return;
+        }
+        control.removeAttribute('aria-invalid');
+        commit(path, nextValue === null ? (isSpacing ? null : 0) : nextValue);
+      });
     } else if (field.kind === 'color') {
       control = element('input', { type: 'color', id, 'data-field-editor': path });
       const color = String(value || '#f2f2f4');
@@ -236,6 +251,29 @@ export function mountSectionPanel({ root, editor, blockSchema, mediaClient }) {
     panel.hidden = false;
     panel.dataset.changed = 'false';
     panel.append(element('h2', { class: 'section-panel-title' }, schema.label));
+    const wrapper = editor.getWrapper();
+    const siblings = wrapper.components();
+    const position = siblings.indexOf(component);
+    const order = element('div', { class: 'section-order-controls', role: 'group', 'aria-label': 'Ordre des sections' });
+    const move = (offset, label, text) => {
+      const button = element('button', { type: 'button', 'aria-label': label }, text);
+      button.disabled = position < 0 || position + offset < 0 || position + offset >= siblings.length;
+      button.addEventListener('click', () => {
+        const from = siblings.indexOf(component);
+        const to = from + offset;
+        if (from < 0 || to < 0 || to >= siblings.length) return;
+        const models = siblings.models.slice();
+        const [current] = models.splice(from, 1);
+        models.splice(to, 0, current);
+        siblings.reset(models);
+        editor.select(component);
+        editor.trigger('update');
+        refresh();
+      });
+      return button;
+    };
+    order.append(move(-1, 'Monter cette section', '↑ Monter'), move(1, 'Descendre cette section', '↓ Descendre'));
+    panel.append(order);
     const data = readData(component, schema);
     const variants = Object.entries(schema.variants || {});
     if (variants.length) {

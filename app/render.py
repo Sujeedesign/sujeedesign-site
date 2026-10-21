@@ -446,6 +446,36 @@ def _apply_section_background(rendered: str, section_type: str, data: dict) -> s
     return rendered
 
 
+def _apply_section_spacing(rendered: str, data: dict) -> str:
+    """Applique uniquement les valeurs numériques de marges prévues au schéma."""
+    declarations = []
+    for property_name in ("padding", "margin"):
+        for side in ("top", "right", "bottom", "left"):
+            value = data.get(f"{property_name}_{side}")
+            if isinstance(value, int) and not isinstance(value, bool) and 0 <= value <= 240:
+                declarations.append(f"{property_name}-{side}:{value}px")
+    if not declarations:
+        return rendered
+    spacing = ";".join(declarations)
+
+    def decorate(match: re.Match[str]) -> str:
+        attrs = match.group("attrs")
+        style_match = _STYLE_ATTRIBUTE.search(attrs)
+        if style_match:
+            existing = style_match.group("value").rstrip("; ")
+            value = f"{existing};{spacing}" if existing else spacing
+            replacement = (
+                f"{style_match.group('prefix')}{style_match.group('quote')}"
+                f"{html_module.escape(value, quote=True)}{style_match.group('quote')}"
+            )
+            attrs = attrs[:style_match.start()] + replacement + attrs[style_match.end():]
+        else:
+            attrs += f' style="{html_module.escape(spacing, quote=True)}"'
+        return f"<{match.group('tag')}{attrs}>"
+
+    return _ROOT_OPEN_TAG.sub(decorate, rendered, count=1)
+
+
 def _get(obj: Any, key: str, default: Any = "") -> Any:
     if isinstance(obj, dict):
         return obj.get(key, default)
@@ -469,6 +499,7 @@ def section_html(env: Environment, section: sqlite3.Row | dict, ctx: dict | None
         return ""
     rendered = template.render(s=normalized, **{k: v for k, v in context.items() if k != "s"})
     rendered = _apply_section_background(rendered, normalized["type"], normalized["data"])
+    rendered = _apply_section_spacing(rendered, normalized["data"])
     if not envelopes:
         return rendered
     return envelope_html(normalized) + rendered + "</div>"

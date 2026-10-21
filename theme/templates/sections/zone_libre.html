@@ -41,6 +41,16 @@
             {% elif kind == 'image' %}
               {% set src = item.get('src', '')|safe_media %}
               {% if src %}<figure class="zone-libre__image"><img src="{{ src }}" alt="{{ item.get('alt', '') }}" loading="lazy"></figure>{% endif %}
+            {% elif kind == 'image-stack' %}
+              {% set images = item.get('images', []) %}
+              {% if images is sequence and images is not string %}
+              <div class="zone-libre__image-stack">
+                {% for image in images if image is mapping %}
+                  {% set src = image.get('src', '')|safe_media %}
+                  {% if src %}<figure class="zone-libre__image"><img src="{{ src }}" alt="{{ image.get('alt', '') }}" loading="lazy"></figure>{% endif %}
+                {% endfor %}
+              </div>
+              {% endif %}
             {% elif kind == 'list' %}
               {% set entries = item.get('items', []) %}
               {% if entries is sequence and entries is not string and entries %}<ul class="zone-libre__list">{% for entry in entries %}<li>{{ entry }}</li>{% endfor %}</ul>{% endif %}

@@ -219,6 +219,14 @@ def test_project_to_sections_restores_fields_visibility_and_order():
         "caption": "Une légende",
         "section_background": "default",
         "section_background_color": "#f2f2f4",
+        "padding_top": None,
+        "padding_right": None,
+        "padding_bottom": None,
+        "padding_left": None,
+        "margin_top": None,
+        "margin_right": None,
+        "margin_bottom": None,
+        "margin_left": None,
     }
     assert sections[2]["data"]["author"] == "Sujee"
 
@@ -441,7 +449,7 @@ def test_theme_v3_project_gains_default_background_fields_without_content_change
     migrated = migrate_project(project)
     sections = project_to_sections(migrated)
 
-    assert migrated["theme_version"] == THEME_VERSION == 6
+    assert migrated["theme_version"] == THEME_VERSION == 7
     assert all(section["data"]["section_background"] == "default" for section in sections)
     assert all(section["data"]["section_background_color"] == "#f2f2f4" for section in sections)
 
@@ -483,7 +491,7 @@ def test_theme_v4_zone_free_background_settings_survive_migration(legacy_backgro
     migrated = migrate_project(project)
     section = project_to_sections(migrated)[0]
 
-    assert migrated["theme_version"] == THEME_VERSION == 6
+    assert migrated["theme_version"] == THEME_VERSION == 7
     assert migrated["project_data"] == before
     assert section["data"]["background"] == legacy_background
     assert section["data"]["section_background_color"] == "#123456"
@@ -501,7 +509,7 @@ def test_theme_v5_home_hero_animation_choice_survives_migration():
     migrated = migrate_project(project)
     section = project_to_sections(migrated)[0]
 
-    assert migrated["theme_version"] == THEME_VERSION == 6
+    assert migrated["theme_version"] == THEME_VERSION == 7
     assert migrated["project_data"] == before
     assert section["data"]["background"] == "hero-gradient"
 
@@ -517,7 +525,7 @@ def test_migrate_legacy_theme_project_preserves_content_and_is_idempotent(legacy
     migrated = migrate_project(project)
 
     assert project == before
-    assert migrated["theme_version"] == THEME_VERSION == 6
+    assert migrated["theme_version"] == THEME_VERSION == 7
     assert migrated["project_data"] == project["project_data"]
     assert migrate_project(migrated) == migrated
     assert [section["type"] for section in project_to_sections(migrated)] == [

@@ -17,6 +17,11 @@ from .types import Block, Field, Kind
 
 TEXT_KINDS = (Kind.TEXT, Kind.TEXTAREA, Kind.RICH, Kind.RICH_LINE)
 ITEM_KINDS = (Kind.ITEMS, Kind.IMAGES, Kind.CTAS)
+SECTION_SPACING_FIELDS = frozenset({
+    f"{property_name}_{side}"
+    for property_name in ("padding", "margin")
+    for side in ("top", "right", "bottom", "left")
+})
 
 
 @dataclass(frozen=True)
@@ -103,8 +108,12 @@ def _errors_for(field: Field, value: Any, path: str) -> list[ValidationError]:
             return [ValidationError(path, "max_length", str(field.max_length))]
         return []
     if kind is Kind.NUMBER:
+        if field.name in SECTION_SPACING_FIELDS and value is None:
+            return []
         if isinstance(value, bool) or not isinstance(value, (int, float)):
             return [ValidationError(path, "not_a_number", "")]
+        if field.name in SECTION_SPACING_FIELDS and (not isinstance(value, int) or not 0 <= value <= 240):
+            return [ValidationError(path, "spacing_range", "0 à 240 pixels")]
         return []
     if kind is Kind.BOOL:
         if isinstance(value, bool) or (isinstance(value, int) and value in (0, 1)):
@@ -215,6 +224,13 @@ def _free_zone_errors(data: dict[str, Any]) -> list[ValidationError]:
                         errors.append(ValidationError("columns", "unsafe_href", path))
                 if element.get("type") == "image" and not _safe_local_image(element.get("src", "")):
                     errors.append(ValidationError("columns", "unsafe_media", path))
+                if element.get("type") == "image-stack":
+                    images = element.get("images", [])
+                    if isinstance(images, list) and any(
+                        isinstance(image, dict) and not _safe_local_image(image.get("src", ""))
+                        for image in images
+                    ):
+                        errors.append(ValidationError("columns", "unsafe_media", path))
         if len(spans) == len(columns) and (any(span < 2 for span in spans) or sum(spans) != 12):
             errors.append(ValidationError("columns", "bad_layout", "les largeurs doivent totaliser 12"))
     background_image = data.get("background_image", "")

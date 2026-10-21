@@ -26,6 +26,11 @@ SECTION_BACKGROUND = Field(
 SECTION_BACKGROUND_COLOR = Field(
     "section_background_color", COLOR, "Couleur personnalisée", default="#f2f2f4", inplace=False
 )
+SECTION_SPACING_FIELDS = tuple(
+    Field(f"{property_name}_{side}", NUMBER, f"Marge {group} · {label} (px)", default=None, inplace=False)
+    for group, property_name in (("interne", "padding"), ("externe", "margin"))
+    for side, label in (("top", "haut"), ("right", "droite"), ("bottom", "bas"), ("left", "gauche"))
+)
 
 CTA_ITEM = Field(
     "ctas",
@@ -53,6 +58,7 @@ def _blocks() -> dict[str, Block]:
     def add(name: str, label: str, fields: tuple[Field, ...], variants: dict[str, str] | None = None) -> None:
         if name != "zone-libre":
             fields = (*fields, SECTION_BACKGROUND, SECTION_BACKGROUND_COLOR)
+        fields = (*fields, *SECTION_SPACING_FIELDS)
         catalogue[name] = Block(
             name=name,
             label=label,
@@ -363,7 +369,7 @@ def _blocks() -> dict[str, Block]:
                         "Éléments",
                         max_items=8,
                         fields=(
-                            Field("type", CHOICE, "Type", choices=("heading", "text", "button", "image", "list", "divider"), default="heading"),
+                            Field("type", CHOICE, "Type", choices=("heading", "text", "button", "image", "image-stack", "list", "divider"), default="heading"),
                             Field("text", RICH, "Texte", max_length=4000),
                             Field("level", CHOICE, "Niveau du titre", choices=("h2", "h3", "h4"), default="h2"),
                             Field("label", TEXT, "Libellé du bouton", max_length=100),
@@ -371,6 +377,10 @@ def _blocks() -> dict[str, Block]:
                             Field("role", CHOICE, "Style du bouton", choices=("principal", "secondaire", "lien"), default="principal"),
                             Field("src", IMAGE, "Image", inplace=False),
                             Field("alt", TEXT, "Texte alternatif", max_length=160, inplace=False),
+                            Field("images", IMAGES, "Images empilées", max_items=12, inplace=False, fields=(
+                                Field("src", IMAGE, "Fichier", inplace=False),
+                                Field("alt", TEXT, "Texte alternatif", max_length=160, inplace=False),
+                            )),
                             Field("items", LINES, "Éléments de la liste"),
                         ),
                     ),
