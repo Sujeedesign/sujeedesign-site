@@ -71,11 +71,14 @@ button, a { font: inherit; }
 .section-repeat-actions { display: flex; gap: 6px; }
 .section-repeat-actions button, .section-repeat-add { min-height: 32px; padding: 5px 9px; border: 1px solid #d9d7d2; border-radius: 6px; background: #fff; color: #222; cursor: pointer; }
 .section-repeat-actions button:disabled, .section-repeat-add:disabled { opacity: .5; cursor: not-allowed; }
+.section-panel-delete { min-height: 38px; margin-top: 8px; padding: 7px 10px; border: 1px solid #d9a7a2; border-radius: 7px; background: #fff8f7; color: #a4261d; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.section-panel-delete:hover { border-color: #a4261d; background: #fff0ee; }
+.section-panel-delete:focus-visible { outline: 2px solid #a4261d; outline-offset: 2px; }
 .sjd-editor-preview { display: grid; gap: 8px; min-height: 120px; align-content: center; padding: 24px; border: 1px dashed #aaa; border-radius: 8px; background: rgba(255,255,255,.78); text-align: center; }
 .sjd-editor-preview-title { font-size: 18px; }
 .sjd-editor-preview p { margin: 0; color: #666; font-size: 12px; }
-@media (max-width: 900px) { .visual-section-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); } .section-panel-title, .section-repeat-list, .section-repeat-add, .section-variant { grid-column: 1 / -1; } }
-@media (max-width: 520px) { .visual-section-panel { grid-template-columns: 1fr; } .section-panel-title, .section-repeat-list, .section-repeat-add, .section-variant { grid-column: 1; } }
+@media (max-width: 900px) { .visual-section-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); } .section-panel-title, .section-repeat-list, .section-repeat-add, .section-variant, .section-panel-delete { grid-column: 1 / -1; } }
+@media (max-width: 520px) { .visual-section-panel { grid-template-columns: 1fr; } .section-panel-title, .section-repeat-list, .section-repeat-add, .section-variant, .section-panel-delete { grid-column: 1; } }
 @media (max-width: 900px) {
   .visual-layout { grid-template-columns: 160px minmax(0, 1fr); grid-template-rows: minmax(280px, 1fr) 215px; }
   #visual-blocks { grid-column: 1; grid-row: 1; }

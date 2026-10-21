@@ -62,6 +62,29 @@ test('renders the server preview and selects the corresponding section', async (
   await expect.poll(() => page.evaluate(() => window.sjdVisualEditor.getSelected()?.getAttributes()['data-sjd-section'])).toBe('chapter');
 });
 
+test('deletes the selected section only after confirmation and saves the draft', async ({ page }) => {
+  await page.goto('/');
+  await page.waitForFunction(() => Boolean(window.sjdVisualEditor && document.documentElement.dataset.visualEditorReady));
+  const before = await page.evaluate(() => window.sjdVisualEditor.getWrapper().components().length);
+  await page.locator('#visual-blocks .gjs-block').filter({ hasText: 'Chapitre éditorial' }).click();
+  const afterAdd = await page.evaluate(() => window.sjdVisualEditor.getWrapper().components().length);
+  expect(afterAdd).toBe(before + 1);
+
+  const preview = page.frameLocator('#visual-live-preview');
+  await preview.locator(`.sjd-block[data-block-position="${afterAdd - 1}"]`).click();
+  const remove = page.getByRole('button', { name: 'Supprimer cette section' });
+  await expect(remove).toBeVisible();
+  page.once('dialog', (dialog) => dialog.dismiss());
+  await remove.click();
+  await expect.poll(() => page.evaluate(() => window.sjdVisualEditor.getWrapper().components().length)).toBe(afterAdd);
+
+  page.once('dialog', (dialog) => dialog.accept());
+  await remove.click();
+  await expect.poll(() => page.evaluate(() => window.sjdVisualEditor.getWrapper().components().length)).toBe(before);
+  await expect(page.locator('#visual-status')).toHaveText('Brouillon enregistré', { timeout: 5000 });
+  await expect.poll(() => calls.at(-1)?.project?.project_data?.pages?.[0]?.frames?.[0]?.component?.components?.length ?? 0).toBe(before);
+});
+
 test('composes a section with bounded columns, theme colors and a local background image', async ({ page }) => {
   await page.route('**/api/editor/media', (route) => route.fulfill({
     status: 200, contentType: 'application/json',

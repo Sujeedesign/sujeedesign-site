@@ -234,6 +234,22 @@ export function mountSectionPanel({ root, editor, blockSchema, mediaClient }) {
       panel.append(group);
     }
     for (const field of schema.fields || []) panel.append(addControl(field, field.name, data[field.name] ?? fieldDefault(field)));
+    const remove = element('button', {
+      type: 'button',
+      class: 'section-panel-delete',
+      'data-section-delete': '',
+      'aria-label': 'Supprimer cette section',
+    }, 'Supprimer cette section');
+    remove.addEventListener('click', () => {
+      const target = selected;
+      if (!target || !schema) return;
+      const label = schema.label || 'section';
+      if (!window.confirm(`Supprimer « ${label} » du brouillon ? La page publique ne changera qu’après publication.`)) return;
+      selected = null;
+      target.remove();
+      refresh();
+    });
+    panel.append(remove);
   }
 
   editor.on('component:selected', (component) => {
