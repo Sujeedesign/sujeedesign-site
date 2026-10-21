@@ -314,6 +314,75 @@ def _contrast_foreground(color: str) -> str:
     return "#000000" if black_contrast >= white_contrast else "#ffffff"
 
 
+class _DirectChildClassParser(HTMLParser):
+    """Collecte uniquement les classes des enfants directs du premier élément."""
+
+    _VOID_TAGS = {
+        "area", "base", "br", "col", "embed", "hr", "img", "input", "link",
+        "meta", "param", "source", "track", "wbr",
+    }
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.root_seen = False
+        self.stack: list[str] = []
+        self.classes: set[str] = set()
+
+    def _collect(self, attrs: list[tuple[str, str | None]]) -> None:
+        for name, value in attrs:
+            if name.lower() == "class" and value:
+                self.classes.update(value.split())
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if not self.root_seen:
+            self.root_seen = True
+            self.stack.append(tag.lower())
+            return
+        if len(self.stack) == 1:
+            self._collect(attrs)
+        if tag.lower() not in self._VOID_TAGS:
+            self.stack.append(tag.lower())
+
+    def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if not self.root_seen:
+            self.root_seen = True
+            self.stack.append(tag.lower())
+        elif len(self.stack) == 1:
+            self._collect(attrs)
+
+    def handle_endtag(self, tag: str) -> None:
+        tag = tag.lower()
+        for index in range(len(self.stack) - 1, -1, -1):
+            if self.stack[index] == tag:
+                del self.stack[index:]
+                return
+
+
+def _ensure_home_hero_layers(rendered: str) -> str:
+    """Ajoute les couches réutilisables du hero d’accueil sans doublonner le gabarit."""
+    root = _ROOT_OPEN_TAG.search(rendered)
+    if not root:
+        return rendered
+    root_attrs = root.group("attrs")
+    class_match = _CLASS_ATTRIBUTE.search(root_attrs)
+    root_classes = set(class_match.group("value").split()) if class_match else set()
+    parser = _DirectChildClassParser()
+    parser.feed(rendered)
+    parser.close()
+    present_classes = parser.classes
+    layers = (
+        ("hero-bg", '<div class="hero-bg" aria-hidden="true"></div>'),
+        ("hero-shader", '<canvas class="hero-shader" aria-hidden="true"></canvas>'),
+        ("hero-grain", '<div class="hero-grain" aria-hidden="true"></div>'),
+    )
+    additions = [markup for class_name, markup in layers if class_name not in present_classes]
+    if "hero" not in root_classes and "sjd-home-hero-veil" not in present_classes:
+        additions.append('<div class="sjd-home-hero-veil" aria-hidden="true"></div>')
+    if not additions:
+        return rendered
+    return _ROOT_OPEN_TAG.sub(lambda match: match.group(0) + "".join(additions), rendered, count=1)
+
+
 def _apply_section_background(rendered: str, section_type: str, data: dict) -> str:
     """Applique une variante contrôlée au premier élément racine du gabarit.
 
@@ -371,7 +440,10 @@ def _apply_section_background(rendered: str, section_type: str, data: dict) -> s
                 attrs += f' style="{html_module.escape(style_declaration, quote=True)}"'
         return f"<{tag}{attrs}>"
 
-    return _ROOT_OPEN_TAG.sub(decorate, rendered, count=1)
+    rendered = _ROOT_OPEN_TAG.sub(decorate, rendered, count=1)
+    if mode == "hero-gradient":
+        rendered = _ensure_home_hero_layers(rendered)
+    return rendered
 
 
 def _get(obj: Any, key: str, default: Any = "") -> Any:

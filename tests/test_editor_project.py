@@ -441,7 +441,7 @@ def test_theme_v3_project_gains_default_background_fields_without_content_change
     migrated = migrate_project(project)
     sections = project_to_sections(migrated)
 
-    assert migrated["theme_version"] == THEME_VERSION == 5
+    assert migrated["theme_version"] == THEME_VERSION == 6
     assert all(section["data"]["section_background"] == "default" for section in sections)
     assert all(section["data"]["section_background_color"] == "#f2f2f4" for section in sections)
 
@@ -483,13 +483,30 @@ def test_theme_v4_zone_free_background_settings_survive_migration(legacy_backgro
     migrated = migrate_project(project)
     section = project_to_sections(migrated)[0]
 
-    assert migrated["theme_version"] == THEME_VERSION == 5
+    assert migrated["theme_version"] == THEME_VERSION == 6
     assert migrated["project_data"] == before
     assert section["data"]["background"] == legacy_background
     assert section["data"]["section_background_color"] == "#123456"
 
 
-@pytest.mark.parametrize("legacy_version", [1, 2, 3, 4])
+def test_theme_v5_home_hero_animation_choice_survives_migration():
+    from sujee_editor.editor.project import migrate_project
+
+    data = default_data(DEFAULT_BLOCKS["zone-libre"])
+    data["background"] = "hero-gradient"
+    project = sections_to_project([{"id": 1, "type": "zone-libre", "position": 0, "effective": data}])
+    project["theme_version"] = 5
+    before = copy.deepcopy(project["project_data"])
+
+    migrated = migrate_project(project)
+    section = project_to_sections(migrated)[0]
+
+    assert migrated["theme_version"] == THEME_VERSION == 6
+    assert migrated["project_data"] == before
+    assert section["data"]["background"] == "hero-gradient"
+
+
+@pytest.mark.parametrize("legacy_version", [1, 2, 3, 4, 5])
 def test_migrate_legacy_theme_project_preserves_content_and_is_idempotent(legacy_version: int):
     from sujee_editor.editor.project import migrate_project
 
@@ -500,7 +517,7 @@ def test_migrate_legacy_theme_project_preserves_content_and_is_idempotent(legacy
     migrated = migrate_project(project)
 
     assert project == before
-    assert migrated["theme_version"] == THEME_VERSION == 5
+    assert migrated["theme_version"] == THEME_VERSION == 6
     assert migrated["project_data"] == project["project_data"]
     assert migrate_project(migrated) == migrated
     assert [section["type"] for section in project_to_sections(migrated)] == [

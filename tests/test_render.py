@@ -241,21 +241,63 @@ def test_zone_free_custom_background_uses_hex_and_rejects_css_payloads():
 
 
 @pytest.mark.parametrize(("type_", "field"), [("chapter", "section_background"), ("zone-libre", "background")])
-def test_hero_animated_gradient_is_applied_to_section_root(type_: str, field: str):
+def test_home_hero_animation_injects_its_background_layers(type_: str, field: str):
     section = build_section(type_)
     section["data"][field] = "hero-gradient"
 
     html = render_module.section_html(ENV, section, CTX, envelopes=False)
 
     assert "sjd-section-background--hero-gradient" in html
+    assert html.count('class="hero-bg"') == 1
+    assert html.count('class="hero-shader"') == 1
+    assert html.count('class="hero-grain"') == 1
+    assert html.count('class="sjd-home-hero-veil"') == 1
 
 
-def test_hero_background_choice_reuses_animated_palette_and_respects_reduced_motion():
-    styles = (Path(__file__).parents[1] / "theme" / "assets" / "site-extras.css").read_text()
-    rule = styles.split(".sjd-section-background--hero-gradient {", 1)[1].split("}", 1)[0]
-    reduced_motion = styles.split("@media (prefers-reduced-motion: reduce)", 1)[1]
+def test_home_hero_animation_reuses_existing_layers_without_duplicates():
+    section = build_section("hero", "accueil")
+    section["data"]["section_background"] = "hero-gradient"
 
-    assert "var(--gradient-iridescent)" in rule
-    assert "animation: gradient-pan 26s" in rule
+    html = render_module.section_html(ENV, section, CTX, envelopes=False)
+
+    assert html.count('class="hero-bg"') == 1
+    assert html.count('class="hero-shader"') == 1
+    assert html.count('class="hero-grain"') == 1
+    assert "sjd-home-hero-veil" not in html
+
+
+def test_nested_hero_layer_classes_do_not_block_root_layer_injection():
+    template = (
+        '<section><div class="nested">'
+        '<span class="hero-bg"></span><span class="hero-shader"></span>'
+        '<span class="hero-grain"></span><span class="sjd-home-hero-veil"></span>'
+        '</div></section>'
+    )
+
+    html = render_module._apply_section_background(
+        template, "chapter", {"section_background": "hero-gradient"}
+    )
+
+    assert html.count('class="hero-bg"') == 2
+    assert html.count('class="hero-shader"') == 2
+    assert html.count('class="hero-grain"') == 2
+    assert html.count('class="sjd-home-hero-veil"') == 2
+
+
+def test_home_hero_animation_reuses_webgl_shader_and_reduced_motion_support():
+    assets = Path(__file__).parents[1] / "theme" / "assets"
+    home_styles = (assets / "site.css").read_text()
+    editor_styles = (assets / "site-extras.css").read_text()
+    script = (assets / "site.js").read_text()
+    reduced_motion = editor_styles.split("@media (prefers-reduced-motion: reduce)", 1)[1]
+
+    assert ".hero-bg{position:absolute;inset:0;z-index:0" in home_styles
+    assert ".hero-shader{position:absolute;inset:0;z-index:1" in home_styles
+    assert ".hero-grain{position:absolute;inset:0;z-index:3" in home_styles
+    assert 'document.querySelectorAll(".hero-shader")' in script
+    assert "if (!reduced) requestAnimationFrame(frame)" in script
+    assert ".hero::after{content:\"\"" in home_styles
+    assert ".sjd-home-hero-veil {" in editor_styles
+    assert ".sjd-section-background--hero-gradient .hero-bg" in editor_styles
     assert ".sjd-section-background--hero-gradient" in reduced_motion
     assert "animation: none !important" in reduced_motion

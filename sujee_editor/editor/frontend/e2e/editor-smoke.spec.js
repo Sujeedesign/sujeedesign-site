@@ -93,7 +93,7 @@ test('edits a section background with an animated gradient or a custom color', a
   const background = panel.locator('[data-field-editor="section_background"]');
   const color = panel.locator('[data-field-editor="section_background_color"]');
   await expect(background.locator('option[value="gradient"]')).toHaveText('Dégradé animé');
-  await expect(background.locator('option[value="hero-gradient"]')).toHaveText('Dégradé animé du hero');
+  await expect(background.locator('option[value="hero-gradient"]')).toHaveText('Fond animé du hero d’accueil');
   await expect(color).toBeHidden();
 
   await background.selectOption('gradient');
@@ -106,20 +106,24 @@ test('edits a section background with an animated gradient or a custom color', a
   await expect.poll(() => page.evaluate(() => JSON.parse(window.sjdVisualEditor.getSelected().getAttributes()['data-sjd-data']).section_background_color)).toBe('#123456');
 });
 
-test('hero gradient keeps nested surface contrast and removes the original shader', async ({ page }) => {
+test('home hero animation reuses the liquid shader and preserves nested surface contrast', async ({ page }) => {
   const siteStyles = await readFile(new URL('../../../../theme/assets/site.css', import.meta.url), 'utf8');
   const extraStyles = await readFile(new URL('../../../../theme/assets/site-extras.css', import.meta.url), 'utf8');
   await page.setContent(`
-    <section id="page-hero" class="hero-gradient-probe page-hero sjd-section-background--hero-gradient"><div class="container">Page hero</div></section>
-    <section id="p-hero" class="hero-gradient-probe p-hero sjd-section-background--hero-gradient"><div class="container">Prestation</div></section>
+    <section id="page-hero" class="hero-gradient-probe page-hero sjd-section-background--hero-gradient">
+      <div class="hero-bg" aria-hidden="true"></div><canvas class="hero-shader" aria-hidden="true"></canvas><div class="hero-grain" aria-hidden="true"></div><div class="sjd-home-hero-veil" aria-hidden="true"></div><div class="container">Page hero</div>
+    </section>
+    <section id="p-hero" class="hero-gradient-probe p-hero sjd-section-background--hero-gradient">
+      <div class="hero-bg" aria-hidden="true"></div><canvas class="hero-shader" aria-hidden="true"></canvas><div class="hero-grain" aria-hidden="true"></div><div class="sjd-home-hero-veil" aria-hidden="true"></div><div class="container">Prestation</div>
+    </section>
     <header id="home-hero" class="hero-gradient-probe hero sjd-section-background--hero-gradient">
-      <div class="hero-bg"></div><canvas class="hero-shader" aria-hidden="true"></canvas><div class="hero-inner">Accueil</div>
+      <div class="hero-bg"></div><canvas class="hero-shader" aria-hidden="true"></canvas><div class="hero-grain"></div><div class="hero-inner">Accueil</div>
     </header>
     <section id="project-hero" class="hero-gradient-probe project-cover sjd-section-background--hero-gradient">
-      <img class="project-cover__media" src="/cover.webp" alt=""><div class="project-cover__shade"></div><div class="container">Projet</div>
+      <div class="hero-bg" aria-hidden="true"></div><canvas class="hero-shader" aria-hidden="true"></canvas><div class="hero-grain" aria-hidden="true"></div><div class="sjd-home-hero-veil" aria-hidden="true"></div><img class="project-cover__media" src="/cover.webp" alt=""><div class="project-cover__shade"></div><div class="container">Projet</div>
     </section>
     <section id="hero-gradient-surface" class="hero-gradient-probe p-final--home sjd-section-background--hero-gradient">
-      <canvas class="hero-shader" aria-hidden="true"></canvas>
+      <div class="hero-bg" aria-hidden="true"></div><canvas class="hero-shader" aria-hidden="true"></canvas><div class="hero-grain" aria-hidden="true"></div><div class="sjd-home-hero-veil" aria-hidden="true"></div>
       <div class="surface"><p id="surface-text">Texte sur carte claire</p></div>
       <span id="inherited-text">Texte sur le dégradé</span>
     </section>
@@ -134,30 +138,128 @@ test('hero gradient keeps nested surface contrast and removes the original shade
     inheritedText: getComputedStyle(document.querySelector('#inherited-text')).color,
     surfaceText: getComputedStyle(document.querySelector('#surface-text')).color,
     shader: getComputedStyle(root.querySelector('.hero-shader')).display,
+    layers: Array.from(root.querySelectorAll('.hero-bg, .hero-shader, .hero-grain, .sjd-home-hero-veil')).map((node) => getComputedStyle(node).display),
     oldOverlay: getComputedStyle(root, '::before').display,
+    homeOverlay: getComputedStyle(root, '::after').display,
   }));
   const heroEffects = await page.locator('.hero-gradient-probe').evaluateAll((roots) => Object.fromEntries(
     roots.map((root) => [root.id, {
       before: getComputedStyle(root, '::before').display,
       after: getComputedStyle(root, '::after').display,
-      backgroundChildren: Array.from(root.querySelectorAll('.hero-bg, .hero-shader, .project-cover__media, .project-cover__shade'))
+      backgroundChildren: Array.from(root.querySelectorAll('.hero-bg, .hero-shader, .hero-grain, .project-cover__media, .project-cover__shade'))
         .map((element) => getComputedStyle(element).display),
     }]),
   ));
 
-  expect(styles.background).toContain('rgb(160, 224, 171)');
-  expect(styles.animation).toBe('gradient-pan');
+  expect(styles.background).toBe('none');
+  expect(styles.animation).toBe('none');
   expect(styles.inheritedText).toBe('rgb(255, 255, 255)');
   expect(styles.surfaceText).toBe('rgb(11, 11, 12)');
-  expect(styles.shader).toBe('none');
+  expect(styles.shader).toBe('block');
+  expect(styles.layers).toEqual(['block', 'block', 'block', 'block']);
   expect(styles.oldOverlay).toBe('none');
+  expect(styles.homeOverlay).toBe('none');
   expect(heroEffects['page-hero']).toMatchObject({ before: 'none', after: 'none' });
   expect(heroEffects['p-hero']).toMatchObject({ before: 'none', after: 'none' });
-  expect(heroEffects['home-hero'].after).toBe('none');
-  expect(heroEffects['home-hero'].backgroundChildren).toEqual(['none', 'none']);
-  expect(heroEffects['project-hero'].backgroundChildren).toEqual(['none', 'none']);
+  expect(heroEffects['home-hero'].after).toBe('block');
+  expect(heroEffects['home-hero'].backgroundChildren).toEqual(['block', 'block', 'block']);
+  expect(heroEffects['project-hero'].backgroundChildren).toEqual(['block', 'block', 'block', 'none', 'none']);
   expect(heroEffects['hero-gradient-surface'].before).toBe('none');
-  expect(heroEffects['hero-gradient-surface'].backgroundChildren).toEqual(['none']);
+  expect(heroEffects['hero-gradient-surface'].after).toBe('none');
+  expect(heroEffects['hero-gradient-surface'].backgroundChildren).toEqual(['block', 'block', 'block']);
+});
+
+test('homepage liquid shader draws its red-orange WebGL effect', async ({ page }) => {
+  const siteStyles = await readFile(new URL('../../../../theme/assets/site.css', import.meta.url), 'utf8');
+  const extraStyles = await readFile(new URL('../../../../theme/assets/site-extras.css', import.meta.url), 'utf8');
+  const siteScript = await readFile(new URL('../../../../theme/assets/site.js', import.meta.url), 'utf8');
+  await page.setContent(`
+    <style>${siteStyles}\n${extraStyles}</style>
+    <header id="hero" class="hero sjd-section-background--hero-gradient">
+      <div class="hero-bg" aria-hidden="true"></div>
+      <canvas class="hero-shader" id="heroShader" aria-hidden="true"></canvas>
+      <div class="hero-grain" aria-hidden="true"></div>
+      <div class="hero-inner">Identité, web &amp; création</div>
+    </header>
+  `);
+
+  await page.addScriptTag({ content: siteScript });
+  await expect.poll(() => page.evaluate(() => typeof window.__shaderProbe)).toBe('function');
+  const pixel = await page.evaluate(() => window.__shaderProbe());
+
+  expect(pixel).toHaveLength(4);
+  expect(pixel[3]).toBe(255);
+  expect(pixel[0]).toBeGreaterThan(pixel[1]);
+  expect(pixel[1]).toBeGreaterThan(pixel[2]);
+});
+
+test('homepage shader stops its animation when reduced motion is requested', async ({ page }) => {
+  const siteStyles = await readFile(new URL('../../../../theme/assets/site.css', import.meta.url), 'utf8');
+  const extraStyles = await readFile(new URL('../../../../theme/assets/site-extras.css', import.meta.url), 'utf8');
+  const siteScript = await readFile(new URL('../../../../theme/assets/site.js', import.meta.url), 'utf8');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.setContent(`
+    <style>${siteStyles}\n${extraStyles}</style>
+    <header class="hero sjd-section-background--hero-gradient">
+      <div class="hero-bg"></div><canvas class="hero-shader" id="heroShader"></canvas>
+      <div class="hero-grain"></div><div class="hero-inner">Accueil</div>
+    </header>
+  `);
+  await page.evaluate(() => {
+    const requestAnimationFrame = window.requestAnimationFrame.bind(window);
+    window.__rafCalls = 0;
+    window.requestAnimationFrame = (callback) => {
+      window.__rafCalls += 1;
+      return requestAnimationFrame(callback);
+    };
+  });
+
+  await page.addScriptTag({ content: siteScript });
+  await page.waitForTimeout(100);
+  const state = await page.evaluate(() => ({
+    reduced: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    rafCalls: window.__rafCalls,
+    animation: getComputedStyle(document.querySelector('.hero-bg')).animationName,
+    pixel: window.__shaderProbe?.(),
+  }));
+
+  expect(state.reduced).toBe(true);
+  expect(state.rafCalls).toBeLessThan(6);
+  expect(state.animation).toBe('none');
+  expect(state.pixel?.[3]).toBe(255);
+});
+
+test('homepage CSS fallback remains visible when WebGL is unavailable', async ({ page }) => {
+  const siteStyles = await readFile(new URL('../../../../theme/assets/site.css', import.meta.url), 'utf8');
+  const extraStyles = await readFile(new URL('../../../../theme/assets/site-extras.css', import.meta.url), 'utf8');
+  const siteScript = await readFile(new URL('../../../../theme/assets/site.js', import.meta.url), 'utf8');
+  await page.setContent(`
+    <style>${siteStyles}\n${extraStyles}</style>
+    <header class="hero sjd-section-background--hero-gradient">
+      <div class="hero-bg"></div><canvas class="hero-shader" id="heroShader"></canvas>
+      <div class="hero-grain"></div><div class="hero-inner">Accueil</div>
+    </header>
+  `);
+  await page.evaluate(() => {
+    const getContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (type, ...args) {
+      if (type === 'webgl' || type === 'experimental-webgl') return null;
+      return getContext.call(this, type, ...args);
+    };
+  });
+
+  await page.addScriptTag({ content: siteScript });
+  const state = await page.evaluate(() => ({
+    shader: getComputedStyle(document.querySelector('.hero-shader')).display,
+    fallback: getComputedStyle(document.querySelector('.hero-bg')).display,
+    image: getComputedStyle(document.querySelector('.hero-bg')).backgroundImage,
+    animation: getComputedStyle(document.querySelector('.hero-bg')).animationName,
+  }));
+
+  expect(state.shader).toBe('none');
+  expect(state.fallback).toBe('block');
+  expect(state.image).not.toBe('none');
+  expect(state.animation).toBe('gradient-pan');
 });
 
 test('composes a section with bounded columns, theme colors and a local background image', async ({ page }) => {
@@ -169,7 +271,7 @@ test('composes a section with bounded columns, theme colors and a local backgrou
   await page.waitForFunction(() => Boolean(window.sjdVisualEditor && document.documentElement.dataset.visualEditorReady));
   await page.locator('#visual-blocks .gjs-block').filter({ hasText: 'Section à composer' }).click();
   const panel = page.locator('#visual-section-panel');
-  await expect(panel.locator('[data-field-editor="background"] option[value="hero-gradient"]')).toHaveText('Dégradé animé du hero');
+  await expect(panel.locator('[data-field-editor="background"] option[value="hero-gradient"]')).toHaveText('Fond animé du hero d’accueil');
   const addColumn = panel.locator('[data-repeat-path="columns"] + .section-repeat-add');
   await addColumn.click();
   await expect.poll(() => page.evaluate(() => JSON.parse(window.sjdVisualEditor.getSelected().getAttributes()['data-sjd-data']).columns.map((column) => column.span))).toEqual(['4', '4', '4']);

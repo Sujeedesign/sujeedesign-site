@@ -361,4 +361,4 @@ def test_export_includes_draft_and_published_visual_project(client: TestClient) 
     assert set(page["visual_project"]) == {
         "schema_version", "theme_id", "theme_version", "draft_version", "draft_project", "published_project"
     }
-    assert page["visual_project"]["theme_version"] == 5
+    assert page["visual_project"]["theme_version"] == 6
