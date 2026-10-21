@@ -1,6 +1,6 @@
 {% set d = s.data %}
 {% set background = d.get('background', 'none') %}
-{% if background not in ('none', 'paper', 'obsidian', 'accent', 'gradient', 'custom', 'image') %}{% set background = 'none' %}{% endif %}
+{% if background not in ('none', 'paper', 'obsidian', 'accent', 'gradient', 'hero-gradient', 'custom', 'image') %}{% set background = 'none' %}{% endif %}
 {% set width = d.get('width', 'container') %}
 {% if width not in ('container', 'full') %}{% set width = 'container' %}{% endif %}
 {% set spacing = d.get('spacing', 'normal') %}

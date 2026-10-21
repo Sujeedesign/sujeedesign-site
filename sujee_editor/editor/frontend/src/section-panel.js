@@ -4,7 +4,7 @@ function clone(value) {
 
 const BACKGROUND_LABELS = {
   default: 'Par défaut', none: 'Par défaut', paper: 'Clair', obsidian: 'Sombre',
-  accent: 'Accent bronze', gradient: 'Dégradé animé', custom: 'Couleur personnalisée', image: 'Image de fond',
+  accent: 'Accent bronze', gradient: 'Dégradé animé', 'hero-gradient': 'Dégradé animé du hero', custom: 'Couleur personnalisée', image: 'Image de fond',
 };
 
 function fieldDefault(field) {

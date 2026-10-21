@@ -47,7 +47,7 @@ SVG_ATTRS = {
 
 _cache: dict[str, tuple[str, str]] = {}
 _cache_lock = threading.Lock()
-_SECTION_BACKGROUND_MODES = {"paper", "obsidian", "accent", "gradient", "custom"}
+_SECTION_BACKGROUND_MODES = {"paper", "obsidian", "accent", "gradient", "hero-gradient", "custom"}
 _COLOR_HEX = re.compile(r"#[0-9a-fA-F]{6}\Z")
 _ROOT_OPEN_TAG = re.compile(r"<(?P<tag>[A-Za-z][A-Za-z0-9:_-]*)(?P<attrs>[^<>]*)>")
 _CLASS_ATTRIBUTE = re.compile(r"(?P<prefix>\sclass\s*=\s*)(?P<quote>[\"'])(?P<value>.*?)(?P=quote)", re.IGNORECASE)

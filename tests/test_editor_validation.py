@@ -242,6 +242,16 @@ def test_free_zone_supports_animated_gradient_and_custom_color():
     assert rules(validate_data(zone, data)) == [("section_background_color", "bad_color")]
 
 
+@pytest.mark.parametrize("section_type", sorted(DEFAULT_BLOCKS))
+def test_hero_animated_gradient_is_an_allowed_background_choice_for_every_section(section_type: str):
+    block = DEFAULT_BLOCKS[section_type]
+    data = default_data(block)
+    background_field = "background" if section_type == "zone-libre" else "section_background"
+    data[background_field] = "hero-gradient"
+
+    assert validate_data(block, data) == []
+
+
 def test_free_zone_rejects_backslashes_in_links_and_media_paths():
     zone = DEFAULT_BLOCKS["zone-libre"]
     data = default_data(zone)

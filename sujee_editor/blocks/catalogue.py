@@ -19,7 +19,7 @@ COLOR = Kind.COLOR
 CTAS = Kind.CTAS
 
 CTA_STYLE = ("pill", "pill--filled", "text-link")
-SECTION_BACKGROUND_CHOICES = ("default", "paper", "obsidian", "accent", "gradient", "custom")
+SECTION_BACKGROUND_CHOICES = ("default", "paper", "obsidian", "accent", "gradient", "hero-gradient", "custom")
 SECTION_BACKGROUND = Field(
     "section_background", CHOICE, "Arrière-plan", choices=SECTION_BACKGROUND_CHOICES, default="default", inplace=False
 )
@@ -340,7 +340,7 @@ def _blocks() -> dict[str, Block]:
         "zone-libre",
         "Section à composer",
         (
-            Field("background", CHOICE, "Arrière-plan", choices=("none", "paper", "obsidian", "accent", "gradient", "custom", "image"), default="none"),
+            Field("background", CHOICE, "Arrière-plan", choices=("none", "paper", "obsidian", "accent", "gradient", "hero-gradient", "custom", "image"), default="none"),
             SECTION_BACKGROUND_COLOR,
             Field("background_image", IMAGE, "Image de fond", inplace=False, default=""),
             Field("width", CHOICE, "Largeur", choices=("container", "full"), default="container"),

@@ -93,14 +93,71 @@ test('edits a section background with an animated gradient or a custom color', a
   const background = panel.locator('[data-field-editor="section_background"]');
   const color = panel.locator('[data-field-editor="section_background_color"]');
   await expect(background.locator('option[value="gradient"]')).toHaveText('Dégradé animé');
+  await expect(background.locator('option[value="hero-gradient"]')).toHaveText('Dégradé animé du hero');
   await expect(color).toBeHidden();
 
   await background.selectOption('gradient');
   await expect.poll(() => page.evaluate(() => JSON.parse(window.sjdVisualEditor.getSelected().getAttributes()['data-sjd-data']).section_background)).toBe('gradient');
+  await background.selectOption('hero-gradient');
+  await expect.poll(() => page.evaluate(() => JSON.parse(window.sjdVisualEditor.getSelected().getAttributes()['data-sjd-data']).section_background)).toBe('hero-gradient');
   await background.selectOption('custom');
   await expect(color).toBeVisible();
   await color.fill('#123456');
   await expect.poll(() => page.evaluate(() => JSON.parse(window.sjdVisualEditor.getSelected().getAttributes()['data-sjd-data']).section_background_color)).toBe('#123456');
+});
+
+test('hero gradient keeps nested surface contrast and removes the original shader', async ({ page }) => {
+  const siteStyles = await readFile(new URL('../../../../theme/assets/site.css', import.meta.url), 'utf8');
+  const extraStyles = await readFile(new URL('../../../../theme/assets/site-extras.css', import.meta.url), 'utf8');
+  await page.setContent(`
+    <section id="page-hero" class="hero-gradient-probe page-hero sjd-section-background--hero-gradient"><div class="container">Page hero</div></section>
+    <section id="p-hero" class="hero-gradient-probe p-hero sjd-section-background--hero-gradient"><div class="container">Prestation</div></section>
+    <header id="home-hero" class="hero-gradient-probe hero sjd-section-background--hero-gradient">
+      <div class="hero-bg"></div><canvas class="hero-shader" aria-hidden="true"></canvas><div class="hero-inner">Accueil</div>
+    </header>
+    <section id="project-hero" class="hero-gradient-probe project-cover sjd-section-background--hero-gradient">
+      <img class="project-cover__media" src="/cover.webp" alt=""><div class="project-cover__shade"></div><div class="container">Projet</div>
+    </section>
+    <section id="hero-gradient-surface" class="hero-gradient-probe p-final--home sjd-section-background--hero-gradient">
+      <canvas class="hero-shader" aria-hidden="true"></canvas>
+      <div class="surface"><p id="surface-text">Texte sur carte claire</p></div>
+      <span id="inherited-text">Texte sur le dégradé</span>
+    </section>
+  `);
+  await page.addStyleTag({ content: siteStyles });
+  await page.addStyleTag({ content: extraStyles });
+  await page.addStyleTag({ content: '.surface { background: #fff; padding: 12px; } .surface p { color: #0b0b0c; }' });
+
+  const styles = await page.locator('#hero-gradient-surface').evaluate((root) => ({
+    background: getComputedStyle(root).backgroundImage,
+    animation: getComputedStyle(root).animationName,
+    inheritedText: getComputedStyle(document.querySelector('#inherited-text')).color,
+    surfaceText: getComputedStyle(document.querySelector('#surface-text')).color,
+    shader: getComputedStyle(root.querySelector('.hero-shader')).display,
+    oldOverlay: getComputedStyle(root, '::before').display,
+  }));
+  const heroEffects = await page.locator('.hero-gradient-probe').evaluateAll((roots) => Object.fromEntries(
+    roots.map((root) => [root.id, {
+      before: getComputedStyle(root, '::before').display,
+      after: getComputedStyle(root, '::after').display,
+      backgroundChildren: Array.from(root.querySelectorAll('.hero-bg, .hero-shader, .project-cover__media, .project-cover__shade'))
+        .map((element) => getComputedStyle(element).display),
+    }]),
+  ));
+
+  expect(styles.background).toContain('rgb(160, 224, 171)');
+  expect(styles.animation).toBe('gradient-pan');
+  expect(styles.inheritedText).toBe('rgb(255, 255, 255)');
+  expect(styles.surfaceText).toBe('rgb(11, 11, 12)');
+  expect(styles.shader).toBe('none');
+  expect(styles.oldOverlay).toBe('none');
+  expect(heroEffects['page-hero']).toMatchObject({ before: 'none', after: 'none' });
+  expect(heroEffects['p-hero']).toMatchObject({ before: 'none', after: 'none' });
+  expect(heroEffects['home-hero'].after).toBe('none');
+  expect(heroEffects['home-hero'].backgroundChildren).toEqual(['none', 'none']);
+  expect(heroEffects['project-hero'].backgroundChildren).toEqual(['none', 'none']);
+  expect(heroEffects['hero-gradient-surface'].before).toBe('none');
+  expect(heroEffects['hero-gradient-surface'].backgroundChildren).toEqual(['none']);
 });
 
 test('composes a section with bounded columns, theme colors and a local background image', async ({ page }) => {
@@ -112,6 +169,7 @@ test('composes a section with bounded columns, theme colors and a local backgrou
   await page.waitForFunction(() => Boolean(window.sjdVisualEditor && document.documentElement.dataset.visualEditorReady));
   await page.locator('#visual-blocks .gjs-block').filter({ hasText: 'Section à composer' }).click();
   const panel = page.locator('#visual-section-panel');
+  await expect(panel.locator('[data-field-editor="background"] option[value="hero-gradient"]')).toHaveText('Dégradé animé du hero');
   const addColumn = panel.locator('[data-repeat-path="columns"] + .section-repeat-add');
   await addColumn.click();
   await expect.poll(() => page.evaluate(() => JSON.parse(window.sjdVisualEditor.getSelected().getAttributes()['data-sjd-data']).columns.map((column) => column.span))).toEqual(['4', '4', '4']);

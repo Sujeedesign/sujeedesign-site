@@ -238,3 +238,24 @@ def test_zone_free_custom_background_uses_hex_and_rejects_css_payloads():
     assert "sjd-section-background--custom" not in unsafe_html
     assert "--sjd-section-background:" not in unsafe_html
     assert "javascript:" not in unsafe_html
+
+
+@pytest.mark.parametrize(("type_", "field"), [("chapter", "section_background"), ("zone-libre", "background")])
+def test_hero_animated_gradient_is_applied_to_section_root(type_: str, field: str):
+    section = build_section(type_)
+    section["data"][field] = "hero-gradient"
+
+    html = render_module.section_html(ENV, section, CTX, envelopes=False)
+
+    assert "sjd-section-background--hero-gradient" in html
+
+
+def test_hero_background_choice_reuses_animated_palette_and_respects_reduced_motion():
+    styles = (Path(__file__).parents[1] / "theme" / "assets" / "site-extras.css").read_text()
+    rule = styles.split(".sjd-section-background--hero-gradient {", 1)[1].split("}", 1)[0]
+    reduced_motion = styles.split("@media (prefers-reduced-motion: reduce)", 1)[1]
+
+    assert "var(--gradient-iridescent)" in rule
+    assert "animation: gradient-pan 26s" in rule
+    assert ".sjd-section-background--hero-gradient" in reduced_motion
+    assert "animation: none !important" in reduced_motion

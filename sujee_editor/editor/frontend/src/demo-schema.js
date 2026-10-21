@@ -6,7 +6,7 @@ const image = (name, label = name) => f(name, 'image', label);
 const item = (name, kind, fields, label = name, extra = {}) => f(name, kind, label, { fields, ...extra });
 const ctaFields = [t('label', 'Libellé'), t('href', 'Lien'), f('style', 'choice', 'Style', { choices: ['pill', 'pill--filled', 'text-link'] })];
 const sectionBackgroundFields = [
-  f('section_background', 'choice', 'Arrière-plan', { choices: ['default', 'paper', 'obsidian', 'accent', 'gradient', 'custom'], default: 'default' }),
+  f('section_background', 'choice', 'Arrière-plan', { choices: ['default', 'paper', 'obsidian', 'accent', 'gradient', 'hero-gradient', 'custom'], default: 'default' }),
   f('section_background_color', 'color', 'Couleur personnalisée', { default: '#f2f2f4' }),
 ];
 
@@ -31,7 +31,7 @@ export const DEMO_BLOCKS = Object.fromEntries([
   ['etude-de-cas', 'Étude de cas', [item('blocks', 'items', [f('kind', 'choice', 'Type', { choices: ['texte', 'liste', 'meta'] }), t('title'), f('body', 'html'), l('items'), l('meta')], 'Blocs')]],
   ['banniere', 'Bannière visuelle', [image('src'), t('alt'), f('svg', 'html')]],
   ['zone-libre', 'Section à composer', [
-    f('background', 'choice', 'Arrière-plan', { choices: ['none', 'paper', 'obsidian', 'accent', 'gradient', 'custom', 'image'], default: 'none' }),
+    f('background', 'choice', 'Arrière-plan', { choices: ['none', 'paper', 'obsidian', 'accent', 'gradient', 'hero-gradient', 'custom', 'image'], default: 'none' }),
     sectionBackgroundFields[1],
     f('background_image', 'image', 'Image de fond'),
     f('width', 'choice', 'Largeur', { choices: ['container', 'full'], default: 'container' }),

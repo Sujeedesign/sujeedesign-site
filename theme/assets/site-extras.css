@@ -519,6 +519,7 @@ figcaption:empty {
 .sjd-section-background--obsidian,
 .sjd-section-background--accent,
 .sjd-section-background--gradient,
+.sjd-section-background--hero-gradient,
 .sjd-section-background--custom {
   isolation: isolate;
   --sjd-section-text: var(--color-obsidian-solid);
@@ -532,6 +533,17 @@ figcaption:empty {
   animation: gradient-pan 24s ease-in-out infinite;
   color: var(--color-obsidian-solid) !important;
 }
+.sjd-section-background--hero-gradient {
+  background-image:
+    linear-gradient(180deg, rgba(0,0,0,.82) 0, rgba(0,0,0,.64) 70px, rgba(0,0,0,.22) 170px, rgba(0,0,0,0) 260px),
+    linear-gradient(90deg, rgba(0,0,0,.80) 0%, rgba(0,0,0,.74) 44%, rgba(0,0,0,.50) 72%, rgba(0,0,0,.24) 100%),
+    linear-gradient(180deg, rgba(0,0,0,0) 62%, rgba(0,0,0,.34) 100%),
+    linear-gradient(rgba(0,0,0,.48), rgba(0,0,0,.48)),
+    var(--gradient-iridescent) !important;
+  background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 220% 220% !important;
+  animation: gradient-pan 26s ease-in-out infinite;
+  color: var(--color-paper-solid) !important;
+}
 .sjd-section-background--custom { background: var(--sjd-section-background) !important; color: var(--sjd-section-foreground) !important; --sjd-section-text: var(--sjd-section-foreground); }
 .sjd-section-background--paper :is(h1, h2, h3, h4, p, li, span, small, strong, em, cite, figcaption, blockquote, dt, dd, time, label, legend, summary, a:not(.pill):not(.pill--filled)):not(.pill *):not(.pill--filled *),
 .sjd-section-background--obsidian :is(h1, h2, h3, h4, p, li, span, small, strong, em, cite, figcaption, blockquote, dt, dd, time, label, legend, summary, a:not(.pill):not(.pill--filled)):not(.pill *):not(.pill--filled *),
@@ -540,11 +552,24 @@ figcaption:empty {
 .sjd-section-background--custom :is(h1, h2, h3, h4, p, li, span, small, strong, em, cite, figcaption, blockquote, dt, dd, time, label, legend, summary, a:not(.pill):not(.pill--filled)):not(.pill *):not(.pill--filled *) {
   color: var(--sjd-section-text) !important;
 }
+.sjd-section-background--hero-gradient .pill:not(.pill--filled) {
+  border-color: rgba(255,255,255,.55);
+  color: var(--color-paper-solid);
+  background: rgba(0,0,0,.5);
+}
+.sjd-section-background--hero-gradient .pill:not(.pill--filled):hover {
+  background: var(--color-paper-solid);
+  color: var(--color-accent-ink);
+  border-color: var(--color-paper-solid);
+}
 .sjd-section-background--paper :is(.hero-bg, .hero-shader, .project-cover__media, .project-cover__shade),
 .sjd-section-background--obsidian :is(.hero-bg, .hero-shader, .project-cover__media, .project-cover__shade),
 .sjd-section-background--accent :is(.hero-bg, .hero-shader, .project-cover__media, .project-cover__shade),
 .sjd-section-background--gradient :is(.hero-bg, .hero-shader, .project-cover__media, .project-cover__shade),
+.sjd-section-background--hero-gradient :is(.hero-bg, .hero-shader, .project-cover__media, .project-cover__shade),
 .sjd-section-background--custom :is(.hero-bg, .hero-shader, .project-cover__media, .project-cover__shade) { display: none !important; }
+.sjd-section-background--hero-gradient > :is(.hero-bg, .hero-shader, .project-cover__media, .project-cover__shade),
+.p-final--home.sjd-section-background--hero-gradient > .hero-shader { display: none !important; }
 .hero.sjd-section-background--paper::after,
 .hero.sjd-section-background--obsidian::after,
 .hero.sjd-section-background--accent::after,
@@ -564,8 +589,15 @@ figcaption:empty {
 .p-hero.sjd-section-background--obsidian::before,
 .p-hero.sjd-section-background--accent::before,
 .p-hero.sjd-section-background--gradient::before,
-.p-hero.sjd-section-background--custom::before { display: none !important; }
+.p-hero.sjd-section-background--custom::before,
+.hero.sjd-section-background--hero-gradient::after,
+.p-final--home.sjd-section-background--hero-gradient::before,
+.page-hero.sjd-section-background--hero-gradient::before,
+.page-hero.sjd-section-background--hero-gradient::after,
+.p-hero.sjd-section-background--hero-gradient::before,
+.p-hero.sjd-section-background--hero-gradient::after { display: none !important; }
 
 @media (prefers-reduced-motion: reduce) {
   .sjd-section-background--gradient { animation: none !important; background-size: 100% 100% !important; }
+  .sjd-section-background--hero-gradient { animation: none !important; background-size: 100% 100% !important; }
 }
