@@ -4,5 +4,5 @@
 <script id="sjd-editor-data" type="application/json">{{ editor|tojson }}</script>
 <script type="module" src="/assets/editor/editor.js"></script>
 {% elif editor_enabled %}
-<a class="sjd-edit-entry" href="?edit=1">Modifier cette page</a>
+<a class="sjd-edit-entry" href="/admin/pages/{{ page.id }}">Modifier cette page</a>
 {% endif %}

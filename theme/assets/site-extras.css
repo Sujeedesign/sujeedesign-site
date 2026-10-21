@@ -508,6 +508,7 @@ figcaption:empty {
 .zone-libre__image-stack { display: flex; flex-direction: column; gap: var(--spacing-24); }
 .zone-libre__image-stack .zone-libre__image { margin: 0; }
 .zone-libre__image img { display: block; width: 100%; height: auto; object-fit: cover; }
+.zone-libre__image-stack .zone-libre__image img { height: auto; object-fit: contain; }
 .zone-libre__list { display: grid; gap: var(--spacing-12); margin: 0 0 var(--spacing-24); padding-inline-start: 1.25em; }
 .zone-libre__divider { width: 100%; margin-block: var(--spacing-24); border: 0; border-top: 1px solid currentColor; opacity: .35; }
 @media (max-width: 760px) {

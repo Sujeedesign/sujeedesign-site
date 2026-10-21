@@ -171,7 +171,9 @@ export function mountSectionPanel({ root, editor, blockSchema, mediaClient }) {
       const isBackgroundChoice = field.name === 'section_background'
         || (schema?.name === 'zone-libre' && field.name === 'background' && parts.length === 1);
       for (const choice of choices) {
-        const label = isBackgroundChoice ? (BACKGROUND_LABELS[choice] || choice) : choice;
+        const label = field.name === 'type' && choice === 'image-stack'
+          ? 'Images empilées'
+          : isBackgroundChoice ? (BACKGROUND_LABELS[choice] || choice) : choice;
         control.append(element('option', { value: choice }, label));
       }
       control.value = String(value ?? '');

@@ -61,9 +61,10 @@ def test_the_edit_flag_without_a_session_changes_nothing(client: TestClient, db_
 
 
 def test_a_signed_in_reader_gets_the_entry_link(client: TestClient, db_file: Path) -> None:
-    seed_page(db_file)
+    page_id, _ = seed_page(db_file)
     html = client.get(f"/{SLUG}", cookies=session_cookies()).text
-    assert 'href="?edit=1"' in html
+    assert f'href="/admin/pages/{page_id}"' in html
+    assert 'href="?edit=1"' not in html
     assert "sjd-editor-data" not in html
 
 

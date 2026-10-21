@@ -781,6 +781,7 @@ test('adds and reorders multiple images in a vertical container inside a column'
   await page.locator('#visual-blocks .gjs-block').filter({ hasText: 'Section à composer' }).click();
   const panel = page.locator('#visual-section-panel');
   await panel.locator('[data-repeat-path="columns.0.elements"] + .section-repeat-add').click();
+  await expect(panel.locator('[data-field-editor="columns.0.elements.0.type"] option[value="image-stack"]')).toHaveText('Images empilées');
   await panel.locator('[data-field-editor="columns.0.elements.0.type"]').selectOption('image-stack');
   const addImage = panel.locator('[data-repeat-path="columns.0.elements.0.images"] + .section-repeat-add');
   await addImage.click();
@@ -799,4 +800,19 @@ test('adds and reorders multiple images in a vertical container inside a column'
     return savedData.flatMap((data) => data.columns || []).flatMap((column) => column.elements || [])
       .find((item) => item.type === 'image-stack')?.images?.map((image) => image.src);
   }).toEqual(['/medias/second.webp', '/medias/first.webp']);
+});
+
+test('preserves the natural proportions of images in a vertical stack', async ({ page }) => {
+  const css = await readFile(new URL('../../../../theme/assets/site-extras.css', import.meta.url), 'utf8');
+  const svg = encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400"></svg>');
+  await page.setContent(`<style>${css}</style><div class="zone-libre__image-stack" style="width:320px"><figure class="zone-libre__image"><img id="stacked-image" src="data:image/svg+xml,${svg}" alt=""></figure></div>`);
+  const dimensions = await page.locator('#stacked-image').evaluate(async (image) => {
+    await image.decode();
+    const rect = image.getBoundingClientRect();
+    return { width: rect.width, height: rect.height, naturalWidth: image.naturalWidth, naturalHeight: image.naturalHeight, objectFit: getComputedStyle(image).objectFit };
+  });
+  expect(dimensions.width).toBe(320);
+  expect(dimensions.height).toBe(160);
+  expect(dimensions.height / dimensions.width).toBe(dimensions.naturalHeight / dimensions.naturalWidth);
+  expect(dimensions.objectFit).toBe('contain');
 });
