@@ -284,3 +284,14 @@ body > .readrail{background:none;border:0;padding:0}
   .sec-head{margin-bottom:clamp(32px,6vw,48px)}
   .contact{padding-block:clamp(76px,10vh,110px)}
 }
+
+/* Lisibilité des micro-textes (contact + chiffres) */
+.contact .mono{color:rgba(251,247,238,.88);font-size:10px;letter-spacing:.16em}
+.contact .lead{font-size:15px;line-height:1.65}
+.num span{font-size:10px;letter-spacing:.1em}
+.num p{font-size:13px}
+@media (max-width:900px){
+  .num span{font-size:10.5px}
+  .num p{font-size:13px}
+  .hero__cta{min-height:48px}
+}
