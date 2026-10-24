@@ -24,6 +24,7 @@ from .settings import VERSION
 import sujee_editor
 
 THEME_ASSETS = Path(__file__).resolve().parents[1] / "theme" / "assets"
+V4_PREVIEW = Path(__file__).resolve().parents[1] / "theme" / "v4"
 
 
 def create_app(db_path: str | Path | None = None) -> FastAPI:
@@ -80,6 +81,9 @@ def create_app(db_path: str | Path | None = None) -> FastAPI:
         page_path=repo_module.page_path,
     ).mount(app)
     app.mount("/assets", StaticFiles(directory=str(THEME_ASSETS)), name="assets")
+    # Aperçu V4 : pages statiques autonomes, servies sous /v4 (index.html par défaut).
+    if V4_PREVIEW.is_dir():
+        app.mount("/v4", StaticFiles(directory=str(V4_PREVIEW), html=True), name="v4")
     app.mount("/medias", StaticFiles(directory=str(media_root)), name="medias")
 
     @app.get("/api/health")
