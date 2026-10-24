@@ -1,0 +1,143 @@
+/* ============================================================
+   SUJEE DESIGN — V5 « papier » : clair, pleine largeur
+   Surcharge de site.css. Aucune règle de structure modifiée.
+   ============================================================ */
+
+:root{
+  --bg:#F4F1E8;
+  --bg-2:#EDE9DC;
+  --bone:#0A0A09;          /* l'encre remplace l'os */
+  --ink:#0A0A09;
+  --paper:#FBFAF4;
+  --muted:#5F5A50;
+  --muted-2:#3F3B34;
+  --line:rgba(10,10,9,.16);
+  --line-2:rgba(10,10,9,.09);
+  --accent:#C2370F;        /* 4,8:1 sur le papier */
+  --accent-bright:#FF4B1F;
+  --glass:rgba(255,255,255,.55);
+  --glass-edge:rgba(10,10,9,.12);
+
+  --max:none;
+  --pad:clamp(18px,3.4vw,72px);
+}
+
+body{background:var(--bg);color:var(--ink)}
+body::after{opacity:.028}
+::selection{background:var(--accent-bright);color:#0A0A09}
+
+/* Pleine largeur : on garde la marge, on retire le plafond */
+.wrap{max-width:none;padding-inline:var(--pad)}
+.nav-in{max-width:none}
+
+/* ---------- Navigation ---------- */
+.nav{background:transparent}
+.nav.solid,.nav.scrolled{background:rgba(244,241,232,.86);border-bottom:1px solid var(--line-2)}
+@supports (backdrop-filter:blur(1px)){
+  .nav.solid,.nav.scrolled{backdrop-filter:blur(18px) saturate(120%);background:rgba(244,241,232,.72)}
+}
+.brand b{color:var(--ink)}
+.nav-mid a{color:var(--muted)}
+.nav-mid a:hover,.nav-mid a[aria-current]{color:var(--ink)}
+.nav-cta{background:var(--ink);color:var(--bg);border-radius:2px}
+.nav-cta:hover{background:var(--accent-bright);color:#0A0A09}
+.rail a{color:var(--muted)}
+.rail a.active{color:var(--ink)}
+
+/* ---------- Héros ---------- */
+.hero__title .thin{-webkit-text-stroke-color:var(--ink)}
+.hero__lead{color:#4A463E}
+.hero__lead b{color:var(--ink)}
+.hero__portrait img{filter:grayscale(1) contrast(1.03)}
+.fig{background:rgba(244,241,232,.84);border:1px solid rgba(10,10,9,.16);color:var(--ink)}
+.scrollcue{color:var(--muted)}
+.scrollcue .bar{background:var(--line)}
+
+/* ---------- Sections ---------- */
+.section,.contact{background:var(--bg)}
+.contact::before{background:radial-gradient(circle,rgba(255,75,31,.12),rgba(255,75,31,0) 70%)}
+.sec-num{color:var(--accent)}
+.statement em{color:var(--accent)}
+
+/* Surfaces qui étaient sombres */
+.glasscard{
+  background:linear-gradient(160deg,rgba(255,255,255,.9),rgba(255,255,255,.6));
+  border:1px solid rgba(10,10,9,.14);
+  box-shadow:0 30px 60px -44px rgba(10,10,9,.4), inset 0 1px 0 #fff;
+}
+.glasscard b{color:var(--ink)}
+.glasscard li{color:#4A463E}
+.glasscard h3{color:var(--muted)}
+
+/* ---------- Cartes projet (accueil) ---------- */
+.c-paper{background:var(--paper);color:var(--ink);border-color:rgba(10,10,9,.14)}
+.c-paper .case__bar{background:rgba(10,10,9,.05);border-color:rgba(10,10,9,.12)}
+.case--ui{background:#0A0A09!important;color:#F2EFE7}
+.case--ui .case__idx,.case--ui .case__meta,.case--ui .case__sub{color:#9A958A}
+.case--ui .case__bar{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12);color:#F2EFE7}
+.case--ui .case__ghost{-webkit-text-stroke-color:rgba(242,239,231,.16)}
+.case{border-color:rgba(10,10,9,.14)}
+.case__bar{background:rgba(10,10,9,.04);border-color:rgba(10,10,9,.12);color:inherit}
+body > .rail{display:none}
+@media (max-width:1100px){body > .rail{display:none}}
+
+/* ---------- Mur de projets (réalisations) ---------- */
+.w-paper{background:var(--paper);color:var(--ink);border-color:rgba(10,10,9,.14)}
+.w-signal{background:var(--accent-bright);color:#0A0A09}
+.w-dark{background:#0A0A09;color:#F2EFE7}
+.wcard__meta{border-color:rgba(128,128,128,.28)}
+.sc-pack i,.sc-prod .b{box-shadow:0 26px 40px -30px rgba(10,10,9,.45)}
+
+/* ---------- Pages intérieures ---------- */
+.plate.paper{background:var(--paper)}
+.plate.outline .word{color:transparent;-webkit-text-stroke:1.5px var(--ink)}
+.thumb.tp-paper{background:var(--paper);color:var(--ink);border:1px solid rgba(10,10,9,.14)}
+.prow:hover{background:rgba(10,10,9,.03)}
+.rate:hover{background:rgba(10,10,9,.03)}
+.prose p,.prose li{color:#3F3B34}
+.prose a,.prose strong{color:var(--ink)}
+.legal .toc a:hover{color:var(--ink)}
+.meta-grid dd{color:var(--ink)}
+.faq summary{color:var(--ink)}
+
+/* ---------- Pied de page : bloc encre pour fermer la page ---------- */
+footer{background:#0A0A09;color:#F2EFE7;margin-top:clamp(40px,7vw,90px)}
+footer .foot{color:#9A958A}
+footer .foot a{color:#9A958A}
+footer .foot a:hover{color:#F2EFE7}
+
+/* ---------- Ajustements de proportion en pleine largeur ---------- */
+@media (min-width:1500px){
+  .hero{padding-inline:var(--pad)}
+  .hero__title{font-size:clamp(80px,7.6vw,168px)}
+  .statement{font-size:clamp(46px,4.4vw,86px);max-width:24ch}
+  .sec-head h2{font-size:clamp(38px,3.4vw,64px)}
+  .case__title{font-size:clamp(48px,5.2vw,112px)}
+  .wall{grid-template-columns:repeat(12,1fr)}
+}
+
+/* ---------- Passe 2 : lisibilité et détails ---------- */
+.nav-mid a{font-size:11.5px;letter-spacing:.02em;color:#4A463E}
+.nav-right .t{color:var(--muted)}
+.c-paper .case__ghost{-webkit-text-stroke-color:rgba(10,10,9,.10)}
+.case--ui .case__ghost{-webkit-text-stroke-color:rgba(242,239,231,.14)}
+.glasscard li{color:#33302A;font-size:13.5px}
+.glasscard li i{color:#A82F0C}
+footer .foot{font-size:12.5px}
+footer .foot a{color:#B8B2A6}
+
+@media (min-width:1500px){
+  .nav-mid{gap:34px}
+  .hero__portrait{max-height:74vh}
+  .hero__title .thin{-webkit-text-stroke-width:2px}
+  .lede{font-size:17px}
+  .sec-head p{font-size:15.5px}
+  .step p{font-size:14.5px}
+  .svc-row p{font-size:15px}
+}
+
+/* Le chiffre fantôme était un geste de la version noire : on le retire en clair */
+.case__ghost{display:none}
+.case__meta{font-size:11px;line-height:1.45;color:#4A463E}
+.case__idx{color:#4A463E}
+.case__sub span{color:#4A463E}
