@@ -295,3 +295,6 @@ body > .readrail{background:none;border:0;padding:0}
   .num p{font-size:13px}
   .hero__cta{min-height:48px}
 }
+
+/* Le label de section doit rester lisible sur le vermillon */
+.contact .contact__kick{color:rgba(255,255,255,.95);margin:0;font-size:10px;letter-spacing:.18em}
