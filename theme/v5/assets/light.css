@@ -244,3 +244,43 @@ body > .readrail{background:none;border:0;padding:0}
   .hero--proj .hero__lead{color:#E4DFD2}
 }
 .hero--proj{width:100%;max-width:none!important}
+
+/* ============ RYTHME ET DIFFÉRENCIATION DES SECTIONS ============ */
+/* Plus d'air entre les blocs : la lecture sépare d'elle-même les sections */
+.section{padding-block:clamp(104px,13vh,188px)}
+.section--tint{background:#EDE7D8}
+.sec-head{margin-bottom:clamp(48px,6.2vw,88px)}
+.sec-head p{margin-top:20px;max-width:48ch}
+.sec-num{font-size:10.5px;letter-spacing:.14em}
+.statement{margin-bottom:clamp(56px,7.4vw,100px)}
+.numbers{margin-top:clamp(44px,5.4vw,80px)}
+.numbers .num{padding:26px 24px 0 0}
+.case{margin-bottom:clamp(30px,4vw,56px)}
+.steps{gap:clamp(30px,3.6vw,60px)}
+.rates .rate{padding-block:clamp(22px,2.4vw,34px)}
+.bandcta{margin-top:clamp(56px,7vw,96px)}
+
+/* Accueil : le hero respire, puis chaque chapitre s'ouvre sur du vide */
+#studio{padding-top:clamp(110px,14vh,200px)}
+#travaux .sec-head{margin-bottom:clamp(44px,5vw,72px)}
+
+/* ============ CONTACT : bloc couleur ============ */
+.contact{background:#B4502C;padding-block:clamp(96px,12vh,168px)}
+.contact h2{color:#FBF7EE}
+.contact .lead{color:rgba(251,247,238,.92)}
+.contact .mono{color:rgba(251,247,238,.72)}
+.contact .mail{color:#FBF7EE;border-bottom-color:rgba(251,247,238,.5)}
+.contact .mail:hover{color:#1A120C;border-bottom-color:#1A120C}
+.contact .glasscard{background:#FBF7EE;border:1px solid #E4D6C0;backdrop-filter:none;-webkit-backdrop-filter:none;
+  box-shadow:0 40px 80px -50px rgba(40,15,5,.6);padding:clamp(24px,3vw,38px)}
+.contact .glasscard h3{color:#7A5A45;font-size:10px;letter-spacing:.14em}
+.contact .glasscard li{color:#3A2E24;border-bottom-color:rgba(10,10,9,.12);font-size:13.5px;padding:13px 0}
+.contact .glasscard li i{color:#B4502C;opacity:1;font-size:10px}
+.contact .glasscard b{color:#0A0A09;font-size:13.5px}
+.contact::before{background:radial-gradient(circle,rgba(255,120,60,.4),rgba(255,120,60,0) 70%)}
+
+@media (max-width:900px){
+  .section{padding-block:clamp(72px,10vh,110px)}
+  .sec-head{margin-bottom:clamp(32px,6vw,48px)}
+  .contact{padding-block:clamp(76px,10vh,110px)}
+}
