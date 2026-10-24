@@ -744,3 +744,180 @@ box-shadow:0 50px 90px -50px #000, 0 0 0 1px rgba(255,75,31,.25)}
   .case--ui .case__visual{height:auto!important;min-height:0!important}
   .case:not(.case--ui) .case__visual{height:200px!important}
 }
+
+/* ============================================================
+   MUR DE PROJETS (page réalisations)
+   ============================================================ */
+.wall{display:grid;grid-template-columns:repeat(12,1fr);gap:clamp(10px,1.4vw,18px)}
+.wcard{grid-column:span 6;display:flex;flex-direction:column;text-decoration:none;color:inherit;
+  border:1px solid rgba(242,239,231,.12);border-radius:4px;overflow:hidden;position:relative;
+  transition:border-color .35s ease,transform .35s ease}
+.wcard:hover{border-color:rgba(242,239,231,.3)}
+.wcard.w7{grid-column:span 7}
+.wcard.w5{grid-column:span 5}
+.w-paper{background:#EFEBDF;color:#0A0A09;border-color:rgba(10,10,9,.14)}
+.w-paper:hover{border-color:rgba(10,10,9,.4)}
+.w-signal{background:#FF4B1F;color:#0A0A09;border-color:rgba(10,10,9,.2)}
+.w-signal:hover{border-color:#0A0A09}
+.w-dark{background:#0D0D0C;color:#F2EFE7}
+
+.wcard__vis{position:relative;height:clamp(230px,30vw,330px);display:grid;place-items:center;overflow:hidden}
+.wcard__vis > *{transition:transform .6s cubic-bezier(.22,1,.36,1)}
+.wcard:hover .wcard__vis > *{transform:translateY(-4px) scale(1.015)}
+.wcard__meta{display:flex;align-items:baseline;gap:14px;padding:16px 18px 18px;border-top:1px solid currentColor;
+  border-color:rgba(128,128,128,.25)}
+.wcard__num{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;opacity:.55}
+.wcard__name{font-family:var(--display);font-weight:700;font-size:clamp(22px,2.4vw,32px);letter-spacing:-.03em;line-height:1;margin:0}
+.wcard__tags{margin-left:auto;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;opacity:.62;text-align:right}
+.wcard__go{position:absolute;inset:auto 0 0 0;height:0;overflow:hidden}
+.wcard__arrow{position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(10,10,9,.9);color:#F2EFE7;font-size:13px;opacity:0;transform:translateY(4px);transition:.35s}
+.wcard:hover .wcard__arrow{opacity:1;transform:none}
+.w-paper .wcard__arrow,.w-signal .wcard__arrow{background:#0A0A09;color:#F2EFE7}
+
+/* --- Scène 1 : packaging Vaasam --- */
+.sc-pack{display:flex;align-items:flex-end;gap:14px;height:78%}
+.sc-pack i{display:block;width:74px;border-radius:18px 18px 4px 4px;background:#0B0B0B;position:relative;
+  box-shadow:0 24px 40px -26px rgba(10,10,9,.6)}
+.sc-pack i:nth-child(1){height:64%}
+.sc-pack i:nth-child(2){height:88%;width:62px;border-radius:14px 14px 4px 4px}
+.sc-pack i:nth-child(3){height:76%;width:86px}
+.sc-pack i b{position:absolute;left:0;right:0;bottom:26%;background:#F2EFE7;color:#0A0A09;
+  font-family:var(--mono);font-size:6.5px;letter-spacing:.14em;text-transform:uppercase;text-align:center;padding:5px 0 3px}
+.sc-pack i u{position:absolute;left:0;right:0;bottom:12%;color:#F2EFE7;font-family:var(--mono);font-size:5.5px;
+  letter-spacing:.18em;text-align:center;text-decoration:none}
+
+/* --- Scène 2 : façade RFA --- */
+.sc-shop{width:74%;max-width:340px;background:#0A0A09;border-radius:5px;overflow:hidden;
+  box-shadow:0 30px 50px -30px rgba(10,10,9,.75)}
+.sc-shop .sh{height:64px;background:repeating-linear-gradient(180deg,#141311 0 7px,#201E1A 7px 8px)}
+.sc-shop .sg{padding:18px 16px;text-align:center;border-top:2px solid #FF4B1F;border-bottom:2px solid #FF4B1F}
+.sc-shop .sg b{display:block;font-family:var(--display);font-weight:700;font-size:34px;line-height:.9;color:#F2EFE7;letter-spacing:-.03em}
+.sc-shop .sg span{display:block;margin-top:6px;font-family:var(--mono);font-size:6.5px;letter-spacing:.24em;color:#9A958A;text-transform:uppercase}
+.sc-shop .fl{height:38px;background:linear-gradient(180deg,#17150F,#0A0A09);border-top:1px solid rgba(242,239,231,.12)}
+
+/* --- Scène 3 : interface Atelier 24 --- */
+.sc-ui{width:82%;max-width:400px;background:#F4F1E7;border-radius:5px;overflow:hidden;
+  box-shadow:0 34px 60px -34px #000;border:1px solid rgba(242,239,231,.5)}
+.sc-ui .bar{display:flex;align-items:center;gap:5px;padding:8px 10px;background:#E6E1D3;border-bottom:1px solid rgba(10,10,9,.12)}
+.sc-ui .bar i{width:6px;height:6px;border-radius:50%;background:#B9B2A2}
+.sc-ui .bar i:first-child{background:#FF4B1F}
+.sc-ui .bar span{margin-left:6px;font-family:var(--mono);font-size:7.5px;color:#4A463E;letter-spacing:.06em}
+.sc-ui .body{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px}
+.sc-ui .k{background:#FBFAF4;border:1px solid rgba(10,10,9,.12);border-radius:3px;padding:9px 10px;display:flex;flex-direction:column;gap:4px}
+.sc-ui .k em{font-family:var(--display);font-weight:700;font-style:normal;font-size:22px;line-height:1;letter-spacing:-.03em;color:#0A0A09}
+.sc-ui .k small{font-family:var(--mono);font-size:6.5px;letter-spacing:.1em;text-transform:uppercase;color:#6B665C}
+.sc-ui .gr{grid-column:1/3;display:flex;align-items:flex-end;gap:6px;height:46px;background:#FBFAF4;
+  border:1px solid rgba(10,10,9,.12);border-radius:3px;padding:8px}
+.sc-ui .gr i{flex:1;background:rgba(10,10,9,.26);border-radius:1px}
+.sc-ui .gr i:nth-child(4){background:#FF4B1F}
+
+/* --- Scène 4 : site MPT --- */
+.sc-site{width:84%;max-width:430px;background:#F7F5EE;border-radius:5px;overflow:hidden;
+  box-shadow:0 30px 56px -34px rgba(10,10,9,.45);border:1px solid rgba(10,10,9,.12)}
+.sc-site .url{display:flex;align-items:center;gap:6px;padding:7px 10px;background:#EDE9DC;border-bottom:1px solid rgba(10,10,9,.1);
+  font-family:var(--mono);font-size:7px;color:#6B665C;letter-spacing:.06em}
+.sc-site .url b{width:5px;height:5px;border-radius:50%;background:#B9B2A2}
+.sc-site .hd{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid rgba(10,10,9,.08)}
+.sc-site .lg{font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:-.02em;color:#0A0A09}
+.sc-site .lk{font-family:var(--mono);font-size:6.5px;letter-spacing:.1em;color:#6B665C;text-transform:uppercase}
+.sc-site .s-hero{padding:14px 12px 12px}
+.sc-site .s-hero h4{font-family:var(--display);font-weight:700;font-size:clamp(18px,2vw,26px);line-height:.95;letter-spacing:-.03em;
+  margin:0 0 10px;color:#0A0A09}
+.sc-site .fld{display:flex;flex-direction:column;gap:5px}
+.sc-site .fld i{display:block;height:15px;border:1px solid rgba(10,10,9,.18);border-radius:2px;background:#FFFDF7}
+.sc-site .fld i.cta{background:#0A0A09;border-color:#0A0A09;height:17px;position:relative}
+.sc-site .fld i.cta::after{content:"";position:absolute;left:50%;top:50%;width:34px;height:1px;background:#F2EFE7;transform:translate(-50%,-50%)}
+
+/* --- Scène 5 : produits PSW --- */
+.sc-prod{display:flex;align-items:flex-end;gap:16px;height:76%}
+.sc-prod .b{display:block;width:66px;border-radius:10px 10px 5px 5px;background:#0B0B0B;position:relative;
+  box-shadow:0 22px 36px -24px rgba(10,10,9,.55)}
+.sc-prod .b:nth-child(1){height:80%;background:#14231B}
+.sc-prod .b:nth-child(2){height:100%;width:74px;background:#0B0B0B}
+.sc-prod .b b{position:absolute;inset:auto 6px 30% 6px;background:#F2EFE7;color:#0A0A09;text-align:center;
+  font-family:var(--mono);font-size:6px;letter-spacing:.12em;padding:6px 2px 4px;line-height:1.5;text-transform:uppercase}
+.sc-prod .b u{position:absolute;left:0;right:0;bottom:12%;text-align:center;font-family:var(--mono);font-size:5.5px;
+  letter-spacing:.16em;color:#B8B2A6;text-decoration:none}
+.sc-prod .b em{position:absolute;left:50%;top:12%;transform:translateX(-50%);width:22px;height:22px;border-radius:50%;
+  border:1px solid rgba(242,239,231,.4)}
+
+/* --- Scène 6 : livre --- */
+.sc-book{display:flex;gap:6px;width:70%;max-width:360px;height:72%;
+  box-shadow:0 30px 50px -32px rgba(10,10,9,.6)}
+.sc-book .pg{flex:1;background:#F7F5EE;display:flex;flex-direction:column;padding:10px;gap:7px}
+.sc-book .pg:first-child{border-radius:3px 0 0 3px}
+.sc-book .pg:last-child{border-radius:0 3px 3px 0}
+.sc-book .ph{flex:1;background:#14130F;position:relative;overflow:hidden}
+.sc-book .ph::after{content:"";position:absolute;inset:auto -20% -40% -20%;height:60%;background:rgba(242,239,231,.06)}
+.sc-book .ln{height:2px;background:rgba(10,10,9,.3)}
+.sc-book .ln.s{width:52%}
+.sc-book .tt{font-family:var(--display);font-weight:700;font-size:9px;line-height:1.05;letter-spacing:-.02em;color:#0A0A09}
+.sc-book .cap{font-family:var(--mono);font-size:4.5px;letter-spacing:.14em;color:#6B665C;text-transform:uppercase}
+
+@media (max-width:900px){
+  .wcard,.wcard.w7,.wcard.w5{grid-column:span 12}
+  .wcard__vis{height:240px}
+  .sc-shop{width:70%}
+  .sc-pack i{width:58px}
+  .sc-pack i:nth-child(3){width:66px}
+  .sc-prod .b{width:52px}
+}
+
+/* --- Passe 2 : scènes plus crédibles et plus grandes --- */
+.sc-pack{height:84%;gap:20px}
+.sc-pack i{width:104px;box-shadow:0 34px 46px -30px rgba(10,10,9,.55)}
+.sc-pack i:nth-child(1){height:62%}
+.sc-pack i:nth-child(2){height:86%;width:88px}
+.sc-pack i:nth-child(3){height:74%;width:124px}
+.sc-pack i b{font-size:8px;letter-spacing:.18em;padding:7px 0 4px;bottom:24%}
+.sc-pack i u{font-size:6.5px;bottom:10%}
+
+.sc-site .s-hero h4{font-size:clamp(22px,2.3vw,30px);line-height:.94;margin-bottom:12px}
+.sc-site .fld i{height:18px}
+.sc-site .btn{display:inline-block;margin-top:9px;background:#0A0A09;color:#F2EFE7;font-family:var(--mono);
+  font-size:8px;letter-spacing:.12em;text-transform:uppercase;padding:8px 12px;border-radius:2px}
+.sc-site .mini{display:block;margin-top:8px;font-family:var(--mono);font-size:6.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:#7A7364}
+.sc-site .s-hero{padding:16px 14px 16px}
+
+.sc-prod .b{border-radius:12px 12px 6px 6px}
+.sc-prod .b::before{content:"";position:absolute;top:-26px;left:50%;transform:translateX(-50%);width:26px;height:28px;
+  background:inherit;border-radius:4px 4px 0 0;box-shadow:inset 0 -6px 0 rgba(255,255,255,.06)}
+.sc-prod .b{height:74%}
+.sc-prod .b:nth-child(2){height:94%}
+.sc-prod .b b{font-size:7px;letter-spacing:.14em;padding:8px 3px 6px;bottom:26%}
+.sc-prod .b u{font-size:6px;bottom:10%}
+.sc-prod .b em{width:26px;height:26px;border-color:rgba(242,239,231,.35)}
+
+/* Livre : objet fermé, couverture + dos */
+.sc-book{position:relative;width:56%;max-width:250px;height:78%;display:block;gap:0}
+.sc-book .bk{position:absolute;inset:0 0 0 14px;background:#F5F2E8;border-radius:2px 5px 5px 2px;
+  display:flex;flex-direction:column;justify-content:space-between;padding:18px 16px;
+  box-shadow:0 34px 54px -34px rgba(10,10,9,.7), inset -1px 0 0 rgba(10,10,9,.08)}
+.sc-book .bk::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,rgba(10,10,9,.06),transparent 30%)}
+.sc-book .bk-t{font-family:var(--display);font-weight:700;font-size:clamp(18px,1.9vw,24px);line-height:.9;
+  letter-spacing:-.03em;color:#0A0A09;text-transform:uppercase}
+.sc-book .bk-st{font-family:var(--mono);font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:#6B665C}
+.sc-book .bk-y{font-family:var(--mono);font-size:7px;letter-spacing:.16em;color:#0A0A09}
+.sc-book .bk-spine{position:absolute;left:0;top:6px;bottom:6px;width:14px;background:#0A0A09;border-radius:2px 0 0 2px;
+  box-shadow:0 30px 46px -30px rgba(10,10,9,.6)}
+
+@media (max-width:900px){
+  .sc-pack i{width:74px}
+  .sc-pack i:nth-child(2){width:64px}
+  .sc-pack i:nth-child(3){width:90px}
+  .sc-prod .b{width:58px}
+  .sc-book{width:62%}
+}
+
+/* Vaasam : silhouette de bocal avec couvercle */
+.sc-pack{align-items:flex-end}
+.sc-pack i{border-radius:6px 6px 4px 4px}
+.sc-pack i::before{content:"";position:absolute;top:-11px;left:50%;transform:translateX(-50%);
+  width:76%;height:12px;background:#1C1B18;border-radius:3px 3px 1px 1px;
+  box-shadow:inset 0 2px 0 rgba(242,239,231,.14)}
+.sc-pack i b{bottom:30%;font-size:7.5px;letter-spacing:.2em;padding:6px 0 3px;background:#F2EFE7;
+  box-shadow:0 -1px 0 rgba(10,10,9,.08),0 1px 0 rgba(10,10,9,.08)}
+.sc-pack i u{bottom:16%;font-size:6px}
+.wcard__tags{font-size:10px;opacity:.8;letter-spacing:.08em}
