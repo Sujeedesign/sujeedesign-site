@@ -23,7 +23,7 @@ if (!reduced && 'IntersectionObserver' in window && rvs.length) {
 }
 
 /* Rail de progression (accueil uniquement) */
-const links = [...document.querySelectorAll('.rail a')];
+const links = [...document.querySelectorAll('.readrail a')];
 if (links.length) {
   const ids = links.map(a => a.getAttribute('href').slice(1));
   const obs = new IntersectionObserver(es => {

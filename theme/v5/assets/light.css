@@ -78,7 +78,6 @@ body::after{opacity:.028}
 .case--ui .case__ghost{-webkit-text-stroke-color:rgba(242,239,231,.16)}
 .case{border-color:rgba(10,10,9,.14)}
 .case__bar{background:rgba(10,10,9,.04);border-color:rgba(10,10,9,.12);color:inherit}
-body > .rail{display:none}
 @media (max-width:1100px){body > .rail{display:none}}
 
 /* ---------- Mur de projets (réalisations) ---------- */
@@ -141,3 +140,106 @@ footer .foot a{color:#B8B2A6}
 .case__meta{font-size:11px;line-height:1.45;color:#4A463E}
 .case__idx{color:#4A463E}
 .case__sub span{color:#4A463E}
+
+/* ============ HERO PROJET — image pleine largeur ============ */
+.hero--proj{
+  display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch;
+  padding:0 var(--pad) clamp(56px,8vh,86px);max-width:none;
+  min-height:min(100svh,960px);height:auto;background:#0C0B09;isolation:isolate;
+}
+.hero__bg{position:absolute;inset:0;z-index:0;overflow:hidden;
+  background:radial-gradient(120% 95% at 76% 14%,#33261A 0%,#1B1610 42%,#0B0A08 100%)}
+.hero__still{position:absolute;right:-2vw;bottom:0;
+  height:min(93%,920px);width:min(78vw,1500px);
+  display:flex;align-items:flex-end;justify-content:flex-end;gap:clamp(10px,2vw,40px);
+  padding-right:clamp(24px,6vw,130px)}
+.hero__still::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:14%;pointer-events:none;
+  background:radial-gradient(60% 100% at 66% 100%,rgba(0,0,0,.5),rgba(0,0,0,0) 76%)}
+.hpack{position:relative;flex:0 0 auto;width:clamp(112px,12.5vw,232px);
+  border-radius:8px 8px 4px 4px;color:#2A2118;overflow:hidden;
+  display:flex;flex-direction:column;justify-content:space-between;
+  padding:clamp(20px,2vw,30px) clamp(10px,1vw,16px) clamp(14px,1.4vw,20px);
+  background:linear-gradient(100deg,#F2EAD8 0%,#E6D9BE 48%,#C9B892 100%);
+  box-shadow:0 50px 70px -24px rgba(0,0,0,.8),inset -10px 0 16px -10px rgba(0,0,0,.4);
+}
+.hpack::before{content:"";position:absolute;left:0;right:0;top:0;height:7px;background:#B4502C}
+.hpack::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(75deg,rgba(255,255,255,.32),transparent 34%,rgba(0,0,0,.14) 78%)}
+.hp-a{height:60%}.hp-b{height:90%}.hp-c{height:72%}
+.hp-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:#8C5A3C}
+.hpack b{font-family:var(--display);font-weight:700;font-size:clamp(17px,1.5vw,26px);
+  text-transform:uppercase;letter-spacing:-.02em;line-height:.88}
+.hpack em{font-family:var(--mono);font-style:normal;font-size:9.5px;letter-spacing:.16em;color:#6B5B45}
+.hero__word{display:none;position:absolute;right:clamp(0px,2vw,40px);bottom:-1.4vw;
+  font-family:var(--display);font-weight:700;text-transform:uppercase;line-height:.78;
+  font-size:clamp(84px,15vw,250px);letter-spacing:-.05em;
+  color:transparent;-webkit-text-stroke:1px rgba(242,239,231,.22);pointer-events:none}
+.hero__veil{position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(96deg,rgba(8,7,6,.95) 0%,rgba(8,7,6,.86) 30%,rgba(8,7,6,.5) 46%,rgba(8,7,6,.14) 68%,rgba(8,7,6,.32) 100%),
+             linear-gradient(to top,rgba(8,7,6,.8),rgba(8,7,6,0) 38%)}
+.hero__hit{position:absolute;inset:0;z-index:2;cursor:pointer;text-decoration:none}
+.hero__hit:focus-visible{outline:2px solid #FF4B1F;outline-offset:-6px}
+.hero__content{position:relative;z-index:3;pointer-events:none;max-width:min(1000px,74vw)}
+.hero--proj .hero__kicker{color:rgba(242,239,231,.82);margin:0 0 18px;font-size:10.5px;letter-spacing:.14em}
+.hero--proj .hero__kicker::before{background:#FF4B1F;width:30px}
+.hero--proj .hero__title{color:#F2EFE7;font-size:clamp(44px,7.9vw,134px);margin:0}
+.hero--proj .hero__title .thin{color:transparent;-webkit-text-stroke:2.2px #F2EFE7}
+.hero--proj .hero__cols{display:flex;align-items:flex-end;gap:clamp(18px,3vw,44px);margin-top:clamp(20px,3vh,34px);flex-wrap:wrap}
+.hero--proj .hero__lead{max-width:44ch;color:#DDD7C9;font-size:clamp(14.5px,1.05vw,17px)}
+.hero--proj .hero__lead b{color:#F2EFE7}
+.hero__cta{pointer-events:auto;display:inline-flex;align-items:center;gap:10px;text-decoration:none;
+  font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:#0A0A09;background:#F2EFE7;border:1px solid #F2EFE7;border-radius:2px;padding:14px 20px;font-size:10.5px;
+  transition:background .22s,color .22s,transform .22s}
+.hero__cta svg{width:13px;height:13px}
+.hero__cta:hover{background:#FF4B1F;border-color:#FF4B1F;color:#0A0A09;transform:translateY(-1px)}
+.hero__tag{position:absolute;z-index:3;right:var(--pad);bottom:clamp(56px,8vh,86px);
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(242,239,231,.8)}
+.hero--proj .scrollcue{z-index:3;bottom:16px;color:rgba(242,239,231,.72)}
+.hero--proj .scrollcue .bar{background:rgba(242,239,231,.22)}
+.hero--proj .scrollcue .bar::after{background:#F2EFE7}
+
+@media (max-width:900px){
+  .hero--proj{padding-bottom:clamp(96px,14vh,130px);min-height:100svh}
+  .hero__content{max-width:100%}
+  .hero__still{right:-10vw;width:130vw;height:56%;opacity:.92}
+  .hero__word{display:none;font-size:30vw;bottom:6vw;right:-3vw;opacity:.8}
+  .hero--proj .hero__title{font-size:clamp(40px,12.4vw,66px)}
+  .hero--proj .hero__cols{gap:18px;margin-top:22px}
+  .hero__tag{display:none}
+  .hero__cta{width:100%;justify-content:space-between}
+}
+
+/* Correctif : le rail du mockup Atelier 24 restait fixé au viewport */
+.win .rail{position:static;top:auto;right:auto;transform:none;height:100%;align-items:center;padding:8px 0}
+
+/* Nav claire tant qu'elle survole le hero sombre */
+body.has-dark-hero .nav:not(.scrolled) .brand b,body.has-dark-hero .nav:not(.scrolled) .nav-mid a,body.has-dark-hero .nav:not(.scrolled) .nav-right .t{color:#F2EFE7}
+body.has-dark-hero .nav:not(.scrolled) .brand .dot{background:#FF4B1F}
+body.has-dark-hero .nav:not(.scrolled) .nav-mid a:hover{color:#FF4B1F}
+body.has-dark-hero .nav:not(.scrolled) .nav-cta{background:transparent;color:#F2EFE7;border:1px solid rgba(242,239,231,.45)}
+body.has-dark-hero .nav:not(.scrolled) .nav-cta:hover{background:#FF4B1F;color:#0A0A09}
+body.has-dark-hero .nav:not(.scrolled){--muted:#B8B2A6}
+
+/* Rail de progression, isolé des styles de maquette */
+.readrail{position:fixed;right:24px;top:50%;transform:translateY(-50%);z-index:80;
+  display:flex;flex-direction:column;gap:13px;align-items:flex-end}
+.readrail a{position:relative;display:block;text-decoration:none;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:rgba(242,239,231,.5);transition:color .3s}
+.readrail a .lbl{position:absolute;right:calc(100% + 12px);top:50%;opacity:0;
+  transform:translate(6px,-50%);transition:opacity .3s,transform .3s;white-space:nowrap}
+.readrail a:hover .lbl,.readrail a.active .lbl{opacity:1;transform:translate(0,-50%)}
+.readrail a .ln{display:block;width:16px;height:1px;background:currentColor;transition:width .3s,background .3s}
+.readrail a:hover{color:#F2EFE7}
+.readrail a.active{color:#F2EFE7}
+.readrail a.active .ln{width:28px;height:2px;background:#FF4B1F}
+@media (max-width:1100px){.readrail{display:none}}
+body > .readrail{background:none;border:0;padding:0}
+
+/* Mobile : le texte passe sur les packs, on renforce le voile */
+@media (max-width:900px){
+  .hero__still{top:62px;bottom:auto;height:46%;right:-10vw;width:126vw;opacity:1;padding-right:0}
+  .hero__veil{background:linear-gradient(to bottom,rgba(8,7,6,.42) 0%,rgba(8,7,6,.1) 26%,rgba(8,7,6,.55) 44%,rgba(8,7,6,.94) 58%,#0C0B09 72%)}
+  .hero--proj .hero__lead{color:#E4DFD2}
+}

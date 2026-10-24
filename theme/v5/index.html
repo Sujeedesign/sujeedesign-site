@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sujee Design — Studio de design, Paris</title>
 <meta name="description" content="Studio de design indépendant à Paris. Identité, direction artistique, sites web et outils IA. Un seul interlocuteur, de la première esquisse à la mise en ligne.">
-<meta name="theme-color" content="#0A0A09">
+<meta name="theme-color" content="#F4F1E8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Space+Grotesk:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="assets/light.css">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 </head>
-<body>
+<body class="has-dark-hero">
 <a class="skip" href="#main">Aller au contenu</a>
 
 <nav class="nav" id="nav">
@@ -34,7 +34,7 @@
   </div>
 </nav>
 
-<div class="rail" aria-label="Progression de lecture">
+<div class="readrail" aria-label="Progression de lecture">
   <a href="#top" class="active"><span class="lbl">Intro</span><span class="ln"></span></a>
   <a href="#studio"><span class="lbl">Studio</span><span class="ln"></span></a>
   <a href="#travaux"><span class="lbl">Travaux</span><span class="ln"></span></a>
@@ -45,25 +45,35 @@
 
 <main id="main">
   <!-- HERO -->
-  <header class="hero" id="top">
-    <h1 class="hero__title" id="heroTitle">
-      <span>Votre</span>
-      <span>marque,</span>
-      <span class="thin">de&nbsp;A&nbsp;à&nbsp;Z.</span>
-    </h1>
+  <header class="hero hero--proj" id="top">
 
-    <div class="hero__portrait">
-      <div class="frame">
-        <img src="assets/sujeepan_sabesan.jpg" alt="Portrait de Sujeepan Sabesan, designer et directeur artistique">
-        <div class="fig"><i aria-hidden="true"></i>Sujeepan Sabesan, fondateur</div>
+    <div class="hero__bg" aria-hidden="true">
+      <div class="hero__still">
+        <div class="hpack hp-a"><span class="hp-lbl">Vaasam</span><b>Cumin</b><em>100 g</em></div>
+        <div class="hpack hp-b"><span class="hp-lbl">Vaasam</span><b>Curry</b><em>250 g</em></div>
+        <div class="hpack hp-c"><span class="hp-lbl">Vaasam</span><b>Safran</b><em>500 g</em></div>
+      </div>
+      <span class="hero__word">Vaasam</span>
+    </div>
+    <span class="hero__veil" aria-hidden="true"></span>
+    <a class="hero__hit" href="projet.html" aria-label="Voir l'étude de cas Vaasam Paris"></a>
+
+    <div class="hero__content">
+      <p class="hero__kicker">Projet à la une · Vaasam Paris · 2026</p>
+      <h1 class="hero__title" id="heroTitle">
+        <span>Votre</span>
+        <span>marque,</span>
+        <span class="thin">de&nbsp;A&nbsp;à&nbsp;Z.</span>
+      </h1>
+      <div class="hero__cols">
+        <p class="hero__lead">Identité, image, web, outils. Je dessine des marques qui tiennent debout partout, <b>et je reste jusqu'à ce qu'elles tournent en vrai.</b></p>
+        <a class="hero__cta" href="projet.html">Voir le projet
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
       </div>
     </div>
 
-    <div class="hero__cols">
-      <p class="hero__kicker">Studio de design · Paris · depuis 2013</p>
-      <p class="hero__lead">Identité, image, web, outils. Je dessine des marques qui tiennent debout partout, <b>et je reste jusqu'à ce qu'elles tournent en vrai.</b></p>
-    </div>
-
+    <div class="hero__tag" aria-hidden="true">Identité · Packaging · 40 références</div>
     <div class="scrollcue"><span class="bar" aria-hidden="true"></span>Défiler</div>
   </header>
 
