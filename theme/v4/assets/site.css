@@ -921,3 +921,8 @@ box-shadow:0 50px 90px -50px #000, 0 0 0 1px rgba(255,75,31,.25)}
   box-shadow:0 -1px 0 rgba(10,10,9,.08),0 1px 0 rgba(10,10,9,.08)}
 .sc-pack i u{bottom:16%;font-size:6px}
 .wcard__tags{font-size:10px;opacity:.8;letter-spacing:.08em}
+
+@media (max-width:900px){
+  .wcard__vis{height:282px}
+  .sc-site, .sc-ui{max-width:340px}
+}
