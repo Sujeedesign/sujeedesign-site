@@ -200,3 +200,8 @@ body.has-dark-hero .nav:not(.scrolled) .nav-drop__btn[aria-current]{
 .navpanel__l[aria-current="page"]{ color: var(--accent); }
 .navpanel__sub a[aria-current="page"]{ color: var(--accent); font-weight: 700; }
 .navpanel__sub a[aria-current="page"] span{ font-weight: 700; }
+
+/* la barre compacte gagne un peu de hauteur pour le logo agrandi */
+@media (min-width:1101px){
+  .nav.solid, .nav.scrolled{ height: 64px; }
+}
