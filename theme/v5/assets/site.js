@@ -55,3 +55,30 @@ addEventListener('load', () => {
 
 /* Année courante */
 document.querySelectorAll('[data-year]').forEach(el => el.textContent = new Date().getFullYear());
+
+/* CTA : halo qui suit la souris */
+(() => {
+  const bands = document.querySelectorAll('.cta-glow');
+  if (!bands.length) return;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  bands.forEach(band => {
+    let tx = 72, ty = 50, cx = 72, cy = 50, raf = null;
+    const set = () => { band.style.setProperty('--gx', cx.toFixed(2) + '%'); band.style.setProperty('--gy', cy.toFixed(2) + '%'); };
+    set();
+    const loop = () => {
+      cx += (tx - cx) * 0.08; cy += (ty - cy) * 0.08;
+      set();
+      if (Math.abs(tx - cx) > 0.15 || Math.abs(ty - cy) > 0.15) raf = requestAnimationFrame(loop);
+      else raf = null;
+    };
+    const move = e => {
+      if (reduce) return;
+      const r = band.getBoundingClientRect();
+      tx = Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100));
+      ty = Math.max(0, Math.min(100, ((e.clientY - r.top) / r.height) * 100));
+      if (!raf) raf = requestAnimationFrame(loop);
+    };
+    band.addEventListener('pointermove', move, {passive: true});
+    band.addEventListener('pointerleave', () => { tx = 72; ty = 50; if (!raf) raf = requestAnimationFrame(loop); }, {passive: true});
+  });
+})();
