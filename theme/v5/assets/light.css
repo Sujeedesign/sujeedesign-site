@@ -1359,3 +1359,9 @@ body.has-dark-hero .nav.nav--open .brand__logo--light{display:none!important}
 .rl-p__desc{font-size:clamp(15px,1.12vw,17px);opacity:.9}
 .rl-p__tags li{font-size:9px;padding:6px 10px;opacity:.75}
 .rl-p--dark .sc-book .pg,.rl-p--dark .sc-book .bk{box-shadow:0 40px 70px -30px rgba(0,0,0,.75)}
+
+.rl-p__desc{text-wrap:pretty}
+@media (max-width:860px){
+  .rl-p__info{padding-top:clamp(18px,4vw,26px)}
+  .rl-p__link{padding:8px 0 6px}
+}
