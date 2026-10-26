@@ -115,3 +115,24 @@ document.querySelectorAll('[data-year]').forEach(el => el.textContent = new Date
   [h, p, c].forEach(el => el.addEventListener('input', update));
   update();
 })();
+
+/* ---------- Menu mobile ---------- */
+(() => {
+  const nav = document.getElementById('nav');
+  const burger = nav && nav.querySelector('.nav-burger');
+  const panel = document.getElementById('navpanel');
+  if (!nav || !burger || !panel) return;
+  const setOpen = (v) => {
+    nav.classList.toggle('nav--open', v);
+    burger.setAttribute('aria-expanded', String(v));
+    burger.setAttribute('aria-label', v ? 'Fermer le menu' : 'Ouvrir le menu');
+    document.body.style.overflow = v ? 'hidden' : '';
+  };
+  burger.addEventListener('click', () => setOpen(!nav.classList.contains('nav--open')));
+  panel.addEventListener('click', (e) => { if (e.target.closest('a')) setOpen(false); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && nav.classList.contains('nav--open')) { setOpen(false); burger.focus(); }
+  });
+  const mq = window.matchMedia('(min-width:1101px)');
+  mq.addEventListener('change', (e) => { if (e.matches) setOpen(false); });
+})();

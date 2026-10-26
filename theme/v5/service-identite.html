@@ -23,18 +23,46 @@
     </a>
     <div class="nav-mid">
       <a href="realisations.html">Réalisations</a>
-      <a href="services.html" aria-current="page">Services</a>
+      <div class="nav-drop">
+        <a class="nav-drop__btn" href="services.html">Services
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.6 4.6 6 8l3.4-3.4" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <div class="nav-drop__panel">
+          <a href="service-identite.html" aria-current="page"><span>01</span>Identité de marque</a>
+          <a href="service-direction-artistique.html"><span>02</span>Direction artistique</a>
+          <a href="service-site-ecommerce.html"><span>03</span>Site &amp; e-commerce</a>
+          <a href="service-contenu.html"><span>04</span>Contenu &amp; réseaux</a>
+          <a href="agents-ia.html"><span>05</span>Agents IA</a>
+          <a class="nav-drop__all" href="services.html">Les cinq services <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
       <a href="agents-ia.html">Agents IA</a>
       <a href="a-propos.html">À propos</a>
       <a href="index.html#contact">Contact</a>
     </div>
     <div class="nav-right">
+      <button class="nav-burger" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="navpanel">
+        <span></span><span></span>
+      </button>
       <span class="t">Paris</span>
       <a class="nav-cta" href="mailto:s.sujeepan.pro@gmail.com?subject=Un%20projet">Démarrer
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
     </div>
   </div>
+    <div class="navpanel" id="navpanel">
+      <a class="navpanel__l" href="realisations.html">Réalisations</a>
+      <a class="navpanel__l" href="services.html">Services</a>
+      <div class="navpanel__sub">
+        <a href="service-identite.html"><span>01</span>Identité de marque</a>
+        <a href="service-direction-artistique.html"><span>02</span>Direction artistique</a>
+        <a href="service-site-ecommerce.html"><span>03</span>Site &amp; e-commerce</a>
+        <a href="service-contenu.html"><span>04</span>Contenu &amp; réseaux</a>
+        <a href="agents-ia.html"><span>05</span>Agents IA</a>
+      </div>
+      <a class="navpanel__l" href="a-propos.html">À propos</a>
+      <a class="navpanel__l" href="index.html#contact">Contact</a>
+    </div>
 </nav>
 <main id="main">
   <header class="sp-hero">
@@ -112,8 +140,8 @@
     <div class="wrap">
       <div class="bandcta bandcta--dark cta-glow">
         <div class="glow" aria-hidden="true"></div>
-        <p>Un projet, une formation, un avis ?</p>
-        <a class="btn-fill btn-fill--light" href="mailto:s.sujeepan.pro@gmail.com?subject=Un%20projet">Prendre contact <span aria-hidden="true">↗</span></a>
+        <p>Votre marque ne vous ressemble plus ?</p>
+        <a class="btn-fill btn-fill--light" href="mailto:s.sujeepan.pro@gmail.com?subject=Identité%20de%20marque">Parler de mon identité <span aria-hidden="true">↗</span></a>
       </div>
     </div>
   </section>
