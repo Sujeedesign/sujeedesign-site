@@ -459,3 +459,58 @@ body.has-dark-hero .nav:not(.scrolled) .nav-drop__btn[aria-current]{
 .social-rail{ flex-direction: column; }
 .foot-social{ padding: 16px 0 26px; }
 .foot-social__lbl{ color: rgba(255,255,255,.55); }
+
+/* ============================================================
+   FAQ — état survolé
+   Pas de @media (hover:hover) : certains navigateurs tactiles et
+   l'émulation rapportent hover:none, l'effet ne partirait jamais.
+   ============================================================ */
+.faq details{
+  position: relative;
+  isolation: isolate;
+  transition: border-color .35s var(--ease);
+}
+.faq details::before{
+  content: "";
+  position: absolute;
+  inset: 0 -16px;
+  z-index: -1;
+  border-radius: 3px;
+  background: rgba(10, 10, 11, .03);
+  opacity: 0;
+  transform: scaleY(.86);
+  transition: opacity .35s var(--ease), transform .45s var(--ease);
+  pointer-events: none;
+}
+.faq summary{
+  transition: color .3s var(--ease), transform .4s var(--ease);
+}
+.faq summary::after{
+  transition: color .3s var(--ease), transform .45s var(--ease);
+}
+.faq p{ transition: color .35s var(--ease); }
+
+.faq details[open]::before{
+  opacity: 1;
+  transform: none;
+  background: rgba(201, 52, 15, .045);
+}
+
+.faq details:hover{ border-color: rgba(201, 52, 15, .3); }
+.faq details:hover::before{ opacity: 1; transform: none; }
+.faq details:hover summary{ transform: translateX(8px); }
+.faq details:hover summary::after{ color: var(--accent); transform: rotate(90deg) scale(1.12); }
+.faq details[open]:hover summary::after{ transform: scale(1.12); }
+.faq details:hover p{ color: var(--ink); }
+
+.faq summary:focus-visible{
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .faq details, .faq details::before, .faq summary,
+  .faq summary::after, .faq p{ transition: none !important; }
+  .faq details:hover summary{ transform: none; }
+}
