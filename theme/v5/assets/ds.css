@@ -514,3 +514,22 @@ body.has-dark-hero .nav:not(.scrolled) .nav-drop__btn[aria-current]{
   .faq summary::after, .faq p{ transition: none !important; }
   .faq details:hover summary{ transform: none; }
 }
+
+/* ============================================================
+   CTA du header en vermillon plein
+   Blanc sur #C9340F : 5,27:1 — AA pour le texte de 11,5 px
+   ============================================================ */
+.nav-cta,
+body.has-dark-hero .nav:not(.scrolled) .nav-cta,
+.nav.nav--open .nav-cta{
+  background: var(--accent) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+.nav-cta:hover,
+body.has-dark-hero .nav:not(.scrolled) .nav-cta:hover,
+.nav.nav--open .nav-cta:hover{
+  background: #A82A0B !important;
+  color: #fff !important;
+}
+.nav-cta svg{ color: #fff; }
