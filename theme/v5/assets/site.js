@@ -82,3 +82,36 @@ document.querySelectorAll('[data-year]').forEach(el => el.textContent = new Date
     band.addEventListener('pointerleave', () => { tx = 72; ty = 50; if (!raf) raf = requestAnimationFrame(loop); }, {passive: true});
   });
 })();
+
+/* Simulateur de gains — page Agents IA */
+(() => {
+  const h = document.getElementById('roiHours');
+  if (!h) return;
+  const p = document.getElementById('roiPeople');
+  const c = document.getElementById('roiCost');
+  const oH = document.getElementById('roiHoursOut');
+  const oP = document.getElementById('roiPeopleOut');
+  const oC = document.getElementById('roiCostOut');
+  const year = document.getElementById('roiYear');
+  const hYear = document.getElementById('roiHoursYear');
+  const days = document.getElementById('roiDays');
+  const etp = document.getElementById('roiEtp');
+  const WEEKS = 46, RATE = 0.7, FTE = 1607;
+  const nf = n => Math.round(n).toLocaleString('fr-FR');
+  const update = () => {
+    const hv = +h.value, pv = +p.value, cv = +c.value;
+    const hours = hv * pv * WEEKS * RATE;
+    [[h, hv, 1, 40], [p, pv, 1, 10], [c, cv, 15, 120]].forEach(([el, v, min, max]) => {
+      el.style.setProperty('--p', ((v - min) / (max - min) * 100).toFixed(1) + '%');
+    });
+    oH.textContent = hv + ' h';
+    oP.textContent = pv;
+    oC.textContent = cv + ' €';
+    year.textContent = nf(hours * cv) + ' €';
+    hYear.textContent = nf(hours) + ' h';
+    days.textContent = nf(hours / 7) + ' j';
+    etp.textContent = (hours / FTE).toFixed(2).replace('.', ',');
+  };
+  [h, p, c].forEach(el => el.addEventListener('input', update));
+  update();
+})();

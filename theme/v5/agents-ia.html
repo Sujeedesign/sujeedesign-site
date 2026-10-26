@@ -354,11 +354,59 @@
     </div>
   </section>
 
-  <!-- RÉSULTATS -->
-  <section class="section">
+
+  <!-- ROI -->
+  <section class="section" id="roi">
     <div class="wrap">
       <div class="sec-head rv">
         <div class="sec-num">06</div>
+        <div>
+          <h2>Ce que ça vous rend,<br>en euros.</h2>
+          <p>Un agent ne s'ajoute pas à la pile des outils : il retire du temps payé. Mettez vos chiffres, l'ordre de grandeur apparaît.</p>
+        </div>
+        <div class="side">Simulation</div>
+      </div>
+
+      <div class="roi rv">
+        <div class="roi__panel">
+          <div class="roi__field">
+            <div class="roi__lab"><span>Heures perdues par semaine</span><output id="roiHoursOut">12 h</output></div>
+            <input type="range" id="roiHours" min="1" max="40" step="1" value="12" aria-label="Heures perdues par semaine">
+            <div class="roi__scale"><span>1 h</span><span>40 h</span></div>
+          </div>
+          <div class="roi__field">
+            <div class="roi__lab"><span>Personnes concernées</span><output id="roiPeopleOut">2</output></div>
+            <input type="range" id="roiPeople" min="1" max="10" step="1" value="2" aria-label="Nombre de personnes concernées">
+            <div class="roi__scale"><span>1</span><span>10</span></div>
+          </div>
+          <div class="roi__field">
+            <div class="roi__lab"><span>Coût horaire chargé</span><output id="roiCostOut">35 €</output></div>
+            <input type="range" id="roiCost" min="15" max="120" step="5" value="35" aria-label="Coût horaire chargé">
+            <div class="roi__scale"><span>15 €</span><span>120 €</span></div>
+          </div>
+          <p class="roi__foot">Base : 46 semaines travaillées, 70 % du temps récupéré.</p>
+        </div>
+
+        <div class="roi__out" aria-live="polite">
+          <span class="roi__kick">Économie estimée</span>
+          <b class="roi__big" id="roiYear">27 048 €</b>
+          <i class="roi__unit">par an</i>
+          <div class="roi__rows">
+            <div><span>Heures récupérées</span><b id="roiHoursYear">773 h</b></div>
+            <div><span>Jours de travail</span><b id="roiDays">110 j</b></div>
+            <div><span>Équivalent temps plein</span><b><span id="roiEtp">0,48</span> ETP</b></div>
+          </div>
+          <p class="roi__note">Estimation prudente, pas une promesse. Le vrai gain se mesure sur votre tâche, après le prototype.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RÉSULTATS -->
+  <section class="section section--tint">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <div class="sec-num">07</div>
         <div>
           <h2>Ce que ça change<br>vraiment.</h2>
           <p>Trois effets mesurables, et deux choses que je refuse de faire.</p>
@@ -378,10 +426,10 @@
   </section>
 
   <!-- FAQ -->
-  <section class="section section--tint">
+  <section class="section">
     <div class="wrap">
       <div class="sec-head rv">
-        <div class="sec-num">07</div>
+        <div class="sec-num">08</div>
         <div>
           <h2>Les questions<br>qui reviennent.</h2>
         </div>
@@ -412,8 +460,8 @@
     <div class="wrap">
       <div class="bandcta bandcta--dark cta-glow">
         <div class="glow" aria-hidden="true"></div>
-        <p>Un projet, une formation, un avis ?</p>
-        <a class="btn-fill btn-fill--light" href="mailto:s.sujeepan.pro@gmail.com?subject=Un%20projet">Prendre contact <span aria-hidden="true">↗</span></a>
+        <p>Combien d'heures perdez‑vous chaque semaine ?</p>
+        <a class="btn-fill btn-fill--light" href="#roi">Estimer mes gains <span aria-hidden="true">↗</span></a>
       </div>
     </div>
   </section>
