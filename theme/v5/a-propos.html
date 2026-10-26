@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>À propos — Sujee Design</title>
-<meta name="description" content="Sujeepan Sabesan, designer indépendant à Paris depuis 2013 : direction artistique, image, UX/UI, IA générative et agents, web, formation. Treize ans de pratique, huit ans d'enseignement.">
+<meta name="description" content="Sujeepan Sabesan, designer indépendant à Paris depuis 2013 : direction artistique, photographie et vidéo, UX/UI, IA générative et agents, web, formation. Treize ans de pratique, huit ans d'enseignement.">
 <meta name="theme-color" content="#F7F7F5">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,7 +17,10 @@
 <a class="skip" href="#main">Aller au contenu</a>
 <nav class="nav solid" id="nav">
   <div class="nav-in">
-    <a class="brand" href="index.html"><span class="dot" aria-hidden="true"></span><b>Sujee Design</b></a>
+    <a class="brand brand--logo" href="index.html" aria-label="Sujee Design, accueil">
+      <img class="brand__logo" src="assets/logo-sujee.svg" alt="Sujee Design" width="971" height="243">
+      <img class="brand__logo brand__logo--light" src="assets/logo-sujee-blanc.svg" alt="" width="971" height="243" aria-hidden="true">
+    </a>
     <div class="nav-mid">
       <a href="realisations.html">Réalisations</a>
       <a href="services.html">Services</a>
@@ -40,123 +43,137 @@
     <div class="wrap">
       <p class="kick">À propos · Paris · depuis 2013</p>
       <div class="ab-hero__grid">
-        <h1 class="ab-hero__title">Six métiers,<br>une seule<br>signature.</h1>
+        <h1 class="ab-hero__title">Je dessine,<br>je cadre,<br><em>j'enseigne.</em></h1>
         <div class="ab-hero__side">
-          <p class="ab-hero__lead">Direction artistique, image, UX/UI, IA générative, web et formation. Je dessine, je cadre, j'intègre et j'enseigne. <b>La même personne du brief à la livraison.</b></p>
-          <div class="ab-stats">
-            <div><b>13</b><span>ans de studio</span></div>
-            <div><b>60+</b><span>marques</span></div>
-            <div><b>8</b><span>ans d'enseignement</span></div>
-            <div><b>6</b><span>écoles</span></div>
-          </div>
+          <p class="ab-hero__lead">Treize ans de studio à Paris, à faire la même chose sous des formes différentes : donner une allure juste à des marques qui n'ont pas les moyens d'une agence. Identités, sites, images, emballages. Et depuis huit ans, des classes entières à qui je transmets la méthode.</p>
+          <p class="ab-hero__lead ab-hero__lead--2">Vous parlez à la personne qui dessine, qui code quand il faut, qui cadre le shooting et qui répond. <b>Un seul interlocuteur, du premier croquis à la mise en ligne.</b></p>
           <div class="ab-hero__cta">
             <a class="btn-fill" href="realisations.html">Voir les projets <span aria-hidden="true">↗</span></a>
             <a class="btn-line" href="mailto:s.sujeepan.pro@gmail.com?subject=Un%20projet">Écrire un message</a>
           </div>
         </div>
       </div>
-      <div class="ab-sign rv">
-        <img class="ab-sign__logo" src="assets/logo-sujee.svg" alt="Signature Sujeepan Sabesan, design" width="971" height="243">
-        <figure class="ab-portrait">
-          <img src="assets/sujeepan_sabesan.jpg" alt="Portrait de Sujeepan Sabesan, designer et directeur artistique, à Paris">
-          <figcaption>Sujeepan Sabesan · Paris, 2026</figcaption>
-        </figure>
-      </div>
+    </div>
+    <div class="ab-hero__block">
+      <figure class="ab-hero__fig">
+        <img src="assets/sujeepan_sabesan.jpg" alt="Portrait de Sujeepan Sabesan, designer et directeur artistique à Paris">
+        <figcaption>Sujeepan Sabesan · Paris</figcaption>
+      </figure>
+      <aside class="ab-hero__panel">
+        <div><span>Basé à</span><p>Paris 20e. Je travaille aussi chez les clients, en Île-de-France et à distance.</p></div>
+        <div><span>Statut</span><p>Indépendant depuis 2013. Un seul interlocuteur, du brief à la livraison.</p></div>
+        <div><span>Disponibilité</span><p>Novembre 2026, deux projets en parallèle maximum.</p></div>
+      </aside>
     </div>
   </header>
 
+  <!-- BANDE DE CHIFFRES -->
+  <section class="ab-band">
+    <div class="wrap ab-band__in">
+      <div><b>13</b><span>ans de studio</span></div>
+      <div><b>60+</b><span>marques accompagnées</span></div>
+      <div><b>8</b><span>ans d'enseignement</span></div>
+      <div><b>6</b><span>écoles</span></div>
+    </div>
+  </section>
+
   <!-- COMPÉTENCES -->
-  <section class="section">
+  <section class="section" id="savoir-faire">
     <div class="wrap">
       <div class="sec-head rv">
         <div class="sec-num">01</div>
         <div>
-          <h2>Ce que je sais faire,<br>concrètement.</h2>
-          <p>Six pratiques qui se répondent : une identité se juge aussi sur la photo qui l'accompagne, le site qui la porte et l'outil qui la fait vivre.</p>
+          <h2>Six métiers,<br>une même main.</h2>
+          <p>Une identité ne vit pas seule. Elle se juge sur la photo qui l'accompagne, le site qui la porte et l'outil qui la fait tourner. C'est pour ça que je couvre toute la chaîne.</p>
         </div>
-        <div class="side">Six pratiques</div>
+        <div class="side">De la direction artistique au code</div>
       </div>
 
-      <div class="skills">
-        <article class="skill rv">
-          <span class="skill__n">01</span>
+      <div class="rows">
+        <article class="row rv">
+          <span class="row__n">01</span>
           <h3>Direction artistique</h3>
-          <p>Nom, logo, typographie, couleur, principes de mise en page. Je construis des systèmes que vos équipes peuvent tenir sans moi, sur un flyer comme sur une façade.</p>
-          <ul><li>Identité de marque</li><li>Système graphique</li><li>Charte d'usage</li></ul>
+          <p>Nom, logo, typographie, couleur, principes de mise en page. Je construis des systèmes que vos équipes tiennent sans moi, sur un flyer comme sur une façade de boutique.</p>
+          <div class="row__tags"><span>Identité</span><span>Charte</span><span>Édition</span></div>
         </article>
 
-        <article class="skill rv">
-          <span class="skill__n">02</span>
+        <article class="row rv">
+          <span class="row__n">02</span>
           <h3>Photographie &amp; vidéo</h3>
-          <p>Direction de shooting, prise de vue, retouche, montage et motion design. Les visuels sont pensés pour le support final, pas produits puis recadrés au hasard.</p>
-          <ul><li>Shooting produit</li><li>Portrait &amp; reportage</li><li>Montage &amp; motion</li></ul>
+          <p>Direction de shooting, prise de vue, retouche, montage, motion. L'image est pensée pour son support final, pas produite puis recadrée au hasard.</p>
+          <div class="row__tags"><span>Shooting produit</span><span>Portrait</span><span>Montage</span></div>
         </article>
 
-        <article class="skill rv">
-          <span class="skill__n">03</span>
+        <article class="row rv">
+          <span class="row__n">03</span>
           <h3>UX/UI design</h3>
-          <p>Parcours, arborescence, wireframes, maquettes haute fidélité et design system. Je conçois l'écran en pensant au référencement et à la maintenance.</p>
-          <ul><li>Parcours utilisateur</li><li>Design system</li><li>Prototypage Figma</li></ul>
+          <p>Parcours, arborescence, maquettes, design system. Je conçois l'écran en gardant en tête le référencement, la performance et la maintenance.</p>
+          <div class="row__tags"><span>Parcours</span><span>Figma</span><span>Design system</span></div>
         </article>
 
-        <article class="skill rv">
-          <span class="skill__n">04</span>
+        <article class="row rv">
+          <span class="row__n">04</span>
           <h3>IA générative &amp; agents</h3>
-          <p>Images et contenus générés avec un cadre de marque, automatisations métier, agents internes connectés à vos outils. Une pratique quotidienne, pas une démonstration.</p>
-          <ul><li>Direction de modèles</li><li>Automatisations</li><li>Infrastructure d'agents</li></ul>
+          <p>Images et contenus générés dans un cadre de marque, automatisations métier, agents connectés à vos outils. Une pratique quotidienne, pas une démonstration.</p>
+          <div class="row__tags"><span>Direction de modèles</span><span>Automatisation</span><span>Agents</span></div>
         </article>
 
-        <article class="skill rv">
-          <span class="skill__n">05</span>
+        <article class="row rv">
+          <span class="row__n">05</span>
           <h3>Formation &amp; pédagogie</h3>
           <p>Huit ans devant des classes, du BTS au mastère. J'ai appris à expliquer sans jargon, à faire produire vite, et à laisser des supports qui servent encore après le cours.</p>
-          <ul><li>Design graphique</li><li>UI/UX &amp; Figma</li><li>IA appliquée</li></ul>
+          <div class="row__tags"><span>Design graphique</span><span>UI/UX</span><span>IA appliquée</span></div>
         </article>
 
-        <article class="skill rv">
-          <span class="skill__n">06</span>
+        <article class="row rv">
+          <span class="row__n">06</span>
           <h3>Web &amp; intégration</h3>
-          <p>Design et développement de sites vitrines et e-commerce : WordPress, Webflow, Framer, HTML/CSS. Performance, SEO technique et prise en main inclus.</p>
-          <ul><li>WordPress · Shopify</li><li>Webflow · Framer</li><li>SEO technique</li></ul>
+          <p>Sites vitrines et e-commerce : WordPress, Shopify, Webflow, Framer, HTML/CSS. Livrés rapides, propres, avec une prise en main et une formation à la clé.</p>
+          <div class="row__tags"><span>WordPress</span><span>Shopify</span><span>SEO technique</span></div>
         </article>
       </div>
     </div>
   </section>
 
   <!-- OUTILS -->
-  <section class="section section--tint">
+  <section class="section section--ink">
     <div class="wrap">
-      <div class="sec-head rv">
+      <div class="sec-head sec-head--dark rv">
         <div class="sec-num">02</div>
         <div>
-          <h2>Les outils du quotidien.</h2>
-          <p>Pas une liste de logiciels appris une fois : les outils que j'ouvre chaque semaine, sur des projets livrés.</p>
+          <h2>Les outils<br>du quotidien.</h2>
+          <p>Pas une liste apprise une fois. Les logiciels que j'ouvre chaque semaine, sur des projets livrés.</p>
         </div>
-        <div class="side">Suite Adobe · Figma · CMS · IA</div>
+        <div class="side">Design · Image · Web · IA</div>
       </div>
 
-      <div class="tools rv">
-        <div class="toolset">
-          <h3>Design</h3>
-          <div class="chips"><span>Figma</span><span>Photoshop</span><span>Illustrator</span><span>InDesign</span><span>Lightroom</span></div>
-        </div>
-        <div class="toolset">
-          <h3>Image &amp; vidéo</h3>
-          <div class="chips"><span>Premiere Pro</span><span>After Effects</span><span>DaVinci Resolve</span><span>Capture One</span></div>
-        </div>
-        <div class="toolset">
-          <h3>Web</h3>
-          <div class="chips"><span>WordPress</span><span>Elementor</span><span>Shopify</span><span>Webflow</span><span>Framer</span><span>HTML / CSS</span></div>
-        </div>
-        <div class="toolset">
-          <h3>IA &amp; automatisation</h3>
-          <div class="chips"><span>Midjourney</span><span>ComfyUI</span><span>ChatGPT</span><span>Claude</span><span>Gemini</span><span>n8n</span><span>Make</span><span>Ollama</span></div>
-        </div>
-        <div class="toolset">
-          <h3>Organisation</h3>
-          <div class="chips"><span>Notion</span><span>Jira</span><span>Google Workspace</span><span>Slack</span></div>
-        </div>
+      <div class="toolwall rv">
+        <div class="tool"><img src="assets/tools/figma.svg" alt="" loading="lazy"><span>Figma</span></div>
+        <div class="tool"><img src="assets/tools/adobephotoshop.svg" alt="" loading="lazy"><span>Photoshop</span></div>
+        <div class="tool"><img src="assets/tools/adobeillustrator.svg" alt="" loading="lazy"><span>Illustrator</span></div>
+        <div class="tool"><img src="assets/tools/adobeindesign.svg" alt="" loading="lazy"><span>InDesign</span></div>
+        <div class="tool"><img src="assets/tools/adobelightroom.svg" alt="" loading="lazy"><span>Lightroom</span></div>
+        <div class="tool"><img src="assets/tools/adobexd.svg" alt="" loading="lazy"><span>XD</span></div>
+        <div class="tool"><img src="assets/tools/adobepremierepro.svg" alt="" loading="lazy"><span>Premiere Pro</span></div>
+        <div class="tool"><img src="assets/tools/adobeaftereffects.svg" alt="" loading="lazy"><span>After Effects</span></div>
+        <div class="tool"><img src="assets/tools/davinciresolve.svg" alt="" loading="lazy"><span>DaVinci</span></div>
+        <div class="tool"><img src="assets/tools/wordpress.svg" alt="" loading="lazy"><span>WordPress</span></div>
+        <div class="tool"><img src="assets/tools/elementor.svg" alt="" loading="lazy"><span>Elementor</span></div>
+        <div class="tool"><img src="assets/tools/shopify.svg" alt="" loading="lazy"><span>Shopify</span></div>
+        <div class="tool"><img src="assets/tools/webflow.svg" alt="" loading="lazy"><span>Webflow</span></div>
+        <div class="tool"><img src="assets/tools/framer.svg" alt="" loading="lazy"><span>Framer</span></div>
+        <div class="tool"><img src="assets/tools/html5.svg" alt="" loading="lazy"><span>HTML / CSS</span></div>
+        <div class="tool"><img src="assets/tools/openai.svg" alt="" loading="lazy"><span>ChatGPT</span></div>
+        <div class="tool"><img src="assets/tools/anthropic.svg" alt="" loading="lazy"><span>Claude</span></div>
+        <div class="tool"><img src="assets/tools/googlegemini.svg" alt="" loading="lazy"><span>Gemini</span></div>
+        <div class="tool"><img src="assets/tools/ollama.svg" alt="" loading="lazy"><span>Ollama</span></div>
+        <div class="tool"><img src="assets/tools/n8n.svg" alt="" loading="lazy"><span>n8n</span></div>
+        <div class="tool"><img src="assets/tools/make.svg" alt="" loading="lazy"><span>Make</span></div>
+        <div class="tool"><img src="assets/tools/notion.svg" alt="" loading="lazy"><span>Notion</span></div>
+        <div class="tool"><img src="assets/tools/jira.svg" alt="" loading="lazy"><span>Jira</span></div>
+        <div class="tool"><img src="assets/tools/slack.svg" alt="" loading="lazy"><span>Slack</span></div>
       </div>
+      <p class="toolwall__note">Aussi : Midjourney, ComfyUI, Capture One, Google Workspace, Canva pour les équipes qui travaillent déjà dessus.</p>
     </div>
   </section>
 
@@ -166,43 +183,42 @@
       <div class="sec-head rv">
         <div class="sec-num">03</div>
         <div>
-          <h2>Ils m'ont confié leur marque.</h2>
-          <p>Artisans, transporteurs, maisons, cabinets, indépendants. Des structures très différentes, un même besoin : un système clair et tenable.</p>
+          <h2>Ils m'ont confié<br>leur marque.</h2>
+          <p>Artisans, transporteurs, maisons, cabinets, indépendants. Des structures très différentes, un même besoin : un système clair, tenable, qui vieillit bien.</p>
         </div>
         <div class="side">Sélection de clients</div>
       </div>
 
-      <div class="clients rv">
-        <div class="client"><b>Raj Services</b><span>Services · Île-de-France</span></div>
-        <div class="client"><b>My Prestige Transport</b><span>Transport · Premium</span></div>
-        <div class="client"><b>Maison Kanidjian</b><span>Maison · Artisanat</span></div>
-        <div class="client"><b>La Chambre Avocat</b><span>Juridique · Paris</span></div>
-        <div class="client"><b>Xavier Sport Scientist</b><span>Santé · Performance</span></div>
-        <div class="client"><b>Cabinet Leslec</b><span>Conseil · Expertise</span></div>
+      <div class="wall rv">
+        <div class="logo-cell"><span class="mark mark--sq">RS</span><b>Raj Services</b><i>Services · Île-de-France</i></div>
+        <div class="logo-cell"><span class="mark mark--cir">MP</span><b>My Prestige Transport</b><i>Transport premium</i></div>
+        <div class="logo-cell"><span class="mark mark--dia">MK</span><b>Maison Kanidjian</b><i>Maison · Artisanat</i></div>
+        <div class="logo-cell"><span class="mark mark--sq">CA</span><b>La Chambre Avocat</b><i>Juridique · Paris</i></div>
+        <div class="logo-cell"><span class="mark mark--cir">XS</span><b>Xavier Sport Scientist</b><i>Santé · Performance</i></div>
+        <div class="logo-cell"><span class="mark mark--dia">CL</span><b>Cabinet Leslec</b><i>Conseil · Expertise</i></div>
       </div>
-      <p class="clients__note">Logos et références sur demande, certains projets sont sous accord de confidentialité.</p>
+      <p class="wall__note">Collaborations 2019 — 2026. Chaque marque est présentée par son monogramme, dans le même système graphique. Références et cas détaillés sur demande.</p>
     </div>
   </section>
 
   <!-- ENSEIGNEMENT -->
   <section class="section section--tint">
     <div class="wrap">
-      <div class="sec-head rv">
-        <div class="sec-num">04</div>
-        <div>
-          <h2>Huit ans à enseigner<br>ce que je pratique.</h2>
-          <p>La pédagogie n'est pas un à-côté : c'est ce qui m'oblige à garder des méthodes claires, transmissibles et documentées.</p>
+      <div class="teach">
+        <div class="teach__big rv">
+          <div class="sec-num">04</div>
+          <b>8</b>
+          <span>ans à enseigner<br>ce que je pratique</span>
         </div>
-        <div class="side">2017 — 2026</div>
-      </div>
-
-      <div class="schools rv">
-        <div class="school"><b>MJM Graphic Design</b><span>Paris</span><em>Design graphique, direction artistique</em></div>
-        <div class="school"><b>Webstart</b><span>Paris</span><em>UI/UX, Figma, culture web</em></div>
-        <div class="school"><b>Supcad</b><span>Paris</span><em>PAO, chaîne graphique</em></div>
-        <div class="school"><b>Digital Campus</b><span>Paris</span><em>Design digital, projets étudiants</em></div>
-        <div class="school"><b>IESA Art &amp; Culture</b><span>Paris</span><em>Image, édition, médiation</em></div>
-        <div class="school"><b>School Online</b><span>Distanciel</span><em>Formations courtes, IA appliquée</em></div>
+        <div class="teach__list rv">
+          <p class="teach__intro">La pédagogie n'est pas un à-côté. C'est ce qui m'oblige à garder des méthodes claires, documentées, transmissibles. Et ce qui m'a appris à expliquer un choix en une phrase, ce qui sert aussi en réunion client.</p>
+          <div class="school"><b>MJM Graphic Design</b><i>Paris · Design graphique, direction artistique</i></div>
+          <div class="school"><b>Webstart</b><i>Paris · UI/UX, Figma, culture web</i></div>
+          <div class="school"><b>Supcad</b><i>Paris · PAO, chaîne graphique</i></div>
+          <div class="school"><b>Digital Campus</b><i>Paris · Design digital, projets étudiants</i></div>
+          <div class="school"><b>IESA Art &amp; Culture</b><i>Paris · Image, édition, médiation</i></div>
+          <div class="school"><b>School Online</b><i>Distanciel · Formations courtes, IA appliquée</i></div>
+        </div>
       </div>
     </div>
   </section>
@@ -213,29 +229,29 @@
       <div class="sec-head rv">
         <div class="sec-num">05</div>
         <div>
-          <h2>Le parcours,<br>en cinq dates.</h2>
-          <p>Pas de récit héroïque : des étapes qui expliquent pourquoi je fais ce métier de cette façon.</p>
+          <h2>Cinq dates,<br>pas un roman.</h2>
+          <p>Ce qui explique pourquoi je fais ce métier de cette façon, sans récit héroïque.</p>
         </div>
         <div class="side">2013 — 2026</div>
       </div>
 
       <div class="timeline ab-timeline rv">
-        <div><b>2013</b><span>Installation en indépendant</span></div>
+        <div><b>2013</b><span>Installation en indépendant, Paris</span></div>
         <div><b>2017</b><span>Premières missions d'enseignement</span></div>
         <div><b>2020</b><span>Édition, packaging, direction photo</span></div>
-        <div><b>2023</b><span>UI/UX, formation continue, automatisation</span></div>
+        <div><b>2023</b><span>UI/UX, formations continues, automatisation</span></div>
         <div><b>2026</b><span>Studio, IA générative et agents</span></div>
       </div>
 
       <div class="ab-facts rv">
-        <div class="ab-fact"><b>Formé à</b><span>PAO, édition, image. Passage par l'agence avant l'indépendance.</span></div>
+        <div class="ab-fact"><b>Formé à</b><span>PAO, édition, image, passage en agence avant l'indépendance.</span></div>
         <div class="ab-fact"><b>Manière de travailler</b><span>Un brief, deux directions maximum, une seule personne du début à la fin.</span></div>
         <div class="ab-fact"><b>En dehors du studio</b><span>Photographie argentique, typographie de signalétique, systèmes simples qui tiennent dix ans.</span></div>
       </div>
 
-      <div class="bandcta">
+      <div class="bandcta bandcta--dark">
         <p>Un projet, une formation, un avis ?</p>
-        <a class="btn-line" href="mailto:s.sujeepan.pro@gmail.com?subject=Un%20projet">Prendre contact <span aria-hidden="true">↗</span></a>
+        <a class="btn-fill btn-fill--light" href="mailto:s.sujeepan.pro@gmail.com?subject=Un%20projet">Prendre contact <span aria-hidden="true">↗</span></a>
       </div>
     </div>
   </section>
