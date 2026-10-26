@@ -195,3 +195,8 @@ body.has-dark-hero .nav:not(.scrolled) .nav-drop__btn[aria-current]{
 }
 .nav-drop__btn[aria-current],
 .nav-drop__btn.is-current{ color: var(--accent) !important; font-weight: 700 !important; }
+
+/* même repère orange gras dans le menu mobile */
+.navpanel__l[aria-current="page"]{ color: var(--accent); }
+.navpanel__sub a[aria-current="page"]{ color: var(--accent); font-weight: 700; }
+.navpanel__sub a[aria-current="page"] span{ font-weight: 700; }
