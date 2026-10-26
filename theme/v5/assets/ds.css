@@ -415,10 +415,11 @@ body.has-dark-hero .nav:not(.scrolled) .nav-drop__btn[aria-current]{
   writing-mode: vertical-rl;
   transform: rotate(180deg);
   font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: .16em;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: .14em;
   line-height: 1;
-  color: var(--muted);
+  color: var(--muted-2);
   text-decoration: none;
   padding: 9px 3px;
   transition: color .25s var(--ease);
@@ -455,6 +456,6 @@ body.has-dark-hero .nav:not(.scrolled) .nav-drop__btn[aria-current]{
 }
 
 /* ordre de lecture du rail et respiration du footer */
-.social-rail{ flex-direction: column-reverse; }
+.social-rail{ flex-direction: column; }
 .foot-social{ padding: 16px 0 26px; }
 .foot-social__lbl{ color: rgba(255,255,255,.55); }
