@@ -1381,3 +1381,25 @@ body.has-dark-hero .nav.nav--open .brand__logo--light{display:none!important}
   .rl-svc__card:last-child{grid-column:1/-1;border-right:0}
   .rl-svc__card p{max-width:32ch}
 }
+
+/* ============================================================
+   Bandeau contact (accueil) : dégradé animé + halo qui suit la souris
+   ============================================================ */
+.contact{overflow:hidden;isolation:isolate}
+.contact::before{
+  content:"";position:absolute;inset:-18%;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(38% 46% at var(--gx,72%) var(--gy,42%),rgba(255,168,110,.55),rgba(255,120,60,0) 64%),
+    linear-gradient(118deg,#C9340F 0%,#E0501D 26%,#A82A0C 50%,#DA4A1C 74%,#C9340F 100%);
+  background-size:100% 100%,240% 240%;
+  animation:contactFlow 24s ease-in-out infinite;
+}
+.contact .wrap{position:relative;z-index:2}
+@keyframes contactFlow{
+  0%{background-position:center,0% 50%}
+  50%{background-position:center,100% 50%}
+  100%{background-position:center,0% 50%}
+}
+@media (prefers-reduced-motion:reduce){
+  .contact::before{animation:none}
+}
