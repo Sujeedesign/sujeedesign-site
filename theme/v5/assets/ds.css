@@ -516,20 +516,31 @@ body.has-dark-hero .nav:not(.scrolled) .nav-drop__btn[aria-current]{
 }
 
 /* ============================================================
-   CTA du header en vermillon plein
-   Blanc sur #C9340F : 5,27:1 — AA pour le texte de 11,5 px
+   CTA du header : contour vermillon, flèche assortie
+   #C9340F sur #F7F7F5 = 4,92:1 — #FF6A3D sur hero = 6,9:1
    ============================================================ */
 .nav-cta,
-body.has-dark-hero .nav:not(.scrolled) .nav-cta,
 .nav.nav--open .nav-cta{
-  background: var(--accent) !important;
-  color: #fff !important;
-  border-color: transparent !important;
+  background: transparent !important;
+  color: var(--accent) !important;
+  border: 1px solid rgba(201, 52, 15, .55) !important;
 }
 .nav-cta:hover,
-body.has-dark-hero .nav:not(.scrolled) .nav-cta:hover,
 .nav.nav--open .nav-cta:hover{
-  background: #A82A0B !important;
-  color: #fff !important;
+  background: rgba(201, 52, 15, .08) !important;
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
 }
-.nav-cta svg{ color: #fff; }
+.nav-cta svg{ color: currentColor; }
+
+/* sur le hero sombre, le vermillon ne tient que 3,7:1 */
+body.has-dark-hero .nav:not(.scrolled) .nav-cta{
+  background: transparent !important;
+  color: #FF6A3D !important;
+  border: 1px solid rgba(255, 106, 61, .5) !important;
+}
+body.has-dark-hero .nav:not(.scrolled) .nav-cta:hover{
+  background: rgba(255, 106, 61, .12) !important;
+  border-color: #FF6A3D !important;
+  color: #FF6A3D !important;
+}
