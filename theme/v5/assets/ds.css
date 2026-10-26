@@ -205,3 +205,82 @@ body.has-dark-hero .nav:not(.scrolled) .nav-drop__btn[aria-current]{
 @media (min-width:1101px){
   .nav.solid, .nav.scrolled{ height: 64px; }
 }
+
+/* ============================================================
+   Titres de hero : gras, léger, mot en valeur
+   ============================================================ */
+.hero__title .hl,
+.sv-hero__title .hl,
+.sp-hero__title .hl{
+  font-weight: 300;
+  color: var(--accent);
+  letter-spacing: -.03em;
+}
+.ab-hero__title em,
+.ia-hero__title em{
+  font-style: normal;
+  font-weight: 300;
+  letter-spacing: -.03em;
+}
+/* le hero de l'accueil est sombre : l'orange doit s'éclaircir */
+.hero__title .hl{ color: #FF6A3D; }
+
+/* ============================================================
+   Hero Services : sans quadrillage, animé
+   ============================================================ */
+.sv-hero{ position: relative; overflow: hidden; }
+.sv-hero::before{
+  content: ""; position: absolute; z-index: 0; pointer-events: none;
+  right: -14%; top: -26%; width: 76vw; height: 76vw;
+  max-width: 1080px; max-height: 1080px; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(201,52,15,.16), rgba(201,52,15,.05) 55%, transparent 76%);
+  filter: blur(12px);
+  animation: svAura 20s ease-in-out infinite alternate;
+}
+.sv-hero::after{
+  content: ""; position: absolute; z-index: 0; pointer-events: none;
+  left: 0; right: 0; bottom: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(10,10,11,.16) 22%, rgba(10,10,11,.16) 78%, transparent);
+  transform-origin: left center;
+  animation: svRule 2.4s cubic-bezier(.22,1,.36,1) both .2s;
+}
+.sv-hero .wrap{ position: relative; z-index: 1; }
+@keyframes svAura{
+  from{ transform: translate3d(0,0,0) scale(1); opacity: .85; }
+  to  { transform: translate3d(-7%,6%,0) scale(1.16); opacity: 1; }
+}
+@keyframes svRule{ from{ transform: scaleX(0); } to{ transform: scaleX(1); } }
+
+/* le schéma tourne lentement, les points respirent */
+.sv-hero__fig .ring--dash,
+.sv-hero__fig .ring--in{
+  transform-box: view-box; transform-origin: 200px 200px;
+}
+.sv-hero__fig .ring--dash{ animation: svSpin 72s linear infinite; }
+.sv-hero__fig .ring--in{ animation: svSpin 46s linear infinite reverse; }
+.sv-hero__fig .spokes path{ animation: svFlow 7s linear infinite; }
+.sv-hero__fig .dots circle{ animation: svPulse 3.4s ease-in-out infinite; }
+.sv-hero__fig .dots circle:nth-child(2){ animation-delay: .3s; }
+.sv-hero__fig .dots circle:nth-child(3){ animation-delay: .6s; }
+.sv-hero__fig .dots circle:nth-child(4){ animation-delay: .9s; }
+.sv-hero__fig .dots circle:nth-child(5){ animation-delay: 1.2s; }
+@keyframes svSpin{ to{ transform: rotate(360deg); } }
+@keyframes svFlow{ to{ stroke-dashoffset: -64; } }
+@keyframes svPulse{ 0%,100%{ transform: scale(1); opacity: 1; } 50%{ transform: scale(1.45); opacity: .72; } }
+.sv-hero__fig .dots circle{ transform-box: fill-box; transform-origin: center; }
+
+/* l'icône du logo remplace « SUJEE DESIGN » au centre */
+.sv-hero__fig .core-mark{ animation: svMark 7s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.sv-hero__fig .core-halo{ fill: rgba(201,52,15,.07); animation: svHalo 7s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes svMark{ 0%,100%{ transform: scale(1); } 50%{ transform: scale(1.06); } }
+@keyframes svHalo{ 0%,100%{ transform: scale(1); opacity: .9; } 50%{ transform: scale(1.18); opacity: .6; } }
+
+@media (prefers-reduced-motion: reduce){
+  .sv-hero::before, .sv-hero::after, .sv-hero__fig .ring--dash, .sv-hero__fig .ring--in,
+  .sv-hero__fig .spokes path, .sv-hero__fig .dots circle, .sv-hero__fig .core-mark,
+  .sv-hero__fig .core-halo{ animation: none !important; }
+}
+
+/* titres des cinq services plus présents */
+.sv-row h3{ font-size: clamp(32px, 3.7vw, 58px) !important; font-weight: 700 !important; }
+.sv-row__top{ max-width: 640px; }
