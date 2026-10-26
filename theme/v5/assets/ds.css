@@ -388,3 +388,73 @@ body.has-dark-hero .nav:not(.scrolled) .nav-drop__btn[aria-current]{
 /* empilement sans aucun espace : les filets se superposent au lieu de doubler */
 .pj-fig + .pj-fig{ margin-top: 0; }
 .pj-fig img{ border-radius: 0; }
+
+/* ============================================================
+   Réseaux sociaux : rail fixe à gauche + ligne dans le footer
+   ============================================================ */
+.social-rail{
+  position: fixed;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 85;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 5px;
+  border-radius: 999px;
+  background: rgba(247,247,245,.72);
+  border: 1px solid rgba(10,10,11,.08);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  box-shadow: 0 12px 30px -22px rgba(10,10,11,.5);
+}
+.social-rail a{
+  display: block;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .16em;
+  line-height: 1;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 9px 3px;
+  transition: color .25s var(--ease);
+}
+.social-rail a:hover, .social-rail a:focus-visible{ color: var(--accent); }
+
+/* dans le footer */
+.foot-social{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 22px;
+  padding: 16px 0 4px;
+  margin-top: 10px;
+  border-top: 1px solid rgba(255,255,255,.14);
+  font-size: 11px;
+}
+.foot-social__lbl{
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .16em;
+  color: rgba(255,255,255,.45);
+}
+.foot-social a{
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255,255,255,.28);
+  transition: color .22s var(--ease), border-color .22s var(--ease);
+}
+.foot-social a:hover{ color: #fff; border-bottom-color: currentColor; }
+
+@media (max-width:1100px){
+  .social-rail{ display: none; }
+}
+
+/* ordre de lecture du rail et respiration du footer */
+.social-rail{ flex-direction: column-reverse; }
+.foot-social{ padding: 16px 0 26px; }
+.foot-social__lbl{ color: rgba(255,255,255,.55); }
