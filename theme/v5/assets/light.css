@@ -528,3 +528,81 @@ body.has-dark-hero .nav:not(.scrolled) .brand__logo--light{display:block}
   .ab-band__in b{font-size:clamp(30px,10vw,44px)}
   .ab-hero__panel{padding:22px 4px 26px}
 }
+
+/* ============ IA & AGENTS ============ */
+.ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line-2);border:1px solid var(--line-2)}
+.ai-card{background:var(--bg);padding:clamp(26px,3vw,42px) clamp(22px,2.6vw,38px);display:flex;flex-direction:column;gap:12px;transition:background .3s}
+.ai-card:hover{background:var(--paper)}
+.ai-card__k{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.ai-card h3{font-family:var(--display);font-weight:600;font-size:clamp(20px,2.1vw,29px);line-height:1.05;letter-spacing:-.025em;margin:0}
+.ai-card p{margin:0;font-size:14px;line-height:1.56;color:var(--muted-2);max-width:42ch}
+.ai-card ul{list-style:none;display:flex;flex-wrap:wrap;gap:0 14px;margin:4px 0 0;padding:0}
+.ai-card li{font-family:var(--mono);font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);
+  display:flex;align-items:center;gap:7px}
+.ai-card li::before{content:"";width:4px;height:4px;background:var(--accent);border-radius:50%;flex:none}
+
+.under{background:var(--ink);color:#F7F7F5;margin-top:clamp(22px,2.6vw,34px);
+  display:grid;grid-template-columns:.92fr 1.08fr;gap:clamp(26px,4vw,64px);
+  padding:clamp(30px,3.8vw,56px) clamp(24px,3vw,48px)}
+.under__head .mono{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+.under__head h3{font-family:var(--display);font-weight:600;font-size:clamp(24px,2.6vw,38px);line-height:1.02;letter-spacing:-.03em;margin:0 0 16px}
+.under__head p{margin:0;font-size:14px;line-height:1.6;color:rgba(247,247,245,.72);max-width:40ch}
+.under__cols{display:flex;flex-direction:column}
+.under__cols > div{padding:16px 0;border-top:1px solid rgba(255,255,255,.14)}
+.under__cols > div:first-child{border-top:0;padding-top:0}
+.under__cols b{display:block;font-family:var(--display);font-weight:600;font-size:clamp(15px,1.45vw,19px);letter-spacing:-.02em;margin-bottom:7px}
+.under__cols p{margin:0;font-size:13px;line-height:1.55;color:rgba(247,247,245,.62);max-width:46ch}
+
+.ai-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(18px,2.2vw,34px);margin-top:clamp(32px,4vw,56px)}
+.ai-steps > div{border-top:1px solid var(--line);padding-top:16px}
+.ai-steps b{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--accent);margin-bottom:14px;font-weight:400}
+.ai-steps span{display:block;font-family:var(--display);font-weight:600;font-size:clamp(15px,1.5vw,19px);letter-spacing:-.02em;margin-bottom:8px}
+.ai-steps i{display:block;font-style:normal;font-size:12.5px;line-height:1.5;color:var(--muted)}
+@media (max-width:900px){
+  .ai-grid{grid-template-columns:1fr}
+  .under{grid-template-columns:1fr;gap:26px}
+  .ai-steps{grid-template-columns:1fr 1fr}
+}
+@media (max-width:520px){.ai-steps{grid-template-columns:1fr}}
+
+/* ============ FILETS : PADDING SYMÉTRIQUE (systématique) ============ */
+.timeline div{padding:18px clamp(14px,1.7vw,26px) 0}
+.timeline div:first-child{padding-left:0}
+.timeline div:last-child{padding-right:0;border-right:0}
+.numbers .num{padding:26px clamp(18px,2vw,34px) 0}
+.numbers .num:first-child{padding-left:0}
+.numbers .num:last-child{padding-right:0;border-right:0}
+.step{padding:24px clamp(16px,2vw,30px) 0}
+.step:first-child{padding-left:0}
+.step:last-child{padding-right:0;border-right:0}
+.meta-grid div{padding:18px clamp(14px,1.7vw,26px)}
+.meta-grid div:first-child{padding-left:0}
+.meta-grid div:last-child{padding-right:0;border-right:0}
+.results div{padding:20px clamp(14px,1.7vw,26px) 0}
+.results div:first-child{padding-left:0}
+.results div:last-child{padding-right:0;border-right:0}
+@media (max-width:900px){
+  .timeline div{border-right:1px solid var(--line-2);padding:16px 16px 0 0}
+  .timeline div:nth-child(2n){border-right:0;padding-right:0}
+  .timeline div:nth-child(odd){padding-left:0}
+  .timeline{row-gap:18px}
+}
+
+.ai-card li{color:var(--muted-2)}
+.ai-card li::before{background:var(--ink);opacity:.35}
+.ai-card:hover li::before{background:var(--accent);opacity:1}
+.ai-card{position:relative}
+.ai-card::after{content:"↗";position:absolute;top:clamp(20px,2.4vw,32px);right:clamp(18px,2.2vw,30px);
+  font-family:var(--mono);font-size:12px;color:var(--muted);opacity:0;transform:translate(-4px,4px);transition:.3s}
+.ai-card:hover::after{opacity:1;transform:none;color:var(--accent)}
+.ai-cta{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px;
+  margin-top:clamp(30px,3.6vw,50px);padding-top:clamp(22px,2.6vw,34px);border-top:1px solid var(--line)}
+.ai-cta p{margin:0;font-size:clamp(14px,1.15vw,16.5px);line-height:1.5;color:var(--muted);max-width:52ch}
+.ai-cta b{color:var(--ink);font-weight:500}
+.sec-head .side{color:var(--muted-2)}
+@media (max-width:600px){.ai-cta{align-items:flex-start}.ai-cta .btn-fill{width:100%;justify-content:center;min-height:48px}}
+
+.under__head{align-self:center}
+.under__head p{color:rgba(247,247,245,.8)}
+.under__cols p{color:rgba(247,247,245,.7);font-size:13.5px}
+.under__head .mono{font-size:9.5px}
