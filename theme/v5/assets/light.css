@@ -641,8 +641,8 @@ body.has-dark-hero .nav:not(.scrolled) .brand__logo--light{display:block}
     radial-gradient(34vw 34vw at var(--gx,72%) var(--gy,50%), rgba(201,52,15,.95), rgba(201,52,15,0) 62%),
     radial-gradient(26vw 26vw at calc(var(--gx,72%) + 9%) calc(var(--gy,50%) + 26%), rgba(255,122,60,.6), rgba(255,122,60,0) 60%),
     radial-gradient(30vw 30vw at calc(var(--gx,72%) - 14%) calc(var(--gy,50%) - 40%), rgba(120,26,6,.75), rgba(120,26,6,0) 65%);
-  filter:blur(34px) saturate(115%);
-  opacity:.7;
+  filter:blur(26px) saturate(125%);
+  opacity:.8;
   transition:opacity .6s ease}
 .cta-glow:hover .glow{opacity:1}
 .cta-glow::after{content:"";position:absolute;inset:-60%;z-index:0;pointer-events:none;
@@ -719,3 +719,15 @@ body.has-dark-hero .nav:not(.scrolled) .brand__logo--light{display:block}
   footer .foot{flex-direction:column;align-items:flex-start;gap:8px;padding-bottom:8px}
 }
 @media (max-width:900px){.ia-hero__title{text-wrap:balance}}
+
+/* CTA : proportions plus franches */
+.bandcta--dark{padding:clamp(34px,4.4vw,62px) clamp(26px,3.2vw,56px);gap:clamp(20px,3vw,40px)}
+.bandcta--dark p{font-size:clamp(21px,2.9vw,40px);font-weight:600;letter-spacing:-.03em;line-height:1.08;max-width:26ch}
+.bandcta--dark p b{font-weight:600;color:#FFD9C9}
+.bandcta--dark .btn-fill{padding:17px 26px;font-size:10.5px;letter-spacing:.12em}
+@media (max-width:700px){
+  .bandcta--dark{flex-direction:column;align-items:flex-start;padding:30px 24px}
+  .bandcta--dark p{font-size:clamp(19px,6vw,26px);max-width:100%}
+  .bandcta--dark .btn-fill{width:100%;justify-content:center;min-height:50px}
+}
+.bandcta--dark .btn-fill{padding:18px 30px;font-size:11px;min-height:54px;border-radius:2px}
