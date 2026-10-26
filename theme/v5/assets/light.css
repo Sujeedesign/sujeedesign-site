@@ -1365,3 +1365,10 @@ body.has-dark-hero .nav.nav--open .brand__logo--light{display:none!important}
   .rl-p__info{padding-top:clamp(18px,4vw,26px)}
   .rl-p__link{padding:8px 0 6px}
 }
+
+/* accueil : liens vers les pages intérieures */
+.side a{color:var(--accent);text-decoration:none;border-bottom:1px solid currentColor;padding-bottom:2px;transition:opacity .2s}
+.side a:hover{opacity:.7}
+.rate:hover{background:rgba(10,10,11,.035);padding-left:14px}
+.rate:hover h3{color:var(--accent)}
+.rate h3{transition:color .25s}
