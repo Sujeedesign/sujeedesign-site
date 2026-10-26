@@ -168,9 +168,9 @@ footer a:hover{ border-bottom-color: rgba(255,255,255,.7); }
    ============================================================ */
 
 /* logo un peu plus présent */
-.brand__logo{ height: 36px !important; }
-@media (max-width:1100px){ .brand__logo{ height: 30px !important; } }
-@media (max-width:420px){ .brand__logo{ height: 26px !important; } }
+.brand__logo{ height: 41px !important; }
+@media (max-width:1100px){ .brand__logo{ height: 34px !important; } }
+@media (max-width:420px){ .brand__logo{ height: 29px !important; } }
 
 /* projets de l'accueil au format 16/9 : le visuel suit la hauteur */
 @media (min-width:861px){
