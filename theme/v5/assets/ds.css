@@ -292,3 +292,64 @@ body.has-dark-hero .nav:not(.scrolled) .nav-drop__btn[aria-current]{
   max-width: 15ch;
 }
 @media (max-width:1100px){ .sp-hero__title{ max-width: none; } }
+
+/* ============================================================
+   À propos : frise lisible, une date par ligne
+   ============================================================ */
+.ab-frise{
+  margin-top: clamp(26px, 3.6vw, 44px);
+  border-top: 1px solid var(--line);
+  max-width: 1080px;
+}
+.ab-frise__row{
+  display: grid;
+  grid-template-columns: clamp(90px, 11vw, 150px) 1fr;
+  gap: clamp(18px, 3vw, 48px);
+  align-items: baseline;
+  padding: clamp(18px, 2.3vw, 28px) 0;
+  border-bottom: 1px solid var(--line-2);
+  transition: border-color .3s var(--ease);
+}
+.ab-frise__row b{
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(21px, 2.15vw, 32px);
+  letter-spacing: -.035em;
+  line-height: 1;
+  color: var(--muted);
+  transition: color .3s var(--ease);
+}
+.ab-frise__row span{
+  font-size: clamp(15px, 1.15vw, 17px);
+  line-height: 1.35;
+  letter-spacing: -.01em;
+  color: var(--ink);
+  max-width: 42ch;
+}
+.ab-frise__row:hover{ border-bottom-color: var(--line); }
+.ab-frise__row:hover b{ color: var(--accent); }
+
+/* les trois repères, plus calmes */
+.ab-facts{
+  gap: clamp(28px, 4vw, 64px) !important;
+  margin-top: clamp(52px, 6vw, 84px) !important;
+  max-width: 1180px;
+}
+.ab-fact{ padding-top: 14px !important; }
+.ab-fact b{ margin-bottom: 10px !important; }
+.ab-fact span{
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  max-width: 34ch;
+  display: block;
+}
+
+@media (max-width:700px){
+  .ab-frise__row{ grid-template-columns: 68px 1fr; gap: 16px; }
+  .ab-frise__row b{ font-size: 20px; }
+}
+
+/* la frise et les repères s'alignent sur le titre, pas sur le numéro de section */
+@media (min-width:901px){
+  .ab-frise, .ab-facts{ margin-left: calc(70px + clamp(12px, 2vw, 28px)); max-width: none; }
+}
