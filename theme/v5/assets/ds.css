@@ -284,3 +284,11 @@ body.has-dark-hero .nav:not(.scrolled) .nav-drop__btn[aria-current]{
 /* titres des cinq services plus présents */
 .sv-row h3{ font-size: clamp(32px, 3.7vw, 58px) !important; font-weight: 700 !important; }
 .sv-row__top{ max-width: 640px; }
+
+/* les titres de page service se coupent proprement, sans ligne orpheline */
+.sp-hero__title{
+  font-size: clamp(34px, 5vw, 84px) !important;
+  text-wrap: balance;
+  max-width: 15ch;
+}
+@media (max-width:1100px){ .sp-hero__title{ max-width: none; } }
