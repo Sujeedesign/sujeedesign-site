@@ -164,7 +164,7 @@ footer a:hover{ border-bottom-color: rgba(255,255,255,.7); }
 .nav-drop__all{ border-top: 1px solid var(--line-2); }
 
 /* ============================================================
-   Header flottant + casse des projets 16/9
+   Casse des projets 16/9 + état actif du menu
    ============================================================ */
 
 /* logo un peu plus présent */
@@ -172,80 +172,26 @@ footer a:hover{ border-bottom-color: rgba(255,255,255,.7); }
 @media (max-width:1100px){ .brand__logo{ height: 30px !important; } }
 @media (max-width:420px){ .brand__logo{ height: 26px !important; } }
 
-/* barre flottante, détachée du bord */
-@media (min-width:1101px){
-  .nav{
-    height: auto; padding-top: 12px; background: transparent !important;
-    border-bottom: 0 !important; backdrop-filter: none !important;
-  }
-  .nav.scrolled{ height: auto; background: transparent !important; border-bottom: 0 !important; }
-  .nav-in{
-    max-width: 1480px; margin: 0 auto; height: 74px;
-    padding: 0 10px 0 24px; border-radius: 18px;
-    background: rgba(247,247,245,.74);
-    border: 1px solid rgba(10,10,11,.10);
-    box-shadow: 0 22px 48px -30px rgba(10,10,11,.42);
-    backdrop-filter: blur(22px) saturate(170%);
-    -webkit-backdrop-filter: blur(22px) saturate(170%);
-    transition: height .35s var(--ease), background .35s var(--ease), box-shadow .35s var(--ease);
-  }
-  .nav.scrolled .nav-in{
-    height: 64px; background: rgba(250,250,248,.9);
-    box-shadow: 0 14px 34px -22px rgba(10,10,11,.45);
-  }
-  /* sur un hero sombre, verre fumé */
-  body.has-dark-hero .nav:not(.scrolled) .nav-in{
-    background: rgba(16,15,14,.52);
-    border-color: rgba(255,255,255,.14);
-    box-shadow: 0 22px 60px -28px rgba(0,0,0,.85);
-  }
-}
-
-/* état actif : pastille pleine, plus de soulignement */
-.nav-mid{ gap: 4px !important; }
-.nav-mid a{
-  padding: 9px 13px; border-radius: 999px;
-  transition: background .22s var(--ease), color .22s var(--ease);
-}
-.nav-mid a[aria-current="page"]::after,
-.nav-mid a[aria-current]::after{ display: none !important; }
-.nav-mid a:hover{ background: rgba(10,10,11,.05); }
-.nav-mid a[aria-current="page"],
-.nav-mid a[aria-current]{
-  background: rgba(10,10,11,.07); color: var(--ink) !important;
-}
-body.has-dark-hero .nav:not(.scrolled) .nav-mid a:hover{ background: rgba(255,255,255,.10); }
-body.has-dark-hero .nav:not(.scrolled) .nav-mid a[aria-current]{
-  background: rgba(255,255,255,.16); color: #fff !important;
-}
-
-/* projets de l'accueil au format 16/9 */
+/* projets de l'accueil au format 16/9 : le visuel suit la hauteur */
 @media (min-width:861px){
   .case{ aspect-ratio: 16 / 9; height: auto; max-height: none; min-height: 520px; }
-}
-
-/* dans une carte 16/9, le visuel prend sa place */
-@media (min-width:861px){
   .case__body{ align-items: center; height: 100%; }
   .case__visual{ height: clamp(420px, 80%, 640px); align-self: center; }
   .case__title{ font-size: clamp(56px, 8vw, 132px); }
 }
 
-/* même header flottant sur mobile et tablette */
-@media (max-width:1100px){
-  .nav{ height: auto; padding: 8px 12px 0; background: transparent !important;
-    border-bottom: 0 !important; backdrop-filter: none !important; }
-  .nav.scrolled{ height: auto; background: transparent !important; }
-  .nav-in{
-    height: 58px; padding: 0 8px 0 14px; border-radius: 14px;
-    background: rgba(247,247,245,.9);
-    border: 1px solid rgba(10,10,11,.08);
-    box-shadow: 0 14px 30px -22px rgba(10,10,11,.5);
-    backdrop-filter: blur(18px) saturate(160%);
-    -webkit-backdrop-filter: blur(18px) saturate(160%);
-  }
-  body.has-dark-hero .nav:not(.scrolled) .nav-in{
-    background: rgba(16,15,14,.6); border-color: rgba(255,255,255,.14);
-  }
-  .nav.solid .nav-in{ background: rgba(247,247,245,.92); }
+/* état actif : libellé vermillon en gras, sans pastille */
+.nav-mid a[aria-current="page"]::after,
+.nav-mid a[aria-current]::after{ display: none !important; }
+.nav-mid a[aria-current="page"],
+.nav-mid a[aria-current]{
+  color: var(--accent) !important;
+  font-weight: 700 !important;
 }
+/* sur hero sombre, le vermillon manque de contraste (3,7:1) : orange clair */
+body.has-dark-hero .nav:not(.scrolled) .nav-mid a[aria-current],
+body.has-dark-hero .nav:not(.scrolled) .nav-drop__btn[aria-current]{
+  color: #FF6A3D !important;
+}
+.nav-drop__btn[aria-current],
+.nav-drop__btn.is-current{ color: var(--accent) !important; font-weight: 700 !important; }
