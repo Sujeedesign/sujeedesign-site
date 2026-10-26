@@ -731,3 +731,29 @@ body.has-dark-hero .nav:not(.scrolled) .brand__logo--light{display:block}
   .bandcta--dark .btn-fill{width:100%;justify-content:center;min-height:50px}
 }
 .bandcta--dark .btn-fill{padding:18px 30px;font-size:11px;min-height:54px;border-radius:2px}
+
+/* ============ RYTHME VERTICAL UNIFIÉ ============ */
+:root{
+  --s-section:clamp(78px,9.4vh,132px);
+  --s-section-sm:clamp(54px,7vh,84px);
+  --s-head:clamp(36px,4.2vw,62px);
+}
+.section{padding-block:var(--s-section)}
+.sec-head{margin-bottom:var(--s-head)}
+.statement{margin-bottom:clamp(44px,5.4vw,76px)}
+.numbers{margin-top:clamp(34px,4.2vw,60px)}
+.case{margin-bottom:clamp(24px,3.2vw,44px)}
+#studio{padding-top:clamp(86px,11vh,160px)}
+
+/* Bandeau d'appel à l'action : identique partout */
+.cta-section{padding:clamp(18px,2.4vh,32px) 0 clamp(40px,5vh,64px)}
+.bandcta{margin-top:0;border-top:0;min-height:clamp(176px,17vw,224px);
+  padding:clamp(32px,4vw,56px) clamp(24px,3vw,52px)}
+footer{margin-top:0}
+
+@media (max-width:900px){
+  .section{padding-block:var(--s-section-sm)}
+  .sec-head{margin-bottom:clamp(28px,4.4vw,44px)}
+  .cta-section{padding:14px 0 clamp(32px,4vh,48px)}
+  .bandcta{min-height:0;padding:30px 24px}
+}
