@@ -353,3 +353,35 @@ body.has-dark-hero .nav:not(.scrolled) .nav-drop__btn[aria-current]{
 @media (min-width:901px){
   .ab-frise, .ab-facts{ margin-left: calc(70px + clamp(12px, 2vw, 28px)); max-width: none; }
 }
+
+/* ============================================================
+   Page projet : une seule colonne d'images, ratio d'origine
+   ============================================================ */
+.pj-gallery{
+  display: flex;
+  flex-direction: column;
+  gap: clamp(18px, 2.2vw, 34px);
+  margin-top: clamp(30px, 4vw, 56px);
+}
+.pj-fig{ margin: 0; }
+.pj-fig img{
+  display: block;
+  width: 100%;
+  height: auto;      /* le ratio du fichier est conservé, jamais recadré */
+  max-width: 100%;
+  border-radius: 2px;
+  background: var(--bg-2);
+  border: 1px solid rgba(10,10,11,.09);
+}
+.pj-fig figcaption{
+  margin-top: 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: none;
+  color: var(--muted);
+}
+@media (max-width:700px){
+  .pj-gallery{ gap: 14px; }
+  .pj-fig figcaption{ margin-top: 8px; font-size: 9px; }
+}
