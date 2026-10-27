@@ -503,10 +503,15 @@ def test_every_page_loads_shared_stylesheet(rendered: dict[str, RenderedPage]) -
 
 
 def test_primary_navigation_destinations_match(rendered: dict[str, RenderedPage]) -> None:
-    expected = [("Realisations", "/realisations"), ("Services", "/services"), ("Contact", "/contact")]
+    # Portage v2 : chaque entrée de menu est numérotée (01, 02) et la barre se termine
+    # par un CTA contact au libellé éditorial ("Parlons-en").
+    expected = [("/realisations", "Realisations"), ("/services", "Services"), ("/contact", None)]
     for route, page in rendered.items():
-        assert page.dom.nav_links, f"{route} : la navigation principale doit contenir des liens"
-        assert page.dom.nav_links == expected, f"{route} : destinations de navigation inattendues"
+        assert len(page.dom.nav_links) == len(expected), f"{route} : {page.dom.nav_links}"
+        for (label, href), (want_href, want_label) in zip(page.dom.nav_links, expected):
+            assert href == want_href, f"{route} : destination {href} au lieu de {want_href}"
+            if want_label:
+                assert want_label in label, f"{route} : libellé {label} inattendu"
 
 
 def test_primary_cta_uses_filled_style_on_every_page(rendered: dict[str, RenderedPage]) -> None:
@@ -612,8 +617,8 @@ def test_final_cta_reuses_the_shared_cta_macro() -> None:
 
 def test_home_hero_has_no_portrait(rendered: dict[str, RenderedPage]) -> None:
     page = rendered[HOME_ROUTE]
-    # Le hero d'accueil est un <header class="hero">, pas une <section>.
-    header = re.search(r'<header class="hero"[^>]*>(.*?)</header>', page.html, re.S)
+    # Le hero d'accueil est un <header class="v2-hero"> (portage v2), pas une <section>.
+    header = re.search(r'<header class="(?:v2-)?hero"[^>]*>(.*?)</header>', page.html, re.S)
     assert header is not None, "hero d'accueil absent"
     hero = header.group(1)
     assert "hero-figure" not in hero and "hero-photo" not in hero, "portrait encore rendu dans le hero"
