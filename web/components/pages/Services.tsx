@@ -119,7 +119,7 @@ export function Services() {
                   <img src="/assets/img/svc-contenu.jpg" alt="Revue ouverte, appareil photo et notes adhésives vermillon." width={1400} height={933} loading="lazy" decoding="async" />
                 </div>
               </a>
-              <a className="sv-row rv" href="/services/agents-ia">
+              <a className="sv-row rv" href="/agents-ia">
                 <div className="sv-row__body">
                   <div className="sv-row__top"><span className="sv-row__n">05</span><span className="sv-row__dur">1 à 4 semaines</span></div>
                   <h3>Agents IA</h3>

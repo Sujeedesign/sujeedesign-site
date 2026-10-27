@@ -18,7 +18,7 @@ const legacyUrls: Array<{ source: string; destination: string }> = [
   { source: "/realisations.html", destination: "/realisations" },
   { source: "/services.html", destination: "/services" },
   { source: "/apropos.html", destination: "/a-propos" },
-  { source: "/contact.html", destination: "/a-propos" },
+  { source: "/contact.html", destination: "/a-propos#contact" },
   { source: "/mentions-legales.html", destination: "/mentions-legales" },
   { source: "/identite.html", destination: "/services/identite-de-marque" },
   { source: "/creation-visuelle.html", destination: "/services/direction-artistique" },
@@ -31,7 +31,7 @@ const legacyUrls: Array<{ source: string; destination: string }> = [
   { source: "/projet-formation.html", destination: "/a-propos" },
 
   // Site FastAPI en production (slugs antérieurs au v5)
-  { source: "/contact", destination: "/a-propos" },
+  { source: "/contact", destination: "/a-propos#contact" },
   { source: "/services/identite", destination: "/services/identite-de-marque" },
   { source: "/services/creation-visuelle", destination: "/services/direction-artistique" },
   { source: "/services/web", destination: "/services/site-ecommerce" },
@@ -50,7 +50,35 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   async redirects() {
     return [
+      // Préversion /v5 : chaque page rejoint son équivalent à la racine.
       { source: "/v5", destination: "/", statusCode: 301 },
+      { source: "/v5/index.html", destination: "/", statusCode: 301 },
+      { source: "/v5/a-propos.html", destination: "/a-propos", statusCode: 301 },
+      { source: "/v5/agents-ia.html", destination: "/agents-ia", statusCode: 301 },
+      { source: "/v5/realisations.html", destination: "/realisations", statusCode: 301 },
+      { source: "/v5/projet.html", destination: "/realisations/vaasam", statusCode: 301 },
+      { source: "/v5/services.html", destination: "/services", statusCode: 301 },
+      {
+        source: "/v5/service-identite.html",
+        destination: "/services/identite-de-marque",
+        statusCode: 301,
+      },
+      {
+        source: "/v5/service-direction-artistique.html",
+        destination: "/services/direction-artistique",
+        statusCode: 301,
+      },
+      {
+        source: "/v5/service-site-ecommerce.html",
+        destination: "/services/site-ecommerce",
+        statusCode: 301,
+      },
+      {
+        source: "/v5/service-contenu.html",
+        destination: "/services/contenu-reseaux",
+        statusCode: 301,
+      },
+      { source: "/v5/mentions-legales.html", destination: "/mentions-legales", statusCode: 301 },
       { source: "/v5/:path*", destination: "/", statusCode: 301 },
       ...legacyUrls.map((url) => ({ ...url, statusCode: 301 as const })),
     ];

@@ -2,7 +2,8 @@
 (() => {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const hero = document.querySelector('.rl-hero');
-  if (hero) requestAnimationFrame(() => hero.classList.add('is-in'));
+  if (!hero) return;
+  requestAnimationFrame(() => hero.classList.add('is-in'));
   if (reduce) return;
 
   const run = () => {

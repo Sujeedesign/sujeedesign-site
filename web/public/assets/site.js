@@ -38,7 +38,7 @@ if (links.length) {
 }
 
 /* Moment de mouvement 1 : hero à trois états (accueil) */
-addEventListener('load', () => {
+const heroMotion = () => {
   if (typeof gsap === 'undefined' || !document.querySelector('.hero')) return;
   gsap.registerPlugin(ScrollTrigger);
   gsap.matchMedia().add('(min-width: 861px) and (prefers-reduced-motion: no-preference)', () => {
@@ -51,7 +51,10 @@ addEventListener('load', () => {
     .to('.hero__portrait', {opacity: .35, ease: 'none'}, .45)
     .to('#nav', {height: 58, ease: 'none'}, 0);
   });
-});
+};
+/* Injection après hydratation (Next) : si la page est déjà chargée, on démarre tout de suite. */
+if (document.readyState === 'complete') heroMotion();
+else addEventListener('load', heroMotion, {once: true});
 
 /* Année courante */
 document.querySelectorAll('[data-year]').forEach(el => el.textContent = new Date().getFullYear());

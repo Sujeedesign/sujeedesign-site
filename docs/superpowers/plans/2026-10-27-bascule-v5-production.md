@@ -11,14 +11,20 @@ Branche : `feat/vitrine-next` (commit `3b47d49`), app dans `web/`.
 - Géométrie du `h1` et responsive 390 px identiques (mêmes `top/left/width/height`,
   même `font-size`, `overflow-x = 0`, aucune image cassée, burger présent).
 - `next build` OK (16 routes, sortie standalone), `tsc --noEmit` 0, `vitest` vert.
-- Plus aucune dépendance CDN tierce (le v5 n'utilise que des API natives).
+- Animations du v5 conservées : GSAP 3.13 + ScrollTrigger servis localement depuis
+  `web/public/assets` (aucun CDN, aucun chargement bloquant), `site.js`, `anim.js`
+  et `rl.js` chargés après hydratation. Vérifié en navigateur : hero pinné (1 trigger),
+  `pin-spacer` créé, `h1` de `/realisations` révélé (`is-in`), 0 débordement à 390 px.
 - SEO construit côté Next : `sitemap.xml`, `robots.txt`, OpenGraph, Twitter,
   JSON-LD `ProfessionalService`, canonical par page.
 - Redirections `301` strictes vers les nouvelles URL :
-  - `/v5`, `/v5/*` → `/`
+  - `/v5` → `/`, et chaque page `/v5/*.html` → sa page équivalente
+    (`/v5/a-propos.html` → `/a-propos`, `/v5/projet.html` → `/realisations/vaasam`,
+    `/v5/service-identite.html` → `/services/identite-de-marque`, etc.)
   - anciens fichiers `.html` (`/index.html`, `/apropos.html`, `/identite.html`…)
   - anciennes routes FastAPI (`/services/identite`, `/services/ia`,
-    `/realisations/vaasam-paris`, `/contact` → `/a-propos`, etc.)
+    `/realisations/vaasam-paris` → page équivalente)
+  - `/contact`, `/contact.html` → `/a-propos#contact` (ancre réelle sur le bloc CTA)
   - `/services/agents-ia` → `/agents-ia`
 - 404 réelle sur les URL inconnues, `sitemap.xml` et `robots.txt` à 200.
 
@@ -26,8 +32,9 @@ Branche : `feat/vitrine-next` (commit `3b47d49`), app dans `web/`.
 
 - `docker build` de l'image finale : le daemon Docker n'était pas joignable lors
   du dernier passage. Le Dockerfile (`node:22-alpine`, multi-stage, standalone,
-  user non-root `nextjs`, port 3000) est inchangé et a déjà buildé une fois.
-  À rejouer avant la bascule.
+  user non-root `nextjs`, port 3000, `HEALTHCHECK` sur `/` via `wget`) a été
+  complété depuis ; à build via le builder Coolify avant la bascule.
+- `npm start` écoute désormais 3000, comme le conteneur (plus d'ambiguïté de port).
 
 ## Configuration Coolify cible
 

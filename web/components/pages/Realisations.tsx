@@ -174,7 +174,7 @@ export function Realisations() {
                 <p>Ligne éditoriale, gabarits, production régulière.</p>
                 <span className="rl-svc__a" aria-hidden="true">↗</span>
               </a>
-              <a className="rl-svc__card" href="/services/agents-ia">
+              <a className="rl-svc__card" href="/agents-ia">
                 <span className="rl-svc__n">05</span>
                 <h3>Agents IA</h3>
                 <p>Automatisations, assistants internes, formation.</p>

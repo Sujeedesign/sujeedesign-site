@@ -1,7 +1,7 @@
 /** Portage du v5 : a-propos.html. Balisage d'origine, liens en urls propres. */
 export const pageMeta = {
   "title": "À propos — Sujee Design",
-  "description": "Sujeepan Sabesan, designer indépendant entre Cergy et Paris depuis 2013 : direction artistique, photographie et vidéo, UX/UI, IA générative et agents, web, formation. Treize ans de pratique, huit ans d'enseignement."
+  "description": "Sujeepan Sabesan, designer indépendant entre Cergy et Paris depuis 2013 : direction artistique, photo et vidéo, UX/UI, IA générative, web et formation."
 };
 
 export function APropos() {
@@ -203,7 +203,7 @@ export function APropos() {
             </div>
           </div>
         </section>
-        <section className="cta-section">
+        <section className="cta-section" id="contact">
           <div className="wrap">
             <div className="bandcta bandcta--dark cta-glow">
               <div className="glow" aria-hidden="true" />

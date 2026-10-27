@@ -11,7 +11,8 @@ export function pageMetadata(
   meta: { title: string; description: string },
   path: string,
 ): Metadata {
-  const title = meta.title.replace(/\s*[—–-]\s*Sujee Design\s*$/u, "").trim() || meta.title;
+  const title =
+    meta.title.replace(/\s*[—–·|-]\s*Sujee Design\s*$/u, "").trim() || meta.title;
   const description = meta.description;
 
   return {
