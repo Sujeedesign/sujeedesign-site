@@ -126,7 +126,10 @@ html.no-anim .img-rev{ clip-path: none !important; transform: none !important; }
    Bloc en fin de anim.css : site.css et ds.css imposent des
    hauteurs/colonnes en !important sur .case__body et .case__visual.
    ============================================================ */
-.case--photo{position:relative;background:#0b0b0a;border:0;box-shadow:none}
+/* position:sticky conservée : c'est elle qui empile les cartes au scroll
+   (site.css pose .case en sticky avec des top décalés par nth-of-type).
+   La passer en relative supprimait tout l'effet de pile. */
+.case--photo{position:sticky;background:#0b0b0a;border:0;box-shadow:none}
 .case--photo .case__bg{
   position:absolute;
   /* bordure neutralisée sur la carte photo : sinon elle reste visible en
