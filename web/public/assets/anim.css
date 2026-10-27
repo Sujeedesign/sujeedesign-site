@@ -1,0 +1,92 @@
+/* ============================================================
+   Sujee Design — animations d'apparition et de scroll
+   Chargé après ds.css. Coupé proprement si mouvement réduit.
+   ============================================================ */
+
+/* ---------- Titres : révélation mot à mot sous masque ---------- */
+html.js .aw{
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding: .04em 0 .14em;
+  margin: -.04em 0 -.14em;
+}
+html.js .aw .awi,
+html.js .aw > span{
+  display: inline-block;
+  transform: translateY(118%);
+  transition: transform .96s cubic-bezier(.19, 1, .22, 1);
+  transition-delay: var(--d, 0ms);
+  will-change: transform;
+}
+html.js .is-in .aw .awi,
+html.js .is-in .aw > span{ transform: none; }
+
+/* le titre du hero part tout seul au chargement */
+html.js .hero__title .aw .awi,
+html.js .sv-hero__title .aw .awi,
+html.js .sp-hero__title .aw .awi,
+html.js .ab-hero__title .aw .awi,
+html.js .ia-hero__title .aw .awi,
+html.js .proj-head h1 .aw .awi{ transition-delay: var(--d, 0ms); }
+
+/* ---------- Blocs révélés au scroll ---------- */
+html.js .rv{
+  opacity: 0;
+  transform: translateY(26px);
+  filter: blur(7px);
+  transition: opacity .85s var(--ease), transform .95s var(--ease), filter .9s var(--ease);
+}
+html.js .rv.in{
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+/* filet de sécurité : si site.js ajoute .in avant anim.js */
+html.js .rv.in{ opacity: 1; transform: none; filter: none; }
+
+
+/* ---------- Enfants en cascade ---------- */
+html.js [data-stagger] > *{
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity .7s var(--ease), transform .8s var(--ease);
+}
+html.js [data-stagger].is-in > *{ opacity: 1; transform: none; }
+html.js [data-stagger].is-in > *:nth-child(1){ transition-delay: .04s; }
+html.js [data-stagger].is-in > *:nth-child(2){ transition-delay: .10s; }
+html.js [data-stagger].is-in > *:nth-child(3){ transition-delay: .16s; }
+html.js [data-stagger].is-in > *:nth-child(4){ transition-delay: .22s; }
+html.js [data-stagger].is-in > *:nth-child(5){ transition-delay: .28s; }
+html.js [data-stagger].is-in > *:nth-child(6){ transition-delay: .34s; }
+
+/* ---------- Images : volet qui découvre ---------- */
+html.js .img-rev{
+  clip-path: inset(0 0 101% 0);
+  transform: scale(1.05);
+  transition: clip-path 1.15s cubic-bezier(.19, 1, .22, 1), transform 1.3s cubic-bezier(.19, 1, .22, 1);
+  will-change: clip-path, transform;
+}
+html.js .img-rev.is-in{
+  clip-path: inset(0 0 0 0);
+  transform: none;
+}
+
+/* ---------- Compteurs ---------- */
+html.js .count-up{ font-variant-numeric: tabular-nums; }
+
+/* ---------- Parallaxe douce ---------- */
+html.js [data-parallax]{ will-change: transform; }
+
+/* ---------- Allègements mobile ---------- */
+@media (max-width: 700px){
+  html.js .rv{ filter: none; transform: translateY(18px); }
+  html.js .img-rev{ transform: none; }
+}
+
+/* ---------- Mouvement réduit : tout est déjà à sa place ---------- */
+html.no-anim .aw .awi,
+html.no-anim .aw > span{ transform: none !important; transition: none !important; }
+html.no-anim .rv,
+html.no-anim [data-stagger] > *{ opacity: 1 !important; transform: none !important; filter: none !important; }
+html.no-anim .img-rev{ clip-path: none !important; transform: none !important; }

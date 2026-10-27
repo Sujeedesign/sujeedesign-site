@@ -1,0 +1,11 @@
+# dépendances
+node_modules/
+# build Next
+.next/
+out/
+# tests
+coverage/
+# divers
+*.tsbuildinfo
+next-env.d.ts
+.env*.local
