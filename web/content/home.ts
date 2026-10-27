@@ -157,7 +157,7 @@ export const homeContent: HomeContent = homeSchema.parse({
         number: "05",
         title: "Agents IA",
         summary: "Automatisations, assistants internes, formation.",
-        href: "/services/agents-ia",
+        href: "/agents-ia",
       },
     ],
   },

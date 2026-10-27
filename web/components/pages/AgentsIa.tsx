@@ -1,7 +1,7 @@
 /** Portage du v5 : agents-ia.html. Balisage d'origine, liens en urls propres. */
 export const pageMeta = {
   "title": "Agents IA & automatisation — Sujee Design",
-  "description": "Conception d'agents IA auto-hébergés pour PME et indépendants : veille, devis, production de contenu, support. Connectés à vos outils par MCP, modèles locaux quand c'est possible, accès contrôlés. Cergy et Paris."
+  "description": "Agents IA auto-hébergés pour PME et indépendants : veille, devis, contenu, support. Connectés à vos outils par MCP, modèles locaux, accès contrôlés."
 };
 
 export function AgentsIa() {
@@ -105,9 +105,9 @@ export function AgentsIa() {
               <article className="ai-card rv">
                 <div className="ai-card__top">
                   <svg className="agenticon" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-                    <circle cx={16} cy={16} r="4.5" stroke="currentColor" stroke-width="1.3" />
-                    <path d="M16 3.5v4M16 24.5v4M3.5 16h4M24.5 16h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
-                    <path d="M7.5 7.5a12 12 0 0 1 3 3M21.5 21.5a12 12 0 0 1 3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity=".55" />
+                    <circle cx={16} cy={16} r="4.5" stroke="currentColor" strokeWidth="1.3" />
+                    <path d="M16 3.5v4M16 24.5v4M3.5 16h4M24.5 16h4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                    <path d="M7.5 7.5a12 12 0 0 1 3 3M21.5 21.5a12 12 0 0 1 3 3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" opacity=".55" />
                   </svg>
                   <span className="ai-card__k">Agent 01</span>
                 </div>
@@ -118,9 +118,9 @@ export function AgentsIa() {
               <article className="ai-card rv">
                 <div className="ai-card__top">
                   <svg className="agenticon" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-                    <rect x={5} y={6} width={22} height={20} rx="1.5" stroke="currentColor" stroke-width="1.3" />
-                    <path d="M10 20h5M10 16h8M10 12h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
-                    <circle cx={22} cy={19} r="2.5" stroke="currentColor" stroke-width="1.2" />
+                    <rect x={5} y={6} width={22} height={20} rx="1.5" stroke="currentColor" strokeWidth="1.3" />
+                    <path d="M10 20h5M10 16h8M10 12h5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                    <circle cx={22} cy={19} r="2.5" stroke="currentColor" strokeWidth="1.2" />
                   </svg>
                   <span className="ai-card__k">Agent 02</span>
                 </div>
@@ -131,8 +131,8 @@ export function AgentsIa() {
               <article className="ai-card rv">
                 <div className="ai-card__top">
                   <svg className="agenticon" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-                    <rect x={5} y={5} width={22} height={22} rx="1.5" stroke="currentColor" stroke-width="1.3" />
-                    <path d="M5 12h22M12 12v15" stroke="currentColor" stroke-width="1.3" />
+                    <rect x={5} y={5} width={22} height={22} rx="1.5" stroke="currentColor" strokeWidth="1.3" />
+                    <path d="M5 12h22M12 12v15" stroke="currentColor" strokeWidth="1.3" />
                     <circle cx={21} cy={20} r="1.6" fill="currentColor" />
                   </svg>
                   <span className="ai-card__k">Agent 03</span>
@@ -144,8 +144,8 @@ export function AgentsIa() {
               <article className="ai-card rv">
                 <div className="ai-card__top">
                   <svg className="agenticon" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-                    <path d="M6 8h20v13H14l-6 5v-5H6z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" />
-                    <path d="M11 13h10M11 17h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+                    <path d="M6 8h20v13H14l-6 5v-5H6z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+                    <path d="M11 13h10M11 17h6" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
                   </svg>
                   <span className="ai-card__k">Agent 04</span>
                 </div>
