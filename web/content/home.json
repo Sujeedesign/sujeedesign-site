@@ -63,63 +63,63 @@
     "items": [
       {
         "id": "case01",
-        "index": "01 / Identité · Direction photo",
+        "index": "01 / Direction artistique · Présentation",
         "meta": [
-          "Elerya",
-          "Maroquinerie",
-          "Identité"
+          "Club Med",
+          "Voyage",
+          "2018"
         ],
-        "title": "Elerya",
+        "title": "Club Med — TEd",
         "tags": [
-          "Logotype",
-          "Direction photo",
-          "E-commerce"
+          "Lettrage",
+          "Système de diapositives",
+          "Direction artistique"
         ],
-        "barLabel": "Maroquinerie · Paris",
+        "barLabel": "Voyage · Événement",
         "ghost": "01",
-        "visual": "pack",
-        "tone": "signal",
-        "href": "/realisations/elerya"
+        "visual": "sign",
+        "tone": "paper",
+        "href": "/realisations/club-med"
       },
       {
         "id": "case02",
-        "index": "02 / Site · Design system",
+        "index": "02 / Jeu web · Interface",
         "meta": [
-          "Analog Way",
-          "Broadcast",
-          "2016"
+          "Saft",
+          "Énergie",
+          "2017"
         ],
-        "title": "Analog Way",
+        "title": "Saft, Energy Storage",
         "tags": [
-          "Arborescence",
-          "Gabarits produits",
-          "Typographie"
+          "Jeu web",
+          "Illustration",
+          "Interface"
         ],
-        "barLabel": "Broadcast · Pro AV",
+        "barLabel": "Énergie · Industrie",
         "ghost": "02",
         "visual": "ui",
         "tone": "ui",
-        "href": "/realisations/analog-way"
+        "href": "/realisations/saft-energy-storage"
       },
       {
         "id": "case03",
-        "index": "03 / Présentation · Direction artistique",
+        "index": "03 / Application · UI",
         "meta": [
-          "DEKRA",
-          "Ville de Laval",
-          "Présentation"
+          "LG",
+          "Électronique",
+          "2017"
         ],
-        "title": "Dekra",
+        "title": "LG Sales talk",
         "tags": [
-          "Système de diapositives",
-          "Hiérarchie typographique",
-          "Mise en page"
+          "Application",
+          "UI",
+          "Parcours vendeur"
         ],
-        "barLabel": "Conseil · Collectivité",
+        "barLabel": "Électronique · Mobilité",
         "ghost": "03",
-        "visual": "sign",
+        "visual": "ui",
         "tone": "paper",
-        "href": "/realisations/dekra"
+        "href": "/realisations/lg-sales-talk"
       }
     ]
   },
