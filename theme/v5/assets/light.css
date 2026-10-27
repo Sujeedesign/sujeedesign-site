@@ -1408,3 +1408,24 @@ body.has-dark-hero .nav.nav--open .brand__logo--light{display:none!important}
 @media (prefers-reduced-motion:reduce){
   .contact{animation:none}
 }
+
+/* ============================================================
+   CORRECTIF RESPONSIVE MOBILE — lisibilité sous 700 px
+   1. titres de section : plus de gouttière de 44 px, le titre
+      reprend toute la largeur utile
+   2. micro-textes sous 11 px remontés à 10,5-11,5 px
+   ============================================================ */
+@media (max-width:700px){
+  .sec-head{grid-template-columns:1fr;gap:6px}
+  .sec-head .sec-num{padding-top:0}
+  .sec-head h2{max-width:100%}
+  .ab-sig__sub{font-size:11.5px;letter-spacing:.07em;line-height:1.55}
+  .ab-stats-hero span{font-size:10.5px;letter-spacing:.06em}
+  .ln{font-size:11.5px}
+  .ln .who{font-size:10px;letter-spacing:.1em}
+  .console__foot{font-size:10px}
+  .roi__foot{font-size:10.5px;letter-spacing:.07em}
+  .roi__kick,.roi__rows span,.roi__lab span{font-size:10px;letter-spacing:.1em}
+  .roi__scale{font-size:10px}
+  .roi__unit{font-size:10.5px}
+}
