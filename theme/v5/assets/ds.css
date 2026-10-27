@@ -179,6 +179,11 @@ footer a:hover{ border-bottom-color: rgba(255,255,255,.7); }
   .case__visual{ height: clamp(420px, 80%, 640px); align-self: center; }
   .case__title{ font-size: clamp(56px, 8vw, 132px); }
 }
+/* entre 861 et 980 px, la hauteur mini de 520 px force la largeur via
+   l'aspect-ratio et fait déborder la carte : on la laisse respirer */
+@media (min-width:861px) and (max-width:980px){
+  .case{ min-height: 0; }
+}
 
 /* état actif : libellé vermillon en gras, sans pastille */
 .nav-mid a[aria-current="page"]::after,
@@ -543,4 +548,23 @@ body.has-dark-hero .nav:not(.scrolled) .nav-cta:hover{
   background: rgba(255, 106, 61, .12) !important;
   border-color: #FF6A3D !important;
   color: #FF6A3D !important;
+}
+
+/* ============================================================
+   Zones tactiles confortables sur mobile (48 px de haut minimum)
+   ============================================================ */
+@media (max-width: 900px){
+  footer .foot span{ display: inline-flex; }
+  footer .foot a{ display: inline-block; padding: 9px 0; }
+  .foot-social a{ padding: 11px 0; }
+  .legal .toc a{ display: inline-block; padding: 10px 0; }
+}
+
+/* ============================================================
+   Fins de mobile : pas de mot orphelin, pas de titre collé
+   ============================================================ */
+@media (max-width: 900px){
+  .bandcta p{ text-wrap: pretty; }
+  .rl-p__kicker{ margin-bottom: 12px; }
+  .rl-p__info h2{ margin-bottom: 16px; }
 }
