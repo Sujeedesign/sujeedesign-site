@@ -15,9 +15,12 @@ from __future__ import annotations
 
 import copy
 import json
+import logging
 import os
 from pathlib import Path
 from typing import Any, Iterable
+
+LOGGER = logging.getLogger(__name__)
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -35,9 +38,18 @@ def defaults_path() -> Path:
 
 
 def load_defaults() -> dict[str, Any]:
+    """Contenu de référence ; vide si le fichier manque (image incomplète).
+
+    Un conteneur sans ce fichier ne doit pas casser l'API : le document
+    enregistré reste servi, et `pull-content.mjs` conserve alors son JSON local.
+    """
     path = defaults_path()
-    with path.open(encoding="utf-8") as handle:
-        return json.load(handle)
+    try:
+        with path.open(encoding="utf-8") as handle:
+            return json.load(handle)
+    except FileNotFoundError:
+        LOGGER.warning("valeurs par défaut absentes : %s", path)
+        return {}
 
 
 # --------------------------------------------------------------- lecture/écriture de chemins

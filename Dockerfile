@@ -28,6 +28,10 @@ COPY seed ./seed
 # meurt à l'import (`ModuleNotFoundError: No module named 'sujee_editor'`).
 COPY sujee_editor ./sujee_editor
 COPY --from=editor-assets /build/sujee_editor/editor/static/visual/ ./sujee_editor/editor/static/visual/
+# Valeurs par défaut du contenu éditorial : le back office les sert à l'API
+# `/api/v1/content/{slug}` et le build Next les récupère. Sans ce fichier,
+# l'API répond 500 (FileNotFoundError) dans le conteneur.
+COPY web/content/home.default.json ./web/content/home.default.json
 
 RUN mkdir -p /data && useradd --system --uid 10001 --home /app site \
  && chown -R site:site /app /data
