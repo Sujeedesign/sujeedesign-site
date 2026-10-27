@@ -340,7 +340,7 @@ def test_content_is_readable_without_javascript(audited: dict[str, PageAudit], s
     """
     for path in ("/", "/services", "/contact"):
         html = site.get(path).text
-        assert '<noscript><link rel="stylesheet" href="/assets/site-noscript.css"></noscript>' in html, path
+        assert '<noscript><link rel="stylesheet" href="/bo/assets/site-noscript.css"></noscript>' in html, path
 
     sheet = ROOT / "theme" / "assets" / "site-noscript.css"
     assert sheet.is_file(), "feuille de repli absente du thème"
@@ -349,7 +349,7 @@ def test_content_is_readable_without_javascript(audited: dict[str, PageAudit], s
         assert selector in rules, f"{selector} reste masqué sans JavaScript"
     assert "opacity:1!important" in rules
     assert "transform:none!important" in rules
-    assert site.get("/assets/site-noscript.css").status_code == 200
+    assert site.get("/bo/assets/site-noscript.css").status_code == 200
 
 
 def test_footer_links_to_the_legal_notice_page(site: TestClient, audited: dict[str, PageAudit]) -> None:

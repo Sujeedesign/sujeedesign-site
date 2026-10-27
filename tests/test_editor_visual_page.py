@@ -30,7 +30,7 @@ def test_visual_admin_route_mounts_saved_project_and_theme(client: TestClient, d
     assert 'id="visual-history-open"' not in html
     assert 'id="visual-save"' in html
     assert "/assets/editor/visual/visual-editor.js" in html
-    assert "/assets/site.css" in html
+    assert "/bo/assets/site.css" in html
     match = CONFIG_RE.search(html)
     assert match is not None
     config = json.loads(match.group(1))
@@ -39,7 +39,7 @@ def test_visual_admin_route_mounts_saved_project_and_theme(client: TestClient, d
     assert config["preview_api"] == f"/api/admin/pages/{page_id}/visual-preview"
     assert config["draft_version"] == 0
     assert config["project"]["project_data"]["pages"]
-    assert config["theme_styles"] == ["/assets/site.css", "/assets/site-extras.css", "/assets/site-noscript.css"]
+    assert config["theme_styles"] == ["/bo/assets/site.css", "/bo/assets/site-extras.css", "/bo/assets/site-noscript.css"]
     assert config["csrf"]
     assert list(config["blocks"]) == list(DEFAULT_BLOCKS)
     assert all("fields" in block and "variants" in block for block in config["blocks"].values())
@@ -229,7 +229,7 @@ def test_visual_preview_renders_unsaved_project_with_real_theme_markup(client: T
     assert "Aperçu dynamique sans sauvegarde" in response.text
     assert 'class="s-chap reveal"' in response.text
     assert 'class="sjd-editor-preview sjd-editor-preview-chapter"' not in response.text
-    assert "/assets/site.css" in response.text
+    assert "/bo/assets/site.css" in response.text
     assert "data-edit-mode=\"1\"" not in response.text
     conn = connect(db_file)
     try:

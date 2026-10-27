@@ -23,21 +23,35 @@ describe("relais du back office", () => {
   it("relaie les API et médias du back office", async () => {
     const rules = await build();
     expect(rules.get("/api/admin/:path*")).toMatch(/\/api\/admin\/:path\*$/);
+    // L'éditeur visuel dialogue avec /api/editor (config.api dans visual_page.html).
+    expect(rules.get("/api/editor/:path*")).toMatch(/\/api\/editor\/:path\*$/);
     expect(rules.get("/medias/:path*")).toMatch(/\/medias\/:path\*$/);
   });
 
   it("relaie les assets que le site ne possède pas", async () => {
     const rules = await build();
     for (const asset of [
+      "/bo/assets/:path*",
       "/assets/admin.css",
       "/assets/admin.js",
       "/assets/fonts/:path*",
       "/assets/editor/:path*",
+      "/assets/projects/:path*",
       "/assets/logo-sujeepan-sabesan.svg",
       "/assets/logo-sujeepan-sabesan-clair.svg",
       "/assets/icon_sujeepansabesan.svg",
     ]) {
       expect(rules.has(asset), asset).toBe(true);
+    }
+  });
+
+  it("sert les feuilles du thème sous /bo/assets, pas sous /assets", async () => {
+    const rules = await build();
+    expect(rules.get("/bo/assets/:path*")).toMatch(/\/bo\/assets\/:path\*$/);
+    // site.css et site.js existent des deux côtés : le thème passe par /bo/assets
+    // pour ne jamais écraser la version Next.
+    for (const themed of ["site.css", "site.js", "site-extras.css", "site-v5.css", "site-v5.js", "contact.js"]) {
+      expect(rules.has(`/assets/${themed}`), themed).toBe(false);
     }
   });
 

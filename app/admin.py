@@ -281,7 +281,7 @@ def _render_visual_page(request: Request, conn: sqlite3.Connection, page_id: int
         "csrf": _admin_csrf(request),
         "draft_version": int(row["draft_version"]),
         "project": json.loads(row["draft_project_json"]),
-        "theme_styles": ["/assets/site.css", "/assets/site-extras.css", "/assets/site-noscript.css"],
+        "theme_styles": ["/bo/assets/site.css", "/bo/assets/site-extras.css", "/bo/assets/site-noscript.css"],
         "blocks": {name: block.serialize() for name, block in DEFAULT_BLOCKS.items()},
     }
     config_json = json.dumps(config, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")

@@ -484,7 +484,7 @@ def test_home_and_services_share_editorial_primitives(rendered: dict[str, Render
 def test_listing_and_contact_pages_share_accessible_shell(rendered: dict[str, RenderedPage]) -> None:
     for route in (*LISTING_ROUTES, CONTACT_ROUTE):
         page = rendered[route]
-        assert "/assets/site.css" in page.dom.stylesheets, f"{route} : feuille partagée manquante"
+        assert "/bo/assets/site.css" in page.dom.stylesheets, f"{route} : feuille partagée manquante"
         assert page.dom.main_ids == ["main-content"], f"{route} : identifiant du contenu principal"
         assert page.dom.h1_in_main_count == 1, f"{route} : un h1 dans le contenu principal"
         assert "#main-content" in page.dom.skip_links, f"{route} : lien d'évitement manquant"
@@ -499,7 +499,7 @@ def test_project_pages_use_shared_project_shell(rendered: dict[str, RenderedPage
 
 def test_every_page_loads_shared_stylesheet(rendered: dict[str, RenderedPage]) -> None:
     for route, page in rendered.items():
-        assert "/assets/site.css" in page.dom.stylesheets, f"{route} : /assets/site.css non chargée"
+        assert "/bo/assets/site.css" in page.dom.stylesheets, f"{route} : /assets/site.css non chargée"
 
 
 def test_primary_navigation_destinations_match(rendered: dict[str, RenderedPage]) -> None:

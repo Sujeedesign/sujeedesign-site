@@ -83,6 +83,10 @@ def create_app(db_path: str | Path | None = None) -> FastAPI:
         media_dir=str(media_root),
         page_path=repo_module.page_path,
     ).mount(app)
+    # Le back office sert aussi les assets du thème sous /bo/assets : le site Next
+    # possède son propre public/assets (site.css, site.js…), un préfixe distinct
+    # évite tout écrasement quand les deux vivent sur la même origine.
+    app.mount("/bo/assets", StaticFiles(directory=str(THEME_ASSETS)), name="bo-assets")
     app.mount("/assets", StaticFiles(directory=str(THEME_ASSETS)), name="assets")
     # Aperçu V4 : pages statiques autonomes, servies sous /v4 (index.html par défaut).
     if V4_PREVIEW.is_dir():
@@ -97,7 +101,7 @@ def create_app(db_path: str | Path | None = None) -> FastAPI:
         return {"ok": True, "version": VERSION, "revision": revision}
 
     CANONICAL_HOSTS = {"sujeedesign.com", "www.sujeedesign.com"}
-    ADMIN_PREFIXES = ("/admin", "/api", "/assets", "/medias")
+    ADMIN_PREFIXES = ("/admin", "/api", "/assets", "/bo/assets", "/medias")
     INTERNAL_HOSTS = {"localhost", "127.0.0.1", "0.0.0.0", "testserver"}
 
     @app.middleware("http")

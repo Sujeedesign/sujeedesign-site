@@ -102,10 +102,13 @@ const nextConfig: NextConfig = {
         { source: "/admin/:path*", destination: `${admin}/admin/:path*` },
         { source: "/medias/:path*", destination: `${admin}/medias/:path*` },
         { source: "/api/admin/:path*", destination: `${admin}/api/admin/:path*` },
+        { source: "/api/editor/:path*", destination: `${admin}/api/editor/:path*` },
         // Assets du back office et de l'éditeur visuel : le site Next possède son
         // propre dossier public/assets, on ne relaie que les fichiers qui lui
         // manquent (voir tests/admin-proxy.test.ts).
+        { source: "/bo/assets/:path*", destination: `${admin}/bo/assets/:path*` },
         { source: "/assets/editor/:path*", destination: `${admin}/assets/editor/:path*` },
+        { source: "/assets/projects/:path*", destination: `${admin}/assets/projects/:path*` },
         { source: "/assets/fonts/:path*", destination: `${admin}/assets/fonts/:path*` },
         { source: "/assets/admin.css", destination: `${admin}/assets/admin.css` },
         { source: "/assets/admin.js", destination: `${admin}/assets/admin.js` },
