@@ -31,6 +31,7 @@ describe("relais du back office", () => {
   it("relaie les assets que le site ne possède pas", async () => {
     const rules = await build();
     for (const asset of [
+      "/static-admin/:path*",
       "/bo/assets/:path*",
       "/assets/admin.css",
       "/assets/admin.js",
