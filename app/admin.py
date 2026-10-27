@@ -20,6 +20,8 @@ from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from markupsafe import Markup
 
+from . import content as content_store
+from . import content_model
 from . import repo
 from . import public as public_module
 from . import security
@@ -351,6 +353,81 @@ def settings_screen(request: Request) -> HTMLResponse:
             default_settings=settings_module.DEFAULT_SETTINGS,
             redirects=repo.list_redirects(conn),
         )
+    finally:
+        conn.close()
+
+
+# ------------------------------------------------------- contenu du site (Next)
+
+
+def _flash(url: str, message: str) -> RedirectResponse:
+    response = RedirectResponse(url, status_code=303)
+    response.set_cookie("sjd_flash", message, max_age=90, httponly=True, samesite="lax")
+    return response
+
+
+def _check_form_csrf(request: Request, token: str) -> None:
+    editor = getattr(request.app.state, "editor", None)
+    if editor is None or not verify_csrf(token, editor.session_secret):
+        raise HTTPException(status_code=403, detail="jeton CSRF invalide")
+
+
+@router.get("/admin/contenu", response_class=HTMLResponse)
+def content_screen(request: Request, erreur: str = "") -> Response:
+    if current_admin(request) is None:
+        return login_redirect()
+    conn = _conn(request)
+    try:
+        document = content_store.load_doc(conn, "home")
+        return render_admin(
+            request,
+            conn,
+            "contenu.html",
+            page=None,
+            document=document,
+            sections=content_model.form_sections("home", document["data"]),
+            publication=content_store.last_publication(conn),
+            publish_ready=content_store.publish_ready(),
+            erreur=erreur,
+        )
+    finally:
+        conn.close()
+
+
+@router.post("/admin/contenu")
+async def content_save(request: Request) -> Response:
+    if current_admin(request) is None:
+        return login_redirect()
+    form = await request.form()
+    _check_form_csrf(request, str(form.get("csrf") or ""))
+    conn = _conn(request)
+    try:
+        base = content_store.load_doc(conn, "home")["data"]
+        try:
+            doc = content_model.from_form("home", form, base)
+        except content_model.ContentError as exc:
+            return _flash(f"/admin/contenu?erreur={str(exc)}", f"Rien n'a été enregistré : {exc}")
+        content_store.save_doc(conn, "home", doc)
+        if str(form.get("action") or "") == "publier":
+            result = content_store.request_publish(conn, "home")
+            if not result.get("ok"):
+                return _flash("/admin/contenu", f"Contenu enregistré, mais la publication a échoué : {result.get('error')}")
+            return _flash("/admin/contenu", "Contenu enregistré. Publication lancée, le site est à jour dans deux minutes environ.")
+        return _flash("/admin/contenu", "Contenu enregistré.")
+    finally:
+        conn.close()
+
+
+@router.post("/admin/contenu/publier")
+def content_publish(request: Request) -> Response:
+    if current_admin(request) is None:
+        return login_redirect()
+    conn = _conn(request)
+    try:
+        result = content_store.request_publish(conn, "home")
+        if not result.get("ok"):
+            return _flash("/admin/contenu", f"Publication impossible : {result.get('error')}")
+        return _flash("/admin/contenu", "Publication lancée. Le site est à jour dans deux minutes environ.")
     finally:
         conn.close()
 

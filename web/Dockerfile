@@ -7,7 +7,11 @@ RUN npm ci
 
 FROM node:22-alpine AS builder
 WORKDIR /app
-ENV NEXT_TELEMETRY_DISABLED=1
+# Contenu éditorial : le build tire le document enregistré dans le back office.
+# Vide = le web/content/home.json versionné fait foi.
+ARG CONTENT_API_URL=""
+ENV NEXT_TELEMETRY_DISABLED=1 \
+    CONTENT_API_URL=$CONTENT_API_URL
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build

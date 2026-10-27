@@ -143,6 +143,22 @@ CREATE TABLE IF NOT EXISTS redirections (
   hits INTEGER NOT NULL DEFAULT 0
 );
 
+CREATE TABLE IF NOT EXISTS content_docs (
+  slug TEXT PRIMARY KEY,
+  data TEXT NOT NULL DEFAULT '{}',
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_by TEXT NOT NULL DEFAULT 'admin'
+);
+
+CREATE TABLE IF NOT EXISTS publications (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  slug TEXT NOT NULL DEFAULT '',
+  status TEXT NOT NULL DEFAULT 'demande',
+  deployment TEXT NOT NULL DEFAULT '',
+  detail TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS _meta (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL DEFAULT ''

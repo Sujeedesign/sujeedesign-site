@@ -13,6 +13,7 @@ from fastapi.staticfiles import StaticFiles
 
 from . import admin as admin_module
 from . import contact as contact_module
+from . import content_routes as content_routes_module
 from . import db as db_module
 from . import public as public_module
 from . import render as render_module
@@ -143,6 +144,7 @@ def create_app(db_path: str | Path | None = None) -> FastAPI:
 
     app.include_router(admin_module.router)
     app.include_router(admin_module.api, prefix="/api/admin")
+    app.include_router(content_routes_module.router)
     app.include_router(contact_module.router)
     app.include_router(contact_module.sync)
     app.include_router(public_module.router)
