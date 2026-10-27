@@ -84,7 +84,7 @@
   /* ----- 4. Images : volet ----- */
   const IMG_SEL = [
     '.pj-fig img', '.sv-row figure img', '.sv-row img', '.sp-hero img',
-    '.case__visual', '.ab-hero__portrait', '.ab-portrait', '.hero__portrait',
+    '.case__visual', '.case__bg', '.ab-hero__portrait', '.ab-portrait', '.hero__portrait',
     '.rl-p img', '.proj-head img'
   ].join(',');
   // on observe le conteneur : un clip-path à 100 % empêcherait l'image de
