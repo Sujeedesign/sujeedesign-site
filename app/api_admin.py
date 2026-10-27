@@ -10,15 +10,20 @@ from __future__ import annotations
 
 import hmac
 import json
+import mimetypes
+import re
 import sqlite3
+import unicodedata
+from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse
 
 from . import content as content_store
 from . import content_model
 from . import repo
+from .admin import ALLOWED_TYPES, MAX_UPLOAD
 from .settings import env
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin-api"])
@@ -165,3 +170,133 @@ def publish(request: Request, _: str = Depends(require_token)) -> JSONResponse:
     finally:
         conn.close()
     return JSONResponse(result, status_code=200 if result.get("ok") else 409)
+
+
+# ------------------------------------------------------------------ médiathèque
+
+
+def _slug_filename(name: str, extension: str) -> str:
+    """Nom de fichier stable et lisible : « Elerya 01 » -> « elerya-01.jpg »."""
+    ascii_name = unicodedata.normalize("NFKD", name or "").encode("ascii", "ignore").decode()
+    slug = re.sub(r"[^a-zA-Z0-9]+", "-", ascii_name).strip("-").lower()
+    return f"{(slug or 'media')[:90]}{extension}"
+
+
+@router.get("/media")
+def list_medias(request: Request, limit: int = 400, _: str = Depends(require_token)) -> dict[str, Any]:
+    conn = _conn(request)
+    try:
+        rows = repo.list_medias(conn, limit=max(1, min(limit, 1000)))
+        total = conn.execute("SELECT COUNT(*) FROM medias").fetchone()[0]
+    finally:
+        conn.close()
+    return {
+        "ok": True,
+        "total": int(total),
+        "items": [
+            {
+                "id": row["id"],
+                "filename": row["filename"],
+                "path": row["path"],
+                "alt": row["alt"],
+                "caption": row["caption"],
+                "mime": row["mime"],
+                "width": row["width"],
+                "height": row["height"],
+                "size": row["size"],
+                "created_at": row["created_at"],
+            }
+            for row in rows
+        ],
+    }
+
+
+@router.post("/media")
+async def import_media(
+    request: Request,
+    fichier: UploadFile = File(...),
+    alt: str = Form(""),
+    caption: str = Form(""),
+    credit: str = Form(""),
+    filename: str = Form(""),
+    overwrite: bool = Form(False),
+    author: str = Depends(require_token),
+) -> JSONResponse:
+    """Importe une image dans la médiathèque du back office.
+
+    Même stockage et mêmes contrôles que le formulaire `/admin/medias`, mais par
+    jeton porteur : un nom de fichier stable peut être imposé (utile pour le
+    référencement) et un ré-import met à jour la fiche au lieu de dupliquer.
+    """
+    mime = (fichier.content_type or "").lower()
+    extension = ALLOWED_TYPES.get(mime)
+    if extension is None:
+        guessed = mimetypes.guess_type(fichier.filename or "")[0] or ""
+        extension = ALLOWED_TYPES.get(guessed)
+        mime = mime or guessed
+    if extension is None:
+        raise HTTPException(status_code=415, detail="format refusé (JPG, PNG, WebP, AVIF, GIF ou PDF)")
+
+    payload = await fichier.read()
+    if not payload:
+        raise HTTPException(status_code=400, detail="fichier vide")
+    if len(payload) > MAX_UPLOAD:
+        raise HTTPException(status_code=413, detail="fichier trop lourd (15 Mo maximum)")
+
+    requested = (filename or fichier.filename or "media").rsplit(".", 1)[0]
+    target = _slug_filename(requested, extension)
+
+    folder = Path(request.app.state.media_dir)
+    folder.mkdir(parents=True, exist_ok=True)
+
+    conn = _conn(request)
+    try:
+        existing = repo.get_media_by_filename(conn, target)
+        if existing is not None and not overwrite:
+            raise HTTPException(
+                status_code=409,
+                detail=f"un média nommé {target} existe déjà (overwrite=true pour le remplacer)",
+            )
+
+        (folder / target).write_bytes(payload)
+
+        width = height = 0
+        try:  # optionnel : les dimensions ne bloquent jamais l'import
+            from PIL import Image  # type: ignore
+
+            with Image.open(folder / target) as image:
+                width, height = image.size
+        except Exception:
+            pass
+
+        fields = {
+            "original_filename": (fichier.filename or target)[:200],
+            "path": f"/medias/{target}",
+            "alt": alt.strip()[:300],
+            "caption": caption.strip()[:300],
+            "credit": credit.strip()[:200],
+            "mime": mime,
+            "width": width,
+            "height": height,
+            "size": len(payload),
+        }
+        if existing is not None:
+            repo.update_media(conn, int(existing["id"]), fields)
+            media_id = int(existing["id"])
+            created = False
+        else:
+            media_id = repo.register_media(conn, {"filename": target, **fields})
+            created = True
+        conn.commit()
+    finally:
+        conn.close()
+
+    return JSONResponse(
+        {
+            "ok": True,
+            "created": created,
+            "author": author,
+            "media": {"id": media_id, "filename": target, "path": f"/medias/{target}", **fields},
+        },
+        status_code=201 if created else 200,
+    )

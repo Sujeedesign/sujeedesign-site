@@ -121,6 +121,19 @@ def get_media(conn: sqlite3.Connection, media_id: int) -> sqlite3.Row | None:
     return conn.execute("SELECT * FROM medias WHERE id = ?", (media_id,)).fetchone()
 
 
+def get_media_by_filename(conn: sqlite3.Connection, filename: str) -> sqlite3.Row | None:
+    return conn.execute("SELECT * FROM medias WHERE filename = ?", (filename,)).fetchone()
+
+
+def update_media(conn: sqlite3.Connection, media_id: int, keys: dict[str, Any]) -> None:
+    allowed = ("original_filename", "path", "alt", "caption", "credit", "mime", "width", "height", "size")
+    fields = {k: keys[k] for k in allowed if k in keys}
+    if not fields:
+        return
+    assignments = ", ".join(f"{name} = ?" for name in fields)
+    conn.execute(f"UPDATE medias SET {assignments} WHERE id = ?", (*fields.values(), media_id))
+
+
 def delete_media(conn: sqlite3.Connection, media_id: int) -> sqlite3.Row | None:
     row = get_media(conn, media_id)
     if row is not None:
