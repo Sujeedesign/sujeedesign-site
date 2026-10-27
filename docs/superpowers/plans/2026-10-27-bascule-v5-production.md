@@ -29,6 +29,7 @@ Statut : **bascule effectuée** (voir « État final » en bas).
 - `build_pack` dockerfile, `base_directory` `/web`, `dockerfile_location` `/Dockerfile`
 - `ports_exposes` `3000`, health `/` sur 3000
 - domaines : `https://sujeedesign.com,https://www.sujeedesign.com` (+ URL sslip de secours)
+- un seul hôte indexé : `www` redirige en **301** vers l'apex via `web/middleware.ts` (query string conservée)
 
 Le Dockerfile est multi-stage (`node:22-alpine`), sortie standalone, user `nextjs`,
 `HEALTHCHECK` sur `/`. Build vérifié par le builder Coolify, image en production.
