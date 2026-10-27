@@ -121,70 +121,56 @@ html.no-anim .img-rev{ clip-path: none !important; transform: none !important; }
 /* ============================================================
    Cartes projet avec photo : l'image recouvre TOUTE la carte
    (et non la moitié droite), le texte passe en surimpression.
-   Bloc volontairement en fin de anim.css : site.css et ds.css
-   imposent des hauteurs/colonnes en !important sur .case__body
-   et .case__visual, il faut donc repasser après elles.
+   Le fond et le voile sont des éléments dédiés (.case__bg), donc
+   l'ordre de peinture ne dépend pas d'un z-index croisé hasardeux.
+   Bloc en fin de anim.css : site.css et ds.css imposent des
+   hauteurs/colonnes en !important sur .case__body et .case__visual.
    ============================================================ */
-.case--photo{position:sticky}
+.case--photo{position:relative}
+.case--photo .case__bg{
+  position:absolute;
+  inset:0;
+  z-index:0;
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  border-radius:inherit;
+  pointer-events:none;
+}
+/* voile : lisibilité du texte côté gauche, image préservée à droite */
+.case--photo .case__bg::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(110% 80% at 100% 0%, rgba(8,8,7,.45), rgba(8,8,7,0) 58%),
+    linear-gradient(100deg,
+      rgba(8,8,7,.9) 0%,
+      rgba(8,8,7,.8) 26%,
+      rgba(8,8,7,.56) 44%,
+      rgba(8,8,7,.18) 66%,
+      rgba(8,8,7,.06) 84%,
+      rgba(8,8,7,.34) 100%);
+}
+/* le visuel d'origine n'a plus de sens : la photo est le fond */
+.case--photo .case__visual{display:none!important}
+/* contenu au-dessus du fond et du voile */
+.case--photo .case__top,
+.case--photo .case__body,
+.case--photo .case__bar{position:relative;z-index:2}
 .case--photo .case__body,
 .case--photo.case--ui .case__body{
   display:block!important;
   grid-template-columns:none!important;
   height:100%!important;
   align-self:stretch!important;
-  position:relative;
-  z-index:2;
 }
 .case--photo .case__text{
   height:100%;
   justify-content:center;
   padding:clamp(4px,1vw,14px) 0 0;
 }
-/* l'image sort du flux et couvre la boîte de la carte (inset:0 = padding box) */
-.case--photo .case__visual--photo,
-.case--photo.case--ui .case__visual--photo{
-  position:absolute!important;
-  inset:0!important;
-  width:auto!important;
-  height:auto!important;
-  min-height:0!important;
-  margin:0!important;
-  padding:0!important;
-  order:0!important;
-  align-self:auto!important;
-  z-index:0;
-  overflow:hidden;
-  border-radius:inherit;
-}
-.case--photo .case__visual--photo img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  object-position:center;
-}
-/* voile : lisibilité du texte côté gauche, image préservée à droite */
-.case--photo::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  z-index:1;
-  pointer-events:none;
-  background:linear-gradient(100deg,
-    rgba(8,8,7,.88) 0%,
-    rgba(8,8,7,.72) 32%,
-    rgba(8,8,7,.34) 58%,
-    rgba(8,8,7,.12) 78%,
-    rgba(8,8,7,.28) 100%);
-}
-@media (max-width:860px){
-  .case--photo::after{
-    background:linear-gradient(to bottom,
-      rgba(8,8,7,.82) 0%,
-      rgba(8,8,7,.62) 42%,
-      rgba(8,8,7,.55) 72%,
-      rgba(8,8,7,.8) 100%);
-  }
-}
+.case--photo .case__ghost{z-index:1}
 /* sur une photo, le texte passe en clair quel que soit le ton de la carte */
 .case--photo,
 .case--photo .case__title,
@@ -194,13 +180,38 @@ html.no-anim .img-rev{ clip-path: none !important; transform: none !important; }
 .case--photo .case__meta,
 .case--photo .case__sub{color:#F4F1EA}
 .case--photo .case__idx,
+.case--photo .case__idx *,
 .case--photo .case__meta,
-.case--photo .case__sub{color:rgba(244,241,234,.72)}
-.case--photo .case__bar{
-  background:rgba(10,10,9,.32);
-  border-color:rgba(244,241,234,.24);
-  backdrop-filter:blur(14px) saturate(140%);
-  -webkit-backdrop-filter:blur(14px) saturate(140%);
+.case--photo .case__meta *,
+.case--photo .case__sub,
+.case--photo .case__sub *,
+.case--photo .case__bar,
+.case--photo .case__bar span,
+.case--photo .case__bar span:last-child{
+  color:#F4F1EA;
+  text-shadow:0 1px 10px rgba(0,0,0,.6);
 }
-.case--photo .case__bar span:last-child{color:rgba(244,241,234,.72)}
-.case--photo .case__ghost{-webkit-text-stroke-color:rgba(244,241,234,.22)}
+.case--photo .case__title{text-shadow:0 2px 24px rgba(0,0,0,.5)}
+.case--photo .case__bar{
+  background:rgba(10,10,9,.5);
+  border-color:rgba(244,241,234,.26);
+  backdrop-filter:blur(16px) saturate(140%);
+  -webkit-backdrop-filter:blur(16px) saturate(140%);
+}
+.case--photo .case__meta{
+  background:rgba(10,10,9,.4);
+  padding:5px 9px;
+  border-radius:2px;
+  backdrop-filter:blur(12px) saturate(130%);
+  -webkit-backdrop-filter:blur(12px) saturate(130%);
+}
+.case--photo .case__ghost{-webkit-text-stroke-color:rgba(244,241,234,.2)}
+@media (max-width:860px){
+  .case--photo .case__bg::after{
+    background:linear-gradient(to bottom,
+      rgba(8,8,7,.6) 0%,
+      rgba(8,8,7,.5) 40%,
+      rgba(8,8,7,.62) 72%,
+      rgba(8,8,7,.86) 100%);
+  }
+}

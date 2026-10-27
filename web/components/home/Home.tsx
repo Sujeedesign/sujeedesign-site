@@ -197,9 +197,9 @@ function projectSlug(href: string) {
   return href.split("/").filter(Boolean).pop() ?? "";
 }
 
-/** Vrai quand le projet possède une photo : la carte passe alors en plein cadre. */
-function hasPhoto(href: string) {
-  return Boolean(getProject(projectSlug(href))?.images[0]);
+/** Photo de couverture du projet, posée en fond de carte quand elle existe. */
+function photoSrc(href: string) {
+  return getProject(projectSlug(href))?.images[0]?.src ?? null;
 }
 
 /** Visuel réel du projet quand il existe, sinon l'illustration d'origine. */
@@ -257,10 +257,17 @@ export function Cases() {
             <a
               key={item.id}
               href={item.href}
-              className={`${caseClass[item.tone]}${hasPhoto(item.href) ? " case--photo" : ""}`}
+              className={`${caseClass[item.tone]}${photoSrc(item.href) ? " case--photo" : ""}`}
               style={item.tone === "ui" ? { background: "#080807" } : undefined}
               aria-labelledby={item.id}
             >
+              {photoSrc(item.href) ? (
+                <span
+                  className="case__bg"
+                  aria-hidden="true"
+                  style={{ backgroundImage: `url(${photoSrc(item.href)})` }}
+                />
+              ) : null}
               <div className="case__top">
                 <span className="case__idx">{item.index}</span>
                 <span className="case__meta">
