@@ -1,0 +1,49 @@
+import { describe, expect, it } from "vitest";
+
+import nextConfig from "../next.config";
+
+/**
+ * Le back office est servi par un conteneur séparé : si une rewrite disparaît,
+ * `/admin` retombe sur le site Next et renvoie 404, sans erreur de build. On
+ * verrouille donc le contrat ici.
+ */
+describe("relais du back office", () => {
+  const build = async () => {
+    const rewrites = await nextConfig.rewrites?.();
+    if (!rewrites || Array.isArray(rewrites)) throw new Error("rewrites attendues sous forme d'objet");
+    return new Map((rewrites.beforeFiles ?? []).map((rule) => [rule.source, rule.destination]));
+  };
+
+  it("relaie les pages d'administration et leurs actions", async () => {
+    const rules = await build();
+    expect(rules.get("/admin")).toMatch(/\/admin$/);
+    expect(rules.get("/admin/:path*")).toMatch(/\/admin\/:path\*$/);
+  });
+
+  it("relaie les API et médias du back office", async () => {
+    const rules = await build();
+    expect(rules.get("/api/admin/:path*")).toMatch(/\/api\/admin\/:path\*$/);
+    expect(rules.get("/medias/:path*")).toMatch(/\/medias\/:path\*$/);
+  });
+
+  it("relaie les assets que le site ne possède pas", async () => {
+    const rules = await build();
+    for (const asset of [
+      "/assets/admin.css",
+      "/assets/admin.js",
+      "/assets/fonts/:path*",
+      "/assets/editor/:path*",
+      "/assets/logo-sujeepan-sabesan.svg",
+      "/assets/logo-sujeepan-sabesan-clair.svg",
+      "/assets/icon_sujeepansabesan.svg",
+    ]) {
+      expect(rules.has(asset), asset).toBe(true);
+    }
+  });
+
+  it("n'avale pas les assets propres au site", async () => {
+    const rules = await build();
+    expect(rules.has("/assets/:path*")).toBe(false);
+    expect(rules.has("/assets/site.css")).toBe(false);
+  });
+});

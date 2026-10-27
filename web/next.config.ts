@@ -83,6 +83,49 @@ const nextConfig: NextConfig = {
       ...legacyUrls.map((url) => ({ ...url, statusCode: 301 as const })),
     ];
   },
+  /**
+   * Back office : le domaine public est servi par Next, l'administration tourne dans
+   * son propre conteneur FastAPI. On relaie ici ce qui lui appartient pour qu'elle
+   * reste accessible sur `sujeedesign.com/admin`, avec une seule origine, un seul
+   * certificat et des cookies de session sans problème de SameSite.
+   *
+   * `ADMIN_ORIGIN` est lu au build : les rewrites sont figés dans routes-manifest.
+   * Pour changer de cible, il faut donc redéployer avec la nouvelle valeur.
+   */
+  async rewrites() {
+    const admin = (
+      process.env.ADMIN_ORIGIN || "https://admin-sujeedesign.145.241.167.66.sslip.io"
+    ).replace(/\/+$/, "");
+    return {
+      beforeFiles: [
+        { source: "/admin", destination: `${admin}/admin` },
+        { source: "/admin/:path*", destination: `${admin}/admin/:path*` },
+        { source: "/medias/:path*", destination: `${admin}/medias/:path*` },
+        { source: "/api/admin/:path*", destination: `${admin}/api/admin/:path*` },
+        // Assets du back office et de l'éditeur visuel : le site Next possède son
+        // propre dossier public/assets, on ne relaie que les fichiers qui lui
+        // manquent (voir tests/admin-proxy.test.ts).
+        { source: "/assets/editor/:path*", destination: `${admin}/assets/editor/:path*` },
+        { source: "/assets/fonts/:path*", destination: `${admin}/assets/fonts/:path*` },
+        { source: "/assets/admin.css", destination: `${admin}/assets/admin.css` },
+        { source: "/assets/admin.js", destination: `${admin}/assets/admin.js` },
+        {
+          source: "/assets/logo-sujeepan-sabesan.svg",
+          destination: `${admin}/assets/logo-sujeepan-sabesan.svg`,
+        },
+        {
+          source: "/assets/logo-sujeepan-sabesan-clair.svg",
+          destination: `${admin}/assets/logo-sujeepan-sabesan-clair.svg`,
+        },
+        {
+          source: "/assets/icon_sujeepansabesan.svg",
+          destination: `${admin}/assets/icon_sujeepansabesan.svg`,
+        },
+      ],
+      afterFiles: [],
+      fallback: [],
+    };
+  },
 };
 
 export default nextConfig;
