@@ -573,6 +573,84 @@ export const projects: Project[] = [
     tags: ["Identité", "Logotypes"],
     tone: "paper",
   },
+  {
+    slug: "club-med",
+    index: "08",
+    name: "Club Med — TEd",
+    client: "Club Med",
+    year: "2020",
+    disciplines: ["Direction artistique", "Design de présentation"],
+    pitch:
+      "Un événement sur les expériences de voyage, et un lettrage à construire : les trois lettres de TEd deviennent chacune une destination. Une plage, une pente de ski, un désert.",
+    scope: "Lettrage photographique, système de présentation, déclinaisons de diapositives",
+    sections: [
+      {
+        k: "01",
+        label: "Contexte",
+        title: "Trois lettres, trois voyages",
+        paragraphs: [
+          "Pour l’événement Travel Experience Designer de Club Med, le sujet n’était pas de photographier des vacances, mais de montrer la variété des expériences que la marque revendique. Le brief tenait en un signe : TEd, les trois lettres de l’événement.",
+          "La difficulté était double. Il fallait rester reconnaissable à l’intérieur d’une marque très identifiée, son bleu et son trident, sans produire une énième diapositive de catalogue.",
+        ],
+      },
+      {
+        k: "02",
+        label: "Décision",
+        title: "Le lettrage comme grille",
+        paragraphs: [
+          "Chaque lettre devient une fenêtre : le T ouvre sur une plage et une baigneuse face à la mer, le e contient un skieur en pleine descente, le d montre un dromadaire et des pyramides. Le lettrage n’est plus un titre, c’est le sommaire des expériences.",
+        ],
+        bullets: [
+          "Trois photos découpées dans les contre-formes du T, du e et du d, sur un bleu marine qui tient le tout",
+          "Un panneau blanc central qui isole le contenu et laisse le voyage occuper les bords",
+          "Une typographie sans empattement, un titre en trois lignes, aucune fioriture à côté du trident",
+          "Un jeu de diapositives complet : couverture, piliers, page équipe, indicateurs, visuel d’ouverture",
+        ],
+      },
+      {
+        k: "03",
+        label: "Résultat",
+        title: "Un système, pas une affiche",
+        paragraphs: [
+          "Le lettrage a servi de matrice au reste du gabarit : la même logique de photos glissées dans une forme se retrouve sur la couverture, les pages équipe et le visuel d’ouverture. Une direction artistique qui tient sur une diapositive comme sur vingt, et qui reste lisible quand on la réduit.",
+        ],
+      },
+    ],
+    images: [
+      {
+        src: "/assets/img/projet/club-med/01.jpg",
+        alt: "Couverture de la présentation Club Med : le chiffre 50 en collage de photos de voyage, sur une plage turquoise",
+        width: 1400,
+        height: 1068,
+      },
+      {
+        src: "/assets/img/projet/club-med/02.jpg",
+        alt: "Le lettrage TEd : chaque lettre contient une expérience, plage, ski et désert, avec le logotype Club Med",
+        width: 1400,
+        height: 788,
+      },
+      {
+        src: "/assets/img/projet/club-med/04.jpg",
+        alt: "Page équipe du gabarit Club Med, portraits façon Polaroid sur fond de plage",
+        width: 1400,
+        height: 788,
+      },
+      {
+        src: "/assets/img/projet/club-med/05.jpg",
+        alt: "Le jeu de diapositives déployé en perspective : couverture, piliers, indicateurs et pages équipe",
+        width: 1400,
+        height: 788,
+      },
+      {
+        src: "/assets/img/projet/club-med/06.jpg",
+        alt: "Visuel d’ouverture estival : van, palmier, avion et slogan Let’s travel",
+        width: 1400,
+        height: 788,
+      },
+    ],
+    tags: ["Direction artistique", "Présentation"],
+    tone: "tint",
+  },
 ];
 
 export const projectSlugs = projects.map((project) => project.slug);

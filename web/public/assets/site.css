@@ -926,3 +926,21 @@ box-shadow:0 50px 90px -50px #000, 0 0 0 1px rgba(255,75,31,.25)}
   .wcard__vis{height:282px}
   .sc-site, .sc-ui{max-width:340px}
 }
+
+/* Métadonnées de fiche projet : une seule colonne sur petit mobile.
+   La règle 1fr 1fr du bloc max-width:860px passait après celle du 560px
+   et laissait « Périmètre » dans une colonne trop étroite. */
+@media (max-width:560px){
+  .meta-grid{grid-template-columns:1fr}
+  .meta-grid div{border-right:0;border-bottom:1px solid var(--line-2)}
+  .meta-grid div:nth-child(2),.meta-grid div:nth-child(3),.meta-grid div:nth-child(4){border-top:0}
+  .meta-grid div:last-child{border-bottom:0}
+}
+
+/* Fiches à 2 ou 3 métadonnées : la grille de 4 colonnes laissait des
+   colonnes vides à droite. On ajuste le nombre de colonnes au contenu,
+   au-dessus du seuil mobile où tout passe sur une colonne. */
+@media (min-width:561px){
+  .meta-grid:has(> div:nth-child(2):last-child){grid-template-columns:repeat(2,1fr)}
+  .meta-grid:has(> div:nth-child(3):last-child){grid-template-columns:repeat(3,1fr)}
+}
