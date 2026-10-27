@@ -30,6 +30,14 @@ const legacyUrls: Array<{ source: string; destination: string }> = [
   { source: "/projet-ia.html", destination: "/agents-ia" },
   { source: "/projet-formation.html", destination: "/a-propos" },
 
+  // Projets de démonstration retirés le 27/10/2026 : leurs anciennes adresses
+  // renvoyaient 404. Elles pointent vers le sommaire des réalisations.
+  { source: "/realisations/rfa", destination: "/realisations" },
+  { source: "/realisations/atelier-24", destination: "/realisations" },
+  { source: "/realisations/atelier-24-dix-ans", destination: "/realisations" },
+  { source: "/realisations/mpt", destination: "/realisations" },
+  { source: "/realisations/psw", destination: "/realisations" },
+
   // Site FastAPI en production (slugs antérieurs au v5)
   { source: "/contact", destination: "/a-propos#contact" },
   { source: "/services/identite", destination: "/services/identite-de-marque" },

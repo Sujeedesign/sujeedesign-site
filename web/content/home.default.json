@@ -52,12 +52,12 @@
   },
   "cases": {
     "title": [
-      "Six projets,",
-      "six systèmes."
+      "Huit projets,",
+      "huit systèmes."
     ],
-    "intro": "Chaque marque repart avec ses règles : ce qui se répète, ce qui varie, et ce qu'on ne fait jamais. Trois sont ici, les six sont sur la page Réalisations.",
+    "intro": "Chaque marque repart avec ses règles : ce qui se répète, ce qui varie, et ce qu'on ne fait jamais. Trois sont ici, les huit sont sur la page Réalisations.",
     "aside": {
-      "label": "Les six projets ↗",
+      "label": "Les huit projets ↗",
       "href": "/realisations"
     },
     "items": [
@@ -84,45 +84,43 @@
       },
       {
         "id": "case02",
-        "index": "02 / Marque · Web",
+        "index": "02 / Identité · Direction photo",
         "meta": [
-          "RFA",
-          "4 sites",
-          "2025"
+          "Elerya",
+          "Maroquinerie",
+          "Identité"
         ],
-        "title": "RFA",
+        "title": "Elerya",
         "tags": [
-          "Identité",
-          "Signalétique",
-          "Site",
-          "Déploiement"
+          "Logotype",
+          "Direction photo",
+          "E-commerce"
         ],
-        "barLabel": "Restauration · franchise",
+        "barLabel": "Maroquinerie · Paris",
         "ghost": "02",
-        "visual": "sign",
+        "visual": "pack",
         "tone": "signal",
-        "href": "/realisations/rfa"
+        "href": "/realisations/elerya"
       },
       {
         "id": "case03",
-        "index": "03 / Plateforme · Outils IA",
+        "index": "03 / Site · Design system",
         "meta": [
-          "Atelier 24",
-          "Formation",
-          "2025"
+          "Analog Way",
+          "Broadcast",
+          "2016"
         ],
-        "title": "Atelier 24",
+        "title": "Analog Way",
         "tags": [
-          "Interface",
-          "Contenu",
-          "Workflows",
-          "Formation"
+          "Arborescence",
+          "Gabarits produits",
+          "Typographie"
         ],
-        "barLabel": "Formation · automatisation",
+        "barLabel": "Broadcast · Pro AV",
         "ghost": "03",
         "visual": "ui",
         "tone": "ui",
-        "href": "/realisations/atelier-24"
+        "href": "/realisations/analog-way"
       }
     ]
   },

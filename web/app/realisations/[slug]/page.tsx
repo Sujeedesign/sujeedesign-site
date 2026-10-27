@@ -1,35 +1,35 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Projet, pageMeta } from "@/components/pages/Projet";
+import { ProjetCase, projectMeta } from "@/components/pages/ProjetCase";
 import { PageShell } from "@/components/site/PageShell";
 import { pageMetadata } from "@/lib/page-metadata";
-import { routes } from "@/lib/routes";
-
-/** Le v5 ne publie qu'une étude de cas ; toute autre valeur renvoie un 404. */
-const projects = ["vaasam"] as const;
+import { realisationPath, routes } from "@/lib/routes";
+import { getProject, projectSlugs } from "@/content/projects";
 
 type Params = { params: Promise<{ slug: string }> };
 
 export function generateStaticParams() {
-  return projects.map((slug) => ({ slug }));
+  return projectSlugs.map((slug) => ({ slug }));
 }
 
 export const dynamicParams = false;
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
-  if (!projects.includes(slug as (typeof projects)[number])) return {};
-  return pageMetadata(pageMeta, `${routes.realisations}/${slug}`);
+  const project = getProject(slug);
+  if (!project) return {};
+  return pageMetadata(projectMeta(project), realisationPath(slug));
 }
 
 export default async function Page({ params }: Params) {
   const { slug } = await params;
-  if (!projects.includes(slug as (typeof projects)[number])) notFound();
+  const project = getProject(slug);
+  if (!project) notFound();
 
   return (
     <PageShell current={routes.realisations}>
       <main id="main">
-        <Projet />
+        <ProjetCase project={project} />
       </main>
     </PageShell>
   );

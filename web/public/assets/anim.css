@@ -90,3 +90,16 @@ html.no-anim .aw > span{ transform: none !important; transition: none !important
 html.no-anim .rv,
 html.no-anim [data-stagger] > *{ opacity: 1 !important; transform: none !important; filter: none !important; }
 html.no-anim .img-rev{ clip-path: none !important; transform: none !important; }
+
+/* Visuels réels des études de cas sur l'accueil (chargé en dernier).
+   site.css et ds.css imposent des hauteurs en !important sur .case__visual
+   (200 px en mobile, auto pour .case--ui), d'où les hauteurs explicites ici :
+   les trois cartes gardent le même cadre, l'image est recadrée en cover. */
+.case__visual--photo{position:relative;display:block;padding:0;overflow:hidden;background:#0b0b0a}
+.case__visual--photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
+@media (max-width:860px){
+  .case__visual--photo,.case--ui .case__visual--photo{height:200px!important;min-height:0!important}
+}
+@media (min-width:861px){
+  .case__visual--photo,.case--ui .case__visual--photo{height:clamp(420px,80%,640px)!important}
+}

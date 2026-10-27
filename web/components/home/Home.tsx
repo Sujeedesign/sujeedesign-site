@@ -1,4 +1,5 @@
 import { homeContent } from "@/content/home";
+import { getProject } from "@/content/projects";
 
 const arrow = (
   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -204,6 +205,26 @@ function CaseVisual({ kind }: { kind: "pack" | "sign" | "ui" }) {
   );
 }
 
+/** Visuel réel du projet quand il existe, sinon l'illustration d'origine. */
+function CaseMedia({ href, kind }: { href: string; kind: "pack" | "sign" | "ui" }) {
+  const slug = href.split("/").filter(Boolean).pop() ?? "";
+  const project = getProject(slug);
+  const image = project?.images[0];
+  if (!image) return <CaseVisual kind={kind} />;
+  return (
+    <div className="case__visual case__visual--photo">
+      <img
+        src={image.src}
+        alt={image.alt}
+        width={image.width}
+        height={image.height}
+        loading="lazy"
+        decoding="async"
+      />
+    </div>
+  );
+}
+
 const caseClass: Record<string, string> = {
   paper: "case c-paper",
   signal: "case c-signal",
@@ -265,7 +286,7 @@ export function Cases() {
                     ))}
                   </div>
                 </div>
-                <CaseVisual kind={item.visual} />
+                <CaseMedia href={item.href} kind={item.visual} />
               </div>
               <div className="case__bar">
                 <span className="go">
