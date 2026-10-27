@@ -85,24 +85,50 @@ def publish_ready() -> bool:
     return bool(config["token"] and config["uuid"])
 
 
+# Le conteneur joint Coolify par le réseau Docker ; l'URL publique passe par le
+# proxy et peut répondre 404 selon le DNS vu depuis le conteneur. On essaie donc
+# l'URL configurée, puis l'adresse interne, puis l'URL publique.
+_INTERNAL = "http://coolify:8000"
+
+
+def _candidate_urls() -> list[str]:
+    config = publish_config()
+    urls = [config["url"]]
+    for extra in (_INTERNAL, os.environ.get("COOLIFY_PUBLIC_URL", "https://coolify.sujeedesign.com")):
+        if extra and extra.rstrip("/") not in urls:
+            urls.append(extra.rstrip("/"))
+    return urls
+
+
 def _coolify(path: str, method: str = "GET", payload: dict[str, Any] | None = None) -> Any:
     config = publish_config()
     if not config["token"]:
         raise RuntimeError("COOLIFY_TOKEN absent")
     body = json.dumps(payload).encode("utf-8") if payload is not None else None
-    request = urllib.request.Request(
-        f"{config['url']}{path}",
-        data=body,
-        method=method,
-        headers={
-            "Authorization": f"Bearer {config['token']}",
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        },
-    )
-    with urllib.request.urlopen(request, timeout=20) as response:
-        raw = response.read().decode("utf-8")
-    return json.loads(raw) if raw else {}
+    last: Exception | None = None
+    for base in _candidate_urls():
+        request = urllib.request.Request(
+            f"{base}{path}",
+            data=body,
+            method=method,
+            headers={
+                "Authorization": f"Bearer {config['token']}",
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=20) as response:
+                raw = response.read().decode("utf-8")
+            return json.loads(raw) if raw else {}
+        except urllib.error.HTTPError as exc:
+            detail = exc.read().decode("utf-8", "replace")[:200]
+            last = RuntimeError(f"{exc.code} sur {base}{path} : {detail}")
+            if exc.code not in (404, 502, 503):
+                break
+        except urllib.error.URLError as exc:
+            last = RuntimeError(f"{base} injoignable : {exc.reason}")
+    raise last or RuntimeError("Coolify injoignable")
 
 
 def request_publish(conn: sqlite3.Connection, slug: str = "home") -> dict[str, Any]:
