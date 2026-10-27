@@ -1,7 +1,7 @@
 # Bascule du v5 en production (vitrine Next.js)
 
 Date : 27/10/2026
-Branche : `feat/vitrine-next` (commit `3b47d49`), app dans `web/`.
+Statut : **bascule effectuée** (voir « État final » en bas).
 
 ## Ce qui est prêt et vérifié
 
@@ -13,76 +13,76 @@ Branche : `feat/vitrine-next` (commit `3b47d49`), app dans `web/`.
 - `next build` OK (16 routes, sortie standalone), `tsc --noEmit` 0, `vitest` vert.
 - Animations du v5 conservées : GSAP 3.13 + ScrollTrigger servis localement depuis
   `web/public/assets` (aucun CDN, aucun chargement bloquant), `site.js`, `anim.js`
-  et `rl.js` chargés après hydratation. Vérifié en navigateur : hero pinné (1 trigger),
-  `pin-spacer` créé, `h1` de `/realisations` révélé (`is-in`), 0 débordement à 390 px.
+  et `rl.js` chargés après hydratation.
 - SEO construit côté Next : `sitemap.xml`, `robots.txt`, OpenGraph, Twitter,
   JSON-LD `ProfessionalService`, canonical par page.
-- Redirections `301` strictes vers les nouvelles URL :
-  - `/v5` → `/`, et chaque page `/v5/*.html` → sa page équivalente
-    (`/v5/a-propos.html` → `/a-propos`, `/v5/projet.html` → `/realisations/vaasam`,
-    `/v5/service-identite.html` → `/services/identite-de-marque`, etc.)
-  - anciens fichiers `.html` (`/index.html`, `/apropos.html`, `/identite.html`…)
-  - anciennes routes FastAPI (`/services/identite`, `/services/ia`,
-    `/realisations/vaasam-paris` → page équivalente)
-  - `/contact`, `/contact.html` → `/a-propos#contact` (ancre réelle sur le bloc CTA)
-  - `/services/agents-ia` → `/agents-ia`
-- 404 réelle sur les URL inconnues, `sitemap.xml` et `robots.txt` à 200.
+- Redirections `301` strictes vers les nouvelles URL (détail plus bas).
 
-## Ce qui n'est pas vérifié
+## Configuration Coolify
 
-- `docker build` de l'image finale : le daemon Docker n'était pas joignable lors
-  du dernier passage. Le Dockerfile (`node:22-alpine`, multi-stage, standalone,
-  user non-root `nextjs`, port 3000, `HEALTHCHECK` sur `/` via `wget`) a été
-  complété depuis ; à build via le builder Coolify avant la bascule.
-- `npm start` écoute désormais 3000, comme le conteneur (plus d'ambiguïté de port).
+### Vitrine Next.js
 
-## Configuration Coolify cible
+- nom `sujeedesign-web`, uuid `kbt19dmgg3tnm6azvdcvuegg`
+- projet `Hermes Agent` (`mozs7ed4twhv6thvvfxsobz9`), env `production`
+- serveur `jsvjpfio8b4r0nm7atlucfcq`, destination `tlmpradiwhqmhog6l6zjbcej`
+- repo `https://github.com/Sujeedesign/sujeedesign-site.git`, branche `main`
+- `build_pack` dockerfile, `base_directory` `/web`, `dockerfile_location` `/Dockerfile`
+- `ports_exposes` `3000`, health `/` sur 3000
+- domaines : `https://sujeedesign.com,https://www.sujeedesign.com` (+ URL sslip de secours)
 
-Application actuelle : `sujeedesign` (`zbfls3fq6aiwtoouhkj8vpye`), FastAPI,
-domaine racine, branche `main`, `base_directory /`, port 8080, health `/api/health`.
+Le Dockerfile est multi-stage (`node:22-alpine`), sortie standalone, user `nextjs`,
+`HEALTHCHECK` sur `/`. Build vérifié par le builder Coolify, image en production.
 
-Nouvelle application :
+## Back office `/admin`
 
-- nom `sujeedesign-web`
-- repo `https://github.com/Sujeedesign/sujeedesign-site.git`
-- branche `main` (après merge de `feat/vitrine-next`)
-- `base_directory` : `/web`
-- build pack : Dockerfile, `dockerfile_location` : `/web/Dockerfile`
-- `ports_exposes` : `3000`
-- `health_check_path` : `/`
-- domaines : `https://sujeedesign.com,https://www.sujeedesign.com`
+Le back office (FastAPI + Jinja + `sujee_editor`) monte ses assets à la **racine**
+(`/assets`, `/medias`), donc il ne peut pas cohabiter avec la vitrine sur le même
+hôte sans collisions de chemins ni proxy. Décision : **il garde son propre hôte**.
 
-## Point de vigilance : le back office `/admin`
+- application FastAPI `sujeedesign` (`zbfls3fq6aiwtoouhkj8vpye`), toujours
+  déployée avec son volume `/data` et sa base.
+- hôte actuel : `https://admin-sujeedesign.145.241.167.66.sslip.io`
+  (`/admin` → 303 vers `/admin/connexion`, `/assets/admin.css` 200).
+- à faire quand le DNS sera accessible : créer un `A`/`CNAME`
+  `admin.sujeedesign.com` → `145.241.167.66`, l'ajouter aux domaines de l'app
+  FastAPI, puis retirer l'hôte sslip.
+- `/admin` sur `sujeedesign.com` renvoie **404** : c'est voulu, la vitrine ne
+  proxyfie pas le back office.
 
-L'application FastAPI actuelle sert aussi `/admin` (back office et éditeur de
-blocs) sur le domaine racine. Si le domaine bascule sur Next sans rien prévoir,
-`/admin` renvoie 404.
+## Redirections 301 en production
 
-Deux options, à trancher :
+- `/v5` → `/` ; chaque `/v5/*.html` → sa page équivalente
+  (`/v5/a-propos.html` → `/a-propos`, `/v5/projet.html` → `/realisations/vaasam`,
+  `/v5/service-identite.html` → `/services/identite-de-marque`, etc.)
+- anciens fichiers `.html` (`/index.html`, `/apropos.html`, `/identite.html`…)
+- anciennes routes FastAPI (`/services/identite`, `/services/ia`,
+  `/realisations/vaasam-paris`)
+- `/contact`, `/contact.html` → `/a-propos#contact` (ancre réelle sur le bloc CTA)
+- `/services/agents-ia` → `/agents-ia`
 
-1. **Garder l'admin** : donner à l'app FastAPI un sous-domaine
-   (`admin.sujeedesign.com`, à créer côté DNS) et ne mettre que la vitrine sur
-   la racine. C'est la seule option qui ne coupe rien.
-2. **Bascule sèche** : la racine passe sur Next, l'admin reste accessible par
-   l'ancienne app arrêtée ou par son URL temporaire Coolify jusqu'à ce que le
-   produit admin autonome soit prêt.
+Seule exception : `/v5/` (avec slash final) est normalisé en `308` vers `/v5`
+par Next avant la redirection ; `/v5` répond ensuite `301` vers `/`. Les deux
+codes sont permanents.
 
-Tant que ce point n'est pas tranché, la bascule n'est pas exécutée.
+## État final (vérifié le 27/10/2026)
 
-## Séquence de bascule
+Vérifications faites en ligne, après bascule :
 
-1. Merger `feat/vitrine-next` dans `main`.
-2. Créer l'application Coolify `sujeedesign-web` avec la configuration ci-dessus,
-   sans domaine dans un premier temps, déployer, vérifier la santé.
-3. Trancher le sort de `/admin` (option 1 recommandée).
-4. Déplacer les domaines `sujeedesign.com` et `www.sujeedesign.com` de l'app
-   FastAPI vers `sujeedesign-web`.
-5. Vérifier en ligne : `/` 200, les 9 routes 200, `/services/agents-ia` 301,
-   `/v5` 301, `/nimporte-quoi` 404, `sitemap.xml` et `robots.txt` 200,
-   et une capture desktop + mobile.
-6. Supprimer l'ancienne route `/v5` du code FastAPI (plus servie).
+| contrôle | résultat |
+| --- | --- |
+| `/`, `/services`, `/agents-ia`, `/realisations`, `/realisations/vaasam`, `/a-propos`, `/mentions-legales` | 200 |
+| `/sitemap.xml`, `/robots.txt` | 200 |
+| `/nimporte-quoi` | 404 |
+| `/v5/projet.html`, `/apropos.html`, `/services/identite`, `/contact` | 301 vers la bonne cible |
+| `/admin` sur la racine | 404 (voulu) |
+| back office sslip | `/admin/connexion` 200, assets 200 |
+| HTTPS apex + www + hôte admin | certificats Let's Encrypt valides |
+| navigateur desktop | `gsap` + `ScrollTrigger` chargés, hero pinné (1 `pin-spacer`), `is-in` sur `/realisations` |
+| navigateur 390 px | `scrollWidth = clientWidth = 390`, 1 `h1` par page |
 
 ## Rollback
 
-Redéplacer les domaines sur l'application `sujeedesign` d'origine : elle reste
-en place, image et volume `/data` intacts, jusqu'à validation complète.
+L'application `sujeedesign` (`zbfls3fq6aiwtoouhkj8vpye`) reste déployée, image et
+volume `/data` intacts. Pour revenir en arrière : lui rendre les domaines
+`sujeedesign.com` + `www.sujeedesign.com` et redéployer, puis retirer ces domaines
+de `sujeedesign-web`. Le site FastAPI d'origine reprend la racine tel quel.
