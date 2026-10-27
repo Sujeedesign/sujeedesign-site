@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import sqlite3
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -93,6 +94,40 @@ def create_app(db_path: str | Path | None = None) -> FastAPI:
     def health(conn: sqlite3.Connection = Depends(get_db)) -> dict:
         revision = db_module.content_revision(conn)
         return {"ok": True, "version": VERSION, "revision": revision}
+
+    CANONICAL_HOSTS = {"sujeedesign.com", "www.sujeedesign.com"}
+    ADMIN_PREFIXES = ("/admin", "/api", "/assets", "/medias")
+    INTERNAL_HOSTS = {"localhost", "127.0.0.1", "0.0.0.0", "testserver"}
+
+    @app.middleware("http")
+    async def canonical_host(request: Request, call_next):
+        """Hors du domaine public, l'app ne sert que le back office.
+
+        Le back office garde un hôte dédié, distinct de la vitrine Next.js. Sur
+        cet hôte, les pages publiques de l'ancien site redirigent en 301 vers
+        sujeedesign.com, et tout ce qui est servi passe en noindex, pour éviter
+        un doublon SEO. Seuls les hôtes de prévisualisation (*.sslip.io) et ceux
+        listés dans ADMIN_ONLY_HOSTS sont concernés : les hôtes internes et de
+        test ne sont jamais redirigés.
+        """
+        host = (request.headers.get("host") or "").split(":")[0].lower()
+        allowed = {
+            value.strip().lower()
+            for value in os.environ.get("ADMIN_ONLY_HOSTS", "").split(",")
+            if value.strip()
+        }
+        if host in CANONICAL_HOSTS or host in INTERNAL_HOSTS:
+            return await call_next(request)
+        if not (host.endswith(".sslip.io") or host in allowed):
+            return await call_next(request)
+        path = request.url.path
+        if any(path == prefix or path.startswith(prefix + "/") for prefix in ADMIN_PREFIXES):
+            response = await call_next(request)
+            response.headers["X-Robots-Tag"] = "noindex, nofollow"
+            return response
+        from fastapi.responses import RedirectResponse
+
+        return RedirectResponse(f"https://sujeedesign.com{path}", status_code=301)
 
     @app.middleware("http")
     async def security_headers(request: Request, call_next):
