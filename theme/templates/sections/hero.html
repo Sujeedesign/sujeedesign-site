@@ -1,31 +1,44 @@
 {% from "partials/macros.html" import ctas %}
+{# Le hero peut être rendu hors page (aperçu éditeur) : `settings` reste facultatif. #}
+{% set settings = settings|default({}) %}
 {% set d = s.data %}
 {% set variant = s.variant or 'simple' %}
 
 {% if variant == 'accueil' %}
-{# Le hero d'accueil n'affiche plus de portrait : une seule colonne centrée,
-   titre rotatif puis actions, sur le fond animé. #}
-<header class="hero" id="hero">
-  <div class="hero-bg" id="heroBg"></div>
-  {% if d.get('shader', true) %}<canvas class="hero-shader" id="heroShader" aria-hidden="true"></canvas>{% endif %}
-  <div class="hero-grain"></div>
-  <div class="hero-inner" id="heroInner">
-    {% set rotator = d.get('rotator', []) %}
-    <h1 class="hero-title" id="heroTitle" aria-label="{{ (rotator|join(' '))|replace('<br>', ' ') }}">
-      <span class="hero-rotator" id="heroRotator" aria-hidden="true">
-        {% for word in rotator %}<span class="ht-word{% if loop.first %} is-active{% endif %}">{{ word }}</span>{% endfor %}
-      </span>
-    </h1>
-    {{ ctas(d.get('ctas', []), 'hero-ctas hu') }}
+{# Hero éditorial : la promesse reste lisible, le portrait porte la
+   direction artistique. Le mouvement est décoratif, jamais bloquant. #}
+{% set tagline = settings.tagline|default('Votre marque, de A à Z') %}
+{% set parts = tagline.split(',') %}
+<header class="v2-hero" id="hero">
+  <div class="v2-stamp v2-stamp--hero" aria-hidden="true"><span>Direction<br>artistique<br><b>↗</b></span></div>
+  <div class="v2-hero__grid">
+    <div class="v2-hero__copy">
+      <p class="v2-eyebrow"><span class="dot" aria-hidden="true"></span> Designer graphique &amp; directeur artistique · Paris</p>
+      {% set second = parts[1]|trim if parts|length > 1 else '' %}
+      <h1 class="v2-hero__title">
+        <span class="v2-line"><span>{% if parts|length > 1 %}{{ parts[0] }},{% else %}{{ tagline }}{% endif %}</span></span>
+        {% if parts|length > 1 %}<span class="v2-line"><span><em>{{ second }}{% if not second.endswith('.') %}.{% endif %}</em></span></span>{% endif %}
+      </h1>
+      <p class="v2-hero__lead">Identité, image et sites web pour les marques qui veulent exister pour de vrai. Un interlocuteur unique, depuis 2013.</p>
+      {% if d.get('ctas') %}
+      {{ ctas(d.get('ctas', []), 'v2-hero__actions') }}
+      {% else %}
+      <div class="v2-hero__actions">
+        <a class="pill pill--filled" href="/contact">Démarrer un projet <span aria-hidden="true">↗</span></a>
+        <a class="pill" href="/realisations">Voir les projets</a>
+      </div>
+      {% endif %}
+      <div class="v2-hero__meta">
+        <span>Identité de marque</span>
+        <span>Web &amp; e-commerce</span>
+        <span>Image &amp; direction artistique</span>
+      </div>
+    </div>
   </div>
-  <div class="scroll-badge" id="scrollBadge" aria-hidden="true">
-    <svg viewBox="0 0 104 104">
-      <defs>
-        <path id="circlePath" d="M 52,52 m -38,0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0"/>
-      </defs>
-      <text><textPath href="#circlePath">SCROLL DOWN · SCROLL DOWN · </textPath></text>
-      <circle class="dot" cx="52" cy="52" r="4"/>
-    </svg>
+  <div class="v2-hero__bar">
+    <span>Paris, France</span>
+    <span>Identité · Web · Image</span>
+    <a href="#manifeste">Faire défiler <span aria-hidden="true">↓</span></a>
   </div>
 </header>
 
@@ -37,8 +50,6 @@
     {% set meta = d.get('meta', []) %}
     {% if meta %}<div class="p-meta">{% for item in meta %}<span>{{ item }}</span>{% endfor %}</div>{% endif %}
     <p class="p-intro" data-field="intro">{{ d.get('intro') or '' }}</p>
-    {# L'emplacement des actions est toujours rendu : la bande garde la même
-       hauteur que les pages qui, elles, portent un bouton. #}
     {% if d.get('ctas') %}{{ ctas(d.get('ctas')) }}{% else %}<div class="hero-ctas" aria-hidden="true"></div>{% endif %}
   </div>
 </section>
@@ -47,21 +58,21 @@
 {# `image` : visuel réel du projet (photo fournie par le client). Sans lui, le
    hero garde son visuel d'ambiance et réserve proprement l'emplacement. #}
 {% set image = d.get('image') %}
+{% set project_title = d.get('title','') %}
+{% set image_alt = d.get('image_alt') or (project_title ~ ' · visuel du projet') %}
 <section class="project-cover{% if not image %} project-cover--ambient{% endif %}" aria-labelledby="project-title">
   {% if image %}
-  <img class="project-cover__media project-cover__media--photo" src="{{ image }}" alt="{{ d.get('image_alt','') }}"{% if not d.get('image_alt') %} aria-hidden="true"{% endif %} width="{{ d.get('image_width') or 1920 }}" height="{{ d.get('image_height') or 1080 }}">
+  <img class="project-cover__media project-cover__media--photo" src="{{ image }}" alt="{{ image_alt }}" width="{{ d.get('image_width') or 1920 }}" height="{{ d.get('image_height') or 1080 }}" data-parallax="0.04">
   {% elif d.get('cover') %}
-  <img class="project-cover__media" src="{{ d.get('cover') }}" alt="{{ d.get('cover_alt','') }}" aria-hidden="true" width="1920" height="1080">
+  <img class="project-cover__media" src="{{ d.get('cover') }}" alt="{{ d.get('cover_alt') or image_alt }}" aria-hidden="true" width="1920" height="1080" data-parallax="0.04">
   {% endif %}
   <div class="project-cover__shade" aria-hidden="true"></div>
   <div class="container project-cover__inner">
     <a class="project-back" href="{{ d.get('back_href', '/realisations') }}"><span aria-hidden="true">←</span> {{ d.get('back_label') or 'Toutes les réalisations' }}</a>
     <div class="project-cover__content">
       <p class="p-kicker" data-field="kicker">{{ d.get('kicker') or '' }}</p>
-      <h1 class="p-title" id="project-title" data-field="title">{{ d.get('title','')|inline }}</h1>
+      <h1 class="p-title" id="project-title" data-field="title">{{ project_title|inline }}</h1>
       <p class="p-intro" data-field="intro">{{ d.get('intro') or '' }}</p>
-      {# Sans photo fournie, le visuel d'ambiance reste seul : pas de cadre vide en public.
-         Le champ `image` du back office prend le relais dès qu'une vraie photo existe. #}
     </div>
   </div>
 </section>
@@ -72,9 +83,14 @@
     <p class="page-label reveal" data-field="kicker">{{ d.get('kicker') or '' }}</p>
     <h1 class="page-title reveal" style="--d:.08s" data-field="title">{{ d.get('title','')|inline }}</h1>
     <p class="page-intro reveal" style="--d:.16s" data-field="intro">{{ d.get('intro') or '' }}</p>
-    {# L'emplacement des actions est toujours rendu, même sans bouton : la hauteur
-       de la bande ne dépend pas du contenu (cf. `.page-hero,.p-hero`). #}
-    {% if d.get('ctas') %}{{ ctas(d.get('ctas'), 'hero-ctas reveal') }}{% else %}<div class="hero-ctas reveal" aria-hidden="true"></div>{% endif %}
+    <div class="hero-ctas reveal">
+      {% if current_path == '/contact' %}
+      <a class="pill pill--filled" href="#contact">Remplir le formulaire <span aria-hidden="true">↓</span></a>
+      {% endif %}
+      {% for cta in d.get('ctas', []) %}
+      <a class="{{ cta.style|default('pill') }}" href="{{ cta.href }}">{{ cta.label }} <span aria-hidden="true">{{ cta.icon|default('→') }}</span></a>
+      {% endfor %}
+    </div>
   </div>
 </section>
 {% endif %}

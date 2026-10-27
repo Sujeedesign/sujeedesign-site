@@ -376,7 +376,7 @@ def _ensure_home_hero_layers(rendered: str) -> str:
         ("hero-grain", '<div class="hero-grain" aria-hidden="true"></div>'),
     )
     additions = [markup for class_name, markup in layers if class_name not in present_classes]
-    if "hero" not in root_classes and "sjd-home-hero-veil" not in present_classes:
+    if not root_classes & {"hero", "v2-hero"} and "sjd-home-hero-veil" not in present_classes:
         additions.append('<div class="sjd-home-hero-veil" aria-hidden="true"></div>')
     if not additions:
         return rendered

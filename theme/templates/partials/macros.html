@@ -17,15 +17,18 @@
 {% endmacro %}
 
 {% macro work_card(item, index) %}
+{% set cover_alt = item.cover_alt or (item.title ~ ' — visuel du projet') %}
 <a class="work-card reveal" href="{{ item.href }}" style="--d:{{ index * 0.08 }}s">
   <div class="work-media">
     <div class="work-img">
       {% if item.cover %}
-      <img src="{{ item.cover }}" alt="{{ item.cover_alt|default('') }}"{% if not item.cover_alt %} aria-hidden="true"{% endif %} loading="lazy" width="1200" height="900">
+      <img src="{{ item.cover }}" alt="{{ cover_alt }}" loading="lazy" decoding="async" width="1200" height="900" data-parallax="0.045">
       {% else %}
       <div class="thumb t{{ (index % 4) + 1 }}"></div>
       {% endif %}
     </div>
+    <span class="work-num">{{ '%02d' % (index + 1) }}</span>
+    <span class="work-view">Voir le projet <span aria-hidden="true">↗</span></span>
   </div>
   <div class="work-meta">
     <span class="work-title">{{ item.title }}</span>

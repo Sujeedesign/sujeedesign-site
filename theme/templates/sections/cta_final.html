@@ -3,6 +3,7 @@
 
 {% if s.variant == 'accueil' %}
 <section class="section contact p-final p-final--home reveal" id="contact">
+  <div class="hero-bg" id="pFinalBg" aria-hidden="true"></div>
   {% if d.get('shader', true) %}<canvas class="hero-shader" id="contactShader" aria-hidden="true"></canvas>{% endif %}
   <div class="container">
     <p class="section-label contact-label reveal" style="--d:.05s" data-field="kicker">{{ d.get('kicker','Contact') }}</p>
@@ -20,9 +21,9 @@
   <canvas class="hero-shader" id="pFinalShader" aria-hidden="true"></canvas>
   {% endif %}
   <div class="container">
-    <p class="p-kicker reveal" style="color:var(--color-paper-solid);--d:.05s" data-field="kicker">{{ d.get('kicker') or '' }}</p>
+    <p class="p-kicker reveal" style="--d:.05s" data-field="kicker">{{ d.get('kicker') or '' }}</p>
     <h2 class="p-title reveal" style="--d:.08s" data-field="title">{{ d.get('title','')|inline }}</h2>
-    <p class="p-intro reveal" style="margin-inline:auto;text-align:center;max-width:44ch;--d:.16s" data-field="intro">{{ d.get('intro') or '' }}</p>
+    <p class="p-intro reveal" style="--d:.16s" data-field="intro">{{ d.get('intro') or '' }}</p>
     {{ ctas(d.get('ctas', []), 'p-final-cta reveal') }}
   </div>
 </section>

@@ -2,22 +2,36 @@
 {% set footer = footer|default({}) %}
 <footer class="footer">
   <div class="container">
-    <div class="footer-grid">
-      <div class="f-addr">
+    <div class="v2-footer__top">
+      <p class="v2-footer__kicker">Sujee Design <span>·</span> {{ settings.city|default('Paris, France') }}</p>
+      <a class="v2-footer__top-link" href="#" aria-label="Retour en haut de page">Retour en haut <span aria-hidden="true">↑</span></a>
+    </div>
+    <div class="v2-footer__wordmark" aria-hidden="true">Sujee <em>Design</em></div>
+    <div class="v2-footer__grid">
+      <div>
         <h3>Studio</h3>
         <p>{{ settings.legal_name|default('Sujee Design — Sujeepan Sabesan') }}</p>
         <p>{{ settings.city|default('Paris, France') }}</p>
+        <p>{{ settings.tagline|default('Votre marque, de A à Z.') }}</p>
       </div>
-      <div class="f-addr">
+      <div>
         <h3>Contact</h3>
         {% if settings.email %}<p><a href="mailto:{{ settings.email }}">{{ settings.email }}</a></p>{% endif %}
-        {% if settings.linkedin %}<p><a href="{{ settings.linkedin }}" target="_blank" rel="noopener">linkedin.com/in/sujeepan-sabesan</a></p>{% endif %}
+        <p><a href="/contact">Formulaire de contact</a></p>
+        {% if settings.phone %}<p><a href="tel:{{ settings.phone|replace(' ', '') }}">{{ settings.phone }}</a></p>{% endif %}
       </div>
-      <div class="f-note">
-        <h3>Mentions</h3>
-        <p>© <span id="year">{{ year|default(2026) }}</span> {{ settings.site_name|default('Sujee Design') }}.</p>
-        <p>{{ settings.tagline|default('Votre marque, de A à Z.') }}</p>
-        <p><a href="/mentions-legales">Mentions légales</a></p>
+      <div>
+        <h3>Suivre</h3>
+        {% if settings.linkedin %}<p><a href="{{ settings.linkedin }}" target="_blank" rel="noopener">LinkedIn <span aria-hidden="true">↗</span></a></p>{% endif %}
+        {% if settings.behance %}<p><a href="{{ settings.behance }}" target="_blank" rel="noopener">Behance <span aria-hidden="true">↗</span></a></p>{% endif %}
+        <p><a href="mailto:{{ settings.email|default('s.sujeepan.pro@gmail.com') }}">Écrire un email <span aria-hidden="true">↗</span></a></p>
+      </div>
+    </div>
+    <div class="v2-footer__bottom">
+      <span>© <span id="year">{{ year|default(2026) }}</span> {{ settings.site_name|default('Sujee Design') }}. Tous droits réservés.</span>
+      <div class="v2-footer__social">
+        <a href="/mentions-legales">Mentions légales</a>
+        <a href="/contact">Contact</a>
       </div>
     </div>
   </div>

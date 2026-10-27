@@ -1,6 +1,6 @@
 {% from "partials/macros.html" import heading_lines %}
 {% set d = s.data %}
-<section class="section" id="manifeste">
+<section id="manifeste">
   <div class="container">
     <p class="section-label reveal" data-field="label">{{ d.get('label') or '' }}</p>
     {{ heading_lines(d.get('heading_lines', []), 'manifeste-heading reveal') }}

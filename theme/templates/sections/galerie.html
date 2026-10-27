@@ -7,8 +7,9 @@
     <p class="gallery-label" data-field="label">{{ d.get('label') or '' }}</p>
     <div class="gallery-grid" style="--cols:{{ columns }}">
       {% for image in images %}
+      {% set alt = image.get('alt') or image.get('caption') or 'Visuel du projet' %}
       <figure class="gallery-item">
-        <img src="{{ image.get('src','') }}" alt="{{ image.get('alt','') }}" loading="lazy" decoding="async">
+        <img src="{{ image.get('src','') }}" alt="{{ alt }}" loading="lazy" decoding="async">
         {% if image.get('caption') %}<figcaption>{{ image.get('caption') }}</figcaption>{% endif %}
       </figure>
       {% endfor %}
