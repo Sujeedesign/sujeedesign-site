@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{% block title %}Back office{% endblock %} · Sujee Design</title>
+  <link rel="stylesheet" href="/static-admin/admin.css">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+{% if user %}
+  <div class="shell">
+    <aside class="side" id="side">
+      <a class="brand" href="/admin">
+        <span class="dot"></span>
+        <span class="brand-txt"><strong>Sujee Design</strong><small>back office</small></span>
+      </a>
+      <nav class="nav">
+        {% for key, label, href in nav %}
+          {% set is_active = (active == href) or (href != '/admin' and active.startswith(href)) %}
+          <a class="nav-link{% if is_active %} is-active{% endif %}" href="{{ href }}">
+            <span class="ln"></span>{{ label }}
+          </a>
+        {% endfor %}
+      </nav>
+      <div class="side-foot">
+        <a class="site-link" href="{{ public_url }}" target="_blank" rel="noopener">
+          Voir le site public <span aria-hidden="true">↗</span>
+        </a>
+        <form method="post" action="/admin/deconnexion">
+          <input type="hidden" name="csrf" value="{{ csrf }}">
+          <button class="btn btn-ghost btn-sm" type="submit">Déconnexion</button>
+        </form>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="burger" type="button" data-toggle-side aria-label="Menu">☰</button>
+        <div class="topbar-title">{% block heading %}{% endblock %}</div>
+        <div class="topbar-meta">
+          <span class="pill">admin</span>
+        </div>
+      </header>
+
+      {% if flash %}
+        <div class="flash flash-{{ flash_kind }}" role="status">{{ flash }}</div>
+      {% endif %}
+      {% block error %}{% endblock %}
+
+      <div class="page">
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+  </div>
+{% else %}
+  <div class="auth">
+    {% if flash %}<div class="flash flash-{{ flash_kind }}">{{ flash }}</div>{% endif %}
+    {% block auth %}{% endblock %}
+  </div>
+{% endif %}
+<script src="/static-admin/admin.js" defer></script>
+</body>
+</html>

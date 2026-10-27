@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Connexion{% endblock %}
+{% block body_class %}is-auth{% endblock %}
+{% block auth %}
+  <form class="card auth-card" method="post" action="/admin/connexion">
+    <div class="brand auth-brand"><span class="dot"></span><strong>Sujee Design</strong></div>
+    <h1>Back office</h1>
+    <p class="muted">Accès réservé. Un seul mot de passe protège l'administration.</p>
+    {% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+    <label class="field">
+      <span>Mot de passe</span>
+      <input type="password" name="password" autocomplete="current-password" required autofocus>
+    </label>
+    <button class="btn btn-accent" type="submit">Entrer</button>
+    <p class="muted tiny">Vitrine publique : <a href="{{ public_url }}" target="_blank" rel="noopener">{{ public_url }}</a></p>
+  </form>
+{% endblock %}

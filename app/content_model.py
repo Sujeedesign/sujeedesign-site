@@ -34,7 +34,13 @@ def defaults_path() -> Path:
     en arrière efface les textes d'origine).
     """
     override = os.environ.get("CONTENT_DEFAULTS", "").strip()
-    return Path(override) if override else ROOT / "web" / "content" / "home.default.json"
+    if override:
+        return Path(override)
+    primary = ROOT / "web" / "content" / "home.default.json"
+    if primary.exists():
+        return primary
+    # Image du back office sans le dossier web : copie embarquée du référentiel.
+    return Path(__file__).resolve().parent / "content_defaults" / "home.default.json"
 
 
 def load_defaults() -> dict[str, Any]:
@@ -281,7 +287,7 @@ def _to_value(field: dict[str, Any], raw: str) -> Any:
     return value
 
 
-def from_form(slug: str, form: Any, base: dict[str, Any]) -> dict[str, Any]:
+def from_form(slug: str, form: Any, base: dict[str, Any], validate_doc: bool = True) -> dict[str, Any]:
     """Reconstruit le document complet à partir du formulaire.
 
     Le formulaire envoie tous les champs du modèle : on part donc des valeurs
@@ -295,7 +301,8 @@ def from_form(slug: str, form: Any, base: dict[str, Any]) -> dict[str, Any]:
         if name not in form:
             continue
         set_path(doc, field["path"], _to_value(field, str(form.get(name) or "")))
-    validate(slug, doc)
+    if validate_doc:
+        validate(slug, doc)
     return doc
 
 

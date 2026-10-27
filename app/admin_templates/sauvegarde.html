@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Sauvegarde{% endblock %}
+{% block heading %}Sauvegarde{% endblock %}
+{% block content %}
+  <section class="card">
+    <header class="card-head"><h2>Base actuelle</h2></header>
+    <p class="small">Fichier : <code>{{ path }}</code></p>
+    <p class="small">Taille : {{ (size / 1024) | round(1) }} Ko</p>
+    <ul class="plain">
+      {% for table, count in counts.items() %}
+        <li><strong>{{ table }}</strong> : {{ count }} enregistrement{{ count > 1 and 's' or '' }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="card">
+    <header class="card-head"><h2>Exporter</h2></header>
+    <p class="small muted">Télécharge un JSON complet : contenu, messages, médias, réglages et historique.</p>
+    <a class="btn btn-accent" href="/admin/sauvegarde/export.json">Télécharger l'export JSON</a>
+  </section>
+{% endblock %}

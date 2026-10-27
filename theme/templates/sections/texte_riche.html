@@ -1,8 +1,0 @@
-{% set d = s.data %}
-<section class="page-body section reveal">
-  <div class="container">
-    <p class="page-label reveal" data-field="label">{{ d.get('label') or '' }}</p>
-    <h2 class="bloc-title" data-field="title">{{ (d.get('title') or '')|inline }}</h2>
-    <div class="{% if s.variant == '2' %}grid-2{% else %}prose{% endif %}" data-field="body">{% if d.get('body') %}{{ d.get('body')|rich }}{% endif %}</div>
-  </div>
-</section>

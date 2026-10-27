@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Tableau de bord{% endblock %}
+{% block heading %}Tableau de bord{% endblock %}
+{% block content %}
+  <section class="grid grid-stats">
+    <a class="card stat" href="/admin/messages?statut=nouveau">
+      <span class="stat-k">Nouveaux messages</span>
+      <strong class="stat-v">{{ counts.nouveau }}</strong>
+      <span class="stat-s">{{ counts.total }} au total</span>
+    </a>
+    <a class="card stat" href="/admin/messages?statut=en%20cours">
+      <span class="stat-k">En cours</span>
+      <strong class="stat-v">{{ counts['en cours'] }}</strong>
+      <span class="stat-s">à suivre</span>
+    </a>
+    <a class="card stat" href="/admin/medias">
+      <span class="stat-k">Médias</span>
+      <strong class="stat-v">{{ medias }}</strong>
+      <span class="stat-s">images et documents</span>
+    </a>
+    <div class="card stat">
+      <span class="stat-k">Contenu du site</span>
+      <strong class="stat-v stat-v-sm">
+        {% if doc.updated_at %}modifié {{ doc.updated_at | ago }}{% else %}version de référence{% endif %}
+      </strong>
+      <span class="stat-s">
+        {% if publication %}
+          publication {{ publication.status }} {{ publication.created_at | ago }}
+        {% else %}
+          aucune publication depuis ce back office
+        {% endif %}
+      </span>
+    </div>
+  </section>
+
+  <div class="grid grid-2">
+    <section class="card">
+      <header class="card-head">
+        <h2>Derniers messages</h2>
+        <a class="link" href="/admin/messages">Tout voir</a>
+      </header>
+      {% if recents %}
+        <ul class="list">
+          {% for m in recents %}
+            <li class="list-row">
+              <span class="avatar">{{ m.name | initials }}</span>
+              <div class="list-body">
+                <strong>{{ m.name or 'Sans nom' }}</strong>
+                <span class="muted small">{{ m.project_type or 'projet' }} · {{ m.created_at | ago }}</span>
+              </div>
+              <span class="badge badge-{{ m.status | replace(' ', '-') }}">{{ m.status }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty">Aucun message pour l'instant. Les demandes du formulaire de la vitrine arrivent ici.</p>
+      {% endif %}
+    </section>
+
+    <section class="card">
+      <header class="card-head">
+        <h2>Actions</h2>
+      </header>
+      <div class="stack">
+        <a class="btn btn-line" href="/admin/contenu">Modifier le contenu du site</a>
+        <a class="btn btn-line" href="/admin/apercu">Ouvrir l'aperçu de la vitrine</a>
+        <a class="btn btn-line" href="/admin/sauvegarde">Exporter une sauvegarde</a>
+      </div>
+      <hr class="rule">
+      <h3 class="mini-title">État de la publication</h3>
+      {% if publication %}
+        <p class="small muted">
+          Dernière demande : {{ publication.created_at | datetimefr }} · <strong>{{ publication.status }}</strong>
+          {% if publication.deployment %}<br>déploiement <code>{{ publication.deployment }}</code>{% endif %}
+        </p>
+      {% else %}
+        <p class="small muted">Aucune publication déclenchée depuis le back office.</p>
+      {% endif %}
+      {% if not publish_ready %}
+        <p class="small warn">Publication Coolify non configurée : renseigne COOLIFY_TOKEN sur le serveur.</p>
+      {% endif %}
+    </section>
+  </div>
+
+  {% if revisions %}
+  <section class="card">
+    <header class="card-head"><h2>Versions enregistrées</h2></header>
+    <ul class="list list-tight">
+      {% for r in revisions %}
+        <li class="list-row">
+          <div class="list-body">
+            <strong>{{ r.note or 'enregistrement' }}</strong>
+            <span class="muted small">{{ r.created_at | datetimefr }} · {{ r.author }}</span>
+          </div>
+          <form method="post" action="/admin/contenu/restaurer/{{ r.id }}" data-confirm="Restaurer cette version du contenu ?">
+            <input type="hidden" name="csrf" value="{{ csrf }}">
+            <button class="btn btn-ghost btn-sm" type="submit">Restaurer</button>
+          </form>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+{% endblock %}

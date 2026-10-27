@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Médias{% endblock %}
+{% block heading %}Médias{% endblock %}
+{% block content %}
+  <form class="card upload" method="post" action="/admin/medias" enctype="multipart/form-data">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <div class="upload-drop">
+      <input type="file" name="fichier" id="fichier" required accept="image/jpeg,image/png,image/webp,image/avif,image/gif,application/pdf">
+      <label for="fichier" class="upload-label">
+        <strong>Choisir un fichier</strong>
+        <span class="muted small">JPEG, PNG, WebP, AVIF, GIF ou PDF · 15 Mo max</span>
+      </label>
+      <span class="upload-name" data-file-name></span>
+    </div>
+    <label class="field"><span>Texte alternatif</span><input type="text" name="alt" placeholder="Décrit l'image pour l'accessibilité"></label>
+    <label class="field"><span>Légende (facultatif)</span><input type="text" name="caption"></label>
+    <label class="field"><span>Crédit (facultatif)</span><input type="text" name="credit"></label>
+    <button class="btn btn-accent" type="submit">Téléverser</button>
+  </form>
+
+  {% if medias %}
+    <div class="media-grid">
+      {% for m in medias %}
+        <figure class="card media">
+          {% if m.mime and m.mime.startswith('image/') %}
+            <img src="/medias/{{ m.filename }}" alt="{{ m.alt or m.original_filename or m.filename }}" loading="lazy">
+          {% else %}
+            <div class="media-file"><span>{{ (m.mime or 'fichier').split('/')[-1] | upper }}</span></div>
+          {% endif %}
+          <figcaption>
+            <strong>{{ m.original_filename or m.filename }}</strong>
+            <span class="muted small">{{ m.caption or m.alt or 'sans légende' }}</span>
+            <code class="small">/medias/{{ m.filename }}</code>
+            <div class="media-actions">
+              <button class="btn btn-ghost btn-sm" type="button" data-copy="/medias/{{ m.filename }}">Copier l'URL</button>
+              <form method="post" action="/admin/medias/{{ m.id }}/supprimer" data-confirm="Supprimer ce fichier ?">
+                <input type="hidden" name="csrf" value="{{ csrf }}">
+                <button class="btn btn-danger btn-sm" type="submit">Supprimer</button>
+              </form>
+            </div>
+          </figcaption>
+        </figure>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="card empty">Aucun média. Les fichiers téléversés ici restent disponibles pour le site.</p>
+  {% endif %}
+{% endblock %}

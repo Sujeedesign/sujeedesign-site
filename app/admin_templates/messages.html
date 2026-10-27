@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Messages{% endblock %}
+{% block heading %}Messages{% endblock %}
+{% block content %}
+  <div class="filters">
+    <a class="chip{% if not statut %} is-active{% endif %}" href="/admin/messages">Tous <span>{{ counts.total }}</span></a>
+    <a class="chip{% if statut == 'nouveau' %} is-active{% endif %}" href="/admin/messages?statut=nouveau">Nouveaux <span>{{ counts.nouveau }}</span></a>
+    <a class="chip{% if statut == 'en cours' %} is-active{% endif %}" href="/admin/messages?statut=en%20cours">En cours <span>{{ counts['en cours'] }}</span></a>
+    <a class="chip{% if statut == 'traite' %} is-active{% endif %}" href="/admin/messages?statut=traite">Traités <span>{{ counts.traite }}</span></a>
+  </div>
+
+  {% if messages %}
+    <div class="msg-list">
+      {% for m in messages %}
+        <article class="card msg" id="msg-{{ m.id }}">
+          <header class="msg-head">
+            <span class="avatar">{{ m.name | initials }}</span>
+            <div class="msg-id">
+              <strong>{{ m.name or 'Sans nom' }}</strong>
+              <span class="muted small">
+                <a href="mailto:{{ m.email }}">{{ m.email or 'email manquant' }}</a>
+                {% if m.phone %} · <a href="tel:{{ m.phone }}">{{ m.phone }}</a>{% endif %}
+              </span>
+            </div>
+            <div class="msg-meta">
+              <span class="badge badge-{{ m.status | replace(' ', '-') }}">{{ m.status }}</span>
+              <span class="muted small">{{ m.created_at | datetimefr }}</span>
+              {% if m.reference %}<code class="small">{{ m.reference }}</code>{% endif %}
+            </div>
+          </header>
+
+          <div class="msg-tags">
+            {% if m.project_type %}<span class="tag">{{ m.project_type }}</span>{% endif %}
+            {% if m.budget %}<span class="tag">budget {{ m.budget }}</span>{% endif %}
+            {% if m.source %}<span class="tag">{{ m.source }}</span>{% endif %}
+          </div>
+
+          <p class="msg-text">{{ m.message or 'Pas de message.' }}</p>
+
+          {% if m.note %}
+            <div class="note"><span class="note-k">Note interne</span>{{ m.note }}</div>
+          {% endif %}
+
+          <div class="msg-actions">
+            <form method="post" action="/admin/messages/{{ m.id }}/statut" class="inline-form">
+              <input type="hidden" name="csrf" value="{{ csrf }}">
+              <select name="statut">
+                {% for s in ('nouveau', 'en cours', 'traite') %}
+                  <option value="{{ s }}"{% if s == m.status %} selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+              </select>
+              <input type="text" name="note" placeholder="Note interne (facultatif)" value="{{ m.note }}">
+              <button class="btn btn-ghost btn-sm" type="submit">Mettre à jour</button>
+            </form>
+            <div class="msg-links">
+              <a class="btn btn-ghost btn-sm" href="mailto:{{ m.email }}?subject=Votre%20projet%20%E2%80%94%20Sujee%20Design">Répondre</a>
+              <form method="post" action="/admin/messages/{{ m.id }}/supprimer" data-confirm="Supprimer définitivement ce message ?">
+                <input type="hidden" name="csrf" value="{{ csrf }}">
+                <button class="btn btn-danger btn-sm" type="submit">Supprimer</button>
+              </form>
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="card empty">Aucun message {{ statut and ('avec le statut « ' ~ statut ~ ' »') or '' }} pour l'instant.</p>
+  {% endif %}
+{% endblock %}

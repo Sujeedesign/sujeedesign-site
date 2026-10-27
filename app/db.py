@@ -1,88 +1,34 @@
-"""Accès à la base SQLite du site : schéma, migrations idempotentes, révision."""
+"""Base SQLite du back office : schéma, migrations idempotentes, révision.
+
+Le back office ne rend plus de page publique. Cette base ne contient donc que
+ce qu'il pilote vraiment : messages du formulaire, médias, réglages, révisions
+et documents de contenu consommés par la vitrine Next.
+"""
 
 from __future__ import annotations
 
 import sqlite3
 from pathlib import Path
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 
 # Colonnes ajoutées après la première mise en production. Chaque entrée est
 # appliquée une seule fois, dans l'ordre, par `migrate` (idempotent).
 MIGRATIONS: tuple[tuple[str, str, str], ...] = (
-    ("sections", "draft", "TEXT"),
-    ("sections", "draft_version", "INTEGER NOT NULL DEFAULT 0"),
     ("medias", "original_filename", "TEXT NOT NULL DEFAULT ''"),
 )
 
 REQUIRED_TABLES = (
-    "pages",
-    "sections",
-    "visual_projects",
     "medias",
     "messages",
     "reglages",
     "revisions",
-    "redirections",
+    "content_docs",
+    "publications",
+    "_meta",
 )
 
 SCHEMA = """
-CREATE TABLE IF NOT EXISTS pages (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  slug TEXT NOT NULL UNIQUE,
-  kind TEXT NOT NULL DEFAULT 'page',
-  title TEXT NOT NULL DEFAULT '',
-  status TEXT NOT NULL DEFAULT 'brouillon',
-  excerpt TEXT NOT NULL DEFAULT '',
-  cover TEXT NOT NULL DEFAULT '',
-  cover_alt TEXT NOT NULL DEFAULT '',
-  client TEXT NOT NULL DEFAULT '',
-  year INTEGER,
-  categories TEXT NOT NULL DEFAULT '[]',
-  external_url TEXT NOT NULL DEFAULT '',
-  featured INTEGER NOT NULL DEFAULT 0,
-  position INTEGER NOT NULL DEFAULT 0,
-  num INTEGER NOT NULL DEFAULT 0,
-  in_menu INTEGER NOT NULL DEFAULT 0,
-  menu_position INTEGER NOT NULL DEFAULT 0,
-  menu_label TEXT NOT NULL DEFAULT '',
-  seo_title TEXT NOT NULL DEFAULT '',
-  seo_description TEXT NOT NULL DEFAULT '',
-  og_image TEXT NOT NULL DEFAULT '',
-  robots TEXT NOT NULL DEFAULT 'index,follow',
-  meta TEXT NOT NULL DEFAULT '{}',
-  created_at TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
-  published_at TEXT
-);
-
-CREATE TABLE IF NOT EXISTS sections (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  page_id INTEGER NOT NULL REFERENCES pages(id) ON DELETE CASCADE,
-  position INTEGER NOT NULL DEFAULT 0,
-  type TEXT NOT NULL,
-  variant TEXT NOT NULL DEFAULT '',
-  label TEXT NOT NULL DEFAULT '',
-  visible INTEGER NOT NULL DEFAULT 1,
-  data TEXT NOT NULL DEFAULT '{}',
-  draft TEXT,
-  draft_version INTEGER NOT NULL DEFAULT 0,
-  created_at TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-);
-CREATE INDEX IF NOT EXISTS idx_sections_page ON sections(page_id, position);
-
-CREATE TABLE IF NOT EXISTS visual_projects (
-  page_id INTEGER PRIMARY KEY REFERENCES pages(id) ON DELETE CASCADE,
-  draft_project_json TEXT NOT NULL DEFAULT '{}',
-  published_project_json TEXT NOT NULL DEFAULT '{}',
-  draft_version INTEGER NOT NULL DEFAULT 0,
-  theme_id TEXT NOT NULL DEFAULT '',
-  theme_version INTEGER NOT NULL DEFAULT 1,
-  created_at TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-);
-
 CREATE TABLE IF NOT EXISTS medias (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   filename TEXT NOT NULL UNIQUE,
@@ -136,13 +82,6 @@ CREATE TABLE IF NOT EXISTS revisions (
 );
 CREATE INDEX IF NOT EXISTS idx_revisions_entity ON revisions(entity_type, entity_id, created_at);
 
-CREATE TABLE IF NOT EXISTS redirections (
-  path TEXT PRIMARY KEY,
-  target TEXT NOT NULL,
-  code INTEGER NOT NULL DEFAULT 301,
-  hits INTEGER NOT NULL DEFAULT 0
-);
-
 CREATE TABLE IF NOT EXISTS content_docs (
   slug TEXT PRIMARY KEY,
   data TEXT NOT NULL DEFAULT '{}',
@@ -180,11 +119,7 @@ def connect(path: str | Path) -> sqlite3.Connection:
 
 
 def migrate(conn: sqlite3.Connection) -> list[str]:
-    """Ajoute les colonnes manquantes aux bases existantes. Idempotent.
-
-    Aucune donnée publiée n'est touchée : seules des colonnes sont ajoutées.
-    Retourne la liste des colonnes réellement ajoutées.
-    """
+    """Ajoute les colonnes manquantes aux bases existantes. Idempotent."""
     added: list[str] = []
     for table, column, definition in MIGRATIONS:
         columns = {row["name"] for row in conn.execute(f"PRAGMA table_info({table})")}
@@ -227,7 +162,7 @@ def content_revision(conn: sqlite3.Connection) -> str:
 
 
 def bump_revision(conn: sqlite3.Connection) -> str:
-    """Incrémente la révision globale du contenu : invalide tout cache de rendu."""
+    """Incrémente la révision globale du contenu : invalide tout cache de lecture."""
     current = int(get_meta(conn, "content_revision", "1") or "1")
     set_meta(conn, "content_revision", str(current + 1))
     return str(current + 1)

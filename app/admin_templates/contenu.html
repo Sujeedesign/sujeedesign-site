@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Contenu du site{% endblock %}
+{% block heading %}Contenu du site{% endblock %}
+{% block error %}
+  {% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+{% endblock %}
+{% block content %}
+  <form method="post" action="/admin/contenu" class="content-form" data-dirty-guard>
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+
+    <div class="toolbar card">
+      <div class="toolbar-info">
+        <strong>{{ doc.updated_at and ('Enregistré ' ~ (doc.updated_at | ago)) or 'Version de référence' }}</strong>
+        <span class="muted small">
+          {% if publication %}
+            Dernière publication : {{ publication.status }} ({{ publication.created_at | ago }})
+          {% else %}
+            Aucune publication depuis ce back office
+          {% endif %}
+        </span>
+      </div>
+      <div class="toolbar-actions">
+        <button class="btn btn-ghost" type="submit" name="action" value="save">Enregistrer</button>
+        <button class="btn btn-accent" type="submit" name="action" value="publier"{% if not publish_ready %} disabled title="Publication non configurée"{% endif %}>Enregistrer et publier</button>
+      </div>
+    </div>
+
+    {% if not publish_ready %}
+      <p class="warn small">Publication Coolify non configurée sur ce serveur : l'enregistrement fonctionne, la mise en ligne de la vitrine non.</p>
+    {% endif %}
+
+    <div class="content-layout">
+      <nav class="card toc" aria-label="Sections">
+        <span class="toc-title">Sections</span>
+        {% for section in sections %}
+          <a href="#sec-{{ section.key }}">{{ section.label }}</a>
+        {% endfor %}
+      </nav>
+
+      <div class="content-sections">
+        {% for section in sections %}
+          <section class="card section-card" id="sec-{{ section.key }}">
+            <header class="card-head">
+              <h2>{{ section.label }}</h2>
+              {% if section.hint %}<p class="muted small">{{ section.hint }}</p>{% endif %}
+            </header>
+            {% for block in section.blocks %}
+              <div class="block">
+                {% if block.label %}<h3 class="mini-title">{{ block.label }}</h3>{% endif %}
+                {% for field in block.fields %}
+                  <label class="field">
+                    <span>{{ field.label }}{% if field.hint %}<em class="hint">{{ field.hint }}</em>{% endif %}</span>
+                    {% if field.type == 'lines' %}
+                      <textarea name="f_{{ field.path }}" rows="{{ field.rows or 3 }}" spellcheck="true">{{ field.value }}</textarea>
+                    {% elif field.type == 'text' and field.long %}
+                      <textarea name="f_{{ field.path }}" rows="3">{{ field.value }}</textarea>
+                    {% elif field.type == 'select' %}
+                      <select name="f_{{ field.path }}">
+                        {% for choice in field.choices %}
+                          <option value="{{ choice }}"{% if choice == field.value %} selected{% endif %}>{{ choice }}</option>
+                        {% endfor %}
+                      </select>
+                    {% else %}
+                      <input type="text" name="f_{{ field.path }}" value="{{ field.value }}">
+                    {% endif %}
+                    {% if field.max %}<em class="hint">max {{ field.max }} caractères</em>{% endif %}
+                  </label>
+                {% endfor %}
+              </div>
+            {% endfor %}
+          </section>
+        {% endfor %}
+      </div>
+    </div>
+  </form>
+
+  <section class="card">
+    <header class="card-head"><h2>Versions</h2><p class="muted small">Chaque enregistrement crée une version. Restaurer remplace le contenu courant.</p></header>
+    {% if revisions %}
+      <ul class="list list-tight">
+        {% for r in revisions %}
+          <li class="list-row">
+            <div class="list-body">
+              <strong>{{ r.note or 'enregistrement' }}</strong>
+              <span class="muted small">{{ r.created_at | datetimefr }} · {{ r.author }}</span>
+            </div>
+            <form method="post" action="/admin/contenu/restaurer/{{ r.id }}" data-confirm="Restaurer cette version ?">
+              <input type="hidden" name="csrf" value="{{ csrf }}">
+              <button class="btn btn-ghost btn-sm" type="submit">Restaurer</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty">Aucune version enregistrée pour le moment.</p>
+    {% endif %}
+  </section>
+{% endblock %}

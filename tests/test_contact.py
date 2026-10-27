@@ -4,14 +4,13 @@ from __future__ import annotations
 
 import sqlite3
 import time
-from collections.abc import Iterator
 from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
 
-from app import repo, security
-from app.db import connect, init_db
+from app import security
+from app.db import connect
 
 SYNC_TOKEN = "jeton-de-test"
 URL = "/api/contact"
@@ -45,47 +44,6 @@ def rows(db_file: Any) -> list[sqlite3.Row]:
         conn.close()
 
 
-@pytest.fixture()
-def contact_page(db_file: Any) -> Iterator[None]:
-    """Une page /contact publiée contenant le formulaire, comme en production."""
-    conn = connect(db_file)
-    init_db(conn)
-    page_id = repo.create_page(
-        conn,
-        {"slug": "contact", "kind": "page", "title": "Contact", "status": repo.PUBLISHED},
-    )
-    repo.create_section(
-        conn,
-        page_id,
-        {
-            "type": "formulaire-contact",
-            "variant": "contact",
-            "label": "Formulaire",
-            "data": {"title": "Parlons de ton projet", "intro": "Décris ton besoin."},
-        },
-    )
-    conn.commit()
-    conn.close()
-    yield
-
-
-# ------------------------------------------------------------------ la page
-
-
-def test_form_page_sets_fresh_token_cookie(contact_page: None, client: TestClient) -> None:
-    response = client.get("/contact")
-    assert response.status_code == 200
-    cookie = response.cookies.get("sjd_form")
-    assert cookie
-    assert security.token_issued_at(cookie) is not None
-
-
-def test_form_page_has_consent_checkbox(contact_page: None, client: TestClient) -> None:
-    body = client.get("/contact").text
-    assert 'name="consent"' in body
-    assert 'action="/api/contact"' in body
-
-
 # ------------------------------------------------------------------ soumission
 
 
@@ -102,9 +60,8 @@ def test_valid_submission_is_stored(client: TestClient, db_file: Any) -> None:
     assert stored[0]["ip"] and stored[0]["ip"] != "testclient"  # IP hachée
 
 
-def test_cookie_token_is_accepted(client: TestClient, contact_page: None, db_file: Any) -> None:
+def test_cookie_token_is_accepted(client: TestClient, db_file: Any) -> None:
     """Sans JavaScript, le champ caché peut être périmé : le cookie fait foi."""
-    client.get("/contact")  # la page pose le cookie sjd_form
     client.cookies.set("sjd_form", token(age=30))
     data = payload()
     data.pop("form_token")
@@ -113,9 +70,8 @@ def test_cookie_token_is_accepted(client: TestClient, contact_page: None, db_fil
     assert len(rows(db_file)) == 1
 
 
-def test_fresh_cookie_wins_over_stale_field(client: TestClient, contact_page: None, db_file: Any) -> None:
+def test_fresh_cookie_wins_over_stale_field(client: TestClient, db_file: Any) -> None:
     """Le champ caché (HTML en cache) peut être périmé : le cookie frais prime."""
-    client.get("/contact")
     client.cookies.set("sjd_form", token(age=30))
     response = client.post(URL, data=payload(form_token="contact.1.abcdef.invalide"))
     assert response.status_code == 200

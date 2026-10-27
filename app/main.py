@@ -1,158 +1,97 @@
-"""Application FastAPI du site sujeedesign.com : vitrine, back office, contact."""
+"""Application du back office Sujee Design.
+
+Ne sert plus la vitrine : celle-ci est un site Next.js déployé séparément.
+Ce service expose l'administration (connexion, contenu, messages, médias,
+réglages) et le petit API consommé par la vitrine et par le formulaire.
+"""
 
 from __future__ import annotations
 
-import os
-import sqlite3
+import json
+import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Iterator
 
-from fastapi import Depends, FastAPI, Request
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
-from . import admin as admin_module
-from . import contact as contact_module
-from . import content_routes as content_routes_module
-from . import db as db_module
-from . import public as public_module
-from . import render as render_module
-from . import repo as repo_module
-from . import seed as seed_module
-from . import security as security_module
+from . import admin, contact, content_routes
 from . import settings as settings_module
-from .settings import VERSION
+from .db import connect, init_db
+from .ui import templates  # noqa: F401  (initialise les filtres Jinja)
 
-import sujee_editor
+log = logging.getLogger("sujee.admin")
 
-THEME_ASSETS = Path(__file__).resolve().parents[1] / "theme" / "assets"
-V4_PREVIEW = Path(__file__).resolve().parents[1] / "theme" / "v4"
-V5_PREVIEW = Path(__file__).resolve().parents[1] / "theme" / "v5"
+BASE_DIR = Path(__file__).resolve().parent
+STATIC_DIR = BASE_DIR / "admin_static"
 
 
-def create_app(db_path: str | Path | None = None) -> FastAPI:
-    """Construit l'application. `db_path` permet d'isoler les tests.
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    path = Path(app.state.db_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    conn = connect(path)
+    try:
+        init_db(conn)
+        conn.commit()
+    finally:
+        conn.close()
+    Path(app.state.media_dir).mkdir(parents=True, exist_ok=True)
+    log.info("back office prêt · base %s", path)
+    yield
 
-    Quand un chemin de base est fourni (tests, outils), l'application ne touche
-    pas au contenu : le chargement du contenu initial ne concerne que le
-    démarrage réel du site sur un volume vide.
-    """
-    explicit_db = db_path is not None
-    resolved = Path(db_path) if db_path is not None else settings_module.db_path()
 
-    @asynccontextmanager
-    async def lifespan(app: FastAPI):
-        conn = db_module.connect(resolved)
-        try:
-            db_module.init_db(conn)
-            if not explicit_db:
-                # Premier démarrage réel sur un volume vide : contenu initial.
-                seed_module.seed_if_empty(conn, Path(__file__).resolve().parents[1] / "seed" / "content.json")
-        finally:
-            conn.close()
-        yield
-
+def create_app(db_file: Path | None = None) -> FastAPI:
     app = FastAPI(
-        title="Sujee Design",
-        version=VERSION,
+        title="Sujee Design · back office",
         docs_url=None,
         redoc_url=None,
         openapi_url=None,
         lifespan=lifespan,
     )
-    app.state.db_path = resolved
-    app.state.login_limiter = security_module.RateLimiter()
-    app.state.contact_limiter = security_module.RateLimiter()
+    app.state.db_path = Path(db_file) if db_file else settings_module.db_path()
+    app.state.media_dir = (
+        Path(db_file).parent / "medias" if db_file else settings_module.media_dir()
+    )
+    STATIC_DIR.mkdir(parents=True, exist_ok=True)
+    app.mount("/static-admin", StaticFiles(directory=str(STATIC_DIR)), name="static-admin")
 
-    def get_db(request: Request) -> Iterator[sqlite3.Connection]:
-        conn = db_module.connect(request.app.state.db_path)
-        try:
-            yield conn
-        finally:
-            conn.close()
-
-    app.state.get_db = get_db
-    app.state.render_env = render_module.build_env()
-    media_root = resolved.parent / "medias"
-    media_root.mkdir(parents=True, exist_ok=True)
-    # L'éditeur est monté AVANT /assets : les routes sont évaluées dans l'ordre,
-    # sinon le montage parent répondrait pour /assets/editor/*.
-    sujee_editor.Editor(
-        db_path=resolved,
-        session_secret=security_module.session_secret,
-        media_dir=str(media_root),
-        page_path=repo_module.page_path,
-    ).mount(app)
-    # Le back office sert aussi les assets du thème sous /bo/assets : le site Next
-    # possède son propre public/assets (site.css, site.js…), un préfixe distinct
-    # évite tout écrasement quand les deux vivent sur la même origine.
-    app.mount("/bo/assets", StaticFiles(directory=str(THEME_ASSETS)), name="bo-assets")
-    app.mount("/assets", StaticFiles(directory=str(THEME_ASSETS)), name="assets")
-    # Aperçu V4 : pages statiques autonomes, servies sous /v4 (index.html par défaut).
-    if V4_PREVIEW.is_dir():
-        app.mount("/v4", StaticFiles(directory=str(V4_PREVIEW), html=True), name="v4")
-    if V5_PREVIEW.is_dir():
-        app.mount("/v5", StaticFiles(directory=str(V5_PREVIEW), html=True), name="v5")
-    app.mount("/medias", StaticFiles(directory=str(media_root)), name="medias")
-
-    @app.get("/api/health")
-    def health(conn: sqlite3.Connection = Depends(get_db)) -> dict:
-        revision = db_module.content_revision(conn)
-        return {"ok": True, "version": VERSION, "revision": revision}
-
-    CANONICAL_HOSTS = {"sujeedesign.com", "www.sujeedesign.com"}
-    ADMIN_PREFIXES = ("/admin", "/api", "/assets", "/bo/assets", "/medias")
-    INTERNAL_HOSTS = {"localhost", "127.0.0.1", "0.0.0.0", "testserver"}
+    media_dir = Path(app.state.media_dir)
+    media_dir.mkdir(parents=True, exist_ok=True)
+    app.mount("/medias", StaticFiles(directory=str(media_dir)), name="medias")
 
     @app.middleware("http")
-    async def canonical_host(request: Request, call_next):
-        """Hors du domaine public, l'app ne sert que le back office.
-
-        Le back office garde un hôte dédié, distinct de la vitrine Next.js. Sur
-        cet hôte, les pages publiques de l'ancien site redirigent en 301 vers
-        sujeedesign.com, et tout ce qui est servi passe en noindex, pour éviter
-        un doublon SEO. Seuls les hôtes de prévisualisation (*.sslip.io) et ceux
-        listés dans ADMIN_ONLY_HOSTS sont concernés : les hôtes internes et de
-        test ne sont jamais redirigés.
-        """
-        host = (request.headers.get("host") or "").split(":")[0].lower()
-        allowed = {
-            value.strip().lower()
-            for value in os.environ.get("ADMIN_ONLY_HOSTS", "").split(",")
-            if value.strip()
-        }
-        if host in CANONICAL_HOSTS or host in INTERNAL_HOSTS:
-            return await call_next(request)
-        if not (host.endswith(".sslip.io") or host in allowed):
-            return await call_next(request)
-        path = request.url.path
-        if any(path == prefix or path.startswith(prefix + "/") for prefix in ADMIN_PREFIXES):
-            response = await call_next(request)
-            response.headers["X-Robots-Tag"] = "noindex, nofollow"
-            return response
-        from fastapi.responses import RedirectResponse
-
-        return RedirectResponse(f"https://sujeedesign.com{path}", status_code=301)
-
-    @app.middleware("http")
-    async def security_headers(request: Request, call_next):
-        """En-têtes de durcissement communs à toutes les réponses."""
+    async def headers(request: Request, call_next):
         response = await call_next(request)
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
-        response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
-        response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
-        response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
-        if request.url.scheme == "https":
-            response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+        response.headers.setdefault("Referrer-Policy", "same-origin")
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        if request.url.path.startswith("/admin") or request.url.path.startswith("/api/"):
+            response.headers.setdefault("Cache-Control", "no-store")
+            response.headers.setdefault(
+                "Content-Security-Policy",
+                "default-src 'self'; img-src 'self' data: blob: "
+                "https://sujeedesign.com https://admin-sujeedesign.145.241.167.66.sslip.io; "
+                "style-src 'self' 'unsafe-inline'; script-src 'self'; "
+                "frame-src https://sujeedesign.com https://www.sujeedesign.com; "
+                "form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
+            )
         return response
 
-    app.include_router(admin_module.router)
-    app.include_router(admin_module.api, prefix="/api/admin")
-    app.include_router(content_routes_module.router)
-    app.include_router(contact_module.router)
-    app.include_router(contact_module.sync)
-    app.include_router(public_module.router)
+    @app.get("/")
+    def racine() -> RedirectResponse:
+        return RedirectResponse("/admin", status_code=303)
 
+    @app.get("/sante")
+    @app.get("/api/health")  # compatibilité du healthcheck Coolify existant
+    def sante() -> JSONResponse:
+        return JSONResponse({"ok": True, "service": "back office Sujee Design"})
+
+    app.include_router(admin.router)
+    app.include_router(contact.router)
+    app.include_router(contact.sync)
+    app.include_router(content_routes.router)
     return app
 
 

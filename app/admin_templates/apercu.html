@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Aperçu{% endblock %}
+{% block heading %}Aperçu de la vitrine{% endblock %}
+{% block content %}
+  <div class="toolbar card">
+    <div class="toolbar-info">
+      <strong>{{ site }}</strong>
+      <span class="muted small">
+        {% if publication %}
+          dernière publication {{ publication.status }} · {{ publication.created_at | ago }}
+        {% else %}
+          aucune publication depuis ce back office
+        {% endif %}
+      </span>
+    </div>
+    <div class="toolbar-actions">
+      <form method="post" action="/admin/contenu/publier">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <button class="btn btn-accent" type="submit"{% if not publish_ready %} disabled title="Publication Coolify non configurée"{% endif %}>Publier le contenu</button>
+      </form>
+      <a class="btn btn-ghost" href="{{ site }}" target="_blank" rel="noopener">Ouvrir dans un onglet ↗</a>
+      <a class="btn btn-ghost" href="/admin/contenu">Modifier le contenu</a>
+    </div>
+  </div>
+
+  <p class="note-banner">
+    Cet aperçu affiche <strong>la vitrine réellement déployée</strong>, dans une iframe. Il n'existe plus de rendu
+    local du site dans le back office : ce que tu vois ici est exactement ce que voient les visiteurs.
+  </p>
+
+  <div class="preview">
+    <div class="preview-bar">
+      <span class="dotr"></span><span class="doty"></span><span class="dotg"></span>
+      <code>{{ site }}</code>
+    </div>
+    <iframe src="{{ site }}" title="Aperçu de la vitrine Sujee Design" loading="lazy" referrerpolicy="no-referrer"></iframe>
+  </div>
+
+  <p class="muted small">
+    Si l'iframe reste vide, le site bloque l'intégration (en-tête <code>X-Frame-Options</code>).
+    Utilise « Ouvrir dans un onglet » : c'est le même site.
+  </p>
+{% endblock %}

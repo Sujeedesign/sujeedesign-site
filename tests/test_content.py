@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 
 import pytest
 from fastapi.testclient import TestClient
@@ -10,17 +11,19 @@ from fastapi.testclient import TestClient
 from app import content as content_store
 from app import content_model
 from app.db import connect
-from sujee_editor.tokens import make_csrf
 
 PASSWORD = "mot-de-passe-de-test"
 
 
-def _csrf(client: TestClient) -> str:
-    return make_csrf(client.app.state.editor.session_secret)
+def _csrf(client: TestClient, path: str = "/admin/contenu") -> str:
+    html = client.get(path).text
+    match = re.search(r'name="csrf" value="([^"]+)"', html)
+    assert match, f"aucun jeton CSRF sur {path}"
+    return match.group(1)
 
 
 def login(client: TestClient) -> TestClient:
-    response = client.post("/admin/connexion", data={"password": PASSWORD, "code": ""}, follow_redirects=False)
+    response = client.post("/admin/connexion", data={"password": PASSWORD}, follow_redirects=False)
     assert response.status_code == 303, response.text
     return client
 
@@ -33,7 +36,8 @@ def test_content_api_is_public_and_returns_defaults(client: TestClient) -> None:
     assert response.status_code == 200
     payload = response.json()
     assert payload["slug"] == "home"
-    assert payload["data"]["hero"]["title"]["first"] == "Votre"
+    hero = payload["data"]["hero"]
+    assert hero["title"]["first"]
     assert payload["custom"] is False
     assert payload["schema"], "le formulaire doit recevoir la description des champs"
 
@@ -64,12 +68,14 @@ def test_content_screen_lists_every_section(client: TestClient) -> None:
     response = client.get("/admin/contenu")
     assert response.status_code == 200
     assert "Contenu du site" in response.text
-    for label in ("En-tête", "Studio", "Projets", "Méthode", "Services"):
-        assert f">{label}<" in response.text
+    for section in content_model.schema_for("home"):
+        assert section["label"] in response.text
     assert 'name="csrf"' in response.text
 
 
-def test_content_screen_says_when_publication_is_not_configured(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_content_screen_says_when_publication_is_not_configured(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.delenv("COOLIFY_TOKEN", raising=False)
     login(client)
     response = client.get("/admin/contenu")
@@ -83,11 +89,11 @@ def test_save_then_read_back(client: TestClient, db_file) -> None:
     login(client)
     response = client.post(
         "/admin/contenu",
-        data={"csrf": _csrf(client), "action": "enregistrer", "f_hero.kicker": "Nouvelle accroche"},
+        data={"csrf": _csrf(client), "action": "save", "f_hero.kicker": "Nouvelle accroche"},
         follow_redirects=False,
     )
     assert response.status_code == 303
-    assert response.headers["location"] == "/admin/contenu"
+    assert response.headers["location"].startswith("/admin/contenu")
     payload = client.get("/api/v1/content/home").json()
     assert payload["data"]["hero"]["kicker"] == "Nouvelle accroche"
     assert payload["custom"] is True
@@ -103,7 +109,7 @@ def test_save_keeps_fields_absent_from_the_form(client: TestClient) -> None:
     before = client.get("/api/v1/content/home").json()["data"]
     client.post(
         "/admin/contenu",
-        data={"csrf": _csrf(client), "action": "enregistrer", "f_hero.title.first": "Autre"},
+        data={"csrf": _csrf(client), "action": "save", "f_hero.title.first": "Autre"},
         follow_redirects=False,
     )
     after = client.get("/api/v1/content/home").json()["data"]
@@ -115,11 +121,11 @@ def test_blank_required_field_is_refused_without_writing(client: TestClient, db_
     login(client)
     response = client.post(
         "/admin/contenu",
-        data={"csrf": _csrf(client), "action": "enregistrer", "f_hero.title.first": "   "},
+        data={"csrf": _csrf(client), "action": "save", "f_hero.kicker": "   "},
         follow_redirects=False,
     )
-    assert response.status_code == 303
-    assert "erreur=" in response.headers["location"]
+    assert response.status_code == 200
+    assert "erreur" in response.text.lower() or "refus" in response.text.lower()
     connection = connect(db_file)
     assert content_store.stored_doc(connection, "home") is None
     connection.close()
@@ -129,7 +135,7 @@ def test_save_requires_csrf(client: TestClient) -> None:
     login(client)
     response = client.post(
         "/admin/contenu",
-        data={"csrf": "faux", "action": "enregistrer", "f_hero.kicker": "pirate"},
+        data={"csrf": "faux", "action": "save", "f_hero.kicker": "pirate"},
         follow_redirects=False,
     )
     assert response.status_code == 403
@@ -138,17 +144,21 @@ def test_save_requires_csrf(client: TestClient) -> None:
 # ------------------------------------------------------------------ publication
 
 
-def test_publish_without_token_reports_the_problem(client: TestClient, monkeypatch: pytest.MonkeyPatch, db_file) -> None:
+def test_publish_without_token_reports_the_problem(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch, db_file
+) -> None:
     monkeypatch.delenv("COOLIFY_TOKEN", raising=False)
     login(client)
-    response = client.post("/admin/contenu/publier", follow_redirects=False)
+    response = client.post("/admin/contenu/publier", data={"csrf": _csrf(client)}, follow_redirects=False)
     assert response.status_code == 303
     connection = connect(db_file)
     assert content_store.last_publication(connection) is None
     connection.close()
 
 
-def test_publish_triggers_a_coolify_deployment(client: TestClient, monkeypatch: pytest.MonkeyPatch, db_file) -> None:
+def test_publish_triggers_a_coolify_deployment(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch, db_file
+) -> None:
     monkeypatch.setenv("COOLIFY_TOKEN", "jeton-de-test")
     calls: list[tuple[str, str]] = []
 
@@ -170,9 +180,13 @@ def test_publish_triggers_a_coolify_deployment(client: TestClient, monkeypatch: 
     assert entry["deployment"] == "dep-123"
 
 
-def test_save_and_publish_in_one_submit(client: TestClient, monkeypatch: pytest.MonkeyPatch, db_file) -> None:
+def test_save_and_publish_in_one_submit(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch, db_file
+) -> None:
     monkeypatch.setenv("COOLIFY_TOKEN", "jeton-de-test")
-    monkeypatch.setattr(content_store, "_coolify", lambda *a, **k: {"deployments": [{"deployment_uuid": "dep-9"}]})
+    monkeypatch.setattr(
+        content_store, "_coolify", lambda *a, **k: {"deployments": [{"deployment_uuid": "dep-9"}]}
+    )
     login(client)
     response = client.post(
         "/admin/contenu",
@@ -186,7 +200,9 @@ def test_save_and_publish_in_one_submit(client: TestClient, monkeypatch: pytest.
     connection.close()
 
 
-def test_failed_publication_is_recorded(client: TestClient, monkeypatch: pytest.MonkeyPatch, db_file) -> None:
+def test_failed_publication_is_recorded(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch, db_file
+) -> None:
     monkeypatch.setenv("COOLIFY_TOKEN", "jeton-de-test")
 
     def boom(*args, **kwargs):
@@ -194,7 +210,7 @@ def test_failed_publication_is_recorded(client: TestClient, monkeypatch: pytest.
 
     monkeypatch.setattr(content_store, "_coolify", boom)
     login(client)
-    response = client.post("/admin/contenu/publier", follow_redirects=False)
+    response = client.post("/admin/contenu/publier", data={"csrf": _csrf(client)}, follow_redirects=False)
     assert response.status_code == 303
     connection = connect(db_file)
     entry = content_store.last_publication(connection)

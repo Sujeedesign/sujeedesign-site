@@ -1,8 +1,0 @@
-{% if editor_enabled and edit and editor %}
-{# État de la page pour le canevas : injecté une seule fois, lu par editor.js.
-   Le jeton CSRF qui s'y trouve est signé côté serveur, jamais devinable. #}
-<script id="sjd-editor-data" type="application/json">{{ editor|tojson }}</script>
-<script type="module" src="/assets/editor/editor.js"></script>
-{% elif editor_enabled %}
-<a class="sjd-edit-entry" href="/admin/pages/{{ page.id }}">Modifier cette page</a>
-{% endif %}

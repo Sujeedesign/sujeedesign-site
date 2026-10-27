@@ -11,6 +11,7 @@ VERSION = "1.0.0"
 DEFAULT_SETTINGS = {
     "site_name": "Sujee Design",
     "tagline": "Votre marque, de A à Z",
+    "site_url": "https://sujeedesign.com",
     "site_description": (
         "Sujee Design — Sujeepan Sabesan, designer & directeur artistique à Paris. "
         "Identité de marque, création visuelle, web, marketing, solutions IA."
@@ -77,5 +78,11 @@ def set_value(conn: sqlite3.Connection, key: str, value: str) -> None:
 def all_settings(conn: sqlite3.Connection) -> dict[str, str]:
     merged = dict(DEFAULT_SETTINGS)
     for row in conn.execute("SELECT key, value FROM reglages"):
-        merged[row["key"]] = row["value"]
+        if row["value"] != "":
+            merged[row["key"]] = row["value"]
     return merged
+
+
+def publish_webhook() -> str:
+    """URL de déploiement (webhook Coolify) appelée à la publication."""
+    return env("PUBLISH_WEBHOOK_URL")

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Réglages{% endblock %}
+{% block heading %}Réglages{% endblock %}
+{% block content %}
+  <form class="card form-card" method="post" action="/admin/reglages">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <header class="card-head"><h2>Identité et contacts</h2><p class="muted small">Ces valeurs alimentent le back office et les emails.</p></header>
+    <div class="form-grid">
+      {% for key, label, kind in fields %}
+        <label class="field">
+          <span>{{ label }}</span>
+          <input type="{{ kind or 'text' }}" name="f_{{ key }}" value="{{ values.get(key, '') }}">
+        </label>
+      {% endfor %}
+    </div>
+    <button class="btn btn-accent" type="submit">Enregistrer</button>
+  </form>
+
+  <section class="card">
+    <header class="card-head"><h2>Publication</h2></header>
+    {% if publication %}
+      <p class="small">Dernière demande : {{ publication.created_at | datetimefr }}</p>
+      <p class="small">Statut : <span class="badge">{{ publication.status }}</span>
+        {% if publication.deployment %} · déploiement <code>{{ publication.deployment }}</code>{% endif %}
+      </p>
+    {% else %}
+      <p class="small muted">Aucune publication déclenchée depuis le back office.</p>
+    {% endif %}
+    {% if publish_ready %}
+      <p class="small muted">La publication envoie le contenu à la vitrine Next puis déclenche le déploiement Coolify.</p>
+      <form method="post" action="/admin/contenu/publier">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <button class="btn btn-line" type="submit">Publier maintenant</button>
+      </form>
+    {% else %}
+      <p class="warn small">Publication non configurée : la variable <code>COOLIFY_TOKEN</code> manque sur le serveur du back office.</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <header class="card-head"><h2>Sécurité</h2></header>
+    <ul class="plain">
+      <li>Un seul mot de passe protège le back office, fourni par la variable <code>SITE_ADMIN_PASSWORD</code>.</li>
+      <li>Session signée, expiration 12 heures, cookies <code>HttpOnly</code> et <code>SameSite=Lax</code>.</li>
+      <li>Toutes les actions de modification exigent un jeton CSRF.</li>
+      <li>Tentatives de connexion limitées : blocage temporaire après plusieurs échecs.</li>
+      <li>Aucune page publique n'est servie par ce service.</li>
+    </ul>
+  </section>
+{% endblock %}
