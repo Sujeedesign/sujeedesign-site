@@ -7,7 +7,7 @@
     <p class="admin-sub">{{ counts.pages }} pages, {{ counts.sections }} sections, {{ counts.messages }} messages reçus.</p>
   </div>
   <div class="admin-head-actions">
-    <a class="btn" href="/admin/pages">Gérer les pages</a>
+    <a class="btn btn--primary" href="/admin/pages">Gérer les pages</a>
   </div>
 </header>
 
@@ -41,7 +41,7 @@
     <tbody>
       {% for item in pages %}
       <tr>
-        <td><a href="/admin/pages/{{ item.id }}">{{ item.title or item.slug }}</a><span class="muted"> {{ item.slug }}</span></td>
+        <td><a href="/admin/pages/{{ item.id }}">{{ item.title or item.slug }}</a><span class="muted td-slug">/{{ item.slug }}</span></td>
         <td>{{ item.kind }}</td>
         <td><span class="tag {% if item.status == 'publie' %}tag--ok{% else %}tag--draft{% endif %}">{{ item.status }}</span></td>
         <td class="muted">{{ item.updated_at }}</td>

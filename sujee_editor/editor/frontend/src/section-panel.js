@@ -83,6 +83,8 @@ export function mountSectionPanel({ root, editor, blockSchema, mediaClient }) {
   if (!panel) return { refresh() {}, destroy() {} };
   let selected = null;
   let schema = null;
+  // Blocs de champs ouverts, conservés entre deux rafraîchissements du panneau.
+  const openGroups = new Set(['contenu']);
 
   function commit(path, value) {
     if (!selected || !schema) return;
@@ -216,6 +218,9 @@ export function mountSectionPanel({ root, editor, blockSchema, mediaClient }) {
     } else {
       control = element('textarea', { id, 'data-field-editor': path, 'data-field-kind': field.kind });
       control.value = Array.isArray(value) ? value.join('\n') : String(value ?? '');
+      // Un champ vide n'est pas une erreur : le gabarit affiche alors son texte
+      // d'origine. On le dit, sinon on croit que l'aperçu ne correspond pas.
+      if (!control.value) control.placeholder = 'Vide : le thème affiche son texte par défaut';
       if (Number.isInteger(field.max_length)) control.maxLength = field.max_length;
       control.addEventListener('input', () => {
         const nextValue = field.kind === 'lines' && Array.isArray(value)
@@ -286,6 +291,25 @@ export function mountSectionPanel({ root, editor, blockSchema, mediaClient }) {
       group.append(select);
       panel.append(group);
     }
+    // Regroupement des champs : sur une section comme le hero (27 champs), tout
+    // aligner à plat rend le panneau illisible. Trois blocs repliables, la mise en
+    // page fermée par défaut : on voit d'abord ce qu'on édite vraiment.
+    const LAYOUT = /^(padding|margin)_|^section_background|^background$|^(dense|wide_title|shader|section_background_color)$/;
+    const MEDIA = /(^|_)(cover|image|images|photo|video|alt|src)(_|$)|^(cover_alt|image_alt|image_width|image_height)$/;
+    const groups = new Map();
+    const fieldGroups = [
+      ['contenu', 'Contenu', true],
+      ['medias', 'Médias', false],
+      ['mise-en-page', 'Mise en page', false],
+    ];
+    // On mémorise les blocs ouverts : chaque frappe reconstruit le panneau, et
+    // sans ça le bloc « Médias » se refermait à chaque modification.
+    for (const [key, label, open] of fieldGroups) {
+      const box = element('details', { class: 'section-group', 'data-group': key });
+      box.open = openGroups.size ? openGroups.has(key) : open;
+      box.append(element('summary', {}, label));
+      groups.set(key, box);
+    }
     for (const field of schema.fields || []) {
       const group = addControl(field, field.name, data[field.name] ?? fieldDefault(field));
       if (field.name === 'section_background_color') {
@@ -293,8 +317,24 @@ export function mountSectionPanel({ root, editor, blockSchema, mediaClient }) {
         group.hidden = mode !== 'custom';
         group.dataset.backgroundColorControl = '';
       }
-      panel.append(group);
+      const key = LAYOUT.test(field.name) ? 'mise-en-page' : MEDIA.test(field.name) ? 'medias' : 'contenu';
+      groups.get(key).append(group);
     }
+    // Une couleur de fond choisie explicitement doit rester atteignable même
+    // quand « Mise en page » est repliée.
+    for (const [, box] of groups) {
+      if (box.querySelector('.section-field')) panel.append(box);
+    }
+    if (panel.querySelector('[data-background-color-control]:not([hidden])')) {
+      groups.get('mise-en-page').open = true;
+      openGroups.add('mise-en-page');
+    }
+    // Une fois ouvert manuellement, le bloc reste ouvert aux rafraîchissements suivants.
+    panel.querySelectorAll('.section-group').forEach((box) => {
+      box.addEventListener('toggle', () => {
+        if (box.open) openGroups.add(box.dataset.group); else openGroups.delete(box.dataset.group);
+      });
+    });
     const remove = element('button', {
       type: 'button',
       class: 'section-panel-delete',

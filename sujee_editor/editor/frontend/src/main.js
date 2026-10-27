@@ -49,9 +49,9 @@ function installPreviewInteractions() {
   const previewStyle = doc.createElement('style');
   previewStyle.textContent = `
     .reveal { opacity: 1 !important; transform: none !important; animation: none !important; }
-    .sjd-block[data-block-position] { cursor: pointer; outline: 1px solid transparent; outline-offset: -1px; }
-    .sjd-block[data-block-position]:hover { outline: 1px solid rgba(203, 161, 94, .9) !important; }
-    .sjd-block.sjd-editor-selected { outline: 2px solid #cba15e !important; outline-offset: -2px; }
+    .sjd-block[data-block-position] { cursor: pointer; outline: 1px solid transparent; outline-offset: -1px; transition: outline-color .14s ease; }
+    .sjd-block[data-block-position]:hover { outline: 1px dashed rgba(255, 74, 23, .75) !important; }
+    .sjd-block.sjd-editor-selected { outline: 2px solid #ff4a17 !important; outline-offset: -2px; }
   `;
   doc.head?.append(previewStyle);
   doc.addEventListener('click', (event) => {
@@ -67,6 +67,12 @@ function installPreviewInteractions() {
     if (component) editor.select(component);
   }, true);
   highlightPreviewSelection();
+  // Sélection par défaut : on ouvre l'éditeur avec la première section active,
+  // sinon le panneau « Options de section » reste vide et on ne sait pas où cliquer.
+  if (!editor.getSelected()) {
+    const first = editor.getWrapper().components().at(0);
+    if (first) editor.select(first);
+  }
 }
 
 async function refreshLivePreview() {
@@ -296,6 +302,14 @@ async function saveDraft() {
 }
 
 saveButton?.addEventListener('click', () => { void saveDraft(); });
+
+// Ctrl/Cmd+S : enregistrer sans quitter le clavier (évite le "Enregistrer la page" du navigateur).
+document.addEventListener('keydown', (event) => {
+  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') {
+    event.preventDefault();
+    if (!event.repeat) void saveDraft();
+  }
+});
 
 rebaseButton?.addEventListener('click', async () => {
   if (!window.confirm('Le brouillon visuel sera remplacé par le contenu courant de la page. Continuer ?')) return;
