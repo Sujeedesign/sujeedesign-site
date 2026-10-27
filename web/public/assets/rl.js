@@ -32,12 +32,27 @@
       });
     });
 
-    /* M3 : les services montent en escalier */
-    gsap.from('.rl-svc__card', {
-      y: 26, opacity: 0, duration: .55, stagger: .07, ease: 'power2.out',
-      scrollTrigger: {trigger: '.rl-svc__grid', start: 'top 84%', toggleActions: 'play none none none'}
-    });
+    /* M3 : les cartes de prestations sont révélées en CSS par anim.js
+       (.rv + [data-stagger].is-in). On ne double PLUS l'animation en GSAP :
+       un gsap.from laissait les cartes à opacity 0 quand un saut de scroll
+       dépassait le trigger (bas de page Réalisations vide). */
+
     ScrollTrigger.refresh();
+
+    /* Filet de sécurité : tout tween "from" dont le trigger est déjà passé
+       sans avoir joué est forcé à son état final. */
+    let t;
+    const unstick = () => {
+      ScrollTrigger.getAll().forEach((st) => {
+        if (st.vars.scrub || !st.animation) return;
+        if (st.trigger.getBoundingClientRect().top < innerHeight && st.animation.progress() < 1) {
+          st.animation.progress(1);
+        }
+      });
+    };
+    addEventListener('scroll', () => { clearTimeout(t); t = setTimeout(unstick, 200); }, { passive: true });
+    addEventListener('load', () => { ScrollTrigger.refresh(); unstick(); });
+    unstick();
   };
 
   if (document.readyState === 'complete') run();
