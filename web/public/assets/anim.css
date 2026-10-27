@@ -236,3 +236,20 @@ html.no-anim .img-rev{ clip-path: none !important; transform: none !important; }
       linear-gradient(to bottom,rgba(8,7,6,.72) 0%,rgba(8,7,6,.28) 70px,rgba(8,7,6,0) 150px),
       linear-gradient(to bottom,rgba(8,7,6,0) 26%,rgba(8,7,6,.45) 48%,rgba(8,7,6,.86) 68%,rgba(8,7,6,.97) 84%,#0A0A0B 96%)}
 }
+
+/* Titre du hero : deux lignes maximum, dernier segment en lettres pleines.
+   L'ensemble « de A a Z » passait en contour (color:transparent +
+   -webkit-text-stroke) ; il est desormais rempli et force sur sa propre ligne
+   pour que le titre tienne toujours sur deux lignes. */
+.hero--proj .hero__title>span{display:inline}
+.hero--proj .hero__title .thin{display:block;color:#F4F4F1;-webkit-text-stroke:0;text-stroke:0}
+@media (min-width:901px){
+  /* ds.css impose --ds-h1 en !important sur h1 : il faut la meme arme pour
+     que le titre reprenne de l'echelle une fois ramene a deux lignes. */
+  .hero--proj .hero__title{font-size:clamp(54px,7vw,138px)!important}
+  .hero--proj .hero__title .thin{font-size:1em}
+  /* CTA « Voir le projet » sous le paragraphe, aligne a gauche avec le
+     titre, au lieu de flotter a droite au niveau de la derniere ligne. */
+  .hero--proj .hero__cols{flex-direction:column;align-items:flex-start;
+    gap:clamp(18px,2.4vh,26px);max-width:44ch}
+}
