@@ -25,13 +25,14 @@ const legacyUrls: Array<{ source: string; destination: string }> = [
   { source: "/web.html", destination: "/services/site-ecommerce" },
   { source: "/marketing.html", destination: "/services/contenu-reseaux" },
   { source: "/ia.html", destination: "/agents-ia" },
-  { source: "/projet-vaasam.html", destination: "/realisations/vaasam" },
+  { source: "/projet-vaasam.html", destination: "/realisations" },
   { source: "/projet-rfa.html", destination: "/realisations" },
   { source: "/projet-ia.html", destination: "/agents-ia" },
   { source: "/projet-formation.html", destination: "/a-propos" },
 
-  // Projets de démonstration retirés le 27/10/2026 : leurs anciennes adresses
-  // renvoyaient 404. Elles pointent vers le sommaire des réalisations.
+  // Projets retirés (démonstrations, puis Vaasam mis de côté) : leurs
+  // anciennes adresses pointent vers le sommaire au lieu de renvoyer 404.
+  { source: "/realisations/vaasam", destination: "/realisations" },
   { source: "/realisations/rfa", destination: "/realisations" },
   { source: "/realisations/atelier-24", destination: "/realisations" },
   { source: "/realisations/atelier-24-dix-ans", destination: "/realisations" },
@@ -46,7 +47,7 @@ const legacyUrls: Array<{ source: string; destination: string }> = [
   { source: "/services/marketing", destination: "/services/contenu-reseaux" },
   { source: "/services/ia", destination: "/agents-ia" },
   { source: "/services/agents-ia", destination: "/agents-ia" },
-  { source: "/realisations/vaasam-paris", destination: "/realisations/vaasam" },
+  { source: "/realisations/vaasam-paris", destination: "/realisations" },
   { source: "/realisations/resto-franchise-africain", destination: "/realisations" },
   { source: "/realisations/solutions-ia-automations", destination: "/agents-ia" },
   { source: "/realisations/formation-ui-ux-pao", destination: "/a-propos" },
@@ -64,7 +65,7 @@ const nextConfig: NextConfig = {
       { source: "/v5/a-propos.html", destination: "/a-propos", statusCode: 301 },
       { source: "/v5/agents-ia.html", destination: "/agents-ia", statusCode: 301 },
       { source: "/v5/realisations.html", destination: "/realisations", statusCode: 301 },
-      { source: "/v5/projet.html", destination: "/realisations/vaasam", statusCode: 301 },
+      { source: "/v5/projet.html", destination: "/realisations", statusCode: 301 },
       { source: "/v5/services.html", destination: "/services", statusCode: 301 },
       {
         source: "/v5/service-identite.html",

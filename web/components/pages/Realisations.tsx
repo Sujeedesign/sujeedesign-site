@@ -9,11 +9,14 @@ import { realisationPath } from "@/lib/routes";
 
 const count = projects.length;
 const firstYear = 2013;
+const countWords = ["zéro", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix"];
+const countWord = countWords[count] ?? String(count);
+const countTitle = countWord.charAt(0).toUpperCase() + countWord.slice(1);
 
 export const pageMeta = {
   title: "Réalisations — Sujee Design",
   description:
-    "Huit projets livrés par Sujee Design : identité, packaging, site, interface, édition, jeu web. Le détail de chaque système, du brief au résultat.",
+    "Les projets livrés par Sujee Design : identité, packaging, site, interface, édition, jeu web. Le détail de chaque système, du brief au résultat.",
 };
 
 const toneClass: Record<string, string> = {
@@ -31,10 +34,10 @@ export function Realisations() {
             <p className="kick">Réalisations · 2013 — 2026</p>
             <h1 className="rl-hero__title">
               <span className="rl-line">
-                <span>Huit projets,</span>
+                <span>{countTitle} projets,</span>
               </span>
               <span className="rl-line">
-                <span className="thin">huit systèmes.</span>
+                <span className="thin">{countWord} systèmes.</span>
               </span>
             </h1>
             <div className="rl-hero__foot">

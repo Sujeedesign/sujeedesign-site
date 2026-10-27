@@ -103,3 +103,104 @@ html.no-anim .img-rev{ clip-path: none !important; transform: none !important; }
 @media (min-width:861px){
   .case__visual--photo,.case--ui .case__visual--photo{height:clamp(420px,80%,640px)!important}
 }
+
+/* Ouverture de l'accueil : photo du projet mis en avant, à la place des
+   packagings dessinés en CSS (Vaasam retiré du portfolio). */
+.hero__photo{position:absolute;right:-2vw;bottom:0;width:min(78vw,1500px);height:min(93%,920px);
+  object-fit:cover;object-position:center}
+@media (max-width:900px){
+  .hero__photo{left:0;right:0;top:62px;bottom:auto;width:100%;height:44%;object-position:center 38%;opacity:.95}
+  /* Fondu sur la partie basse de la photo (et non en bas du hero) : le surtitre
+     repose sur un aplat noir, sans arête visible derrière le texte. */
+  .hero__bg::after{content:"";position:absolute;left:0;right:0;top:62px;height:44%;
+    background:linear-gradient(to bottom,rgba(10,10,11,0) 42%,rgba(10,10,11,.92) 86%,#0A0A0B 100%);
+    pointer-events:none}
+}
+
+
+/* ============================================================
+   Cartes projet avec photo : l'image recouvre TOUTE la carte
+   (et non la moitié droite), le texte passe en surimpression.
+   Bloc volontairement en fin de anim.css : site.css et ds.css
+   imposent des hauteurs/colonnes en !important sur .case__body
+   et .case__visual, il faut donc repasser après elles.
+   ============================================================ */
+.case--photo{position:sticky}
+.case--photo .case__body,
+.case--photo.case--ui .case__body{
+  display:block!important;
+  grid-template-columns:none!important;
+  height:100%!important;
+  align-self:stretch!important;
+  position:relative;
+  z-index:2;
+}
+.case--photo .case__text{
+  height:100%;
+  justify-content:center;
+  padding:clamp(4px,1vw,14px) 0 0;
+}
+/* l'image sort du flux et couvre la boîte de la carte (inset:0 = padding box) */
+.case--photo .case__visual--photo,
+.case--photo.case--ui .case__visual--photo{
+  position:absolute!important;
+  inset:0!important;
+  width:auto!important;
+  height:auto!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  order:0!important;
+  align-self:auto!important;
+  z-index:0;
+  overflow:hidden;
+  border-radius:inherit;
+}
+.case--photo .case__visual--photo img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+}
+/* voile : lisibilité du texte côté gauche, image préservée à droite */
+.case--photo::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background:linear-gradient(100deg,
+    rgba(8,8,7,.88) 0%,
+    rgba(8,8,7,.72) 32%,
+    rgba(8,8,7,.34) 58%,
+    rgba(8,8,7,.12) 78%,
+    rgba(8,8,7,.28) 100%);
+}
+@media (max-width:860px){
+  .case--photo::after{
+    background:linear-gradient(to bottom,
+      rgba(8,8,7,.82) 0%,
+      rgba(8,8,7,.62) 42%,
+      rgba(8,8,7,.55) 72%,
+      rgba(8,8,7,.8) 100%);
+  }
+}
+/* sur une photo, le texte passe en clair quel que soit le ton de la carte */
+.case--photo,
+.case--photo .case__title,
+.case--photo .case__bar,
+.case--photo .case__bar span:last-child,
+.case--photo .case__idx,
+.case--photo .case__meta,
+.case--photo .case__sub{color:#F4F1EA}
+.case--photo .case__idx,
+.case--photo .case__meta,
+.case--photo .case__sub{color:rgba(244,241,234,.72)}
+.case--photo .case__bar{
+  background:rgba(10,10,9,.32);
+  border-color:rgba(244,241,234,.24);
+  backdrop-filter:blur(14px) saturate(140%);
+  -webkit-backdrop-filter:blur(14px) saturate(140%);
+}
+.case--photo .case__bar span:last-child{color:rgba(244,241,234,.72)}
+.case--photo .case__ghost{-webkit-text-stroke-color:rgba(244,241,234,.22)}

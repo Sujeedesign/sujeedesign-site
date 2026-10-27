@@ -1,6 +1,6 @@
 {
   "hero": {
-    "kicker": "Projet à la une · Vaasam Paris · 2026",
+    "kicker": "Projet à la une · Elerya",
     "title": {
       "first": "Votre",
       "highlight": "marque,",
@@ -12,9 +12,9 @@
     },
     "cta": {
       "label": "Voir le projet",
-      "href": "/realisations/vaasam"
+      "href": "/realisations/elerya"
     },
-    "tag": "Identité · Packaging · 40 références"
+    "tag": "Identité · Direction photo · E-commerce"
   },
   "studio": {
     "title": [
@@ -52,39 +52,18 @@
   },
   "cases": {
     "title": [
-      "Huit projets,",
-      "huit systèmes."
+      "Sept projets,",
+      "sept systèmes."
     ],
-    "intro": "Chaque marque repart avec ses règles : ce qui se répète, ce qui varie, et ce qu'on ne fait jamais. Trois sont ici, les huit sont sur la page Réalisations.",
+    "intro": "Chaque marque repart avec ses règles : ce qui se répète, ce qui varie, et ce qu'on ne fait jamais. Trois sont ici, les sept sont sur la page Réalisations.",
     "aside": {
-      "label": "Les huit projets ↗",
+      "label": "Les sept projets ↗",
       "href": "/realisations"
     },
     "items": [
       {
         "id": "case01",
-        "index": "01 / Identité · Packaging",
-        "meta": [
-          "Vaasam Paris",
-          "40 références",
-          "2026"
-        ],
-        "title": "Vaasam",
-        "tags": [
-          "Nom",
-          "Logo",
-          "Système typographique",
-          "Packaging"
-        ],
-        "barLabel": "Épicerie fine · Paris",
-        "ghost": "01",
-        "visual": "pack",
-        "tone": "paper",
-        "href": "/realisations/vaasam"
-      },
-      {
-        "id": "case02",
-        "index": "02 / Identité · Direction photo",
+        "index": "01 / Identité · Direction photo",
         "meta": [
           "Elerya",
           "Maroquinerie",
@@ -97,14 +76,14 @@
           "E-commerce"
         ],
         "barLabel": "Maroquinerie · Paris",
-        "ghost": "02",
+        "ghost": "01",
         "visual": "pack",
         "tone": "signal",
         "href": "/realisations/elerya"
       },
       {
-        "id": "case03",
-        "index": "03 / Site · Design system",
+        "id": "case02",
+        "index": "02 / Site · Design system",
         "meta": [
           "Analog Way",
           "Broadcast",
@@ -117,10 +96,30 @@
           "Typographie"
         ],
         "barLabel": "Broadcast · Pro AV",
-        "ghost": "03",
+        "ghost": "02",
         "visual": "ui",
         "tone": "ui",
         "href": "/realisations/analog-way"
+      },
+      {
+        "id": "case03",
+        "index": "03 / Présentation · Direction artistique",
+        "meta": [
+          "DEKRA",
+          "Ville de Laval",
+          "Présentation"
+        ],
+        "title": "Dekra",
+        "tags": [
+          "Système de diapositives",
+          "Hiérarchie typographique",
+          "Mise en page"
+        ],
+        "barLabel": "Conseil · Collectivité",
+        "ghost": "03",
+        "visual": "sign",
+        "tone": "paper",
+        "href": "/realisations/dekra"
       }
     ]
   },

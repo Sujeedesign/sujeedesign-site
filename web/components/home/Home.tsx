@@ -15,34 +15,21 @@ const arrow = (
 
 const { hero, studio, cases, method, services, cta } = homeContent;
 
+/** Projet mis en avant dans l'ouverture : premier cas du portfolio. */
+const featured = getProject("elerya");
+
 export function Hero() {
   return (
     <header className="hero hero--proj" id="top">
       <div className="hero__bg" aria-hidden="true">
-        <div className="hero__still">
-          <div className="hpack hp-a">
-            <span className="hp-lbl">Vaasam</span>
-            <b>Cumin</b>
-            <em>100 g</em>
-          </div>
-          <div className="hpack hp-b">
-            <span className="hp-lbl">Vaasam</span>
-            <b>Curry</b>
-            <em>250 g</em>
-          </div>
-          <div className="hpack hp-c">
-            <span className="hp-lbl">Vaasam</span>
-            <b>Safran</b>
-            <em>500 g</em>
-          </div>
-        </div>
-        <span className="hero__word">Vaasam</span>
+        {featured ? <img className="hero__photo" src={featured.images[0]?.src} alt="" /> : null}
+        <span className="hero__word">{featured?.name ?? ""}</span>
       </div>
       <span className="hero__veil" aria-hidden="true"></span>
       <a
         className="hero__hit"
         href={hero.cta.href}
-        aria-label="Voir l'étude de cas Vaasam Paris"
+        aria-label={`Voir l'étude de cas ${featured?.name ?? ""}`}
       ></a>
 
       <div className="hero__content">
@@ -205,9 +192,19 @@ function CaseVisual({ kind }: { kind: "pack" | "sign" | "ui" }) {
   );
 }
 
+/** Slug du projet visé par le lien d'une carte. */
+function projectSlug(href: string) {
+  return href.split("/").filter(Boolean).pop() ?? "";
+}
+
+/** Vrai quand le projet possède une photo : la carte passe alors en plein cadre. */
+function hasPhoto(href: string) {
+  return Boolean(getProject(projectSlug(href))?.images[0]);
+}
+
 /** Visuel réel du projet quand il existe, sinon l'illustration d'origine. */
 function CaseMedia({ href, kind }: { href: string; kind: "pack" | "sign" | "ui" }) {
-  const slug = href.split("/").filter(Boolean).pop() ?? "";
+  const slug = projectSlug(href);
   const project = getProject(slug);
   const image = project?.images[0];
   if (!image) return <CaseVisual kind={kind} />;
@@ -260,7 +257,7 @@ export function Cases() {
             <a
               key={item.id}
               href={item.href}
-              className={caseClass[item.tone]}
+              className={`${caseClass[item.tone]}${hasPhoto(item.href) ? " case--photo" : ""}`}
               style={item.tone === "ui" ? { background: "#080807" } : undefined}
               aria-labelledby={item.id}
             >

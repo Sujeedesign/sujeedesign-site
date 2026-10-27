@@ -43,87 +43,8 @@ export type Project = {
 
 export const projects: Project[] = [
   {
-    slug: "vaasam",
-    index: "01",
-    name: "Vaasam",
-    client: "Vaasam Paris",
-    year: "2026",
-    city: "Paris",
-    disciplines: ["Identité", "Packaging"],
-    pitch:
-      "Une épicerie fine qui vend des produits d’ailleurs sans folklore. Le travail tenait en une phrase : faire entrer quarante références dans une seule famille visuelle.",
-    scope: "Nom, logotype, système typographique, packaging, guide",
-    duration: "6 semaines",
-    sections: [
-      {
-        k: "01",
-        label: "Contexte",
-        title: "Le problème n’était pas le logo",
-        paragraphs: [
-          "Vaasam existait depuis deux ans avec un nom solide et une identité empruntée à un modèle de packaging asiatique générique. En rayon, la marque ne se distinguait pas de trois concurrents. En ligne, elle vendait des produits mais racontait une histoire floue.",
-          "La commande initiale était un nouveau logo. L’audit a montré que le vrai sujet était ailleurs : quarante références, chacune avec son visuel, aucune règle commune. Le logo seul n’aurait rien réglé.",
-        ],
-      },
-      {
-        k: "02",
-        label: "Décision",
-        title: "Une famille, pas une collection",
-        paragraphs: [
-          "Nous avons construit un système qui tient sur une page : une grille de trois zones, deux familles de caractères, quatre couleurs de fond et un jeu de pictogrammes. Chaque produit hérite de la même structure, seuls le nom et l’origine changent.",
-        ],
-        bullets: [
-          "Logotype en bas de casse, avec un V dessiné qui sert de motif",
-          "Deux caractères : un grotesque pour les noms, un mono pour les origines et les poids",
-          "Quatre fonds mats, imprimés en deux tons, pour une série courte",
-          "Un guide de 24 pages, utilisable par l’imprimeur sans moi",
-        ],
-      },
-      {
-        k: "03",
-        label: "Résultat",
-        title: "Ce que ça change en rayon",
-        paragraphs: [
-          "La gamme se lit maintenant d’un seul coup d’œil : une colonne de noms, une colonne d’origines, une couleur par famille de produit. L’imprimeur a produit les quarante références sans aller-retour supplémentaire, ce qui n’était jamais arrivé.",
-        ],
-      },
-    ],
-    results: [
-      { value: "40", label: "références unifiées" },
-      { value: "2", label: "tons d’impression" },
-      { value: "0", label: "aller-retour imprimeur" },
-    ],
-    images: [
-      {
-        src: "/assets/img/projet/vaasam-pack.jpg",
-        alt: "Les trois packagings Vaasam : cumin, curry et safran",
-        width: 1440,
-        height: 1740,
-      },
-      {
-        src: "/assets/img/projet/vaasam-logo2.jpg",
-        alt: "Logotype Vaasam, version principale",
-        width: 2952,
-        height: 1424,
-      },
-      {
-        src: "/assets/img/projet/vaasam-gamme2.jpg",
-        alt: "Grille des quarante étiquettes Vaasam",
-        width: 1470,
-        height: 664,
-      },
-      {
-        src: "/assets/img/projet/vaasam-spec2.jpg",
-        alt: "Spécimen typographique Vaasam",
-        width: 1470,
-        height: 664,
-      },
-    ],
-    tags: ["Nom", "Logo", "Système typographique", "Packaging"],
-    tone: "paper",
-  },
-  {
     slug: "elerya",
-    index: "02",
+    index: "01",
     name: "Elerya",
     client: "Elerya",
     disciplines: ["Identité", "Direction photo", "E-commerce"],
@@ -200,7 +121,7 @@ export const projects: Project[] = [
   },
   {
     slug: "analog-way",
-    index: "03",
+    index: "02",
     name: "Analog Way",
     client: "Analog Way SAS",
     year: "2016",
@@ -279,7 +200,7 @@ export const projects: Project[] = [
   },
   {
     slug: "dekra",
-    index: "04",
+    index: "03",
     name: "Dekra",
     client: "DEKRA, pour la Ville de Laval",
     disciplines: ["Présentation", "Direction artistique"],
@@ -350,7 +271,7 @@ export const projects: Project[] = [
   },
   {
     slug: "lg-sales-talk",
-    index: "05",
+    index: "04",
     name: "LG Sales talk",
     client: "LG",
     disciplines: ["Application mobile", "UI"],
@@ -427,7 +348,7 @@ export const projects: Project[] = [
   },
   {
     slug: "evenement-spectacle",
-    index: "06",
+    index: "05",
     name: "L’Événement Spectacle",
     client: "L’Événement Spectacle",
     disciplines: ["Site web", "Interface"],
@@ -492,7 +413,7 @@ export const projects: Project[] = [
   },
   {
     slug: "saft-energy-storage",
-    index: "07",
+    index: "06",
     name: "Saft, Energy Storage",
     client: "Saft, groupe Total",
     year: "2015",
@@ -565,7 +486,7 @@ export const projects: Project[] = [
   },
   {
     slug: "logofolio",
-    index: "08",
+    index: "07",
     name: "Logofolio 2013 — 2017",
     client: "Sélection de marques",
     year: "2013 — 2017",
