@@ -32,6 +32,8 @@ pont vers le CRM), et non un site statique auquel on grefferait un chatbot.
    streaming, garde-fous de coût, base de données.
 4. Préparer le pont avec le CRM (prospect créé et devis préparé depuis une conversation).
 5. Garder le déploiement simple : un conteneur, Coolify, aucun service supplémentaire non justifié.
+6. **Remplacer intégralement la vitrine existante** : aucune page, aucun gabarit, aucun style de
+   l'ancien site public n'est conservé. Le v5 devient le site, pas une variante à côté.
 
 ## 3. Non-objectifs
 
@@ -102,9 +104,11 @@ l'indexation IA les découpe en morceaux. Un tarif modifié se propage à la pag
 | `a-propos.html` | `/a-propos` | |
 | `mentions-legales.html` | `/mentions-legales` | |
 | `404` | `app/not-found.tsx` | |
-| `/v5/*` | redirection 301 vers la route équivalente | |
+| `/v5/*` | redirection 301 vers `/` | la préversion disparaît, elle devient le site |
+| ancienne vitrine Jinja (`/`, `/realisations`, `/services`…) | redirection 301 vers la route équivalente | correspondance établie au lot 2, vérifiée une par une |
 
-Redirections permanentes depuis les anciennes URL `.html` pour ne pas perdre le référencement.
+Redirections permanentes depuis toutes les anciennes URL, `.html` et routes Jinja, pour ne pas perdre
+le référencement. La table de correspondance est un livrable du lot 2 et se vérifie par test.
 
 ## 7. Design system et animations
 
@@ -187,8 +191,12 @@ migration ultérieure coûterait plus cher que de partir juste.
 - `web/Dockerfile` multi-étapes, image `node:22-alpine`, sortie standalone
 - Coolify, deux applications sur le même dépôt, variables séparées
 - préversion par branche pour relire avant bascule
-- bascule : le domaine public passe de FastAPI à Next, `/v5` et `theme/v5` conservés une version
-  en rollback, l'admin reste joignable en sous-domaine
+- bascule : remplacement complet. Le domaine public bascule sur Next, `/v5` redirige en 301 vers `/`,
+  la vitrine Jinja n'est plus servie. Rollback = image précédente de l'application Next et tag Git,
+  pas un retour à l'ancien site
+- après bascule, `theme/templates` et les routes publiques Jinja sont retirées du service puis
+  supprimées dans un commit dédié, quand deux semaines de production se sont écoulées sans incident
+- l'admin reste joignable en sous-domaine, servi par l'application FastAPI
 
 ## 12. Observabilité
 
@@ -237,6 +245,12 @@ Critère : un visiteur qui décrit un besoin crée un prospect qualifié dans le
 - **Coût IA non maîtrisé** : plafond journalier et routage local par défaut
 - **Qualité des réponses** : sans corpus propre, l'assistant générique décrédibilise. Le corpus est
   un livrable du lot 2, pas du lot 4
+- **Perte de référencement à la bascule** : le remplacement est total, donc toute URL oubliée devient
+  une 404. Contre-mesure : table de redirections exhaustive issue du sitemap existant, test
+  automatisé qui vérifie chaque ancienne URL, surveillance Search Console après bascule
+- **Admin orphelin** : l'éditeur actuel pilote des pages Jinja qui ne seront plus servies. Il reste
+  fonctionnel mais sans effet public jusqu'au branchement de l'admin sur la nouvelle vitrine, ce qui
+  est un chantier distinct et volontairement hors périmètre ici
 - **Cohabitation des deux applications** : un seul dépôt, deux déploiements, à documenter dans
   `docs/EXPLOITATION.md` pour éviter les erreurs de racine de build
 
@@ -250,7 +264,17 @@ Critère : un visiteur qui décrit un besoin crée un prospect qualifié dans le
 | GSAP | auto-hébergé | CDN plus simple mais CSP plus permissive |
 | Assistant | bulle discrète, une seule page de conversation | panneau latéral persistant si l'usage le justifie |
 
-## 17. Ce qui n'est pas touché
+## 17. Ce qui n'est pas touché dans ce chantier
 
-`app/`, `sujee_editor/`, `theme/templates/`, l'éditeur GrapesJS, les données de production.
-Le chantier vitrine est additif jusqu'au lot 5.
+`app/`, `sujee_editor/`, l'éditeur GrapesJS, les données de production. La vitrine Jinja n'est plus
+servie après la bascule, mais son code n'est supprimé qu'après la période de surveillance, dans un
+commit séparé.
+
+## 18. État de départ vérifié
+
+- dépôt `Sujeedesign/sujeedesign-site`, `main` à `5d019f5`, arbre de travail propre
+- `/v5/` déployé et à jour, correctif responsive en fin de `theme/v5/assets/light.css` (media query
+  `≤ 700px`), donc repérable et ajustable si un écart de rendu apparaît sur mobile
+- aucun travail en cours, aucun serveur de test laissé actif
+- baseline de tests du dépôt dans le worktree : 533 tests passent, 1 échoue
+  (`test_editor_frontend_build`, bundle d'éditeur non compilé dans le worktree, sans lien avec la vitrine)
