@@ -1310,7 +1310,8 @@ body.has-dark-hero .nav.nav--open .brand__logo--light{display:none!important}
 .rl-p--paper .sc-pack i{background:#0B0B0B}
 
 .rl-p__info{position:absolute;z-index:3;left:var(--pad);bottom:clamp(34px,7vh,80px);max-width:min(560px,84vw)}
-.rl-p:nth-child(even) .rl-p__info{left:auto;right:var(--pad)}
+/* titre + description toujours ancrés en bas à gauche, quel que soit le projet */
+.rl-film > .rl-p:first-child{box-shadow:none;border-top:0}
 .rl-p--paper .rl-p__info,.rl-p--tint .rl-p__info{color:var(--ink)}
 .rl-p--dark .rl-p__info,.rl-p--ink .rl-p__info{color:#F7F7F5}
 .rl-p__kicker{margin:0 0 10px;font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
@@ -1355,7 +1356,7 @@ body.has-dark-hero .nav.nav--open .brand__logo--light{display:none!important}
   .rl-scene__word{font-size:clamp(64px,22vw,140px)}
   .art{height:100%;width:100%}
   .art>*{transform:scale(1.05)}
-  .rl-p__info,.rl-p:nth-child(even) .rl-p__info{left:var(--pad);right:var(--pad);bottom:clamp(22px,5vh,40px);max-width:none}
+  .rl-p__info{left:var(--pad);right:var(--pad);bottom:clamp(22px,5vh,40px);max-width:none}
   .rl-p__info h2{font-size:clamp(30px,8.6vw,46px)}
   .rl-p__desc{font-size:14px;margin-bottom:clamp(10px,2vw,14px)}
   .rl-p__tags{display:none}
