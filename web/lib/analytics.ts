@@ -8,7 +8,8 @@
 export const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID ?? "";
 
 /** Jeton de vérification Search Console, méthode « balise HTML ». */
-export const GOOGLE_SITE_VERIFICATION = process.env.NEXT_PUBLIC_GSC_TOKEN ?? "";
+export const GOOGLE_SITE_VERIFICATION =
+  process.env.NEXT_PUBLIC_GSC_TOKEN ?? "TlVzwqRwXwnej9BHbAojNf2BZqcSZ8Dq7CgO4s4oB_Q";
 
 /** Clé publique de consentement stockée côté navigateur. */
 export const CONSENT_KEY = "sd-consent";
