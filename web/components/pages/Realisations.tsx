@@ -20,9 +20,9 @@ export const pageMeta = {
 };
 
 const toneClass: Record<string, string> = {
-  paper: "rl-p rl-p--paper",
-  tint: "rl-p rl-p--tint",
-  dark: "rl-p rl-p--dark",
+  paper: "rl-card rl-card--paper",
+  tint: "rl-card rl-card--tint",
+  dark: "rl-card rl-card--dark",
 };
 
 export function Realisations() {
@@ -63,53 +63,50 @@ export function Realisations() {
           </div>
         </header>
 
-        <section className="rl-index" aria-label="Sommaire des projets">
-          <div className="wrap">
+        <section className="rl-cards" aria-label="Projets">
+          <div className="wrap rl-cards__grid">
             {projects.map((project) => (
-              <a className="rl-row" href={realisationPath(project.slug)} key={project.slug}>
-                <span className="rl-row__n">{project.index}</span>
-                <span className="rl-row__name">{project.name}</span>
-                <span className="rl-row__tags">{project.disciplines.join(" · ")}</span>
-                <span className="rl-row__y">{project.year ?? ""}</span>
-                <span className="rl-row__a" aria-hidden="true">
-                  ↗
-                </span>
-              </a>
-            ))}
-          </div>
-        </section>
-
-        <div className="rl-film">
-          {projects.map((project) => (
-            <section className={toneClass[project.tone] ?? toneClass.paper} id={`p${project.index}`} key={project.slug}>
-              <div className="rl-p__media">
-                <div className="rl-scene">
+              <a
+                className={`${toneClass[project.tone] ?? toneClass.paper}`}
+                href={realisationPath(project.slug)}
+                id={`p${project.index}`}
+                key={project.slug}
+              >
+                <div className="rl-card__top">
+                  <span className="rl-card__idx">
+                    {project.index} · {project.disciplines[0]}
+                  </span>
+                  <span className="rl-card__meta">
+                    <span>{project.client}</span>
+                    {project.year ? <span>{project.year}</span> : null}
+                  </span>
+                </div>
+                <div className="rl-card__media">
                   <img
-                    className="rl-p__img"
                     src={project.images[0]?.src}
                     alt={project.images[0]?.alt ?? project.name}
                     loading="lazy"
                     decoding="async"
+                    width={project.images[0]?.width}
+                    height={project.images[0]?.height}
                   />
-                  <span className="rl-scene__word" aria-hidden="true">
-                    {project.name}
+                </div>
+                <div className="rl-card__foot">
+                  <div className="rl-card__text">
+                    <h2 className="rl-card__title">{project.name}</h2>
+                    <span className="rl-card__tags">
+                      {project.disciplines.join(" · ")}
+                      {project.year ? ` · ${project.year}` : ""}
+                    </span>
+                  </div>
+                  <span className="rl-card__cta">
+                    Voir l’étude de cas <span aria-hidden="true">↗</span>
                   </span>
                 </div>
-                <div className="rl-p__info">
-                  <p className="rl-p__kicker">
-                    {project.index} · {project.disciplines.join(" · ")}
-                    {project.year ? ` · ${project.year}` : ""}
-                  </p>
-                  <h2>{project.name}</h2>
-                  <p className="rl-p__desc">{project.pitch}</p>
-                  <a className="rl-p__link" href={realisationPath(project.slug)}>
-                    Voir l’étude de cas <span aria-hidden="true">↗</span>
-                  </a>
-                </div>
-              </div>
-            </section>
-          ))}
-        </div>
+              </a>
+            ))}
+          </div>
+        </section>
 
         <section className="rl-svc">
           <div className="wrap">

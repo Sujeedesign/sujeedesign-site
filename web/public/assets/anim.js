@@ -6,7 +6,7 @@
   const IMG_SEL = [
     '.pj-fig img', '.sv-row figure img', '.sv-row img', '.sp-hero img',
     '.case__visual', '.case__bg', '.ab-hero__portrait', '.ab-portrait', '.hero__portrait',
-    '.rl-p img', '.proj-head img'
+    '.rl-card img', '.rl-p img', '.proj-head img'
   ].join(',');
 
   /* On télécharge dès l'arrivée sur la page, plus au scroll et plus derrière

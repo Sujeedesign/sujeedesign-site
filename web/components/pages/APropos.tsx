@@ -34,7 +34,16 @@ export function APropos() {
           </div>
           <div className="ab-hero__block">
             <figure className="ab-hero__fig">
-              <img src="/assets/sujeepan_sabesan.jpg" alt="Portrait de Sujeepan Sabesan, designer et directeur artistique à Paris" />
+              {/* LCP de /a-propos : portrait préchargé depuis le <head>, dimensions
+                  déclarées pour ne pas décaler la mise en page au chargement. */}
+              <img
+                src="/assets/sujeepan_sabesan.jpg"
+                alt="Portrait de Sujeepan Sabesan, designer et directeur artistique à Paris"
+                width={1200}
+                height={1357}
+                fetchPriority="high"
+                decoding="async"
+              />
               <figcaption>Sujeepan Sabesan · Cergy · Paris</figcaption>
             </figure>
             <aside className="ab-hero__panel">

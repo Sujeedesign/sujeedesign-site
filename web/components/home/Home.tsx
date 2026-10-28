@@ -18,11 +18,26 @@ const { hero, studio, cases, method, services, cta } = homeContent;
 /** Projet mis en avant dans l'ouverture : premier cas du portfolio. */
 const featured = getProject("elerya");
 
+/** Image du LCP de l'accueil : le fond du hero. Ses dimensions sont celles du fichier. */
+export const heroPhoto = featured?.images[0];
+
 export function Hero() {
   return (
     <header className="hero hero--proj" id="top">
       <div className="hero__bg" aria-hidden="true">
-        {featured ? <img className="hero__photo" src={featured.images[0]?.src} alt="" /> : null}
+        {heroPhoto ? (
+          // LCP : chargée en priorité, sans décalage de mise en page (dimensions
+          // déclarées), et lue dès l'arrivée sans attendre le lazy loading.
+          <img
+            className="hero__photo"
+            src={heroPhoto.src}
+            alt=""
+            width={heroPhoto.width}
+            height={heroPhoto.height}
+            fetchPriority="high"
+            decoding="async"
+          />
+        ) : null}
         <span className="hero__word">{featured?.name ?? ""}</span>
       </div>
       <span className="hero__veil" aria-hidden="true"></span>

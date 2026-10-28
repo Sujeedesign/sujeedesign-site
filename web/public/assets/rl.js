@@ -16,21 +16,10 @@
         scale: .92, y: -30, opacity: .25, ease: 'none',
         scrollTrigger: {trigger: '.rl-hero', start: 'top top', end: 'bottom top', scrub: .6}
       });
-      gsap.utils.toArray('.rl-scene').forEach((scene) => {
-        gsap.fromTo(scene, {scale: 1.14, y: 24}, {
-          scale: 1, y: -24, ease: 'none',
-          scrollTrigger: {trigger: scene.closest('.rl-p'), start: 'top bottom', end: 'bottom top', scrub: true}
-        });
-      });
     });
 
-    /* M2 : chaque bloc entre en décalage */
-    gsap.utils.toArray('.rl-p__info').forEach((info) => {
-      gsap.from(info, {
-        y: 46, opacity: 0, duration: .9, ease: 'power3.out',
-        scrollTrigger: {trigger: info.closest('.rl-p'), start: 'top 72%', toggleActions: 'play none none none'}
-      });
-    });
+    /* M2 : plus de blocs plein écran sur /realisations (cartes statiques),
+       les images ne sont jamais masquées puis révélées. */
 
     /* M3 : les cartes de prestations sont révélées en CSS par anim.js
        (.rv + [data-stagger].is-in). On ne double PLUS l'animation en GSAP :
