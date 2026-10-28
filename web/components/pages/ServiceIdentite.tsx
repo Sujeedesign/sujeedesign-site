@@ -1,7 +1,7 @@
 /** Portage du v5 : service-identite.html. Balisage d'origine, liens en urls propres. */
 export const pageMeta = {
-  "title": "Service 01 · Identité de marque — Sujee Design",
-  "description": "Un logo seul ne fait pas une marque. Je construis le système complet, du nom aux déclinaisons, pour qu'il tienne sur un menu, une devanture, un colis."
+  "title": "Identité visuelle et logo, Cergy et Paris — Sujee Design",
+  "description": "Identité visuelle à Cergy, Val-d'Oise et Paris : nom, logotype, typographies, couleurs, déclinaisons et guide d'usage. Sources à votre nom."
 };
 
 export function ServiceIdentite() {
@@ -68,10 +68,25 @@ export function ServiceIdentite() {
           <div className="wrap">
             <div className="sec-head rv">
               <div className="sec-num">04</div>
+              <div><h2>Travailler l'identité<br />à Cergy et à Paris.</h2><p>Le studio est à Cergy. Les ateliers de cadrage et les présentations se font sur place, dans le Val-d'Oise ou à Paris, et le reste avance à distance.</p></div>
+              <div className="side">Terrain</div>
+            </div>
+            <div className="sp-items rv">
+              <div className="sp-item"><b>01</b><div><h3>Le contexte local change les supports</h3><p>Une devanture, un menu, un colis, une étiquette cousue, un écran de téléphone : les contraintes ne sont pas les mêmes selon qu'on vous croise en rue ou qu'on vous trouve en ligne. Le système est éprouvé sur vos supports réels, pas sur une maquette idéale.</p></div></div>
+              <div className="sp-item"><b>02</b><div><h3>Elerya, identité et boutique</h3><p>Une marque de maroquinerie qui devait paraître installée dès le premier visuel, sans budget de campagne. Logotype, système typographique, direction photo produit et gabarits e-commerce.</p><a className="sv-row__more" href="/realisations/elerya">Voir la fiche Elerya <span aria-hidden="true">↗</span></a></div></div>
+              <div className="sp-item"><b>03</b><div><h3>Logofolio 2013 — 2017</h3><p>Onze logotypes présentés sans mise en scène, pour des clients de secteurs différents : maison d'hôtes, fruits, événementiel, automobile, conseil, média. La méthode se lit dans la série.</p><a className="sv-row__more" href="/realisations/logofolio">Voir le logofolio <span aria-hidden="true">↗</span></a></div></div>
+              <div className="sp-item"><b>04</b><div><h3>Quand l'identité continue ailleurs</h3><p>Une marque neuve a souvent besoin de deux choses de plus : un cadre pour les campagnes et les photographes, et un site qu'on modifie seul. Les deux sont décrits séparément.</p><a className="sv-row__more" href="/services/direction-artistique">Direction artistique <span aria-hidden="true">↗</span></a><br /><a className="sv-row__more" href="/services/site-ecommerce">Site &amp; e-commerce <span aria-hidden="true">↗</span></a></div></div>
+            </div>
+          </div>
+        </section>
+        <section className="section">
+          <div className="wrap">
+            <div className="sec-head rv">
+              <div className="sec-num">05</div>
               <div><h2>Les questions<br />qui reviennent.</h2></div>
               <div className="side">FAQ</div>
             </div>
-            <div className="faq rv"><details><summary>Et si je n'ai pas encore de nom ?</summary><p>C'est le cas une fois sur deux. La recherche de nom fait partie du périmètre, avec une shortlist de trois pistes et une vérification d'usage.</p></details><details><summary>Combien d'allers-retours ?</summary><p>Deux par étape, inclus. Au-delà, on en discute avant de continuer : je préfère le dire que facturer en surprise.</p></details><details><summary>Je garde les fichiers ?</summary><p>Oui. Sources vectorielles, guide, palette, tout est à vous, sans compte à rebours ni licence cachée.</p></details></div>
+            <div className="faq rv"><details><summary>Et si je n'ai pas encore de nom ?</summary><p>C'est le cas une fois sur deux. La recherche de nom fait partie du périmètre, avec une shortlist de trois pistes et une vérification d'usage.</p></details><details><summary>Combien d'allers-retours ?</summary><p>Deux par étape, inclus. Au-delà, on en discute avant de continuer : je préfère le dire que facturer en surprise.</p></details><details><summary>Je garde les fichiers ?</summary><p>Oui. Sources vectorielles, guide, palette, tout est à vous, sans compte à rebours ni licence cachée.</p></details><details><summary>Vous travaillez seulement à Cergy ?</summary><p>Non. Le studio est à Cergy, les rendez-vous se font sur place dans le Val-d'Oise et à Paris, et le reste du projet se suit à distance, avec les mêmes points de validation.</p></details></div>
           </div>
         </section>
         <section className="cta-section">
