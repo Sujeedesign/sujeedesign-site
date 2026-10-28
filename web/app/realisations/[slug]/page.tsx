@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProjetCase, projectMeta } from "@/components/pages/ProjetCase";
+import { JsonLd } from "@/components/site/JsonLd";
 import { PageShell } from "@/components/site/PageShell";
 import { pageMetadata } from "@/lib/page-metadata";
+import { linkedServices } from "@/lib/project-links";
 import { realisationPath, routes } from "@/lib/routes";
+import { breadcrumbNode, creativeWorkNode, pageGraph, webPageNode } from "@/lib/structured-data";
 import { getProject, projectSlugs } from "@/content/projects";
 
 type Params = { params: Promise<{ slug: string }> };
@@ -32,6 +35,20 @@ export default async function Page({ params }: Params) {
 
   return (
     <PageShell current={routes.realisations}>
+      <JsonLd
+        data={pageGraph([
+          webPageNode(realisationPath(slug), project.name, project.pitch),
+          creativeWorkNode(project),
+          // Les prestations affichées en bas de fiche sont aussi décrites ici :
+          // le `CreativeWork` et le `Service` partagent le même `@graph`.
+          ...linkedServices(project).map((service) => service.node),
+          breadcrumbNode([
+            { name: "Accueil", path: routes.home },
+            { name: "Réalisations", path: routes.realisations },
+            { name: project.name, path: realisationPath(slug) },
+          ]),
+        ])}
+      />
       <main id="main">
         <ProjetCase project={project} />
       </main>

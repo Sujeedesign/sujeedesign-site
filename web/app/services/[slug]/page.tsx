@@ -10,9 +10,11 @@ import {
   pageMeta as metaEcommerce,
 } from "@/components/pages/ServiceSiteEcommerce";
 import { ServiceContenu, pageMeta as metaContenu } from "@/components/pages/ServiceContenu";
+import { JsonLd } from "@/components/site/JsonLd";
 import { PageShell } from "@/components/site/PageShell";
 import { pageMetadata } from "@/lib/page-metadata";
 import { routes, serviceHref, servicePath, serviceSlugs, type ServiceSlug } from "@/lib/routes";
+import { breadcrumbNode, pageGraph, serviceNode, webPageNode } from "@/lib/structured-data";
 
 /**
  * Les pages service du v5, une par slug.
@@ -56,10 +58,21 @@ export default async function Page({ params }: Params) {
   const entry = services[slug];
   if (!entry) notFound();
 
-  const { Component } = entry;
+  const { Component, meta } = entry;
 
   return (
     <PageShell current={serviceHref(slug as ServiceSlug)}>
+      <JsonLd
+        data={pageGraph([
+          webPageNode(servicePath(slug as ServiceSlug), meta.title, meta.description),
+          serviceNode(slug as ServiceSlug, meta.description),
+          breadcrumbNode([
+            { name: "Accueil", path: routes.home },
+            { name: "Services", path: routes.services },
+            { name: meta.title, path: servicePath(slug as ServiceSlug) },
+          ]),
+        ])}
+      />
       <main id="main">
         <Component />
       </main>
