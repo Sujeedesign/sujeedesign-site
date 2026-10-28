@@ -175,8 +175,8 @@ footer .foot a{color:#B8B2A6}
   font-size:clamp(84px,15vw,250px);letter-spacing:-.05em;
   color:transparent;-webkit-text-stroke:1px rgba(242,239,231,.22);pointer-events:none}
 .hero__veil{position:absolute;inset:0;z-index:1;pointer-events:none;
-  background:linear-gradient(96deg,rgba(8,7,6,.95) 0%,rgba(8,7,6,.86) 30%,rgba(8,7,6,.5) 46%,rgba(8,7,6,.14) 68%,rgba(8,7,6,.32) 100%),
-             linear-gradient(to top,rgba(8,7,6,.8),rgba(8,7,6,0) 38%)}
+  background:linear-gradient(96deg,rgba(8,7,6,.88) 0%,rgba(8,7,6,.62) 26%,rgba(8,7,6,.26) 46%,rgba(8,7,6,.07) 66%,rgba(8,7,6,.24) 100%),
+             linear-gradient(to top,rgba(8,7,6,.68),rgba(8,7,6,0) 30%)}
 .hero__hit{position:absolute;inset:0;z-index:2;cursor:pointer;text-decoration:none}
 .hero__hit:focus-visible{outline:2px solid #FF4B1F;outline-offset:-6px}
 .hero__content{position:relative;z-index:3;pointer-events:none;max-width:min(1000px,74vw)}
@@ -240,7 +240,8 @@ body > .readrail{background:none;border:0;padding:0}
 /* Mobile : le texte passe sur les packs, on renforce le voile */
 @media (max-width:900px){
   .hero__still{top:62px;bottom:auto;height:46%;right:-10vw;width:126vw;opacity:1;padding-right:0}
-  .hero__veil{background:linear-gradient(to bottom,rgba(8,7,6,.42) 0%,rgba(8,7,6,.1) 26%,rgba(8,7,6,.55) 44%,rgba(8,7,6,.94) 58%,#0A0A0B 72%)}
+  .hero__veil{background:linear-gradient(to bottom,rgba(8,7,6,.28) 0%,rgba(8,7,6,.05) 18%,rgba(8,7,6,.16) 36%,rgba(8,7,6,.46) 48%,rgba(8,7,6,.84) 58%,#0A0A0B 70%)}
+  .hero--proj .hero__title,.hero--proj .hero__lead,.hero--proj .hero__kicker{text-shadow:0 2px 26px rgba(0,0,0,.6)}
   .hero--proj .hero__lead{color:#E6E6E2}
 }
 .hero--proj{width:100%;max-width:none!important}

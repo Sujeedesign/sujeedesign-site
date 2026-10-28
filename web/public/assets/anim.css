@@ -136,19 +136,19 @@ html.no-anim [data-stagger] > *{ opacity: 1 !important; transform: none !importa
   position:absolute;
   inset:0;
   background:
-    radial-gradient(110% 80% at 100% 0%, rgba(8,8,7,.45), rgba(8,8,7,0) 58%),
+    radial-gradient(110% 80% at 100% 0%, rgba(8,8,7,.26), rgba(8,8,7,0) 56%),
     linear-gradient(100deg,
-      rgba(8,8,7,.9) 0%,
-      rgba(8,8,7,.8) 26%,
-      rgba(8,8,7,.56) 44%,
-      rgba(8,8,7,.18) 66%,
-      rgba(8,8,7,.06) 84%,
-      rgba(8,8,7,.34) 100%),
+      rgba(8,8,7,.80) 0%,
+      rgba(8,8,7,.60) 24%,
+      rgba(8,8,7,.32) 44%,
+      rgba(8,8,7,.08) 68%,
+      rgba(8,8,7,.02) 86%,
+      rgba(8,8,7,.20) 100%),
     linear-gradient(to top,
-      rgba(8,8,7,.95) 0%,
-      rgba(8,8,7,.82) 22%,
-      rgba(8,8,7,.4) 44%,
-      rgba(8,8,7,0) 62%);
+      rgba(8,8,7,.84) 0%,
+      rgba(8,8,7,.58) 18%,
+      rgba(8,8,7,.2) 36%,
+      rgba(8,8,7,0) 54%);
 }
 /* le visuel d'origine n'a plus de sens : la photo est le fond */
 .case--photo .case__visual{display:none!important}
@@ -156,6 +156,8 @@ html.no-anim [data-stagger] > *{ opacity: 1 !important; transform: none !importa
 .case--photo .case__body,
 .case--photo .case__foot{position:relative;z-index:2}
 .case--photo .case__ghost{z-index:1}
+.case--photo .case__title{text-shadow:0 2px 28px rgba(0,0,0,.5)}
+.case--photo .case__idx,.case--photo .case__meta,.case--photo .case__sub{text-shadow:0 1px 14px rgba(0,0,0,.6)}
 /* sur une photo, le texte passe en clair quel que soit le ton de la carte */
 .case--photo,
 .case--photo .case__title,
@@ -170,10 +172,10 @@ html.no-anim [data-stagger] > *{ opacity: 1 !important; transform: none !importa
 @media (max-width:860px){
   .case--photo .case__bg::after{
     background:linear-gradient(to bottom,
-      rgba(8,8,7,.6) 0%,
-      rgba(8,8,7,.5) 40%,
-      rgba(8,8,7,.62) 72%,
-      rgba(8,8,7,.86) 100%);
+      rgba(8,8,7,.28) 0%,
+      rgba(8,8,7,.30) 26%,
+      rgba(8,8,7,.46) 56%,
+      rgba(8,8,7,.76) 100%);
   }
 }
 
@@ -183,14 +185,14 @@ html.no-anim [data-stagger] > *{ opacity: 1 !important; transform: none !importa
    Trois couches : scrim haut, degrade lateral gauche, fondu bas. */
 .hero--proj .hero__veil{
   background:
-    linear-gradient(to bottom,rgba(8,7,6,.74) 0%,rgba(8,7,6,.34) 76px,rgba(8,7,6,0) 172px),
-    linear-gradient(96deg,rgba(8,7,6,.95) 0%,rgba(8,7,6,.86) 30%,rgba(8,7,6,.5) 46%,rgba(8,7,6,.14) 68%,rgba(8,7,6,.3) 100%),
-    linear-gradient(to top,rgba(8,7,6,.78) 0%,rgba(8,7,6,0) 42%)}
+    linear-gradient(to bottom,rgba(8,7,6,.6) 0%,rgba(8,7,6,.24) 70px,rgba(8,7,6,0) 150px),
+    linear-gradient(96deg,rgba(8,7,6,.86) 0%,rgba(8,7,6,.6) 28%,rgba(8,7,6,.26) 46%,rgba(8,7,6,.07) 68%,rgba(8,7,6,.2) 100%),
+    linear-gradient(to top,rgba(8,7,6,.7) 0%,rgba(8,7,6,0) 34%)}
 @media (max-width:900px){
   .hero--proj .hero__veil{
     background:
-      linear-gradient(to bottom,rgba(8,7,6,.72) 0%,rgba(8,7,6,.28) 70px,rgba(8,7,6,0) 150px),
-      linear-gradient(to bottom,rgba(8,7,6,0) 26%,rgba(8,7,6,.45) 48%,rgba(8,7,6,.86) 68%,rgba(8,7,6,.97) 84%,#0A0A0B 96%)}
+      linear-gradient(to bottom,rgba(8,7,6,.58) 0%,rgba(8,7,6,.22) 68px,rgba(8,7,6,0) 145px),
+      linear-gradient(to bottom,rgba(8,7,6,0) 34%,rgba(8,7,6,.24) 52%,rgba(8,7,6,.6) 72%,rgba(8,7,6,.88) 88%,#0A0A0B 99%)}
 }
 
 /* Titre du hero : deux lignes maximum, dernier segment en lettres pleines.
@@ -222,10 +224,10 @@ html.no-anim [data-stagger] > *{ opacity: 1 !important; transform: none !importa
 /* plaque sombre derrière le bloc texte : le bas de la photo ne vient plus
    concurrencer la ligne mono ni le titre */
 .case--photo .case__foot::before{
-  content:"";position:absolute;z-index:-1;inset:-20px -120px -120px;
+  content:"";position:absolute;z-index:-1;inset:-14px -120px -96px;
   background:linear-gradient(to top,
-    rgba(8,8,7,.99) 0%,
-    rgba(8,8,7,.97) 42%,
-    rgba(8,8,7,.8) 70%,
+    rgba(8,8,7,.96) 0%,
+    rgba(8,8,7,.9) 40%,
+    rgba(8,8,7,.6) 70%,
     rgba(8,8,7,0) 100%);
 }

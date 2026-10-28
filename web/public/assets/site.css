@@ -215,7 +215,7 @@ a{-webkit-tap-highlight-color:transparent}
 .c-paper .case__idx,.c-paper .case__meta,.c-paper .case__sub{color:rgba(10,10,9,.62)}
 .c-signal .case__idx,.c-signal .case__meta,.c-signal .case__sub{color:rgba(10,10,9,.7)}
 .case--photo .case__idx,.case--photo .case__meta,.case--photo .case__sub{color:rgba(244,241,234,.74)}
-.case--photo .case__top::before{content:"";position:absolute;z-index:-1;inset:-24px -140px -70px;pointer-events:none;background:linear-gradient(180deg,rgba(8,8,7,.94) 0%,rgba(8,8,7,.72) 62%,rgba(8,8,7,0) 100%)}
+.case--photo .case__top::before{content:"";position:absolute;z-index:-1;inset:-22px -140px -46px;pointer-events:none;background:linear-gradient(180deg,rgba(8,8,7,.8) 0%,rgba(8,8,7,.44) 64%,rgba(8,8,7,0) 100%)}
 .c-paper .case__ghost{-webkit-text-stroke-color:rgba(10,10,9,.18)}
 .c-signal{background:var(--accent);color:#0A0A09;border-color:var(--accent)}
 .c-signal .case__ghost{-webkit-text-stroke-color:rgba(10,10,9,.22)}
