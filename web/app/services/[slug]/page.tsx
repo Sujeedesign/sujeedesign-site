@@ -41,7 +41,11 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const entry = services[slug];
   if (!entry) return {};
-  return pageMetadata(entry.meta, servicePath(slug as ServiceSlug));
+  return pageMetadata(
+    entry.meta,
+    servicePath(slug as ServiceSlug),
+    `/assets/img/og/${slug}.jpg`,
+  );
 }
 
 export default async function Page({ params }: Params) {

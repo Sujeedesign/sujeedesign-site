@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     template: "%s — Sujee Design",
   },
   description:
-    "Studio de design indépendant entre Cergy et Paris. Identité, direction artistique, sites web et outils IA. Un seul interlocuteur, de la première esquisse à la mise en ligne.",
+    "Studio de design indépendant entre Cergy et Paris. Identité, direction artistique, sites web et outils IA, du premier croquis à la mise en ligne.",
   applicationName: "Sujee Design",
   authors: [{ name: "Sujeepan Sabesan", url: "https://sujeedesign.com/a-propos" }],
   creator: "Sujeepan Sabesan",
@@ -23,11 +23,20 @@ export const metadata: Metadata = {
     title: "Sujee Design — Studio de design, Cergy et Paris",
     description:
       "Identité, direction artistique, sites et outils IA. Un seul interlocuteur, de la première esquisse à la mise en ligne.",
+    images: [
+      {
+        url: "/assets/img/og/studio.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Sujee Design, studio de design à Cergy et Paris",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Sujee Design — Studio de design, Cergy et Paris",
     description: "Identité, direction artistique, sites et outils IA, entre Cergy et Paris.",
+    images: ["/assets/img/og/studio.jpg"],
   },
   icons: { icon: [{ url: "/assets/favicon.svg", type: "image/svg+xml" }] },
 };

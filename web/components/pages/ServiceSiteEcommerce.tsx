@@ -1,7 +1,7 @@
 /** Portage du v5 : service-site-ecommerce.html. Balisage d'origine, liens en urls propres. */
 export const pageMeta = {
   "title": "Service 03 · Site & e-commerce — Sujee Design",
-  "description": "Beaucoup de sites sont beaux et impossibles à modifier. Le mien est fait pour que vous puissiez changer un texte, une photo, un produit, sans appeler perso"
+  "description": "Un site beau mais impossible à modifier ne sert à rien. Je livre des sites rapides que vous gérez seul : un texte, une photo, un produit."
 };
 
 export function ServiceSiteEcommerce() {

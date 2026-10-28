@@ -1,6 +1,6 @@
 /** Portage du v5 : a-propos.html. Balisage d'origine, liens en urls propres. */
 export const pageMeta = {
-  "title": "À propos — Sujee Design",
+  "title": "À propos — Sujeepan Sabesan, designer",
   "description": "Sujeepan Sabesan, designer indépendant entre Cergy et Paris depuis 2013 : direction artistique, photo et vidéo, UX/UI, IA générative, web et formation."
 };
 

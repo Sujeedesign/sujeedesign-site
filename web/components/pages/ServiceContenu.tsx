@@ -1,7 +1,7 @@
 /** Portage du v5 : service-contenu.html. Balisage d'origine, liens en urls propres. */
 export const pageMeta = {
   "title": "Service 04 · Contenu & réseaux — Sujee Design",
-  "description": "Le contenu ne manque pas, c'est le rythme qui manque. On installe une ligne éditoriale et des gabarits assez simples pour que la publication tienne dans un"
+  "description": "Le contenu ne manque pas, c'est le rythme qui manque. J'installe une ligne éditoriale et des gabarits simples pour publier sans y passer vos soirées."
 };
 
 export function ServiceContenu() {

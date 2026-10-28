@@ -18,7 +18,11 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const project = getProject(slug);
   if (!project) return {};
-  return pageMetadata(projectMeta(project), realisationPath(slug));
+  return pageMetadata(
+    projectMeta(project),
+    realisationPath(slug),
+    `/assets/img/og/${slug}.jpg`,
+  );
 }
 
 export default async function Page({ params }: Params) {

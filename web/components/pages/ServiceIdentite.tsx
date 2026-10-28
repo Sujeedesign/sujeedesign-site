@@ -1,7 +1,7 @@
 /** Portage du v5 : service-identite.html. Balisage d'origine, liens en urls propres. */
 export const pageMeta = {
   "title": "Service 01 · Identité de marque — Sujee Design",
-  "description": "Un logo seul ne fait pas une marque. Ce qui compte, c'est ce que le nom, la typo et les couleurs produisent sur un menu, une devanture, un colis, un écran"
+  "description": "Un logo seul ne fait pas une marque. Je construis le système complet, du nom aux déclinaisons, pour qu'il tienne sur un menu, une devanture, un colis."
 };
 
 export function ServiceIdentite() {

@@ -1,7 +1,7 @@
 /** Portage du v5 : service-direction-artistique.html. Balisage d'origine, liens en urls propres. */
 export const pageMeta = {
   "title": "Service 02 · Direction artistique — Sujee Design",
-  "description": "La première campagne est facile. La cinquième l'est moins. Je pose un cadre visuel assez précis pour que vos prestataires, vos imprimeurs et vos photograph"
+  "description": "La première campagne est facile, la cinquième moins. Je pose un cadre assez précis pour que prestataires et photographes produisent la même chose."
 };
 
 export function ServiceDirectionArtistique() {

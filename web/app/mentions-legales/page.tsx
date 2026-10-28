@@ -4,7 +4,7 @@ import { PageShell } from "@/components/site/PageShell";
 import { pageMetadata } from "@/lib/page-metadata";
 import { routes } from "@/lib/routes";
 
-export const metadata: Metadata = pageMetadata(pageMeta, routes.mentionsLegales);
+export const metadata: Metadata = pageMetadata(pageMeta, routes.mentionsLegales, "/assets/img/og/mentions-legales.jpg");
 
 export default function Page() {
   return (

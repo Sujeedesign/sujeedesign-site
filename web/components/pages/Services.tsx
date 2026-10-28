@@ -1,6 +1,6 @@
 /** Portage du v5 : services.html. Balisage d'origine, liens en urls propres. */
 export const pageMeta = {
-  "title": "Services — Sujee Design",
+  "title": "Services — identité, web, contenu et IA",
   "description": "Identité de marque, direction artistique, sites WordPress et Shopify, contenu, agents IA. Périmètre écrit, livraison documentée, sources à votre nom."
 };
 

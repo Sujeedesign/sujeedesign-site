@@ -6,7 +6,7 @@ import { routes } from "@/lib/routes";
 export function projectMeta(project: Project): { title: string; description: string } {
   const year = project.year && !project.name.includes(project.year) ? ` (${project.year})` : "";
   return {
-    title: `${project.name}${year} — ${project.disciplines.join(", ")}`,
+    title: `${project.name}${year} — ${project.disciplines[0] ?? ""}`.trim(),
     description: project.pitch,
   };
 }
