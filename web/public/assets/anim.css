@@ -60,17 +60,7 @@ html.js [data-stagger].is-in > *:nth-child(4){ transition-delay: .22s; }
 html.js [data-stagger].is-in > *:nth-child(5){ transition-delay: .28s; }
 html.js [data-stagger].is-in > *:nth-child(6){ transition-delay: .34s; }
 
-/* ---------- Images : volet qui découvre ---------- */
-html.js .img-rev{
-  clip-path: inset(0 0 101% 0);
-  transform: scale(1.05);
-  transition: clip-path 1.15s cubic-bezier(.19, 1, .22, 1), transform 1.3s cubic-bezier(.19, 1, .22, 1);
-  will-change: clip-path, transform;
-}
-html.js .img-rev.is-in{
-  clip-path: inset(0 0 0 0);
-  transform: none;
-}
+/* ---------- Images : aucun volet, elles s'affichent dès qu'elles sont là ---------- */
 
 /* ---------- Compteurs ---------- */
 html.js .count-up{ font-variant-numeric: tabular-nums; }
@@ -81,7 +71,6 @@ html.js [data-parallax]{ will-change: transform; }
 /* ---------- Allègements mobile ---------- */
 @media (max-width: 700px){
   html.js .rv{ filter: none; transform: translateY(18px); }
-  html.js .img-rev{ transform: none; }
 }
 
 /* ---------- Mouvement réduit : tout est déjà à sa place ---------- */
@@ -89,7 +78,6 @@ html.no-anim .aw .awi,
 html.no-anim .aw > span{ transform: none !important; transition: none !important; }
 html.no-anim .rv,
 html.no-anim [data-stagger] > *{ opacity: 1 !important; transform: none !important; filter: none !important; }
-html.no-anim .img-rev{ clip-path: none !important; transform: none !important; }
 
 /* Visuels réels des études de cas sur l'accueil (chargé en dernier).
    site.css et ds.css imposent des hauteurs en !important sur .case__visual
