@@ -93,6 +93,53 @@ const nextConfig: NextConfig = {
     ];
   },
   /**
+   * En-têtes HTTP.
+   *
+   * Les fichiers de `public/` sont servis par Next avec `Cache-Control: public,
+   * max-age=0` : chaque visite revalide images et feuilles de style. On pose un
+   * cache long ici.
+   *
+   * Attention aux CSS : leur nom ne contient pas de hash, donc un `max-age` long
+   * servirait une feuille périmée après déploiement. Deux garde-fous :
+   *   1. `layout.tsx` les charge avec `?v=<empreinte du contenu>` (lib/asset-version.ts),
+   *      qui change à chaque modification du fichier ;
+   *   2. `stale-while-revalidate` laisse le navigateur rafraîchir en tâche de fond.
+   * Les images de projets gardent leur nom d'origine : on reste à 30 jours, sans
+   * `immutable`, et un déploiement qui remplace un fichier est donc revalidé au
+   * plus tard au bout de la fenêtre de revalidation.
+   */
+  async headers() {
+    const longCache = "public, max-age=2592000, stale-while-revalidate=604800";
+    return [
+      // HSTS : six mois, sans `includeSubDomains` ni `preload` tant que tous les
+      // sous-domaines ne sont pas servis en https. Ignoré en http par les navigateurs.
+      {
+        source: "/:path*",
+        headers: [
+          { key: "Strict-Transport-Security", value: "max-age=15552000" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+        ],
+      },
+      // Images du site (projets, partages).
+      { source: "/assets/img/:path*", headers: [{ key: "Cache-Control", value: longCache }] },
+      // Photographies et portraits posés à la racine de /assets.
+      { source: "/assets/sujeepan_sabesan.jpg", headers: [{ key: "Cache-Control", value: longCache }] },
+      // Feuilles de style du v5, versionnées par query (voir layout.tsx).
+      { source: "/assets/site.css", headers: [{ key: "Cache-Control", value: longCache }] },
+      { source: "/assets/light.css", headers: [{ key: "Cache-Control", value: longCache }] },
+      { source: "/assets/ds.css", headers: [{ key: "Cache-Control", value: longCache }] },
+      { source: "/assets/anim.css", headers: [{ key: "Cache-Control", value: longCache }] },
+      // Scripts du v5, versionnés par query eux aussi (voir components/site/scripts.tsx).
+      { source: "/assets/gsap.min.js", headers: [{ key: "Cache-Control", value: longCache }] },
+      { source: "/assets/ScrollTrigger.min.js", headers: [{ key: "Cache-Control", value: longCache }] },
+      { source: "/assets/site.js", headers: [{ key: "Cache-Control", value: longCache }] },
+      { source: "/assets/anim.js", headers: [{ key: "Cache-Control", value: longCache }] },
+      { source: "/assets/rl.js", headers: [{ key: "Cache-Control", value: longCache }] },
+      // Polices : même politique, elles ne changent pas entre deux déploiements.
+      { source: "/assets/fonts/:path*", headers: [{ key: "Cache-Control", value: longCache }] },
+    ];
+  },
+  /**
    * Back office : le domaine public est servi par Next, l'administration tourne dans
    * son propre conteneur FastAPI. On relaie ici ce qui lui appartient pour qu'elle
    * reste accessible sur `sujeedesign.com/admin`, avec une seule origine, un seul
