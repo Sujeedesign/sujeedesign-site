@@ -14,7 +14,7 @@ const countWord = countWords[count] ?? String(count);
 const countTitle = countWord.charAt(0).toUpperCase() + countWord.slice(1);
 
 export const pageMeta = {
-  title: "Réalisations — Sujee Design",
+  title: "Réalisations — identité, web, packaging",
   description:
     "Les projets livrés par Sujee Design : identité, packaging, site, interface, édition, jeu web. Le détail de chaque système, du brief au résultat.",
 };
@@ -34,7 +34,7 @@ export function Realisations() {
             <p className="kick">Réalisations · 2013 — 2026</p>
             <h1 className="rl-hero__title">
               <span className="rl-line">
-                <span>{countTitle} projets,</span>
+                <span>{countTitle} projets,{" "}</span>
               </span>
               <span className="rl-line">
                 <span className="thin">{countWord} systèmes.</span>
