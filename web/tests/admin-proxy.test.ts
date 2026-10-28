@@ -61,4 +61,19 @@ describe("relais du back office", () => {
     expect(rules.has("/assets/:path*")).toBe(false);
     expect(rules.has("/assets/site.css")).toBe(false);
   });
+
+  /**
+   * Le back office ne doit jamais apparaître dans les résultats de recherche.
+   * robots.txt le bloque déjà, mais l'en-tête le garantit même si une page est
+   * atteinte par un lien direct, et il survit à la rewrite vers FastAPI.
+   */
+  it("marque le back office en noindex", async () => {
+    const rules = (await nextConfig.headers?.()) ?? [];
+    for (const source of ["/admin", "/admin/:path*"]) {
+      const rule = rules.find((r) => r.source === source);
+      expect(rule, source).toBeDefined();
+      const robots = rule?.headers.find((h) => h.key === "X-Robots-Tag");
+      expect(robots?.value, source).toContain("noindex");
+    }
+  });
 });

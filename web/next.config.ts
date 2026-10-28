@@ -129,6 +129,23 @@ const nextConfig: NextConfig = {
         source: "/((?!_next/|assets/|static-admin/|bo/|api/|admin|medias/|robots.txt|sitemap.xml|favicon).*)",
         headers: [{ key: "Cache-Control", value: "public, max-age=0, must-revalidate" }],
       },
+      // Back office : jamais indexé, même si robots.txt le bloque déjà. On couvre
+      // /admin et tout son sous-arbre, y compris les pages servies par la rewrite
+      // vers FastAPI, pour que l'en-tête survive au proxy.
+      {
+        source: "/admin",
+        headers: [
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+          { key: "Cache-Control", value: "no-store" },
+        ],
+      },
+      {
+        source: "/admin/:path*",
+        headers: [
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+          { key: "Cache-Control", value: "no-store" },
+        ],
+      },
       // Images du site (projets, partages).
       { source: "/assets/img/:path*", headers: [{ key: "Cache-Control", value: longCache }] },
       // Photographies et portraits posés à la racine de /assets.
