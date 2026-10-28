@@ -18,8 +18,43 @@
       });
     });
 
-    /* M2 : plus de blocs plein écran sur /realisations (cartes statiques),
-       les images ne sont jamais masquées puis révélées. */
+    /* M2 : empilement des projets. Chaque carte est sticky plein écran ; la
+       suivante pousse la précédente vers l'arrière (échelle + voile) selon sa
+       position réelle à l'écran. Pas de ScrollTrigger ici : sur un élément
+       sticky, les mesures de ScrollTrigger deviennent fausses une fois collé. */
+    const cards = Array.from(document.querySelectorAll('.rl-p'));
+    if (cards.length > 1) {
+      const DEPTH = 0.12;
+      let raf = 0;
+      const frame = () => {
+        raf = 0;
+        for (let i = 0; i < cards.length - 1; i++) {
+          const nextTop = cards[i + 1].getBoundingClientRect().top;
+          const p = Math.min(1, Math.max(0, 1 - nextTop / innerHeight));
+          const card = cards[i];
+          card.style.transform = p > 0.002 ? `scale(${(1 - DEPTH * p).toFixed(4)})` : '';
+          card.style.setProperty('--stack-dim', (p * 0.6).toFixed(3));
+        }
+      };
+      const onScroll = () => {
+        if (!raf) raf = requestAnimationFrame(frame);
+      };
+      addEventListener('scroll', onScroll, { passive: true });
+      addEventListener('resize', onScroll);
+      frame();
+    }
+
+    /* Sommaire : saut doux vers le projet visé, sans casser l'ancrage. */
+    document.querySelectorAll('[data-rl-jump]').forEach((a) => {
+      a.addEventListener('click', (e) => {
+        const id = a.getAttribute('href');
+        const target = id && document.querySelector(id);
+        if (!target) return;
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.replaceState(null, '', id);
+      });
+    });
 
     /* M3 : les cartes de prestations sont révélées en CSS par anim.js
        (.rv + [data-stagger].is-in). On ne double PLUS l'animation en GSAP :

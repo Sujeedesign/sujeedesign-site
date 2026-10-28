@@ -1285,10 +1285,14 @@ body.has-dark-hero .nav.nav--open .brand__logo--light{display:none!important}
 .rl-row__a{font-size:13px;color:var(--accent);text-align:right;transition:transform .3s}
 .rl-row:hover .rl-row__a{transform:translate(3px,-3px)}
 
-/* film */
-.rl-film{position:relative}
-.rl-p{position:relative;height:145svh;z-index:1}
-.rl-p__media{position:sticky;top:0;height:100svh;overflow:hidden;display:flex;align-items:center;justify-content:center}
+/* film empilé : chaque projet prend l'écran, le suivant glisse par-dessus */
+.rl-film{position:relative;background:var(--bg)}
+.rl-p{position:sticky;top:0;height:100dvh;overflow:hidden;transform-origin:50% 0;
+  border-top:1px solid rgba(10,10,11,.14);box-shadow:0 -1px 0 rgba(0,0,0,.25),0 -54px 110px -30px rgba(0,0,0,.55)}
+/* temps de repos : chaque projet reste plein écran avant que le suivant monte */
+.rl-p + .rl-p{margin-top:60svh}
+.rl-p--dark{border-top-color:rgba(244,241,234,.16);box-shadow:0 -1px 0 rgba(0,0,0,.45),0 -54px 110px -30px rgba(0,0,0,.85)}
+.rl-p__media{position:absolute;inset:0;overflow:hidden;display:flex;align-items:center;justify-content:center}
 .rl-p--paper .rl-p__media{background:var(--bg)}
 .rl-p--tint .rl-p__media{background:var(--bg-2)}
 .rl-p--dark .rl-p__media{background:#0C0B0A}
@@ -1314,6 +1318,12 @@ body.has-dark-hero .nav.nav--open .brand__logo--light{display:none!important}
 .rl-p__desc{margin:0 0 clamp(14px,1.8vw,20px);font-size:clamp(14px,1.05vw,16px);line-height:1.6;max-width:46ch;opacity:.82}
 .rl-p__tags{display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:0 0 clamp(14px,1.8vw,20px);padding:0}
 .rl-p__tags li{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;padding:5px 9px;border:1px solid currentColor;opacity:.55}
+.rl-p__count{position:absolute;z-index:5;top:calc(58px + clamp(12px,2.4vh,24px));right:var(--pad);
+  font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:#fff;mix-blend-mode:difference;opacity:.75}
+/* voile d'empilement : la carte précédente recule quand la suivante arrive */
+.rl-p::after{content:"";position:absolute;inset:0;z-index:4;background:#0A0A0B;
+  opacity:var(--stack-dim,0);pointer-events:none}
 .rl-p__link{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;
   text-transform:uppercase;color:var(--accent);text-decoration:none;border-bottom:1px solid currentColor;padding-bottom:3px}
 .rl-p__link span{transition:transform .3s}
@@ -1342,16 +1352,14 @@ body.has-dark-hero .nav.nav--open .brand__logo--light{display:none!important}
   .rl-hero__foot{grid-template-columns:1fr;gap:20px}
   .rl-row{grid-template-columns:34px minmax(0,1fr) 44px;gap:12px}
   .rl-row__tags{display:none}
-  .rl-p{height:auto}
-  .rl-p__media{position:relative;height:auto;padding:clamp(30px,6vw,48px) 0 clamp(26px,5vw,40px);display:block}
-  .rl-p__media::after{display:none}
-  .rl-scene{position:relative;inset:auto;height:clamp(200px,44vw,300px)}
   .rl-scene__word{font-size:clamp(64px,22vw,140px)}
   .art{height:100%;width:100%}
   .art>*{transform:scale(1.05)}
-  .rl-p__info,.rl-p:nth-child(even) .rl-p__info{position:relative;left:auto;right:auto;bottom:auto;max-width:none;
-    padding:0 var(--pad)}
-  .rl-p__info h2{font-size:clamp(34px,10vw,52px)}
+  .rl-p__info,.rl-p:nth-child(even) .rl-p__info{left:var(--pad);right:var(--pad);bottom:clamp(22px,5vh,40px);max-width:none}
+  .rl-p__info h2{font-size:clamp(30px,8.6vw,46px)}
+  .rl-p__desc{font-size:14px;margin-bottom:clamp(10px,2vw,14px)}
+  .rl-p__tags{display:none}
+  .rl-p__count{top:calc(58px + clamp(8px,2vh,16px));right:var(--pad)}
 }
 
 .art>*{transform:scale(1.7)}
@@ -1436,9 +1444,8 @@ body.has-dark-hero .nav.nav--open .brand__logo--light{display:none!important}
 .rl-p--dark .rl-p__img,.rl-p--ink .rl-p__img{opacity:.86}
 
 
-/* Film des réalisations : huit projets au lieu de six, on resserre le
-   défilement pour que la page reste parcourable (145svh -> 112svh). */
-@media (min-width:701px){ .rl-p{height:112svh} }
+/* Film des réalisations : chaque section tient l'écran, l'empilement se fait
+   en sticky (plus de 112svh de défilement mort par projet). */
 
 /* ---------- Cartes de réalisations ----------
    Même grammaire que les cartes projet de l'accueil : index + discipline en
