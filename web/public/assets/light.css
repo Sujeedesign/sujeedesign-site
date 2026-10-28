@@ -1300,6 +1300,10 @@ body.has-dark-hero .nav.nav--open .brand__logo--light{display:none!important}
 .rl-p__media::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2}
 .rl-p--paper .rl-p__media::after,.rl-p--tint .rl-p__media::after{background:linear-gradient(to top,rgba(247,247,245,.80) 0%,rgba(247,247,245,.34) 11%,rgba(247,247,245,.08) 24%,rgba(247,247,245,0) 36%)}
 .rl-p--dark .rl-p__media::after,.rl-p--ink .rl-p__media::after{background:linear-gradient(to top,rgba(10,10,11,.82) 0%,rgba(10,10,11,.38) 12%,rgba(10,10,11,.1) 26%,rgba(10,10,11,0) 40%)}
+/* halo local derriere le texte (coin bas gauche) : le visuel reste clair, le texte reste lisible */
+.rl-p__media::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:2}
+.rl-p--paper .rl-p__media::before,.rl-p--tint .rl-p__media::before{background:radial-gradient(ellipse 64% 74% at 0% 100%,rgba(247,247,245,.92) 0%,rgba(247,247,245,.64) 34%,rgba(247,247,245,.24) 60%,rgba(247,247,245,0) 80%)}
+.rl-p--dark .rl-p__media::before,.rl-p--ink .rl-p__media::before{background:radial-gradient(ellipse 64% 74% at 0% 100%,rgba(10,10,11,.94) 0%,rgba(10,10,11,.68) 34%,rgba(10,10,11,.28) 60%,rgba(10,10,11,0) 80%)}
 .rl-scene{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;will-change:transform}
 .rl-scene__word{position:absolute;font-family:var(--display);font-weight:700;letter-spacing:-.05em;
   font-size:clamp(90px,19vw,290px);line-height:.8;white-space:nowrap;pointer-events:none;user-select:none}
