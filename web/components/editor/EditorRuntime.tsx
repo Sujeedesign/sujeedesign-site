@@ -31,6 +31,13 @@ type Section = {
 
 const EDIT_COOKIE = "sjd_edit";
 const MULTILINE_TYPES = new Set(["long", "lines", "tags", "list"]);
+const PAGE_SLUGS = new Set(["services", "realisations", "a-propos", "agents-ia"]);
+
+/** Page éditée d'après l'URL : seules les pages du modèle sont reconnues. */
+function currentSlug(): string {
+  const first = window.location.pathname.replace(/^\/+|\/+$/g, "").split("/")[0] ?? "";
+  return PAGE_SLUGS.has(first) ? first : "home";
+}
 
 function hasEditCookie(): boolean {
   return document.cookie.split("; ").some((c) => c.startsWith(`${EDIT_COOKIE}=1`));
@@ -155,17 +162,48 @@ export default function EditorRuntime() {
   const [publishing, setPublishing] = useState(false);
   const editingRef = useRef<HTMLElement | null>(null);
   const originalRef = useRef<string>("");
+  const slugRef = useRef<string>("home");
 
   const flash = useCallback((text: string, err = false) => {
     setToast({ text, err });
     window.setTimeout(() => setToast(null), 2600);
   }, []);
 
+  // Le HTML servi par la vitrine est figé au build : sans ce report, une valeur
+  // enregistrée resterait invisible jusqu'à la publication. On applique donc le
+  // document enregistré sur les champs dès l'activation (aperçu du brouillon).
+  const applyValues = (data: Session) => {
+    for (const field of flatten(data.sections ?? []).values()) {
+      const raw = field.value;
+      if (raw === null || raw === undefined) continue;
+      const text = Array.isArray(raw) ? raw.join("\n") : String(raw);
+      const multiline = MULTILINE_TYPES.has(field.type ?? "");
+      document.querySelectorAll<HTMLElement>(`[data-field="${field.path}"]`).forEach((el) => {
+        if (el.isContentEditable) return;
+        if (el.tagName === "UL" || el.tagName === "OL") {
+          el.innerHTML = "";
+          text.split("\n").map((v) => v.trim()).filter(Boolean).forEach((v) => {
+            const li = document.createElement("li");
+            li.textContent = v;
+            el.appendChild(li);
+          });
+          return;
+        }
+        if (multiline) {
+          setLines(el, text);
+          return;
+        }
+        el.textContent = text;
+      });
+    }
+  };
+
   // Activation : seulement si le repère de session est présent.
   useEffect(() => {
     if (!hasEditCookie()) return;
     let cancelled = false;
-    fetch("/api/editor/session", { credentials: "same-origin", headers: { accept: "application/json" } })
+    slugRef.current = currentSlug();
+    fetch(`/api/editor/session?page=${encodeURIComponent(slugRef.current)}`, { credentials: "same-origin", headers: { accept: "application/json" } })
       .then((r) => (r.ok ? r.json() : null))
       .then((data: Session | null) => {
         if (cancelled || !data?.ok) return;
@@ -173,6 +211,7 @@ export default function EditorRuntime() {
         sessionRef.current = withSchema;
         setSession(withSchema);
         document.body.classList.add("sjd-editing");
+        applyValues(withSchema);
       })
       .catch(() => undefined);
     return () => {
@@ -193,7 +232,7 @@ export default function EditorRuntime() {
           method: "POST",
           credentials: "same-origin",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ path, value, csrf }),
+          body: JSON.stringify({ path, value, csrf, slug: slugRef.current }),
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok || !data.ok) return { ok: false, error: data.error ?? "Enregistrement refusé" };
@@ -379,7 +418,7 @@ export default function EditorRuntime() {
         method: "POST",
         credentials: "same-origin",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ csrf: sessionRef.current.csrf }),
+        body: JSON.stringify({ csrf: sessionRef.current.csrf, slug: slugRef.current }),
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.ok) {

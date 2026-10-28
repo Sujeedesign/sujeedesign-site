@@ -42,9 +42,40 @@ ALLOWED_TYPES = {
 }
 STATUTS = ("nouveau", "en cours", "traite")
 CONTENT_SLUG = "home"
+
+# Pages éditables. Les présentations projet ne sont pas ici : elles restent
+# gérées par l'admin projet, pas par l'éditeur de texte.
+PAGES: tuple[tuple[str, str, str], ...] = (
+    ("home", "Accueil", "/"),
+    ("services", "Services", "/services"),
+    ("realisations", "Réalisations", "/realisations"),
+    ("a-propos", "À propos", "/a-propos"),
+    ("agents-ia", "Agents IA", "/agents-ia"),
+)
+PAGE_LABELS = {slug: label for slug, label, _ in PAGES}
+PAGE_PATHS = {slug: path for slug, _, path in PAGES}
+
+
+def content_page(page: str | None) -> str:
+    """Slug de page demandé, ramené sur une page connue (défaut : accueil)."""
+    candidate = (page or "").strip()
+    return candidate if candidate in PAGE_LABELS else CONTENT_SLUG
+
+
+def revision_type(slug: str) -> str:
+    return "content" if slug == CONTENT_SLUG else f"content:{slug}"
+
+
+def revision_slug(entity_type: str) -> str:
+    if entity_type.startswith("content:"):
+        slug = entity_type.split(":", 1)[1]
+        return slug if slug in PAGE_LABELS else CONTENT_SLUG
+    return CONTENT_SLUG
+
+
 NAV = (
     ("tableau_de_bord", "Tableau de bord", "/admin"),
-    ("contenu", "Contenu du site", "/admin/contenu"),
+    ("pages", "Pages du site", "/admin/pages"),
     ("messages", "Messages", "/admin/messages"),
     ("medias", "Médias", "/admin/medias"),
     ("apercu", "Aperçu", "/admin/apercu"),
@@ -226,23 +257,58 @@ def tableau_de_bord(request: Request, user: str = Depends(require_admin)) -> Res
     )
 
 
-# ------------------------------------------------------------------- contenu
+# --------------------------------------------------------------------- pages
+
+
+@router.get("/admin/pages", response_class=HTMLResponse)
+def pages(request: Request, user: str = Depends(require_admin)) -> Response:
+    """Liste des pages éditables, façon CRM : une carte par page."""
+    conn = get_conn(request)
+    try:
+        rows = []
+        for slug, label, path in PAGES:
+            doc = content_store.load_doc(conn, slug)
+            rows.append(
+                {
+                    "slug": slug,
+                    "label": label,
+                    "path": path,
+                    "updated_at": doc["updated_at"],
+                    "custom": doc["custom"],
+                    "field_count": len(content_model.fields_for(slug)),
+                }
+            )
+        publication = content_store.last_publication(conn)
+    finally:
+        conn.close()
+    return render(
+        request,
+        "pages.html",
+        pages=rows,
+        publication=publication,
+        publish_ready=content_store.publish_ready(),
+    )
 
 
 @router.get("/admin/contenu", response_class=HTMLResponse)
-def contenu(request: Request, user: str = Depends(require_admin)) -> Response:
+def contenu(request: Request, page: str = "", user: str = Depends(require_admin)) -> Response:
+    """Édition par formulaire d'une page : le secours de l'édition en place."""
+    slug = content_page(page)
     conn = get_conn(request)
     try:
-        doc = content_store.load_doc(conn, CONTENT_SLUG)
+        doc = content_store.load_doc(conn, slug)
         publication = content_store.last_publication(conn)
-        revisions = repo.list_revisions(conn, limit=8)
+        revisions = repo.list_revisions(conn, entity_type=revision_type(slug), limit=8)
     finally:
         conn.close()
-    sections = content_model.form_sections(CONTENT_SLUG, doc["data"])
+    sections = content_model.form_sections(slug, doc["data"])
     return render(
         request,
         "contenu.html",
         doc=doc,
+        slug=slug,
+        page_label=PAGE_LABELS[slug],
+        page_path=PAGE_PATHS[slug],
         sections=sections,
         publication=publication,
         revisions=revisions,
@@ -255,37 +321,42 @@ def contenu(request: Request, user: str = Depends(require_admin)) -> Response:
 async def contenu_save(request: Request, user: str = Depends(require_admin)) -> Response:
     form = await request.form()
     check_csrf(request, str(form.get("csrf") or ""))
+    slug = content_page(str(form.get("page") or ""))
+    back_to = "/admin/contenu?page=" + slug
     publish = str(form.get("action") or "save") == "publier"
     conn = get_conn(request)
     try:
-        current = content_store.load_doc(conn, CONTENT_SLUG)
+        current = content_store.load_doc(conn, slug)
         try:
-            doc = content_model.from_form(CONTENT_SLUG, form, current["data"])
+            doc = content_model.from_form(slug, form, current["data"])
         except content_model.ContentError as exc:
             # On réaffiche la saisie refusée pour ne pas la perdre, sans l'enregistrer.
             try:
-                draft = content_model.from_form(CONTENT_SLUG, form, current["data"], validate_doc=False)
+                draft = content_model.from_form(slug, form, current["data"], validate_doc=False)
             except content_model.ContentError:
                 draft = current["data"]
-            sections = content_model.form_sections(CONTENT_SLUG, draft)
+            sections = content_model.form_sections(slug, draft)
             publication = content_store.last_publication(conn)
-            revisions = repo.list_revisions(conn, limit=8)
+            revisions = repo.list_revisions(conn, entity_type=revision_type(slug), limit=8)
             return render(
                 request,
                 "contenu.html",
                 doc=current,
+                slug=slug,
+                page_label=PAGE_LABELS[slug],
+                page_path=PAGE_PATHS[slug],
                 sections=sections,
                 publication=publication,
                 revisions=revisions,
                 publish_ready=content_store.publish_ready(),
                 error=f"Contenu refusé, rien n'a été enregistré : {exc}",
             )
-        repo.save_revision(conn, "content", 0, current["data"], "avant enregistrement", user)
-        content_store.save_doc(conn, CONTENT_SLUG, doc, author=user)
+        repo.save_revision(conn, revision_type(slug), 0, current["data"], "avant enregistrement", user)
+        content_store.save_doc(conn, slug, doc, author=user)
     finally:
         conn.close()
     if not publish:
-        return back("/admin/contenu", "Contenu enregistré. La vitrine sera mise à jour à la prochaine publication.")
+        return back(back_to, f"{PAGE_LABELS[slug]} enregistré. La vitrine sera mise à jour à la prochaine publication.")
     conn = get_conn(request)
     try:
         result = content_store.request_publish(conn, CONTENT_SLUG)
@@ -293,11 +364,11 @@ async def contenu_save(request: Request, user: str = Depends(require_admin)) -> 
         conn.close()
     if not result.get("ok"):
         return back(
-            "/admin/contenu",
+            back_to,
             "Contenu enregistré, mais la publication a échoué : " + str(result.get("error", "")),
             "error",
         )
-    return back("/admin/contenu", "Contenu enregistré, publication lancée.")
+    return back(back_to, "Contenu enregistré, publication lancée.")
 
 
 @router.post("/admin/contenu/publier")
@@ -309,8 +380,8 @@ def contenu_publier(request: Request, csrf: str = Form("")) -> Response:
     finally:
         conn.close()
     if not result.get("ok"):
-        return back("/admin/contenu", "Publication impossible : " + str(result.get("error", "")), "error")
-    return back("/admin/contenu", "Publication lancée. La vitrine redéploie dans une minute environ.")
+        return back("/admin/pages", "Publication impossible : " + str(result.get("error", "")), "error")
+    return back("/admin/pages", "Publication lancée. La vitrine redéploie dans une minute environ.")
 
 
 @router.post("/admin/contenu/restaurer/{revision_id}")
@@ -319,17 +390,21 @@ def contenu_restaurer(request: Request, revision_id: int, csrf: str = Form("")) 
     conn = get_conn(request)
     try:
         row = conn.execute(
-            "SELECT * FROM revisions WHERE id = ? AND entity_type = 'content'", (revision_id,)
+            "SELECT * FROM revisions WHERE id = ? AND entity_type LIKE 'content%'", (revision_id,)
         ).fetchone()
         if row is None:
             raise HTTPException(status_code=404, detail="révision introuvable")
+        slug = revision_slug(str(row["entity_type"]))
         snapshot = repo.revision_snapshot(row)
-        current = content_store.load_doc(conn, CONTENT_SLUG)
-        repo.save_revision(conn, "content", 0, current["data"], "avant restauration", "admin")
-        content_store.save_doc(conn, CONTENT_SLUG, snapshot, author="admin")
+        current = content_store.load_doc(conn, slug)
+        repo.save_revision(conn, revision_type(slug), 0, current["data"], "avant restauration", "admin")
+        content_store.save_doc(conn, slug, snapshot, author="admin")
     finally:
         conn.close()
-    return back("/admin/contenu", "Version restaurée. Publie pour l'envoyer sur la vitrine.")
+    return back(
+        "/admin/contenu?page=" + slug,
+        "Version restaurée. Publie pour l'envoyer sur la vitrine.",
+    )
 
 
 # ------------------------------------------------------------------ messages

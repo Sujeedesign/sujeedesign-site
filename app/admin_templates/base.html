@@ -17,15 +17,15 @@
       </a>
       <nav class="nav">
         {% for key, label, href in nav %}
-          {% set is_active = (active == href) or (href != '/admin' and active.startswith(href)) %}
+          {% set is_active = (active == href) or (href != '/admin' and active.startswith(href)) or (key == 'pages' and active.startswith('/admin/contenu')) %}
           <a class="nav-link{% if is_active %} is-active{% endif %}" href="{{ href }}">
             <span class="ln"></span>{{ label }}
           </a>
         {% endfor %}
       </nav>
       <div class="side-foot">
-        <a class="site-link site-link--edit" href="{{ public_url }}">
-          Éditer la page d’accueil <span aria-hidden="true">→</span>
+        <a class="site-link site-link--edit" href="{{ (page_path or '/') if slug is defined else public_url }}"{% if slug is defined %} target="_blank" rel="noopener"{% endif %}>
+          Éditer {{ ('« ' ~ page_label ~ ' »') if slug is defined and slug != 'home' else 'la page d’accueil' }} en place <span aria-hidden="true">→</span>
         </a>
         <a class="site-link" href="{{ public_url }}" target="_blank" rel="noopener">
           Voir le site public <span aria-hidden="true">↗</span>

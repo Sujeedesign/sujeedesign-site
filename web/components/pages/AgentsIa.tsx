@@ -1,4 +1,8 @@
 /** Portage du v5 : agents-ia.html. Balisage d'origine, liens en urls propres. */
+import { pageHero, line } from "@/content/pages";
+
+const hero = pageHero("agents-ia");
+
 export const pageMeta = {
   "title": "Agents IA & automatisation — Sujee Design",
   "description": "Agents IA auto-hébergés pour PME et indépendants : veille, devis, contenu, support. Connectés à vos outils par MCP, modèles locaux, accès contrôlés."
@@ -12,11 +16,11 @@ export function AgentsIa() {
         <header className="ia-hero">
           <div className="ia-hero__mesh" aria-hidden="true" />
           <div className="wrap">
-            <p className="kick ia-kick"><span className="live-dot" aria-hidden="true" />Service · Agents IA</p>
+            <p className="kick ia-kick"><span className="live-dot" aria-hidden="true" /><span data-field="hero.kicker">{hero.kicker}</span></p>
             <div className="ia-hero__grid">
               <div className="ia-hero__left">
-                <h1 className="ia-hero__title">Un agent qui <br className="br-d" />fait le travail. <br className="br-d" /><em>Pas une démo.</em></h1>
-                <p className="ia-hero__lead">Vous avez testé ChatGPT, trouvé ça impressionnant, et rien n'a changé dans votre semaine. Normal : un modèle seul ne connaît ni vos clients, ni vos fichiers, ni vos règles. Un agent, si.</p>
+                <h1 className="ia-hero__title"><span data-field="hero.title.0">{line(hero.title, 0, "Un agent qui fait le travail.")}</span> <br className="br-d" /><em data-field="hero.title.1">{line(hero.title, 1, "Pas une démo.")}</em></h1>
+                <p className="ia-hero__lead" data-field="hero.lead">{hero.lead}</p>
                 <div className="ia-hero__cta">
                   <a className="btn-fill" href="mailto:s.sujeepan.pro@gmail.com?subject=Agent%20IA">Décrire ma tâche <span aria-hidden="true">↗</span></a>
                   <a className="btn-line" href="#process">Voir la méthode</a>

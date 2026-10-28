@@ -10,6 +10,7 @@ formulaires du back office. Aucun accès anonyme, aucune écriture sans CSRF.
 
 from __future__ import annotations
 
+import copy
 import sqlite3
 from typing import Any
 
@@ -27,22 +28,30 @@ router = APIRouter(prefix="/api/editor", tags=["editor"])
 SLUG = "home"
 
 
+def _slug(value: str | None) -> str:
+    """Slug demandé, ramené sur une page du modèle (défaut : accueil)."""
+    candidate = (value or "").strip()
+    return candidate if candidate in model.SCHEMAS else SLUG
+
+
 class FieldPayload(BaseModel):
     path: str
     value: str = ""
     csrf: str = ""
+    slug: str = SLUG
 
 
 class PublishPayload(BaseModel):
     csrf: str = ""
+    slug: str = SLUG
 
 
-def _fields() -> dict[str, dict[str, Any]]:
-    return {field["path"]: field for field in model.fields_for(SLUG)}
+def _fields(slug: str) -> dict[str, dict[str, Any]]:
+    return {field["path"]: field for field in model.fields_for(slug)}
 
 
-def _doc(conn: sqlite3.Connection) -> dict[str, Any]:
-    return content_store.load_doc(conn, SLUG)
+def _doc(conn: sqlite3.Connection, slug: str) -> dict[str, Any]:
+    return content_store.load_doc(conn, slug)
 
 
 def _medias(conn: sqlite3.Connection) -> list[dict[str, Any]]:
@@ -65,14 +74,15 @@ def _medias(conn: sqlite3.Connection) -> list[dict[str, Any]]:
 
 
 @router.get("/session")
-def session(request: Request) -> JSONResponse:
+def session(request: Request, page: str | None = None) -> JSONResponse:
     """État de la session d'édition, document courant et schéma des champs."""
     user = current_user(request)
     if user is None:
         return JSONResponse({"ok": False, "reason": "anon"}, status_code=401)
+    slug = _slug(page)
     conn = get_conn(request)
     try:
-        doc = _doc(conn)
+        doc = _doc(conn, slug)
         medias = _medias(conn)
     finally:
         conn.close()
@@ -80,10 +90,11 @@ def session(request: Request) -> JSONResponse:
         {
             "ok": True,
             "user": user,
+            "slug": slug,
             "csrf": csrf_token(),
             "doc": doc["data"],
             "updated_at": doc["updated_at"],
-            "sections": model.form_sections(SLUG, doc["data"]),
+            "sections": model.form_sections(slug, doc["data"]),
             "medias": medias,
             "publish_ready": content_store.publish_ready(),
         }
@@ -93,33 +104,45 @@ def session(request: Request) -> JSONResponse:
 @router.post("/champ")
 def champ(request: Request, payload: FieldPayload, user: str = Depends(require_admin)) -> JSONResponse:
     check_csrf(request, payload.csrf)
-    fields = _fields()
+    slug = _slug(payload.slug)
+    fields = _fields(slug)
     field = fields.get(payload.path)
     if field is None:
         raise HTTPException(status_code=404, detail="champ inconnu")
 
     conn = get_conn(request)
     try:
-        current = _doc(conn)
+        current = _doc(conn, slug)
+        previous = copy.deepcopy(current["data"])
         doc = current["data"]
         value = model._to_value(field, payload.value)
         model.set_path(doc, field["path"], value)
         try:
-            model.validate(SLUG, doc)
+            model.validate(slug, doc)
         except model.ContentError as exc:
             return JSONResponse({"ok": False, "error": str(exc)}, status_code=422)
-        content_store.save_doc(conn, SLUG, doc, author=f"editeur:{user}")
+        if doc != previous:
+            repo.save_revision(
+                conn,
+                "content" if slug == SLUG else f"content:{slug}",
+                0,
+                previous,
+                f"avant édition en place ({field['path']})",
+                f"editeur:{user}",
+            )
+        content_store.save_doc(conn, slug, doc, author=f"editeur:{user}")
     finally:
         conn.close()
-    return JSONResponse({"ok": True, "path": field["path"], "doc": doc})
+    return JSONResponse({"ok": True, "slug": slug, "path": field["path"], "doc": doc})
 
 
 @router.post("/publier")
 def publier(request: Request, payload: PublishPayload, user: str = Depends(require_admin)) -> JSONResponse:
     check_csrf(request, payload.csrf)
+    slug = _slug(payload.slug)
     conn = get_conn(request)
     try:
-        result = content_store.request_publish(conn, SLUG)
+        result = content_store.request_publish(conn, slug)
     finally:
         conn.close()
     status = 200 if result.get("ok") else 502

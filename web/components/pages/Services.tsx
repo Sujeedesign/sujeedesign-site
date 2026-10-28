@@ -1,4 +1,8 @@
 /** Portage du v5 : services.html. Balisage d'origine, liens en urls propres. */
+import { pageHero, line } from "@/content/pages";
+
+const hero = pageHero("services");
+
 export const pageMeta = {
   "title": "Services — identité, web, contenu et IA",
   "description": "Identité de marque, direction artistique, sites WordPress et Shopify, contenu, agents IA. Périmètre écrit, livraison documentée, sources à votre nom."
@@ -10,11 +14,11 @@ export function Services() {
 <div>
         <header className="sv-hero">
           <div className="wrap">
-            <p className="kick ia-kick"><span className="live-dot" aria-hidden="true" />Services · Périmètre écrit</p>
+            <p className="kick ia-kick"><span className="live-dot" aria-hidden="true" /><span data-field="hero.kicker">{hero.kicker}</span></p>
             <div className="sv-hero__grid">
               <div>
-                <h1 className="sv-hero__title">Cinq métiers,<br /><span className="hl">un seul interlocuteur.</span></h1>
-                <p className="sv-hero__lead">Le périmètre est écrit avant de commencer. Les allers-retours sont inclus, et vous repartez avec les sources et les accès à votre nom.</p>
+                <h1 className="sv-hero__title"><span data-field="hero.title.0">{line(hero.title, 0, "Cinq métiers,")}</span><br /><span className="hl" data-field="hero.title.1">{line(hero.title, 1, "un seul interlocuteur.")}</span></h1>
+                <p className="sv-hero__lead" data-field="hero.lead">{hero.lead}</p>
                 <p className="sunburst__label">Les cinq métiers</p>
                 <div className="sunburst" aria-hidden="true">
                   <div className="sunburst__item"><b>01</b><span>Identité</span></div>

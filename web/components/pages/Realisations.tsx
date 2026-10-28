@@ -8,7 +8,10 @@
  * sur sa fiche et dans le plan du site.
  */
 import { projects } from "@/content/projects";
+import { pageHero } from "@/content/pages";
 import { realisationPath } from "@/lib/routes";
+
+const hero = pageHero("realisations");
 
 const count = projects.length;
 const firstYear = 2013;
@@ -33,7 +36,7 @@ export function Realisations() {
     <div>
       <header className="rl-hero">
         <div className="wrap">
-          <p className="kick">Réalisations · 2013 — 2026</p>
+          <p className="kick" data-field="hero.kicker">{hero.kicker}</p>
           <h1 className="rl-hero__title">
             <span className="rl-line">
               <span>{countTitle} projets,</span>
@@ -44,8 +47,8 @@ export function Realisations() {
           </h1>
           <div className="rl-hero__foot">
             <p className="rl-hero__lead">
-              Identité, packaging, site, interface, édition, jeu web. Tout est livré, en ligne ou en rayon.{" "}
-              <b>Rien n’est une maquette de concours.</b>
+              <span data-field="hero.lead">{hero.lead}</span>{" "}
+              <b data-field="hero.lead2">{hero.lead2}</b>
             </p>
             <div className="rl-hero__nums">
               <div>

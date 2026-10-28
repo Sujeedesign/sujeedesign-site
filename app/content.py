@@ -40,7 +40,7 @@ def load_doc(conn: sqlite3.Connection, slug: str) -> dict[str, Any]:
     Les défauts viennent du fichier de contenu du front, donc un champ ajouté
     côté Next apparaît ici sans migration de base.
     """
-    base = model.load_defaults() if slug == "home" else {}
+    base = model.defaults_for(slug)
     current = stored_doc(conn, slug)
     if current is None:
         return {"slug": slug, "data": base, "updated_at": None, "custom": False}

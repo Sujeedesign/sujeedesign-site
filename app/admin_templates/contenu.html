@@ -1,12 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Contenu du site{% endblock %}
-{% block heading %}Contenu du site{% endblock %}
+{% block title %}{{ page_label }}{% endblock %}
+{% block heading %}{{ page_label }}{% endblock %}
 {% block error %}
   {% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
 {% endblock %}
 {% block content %}
+  <p class="muted small"><a class="link" href="/admin/pages">← Pages du site</a></p>
+
   <form method="post" action="/admin/contenu" class="content-form" data-dirty-guard>
     <input type="hidden" name="csrf" value="{{ csrf }}">
+    <input type="hidden" name="page" value="{{ slug }}">
 
     <div class="toolbar card">
       <div class="toolbar-info">
@@ -20,6 +23,7 @@
         </span>
       </div>
       <div class="toolbar-actions">
+        <a class="btn btn-line" href="{{ page_path }}" target="_blank" rel="noopener">Éditer en place</a>
         <button class="btn btn-ghost" type="submit" name="action" value="save">Enregistrer</button>
         <button class="btn btn-accent" type="submit" name="action" value="publier"{% if not publish_ready %} disabled title="Publication non configurée"{% endif %}>Enregistrer et publier</button>
       </div>

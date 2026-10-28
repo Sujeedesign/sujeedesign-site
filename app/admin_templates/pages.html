@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Pages du site{% endblock %}
+{% block heading %}Pages du site{% endblock %}
+{% block content %}
+  <div class="toolbar card">
+    <div class="toolbar-info">
+      <strong>{{ pages | length }} pages éditables</strong>
+      <span class="muted small">
+        {% if publication %}
+          Dernière publication : {{ publication.status }} ({{ publication.created_at | ago }})
+        {% else %}
+          Aucune publication depuis ce back office
+        {% endif %}
+      </span>
+    </div>
+    <div class="toolbar-actions">
+      <a class="btn btn-ghost" href="{{ public_url }}" target="_blank" rel="noopener">Voir le site</a>
+      <form method="post" action="/admin/contenu/publier">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <button class="btn btn-accent" type="submit"{% if not publish_ready %} disabled title="Publication non configurée"{% endif %}>Publier les modifications</button>
+      </form>
+    </div>
+  </div>
+
+  {% if not publish_ready %}
+    <p class="warn small">Publication Coolify non configurée sur ce serveur : l'enregistrement fonctionne, la mise en ligne de la vitrine non.</p>
+  {% endif %}
+
+  <p class="note small">
+    <span class="note-k">Comment ça marche</span>
+    « Éditer en place » ouvre la vraie page, connecté : clique un texte, corrige, c'est enregistré.
+    Le formulaire reste là comme secours. Les présentations projet ne sont pas listées ici : elles restent
+    gérées côté admin projet et ne passent jamais par l'édition en place.
+  </p>
+
+  <div class="grid grid-2">
+    {% for p in pages %}
+      <section class="card">
+        <header class="card-head">
+          <h2>{{ p.label }}</h2>
+          <p class="muted small">{{ p.path }}</p>
+        </header>
+        <div class="toolbar-info">
+          <span class="chip">{{ p.field_count }} champs</span>
+          {% if p.custom %}
+            <span class="badge badge-en-cours">modifiée</span>
+          {% else %}
+            <span class="badge badge-traite">référence</span>
+          {% endif %}
+          <span class="muted small">
+            {% if p.updated_at %}enregistrée {{ p.updated_at | ago }}{% else %}jamais modifiée{% endif %}
+          </span>
+        </div>
+        <div class="toolbar-actions">
+          <a class="btn btn-ghost btn-sm" href="/admin/contenu?page={{ p.slug }}">Formulaire</a>
+          <a class="btn btn-accent btn-sm" href="{{ p.path }}" target="_blank" rel="noopener">Éditer en place</a>
+        </div>
+      </section>
+    {% endfor %}
+  </div>
+{% endblock %}

@@ -1,4 +1,8 @@
 /** Portage du v5 : a-propos.html. Balisage d'origine, liens en urls propres. */
+import { pageHero, line } from "@/content/pages";
+
+const hero = pageHero("a-propos");
+
 export const pageMeta = {
   "title": "À propos — Sujeepan Sabesan, designer",
   "description": "Sujeepan Sabesan, designer indépendant entre Cergy et Paris depuis 2013 : direction artistique, photo et vidéo, UX/UI, IA générative, web et formation."
@@ -11,14 +15,14 @@ export function APropos() {
         {/* HERO */}
         <header className="ab-hero">
           <div className="wrap">
-            <p className="kick">À propos · Sujeepan Sabesan</p>
+            <p className="kick" data-field="hero.kicker">{hero.kicker}</p>
             <div className="ab-hero__grid">
-              <h1 className="ab-hero__title">Je dessine,<br />je cadre,<br /><em>j'enseigne.</em></h1>
+              <h1 className="ab-hero__title"><span data-field="hero.title.0">{line(hero.title, 0, "Je dessine,")}</span><br /><span data-field="hero.title.1">{line(hero.title, 1, "je cadre,")}</span><br /><em data-field="hero.title.2">{line(hero.title, 2, "j'enseigne.")}</em></h1>
               <div className="ab-hero__side">
                 <p className="ab-sig">Sujeepan Sabesan</p>
                 <p className="ab-sig__sub">Designer, photographe, formateur. Je signe ce que je livre.</p>
-                <p className="ab-hero__lead">Treize ans de studio entre Cergy et Paris, à faire la même chose sous des formes différentes : donner une allure juste à des marques qui n'ont pas les moyens d'une agence. Identités, sites, images, emballages. Et depuis huit ans, des classes entières à qui je transmets la méthode.</p>
-                <p className="ab-hero__lead ab-hero__lead--2">Vous parlez à la personne qui dessine, qui code quand il faut, qui cadre le shooting et qui répond. <b>Un seul interlocuteur, du premier croquis à la mise en ligne.</b></p>
+                <p className="ab-hero__lead" data-field="hero.lead">{hero.lead}</p>
+                <p className="ab-hero__lead ab-hero__lead--2"><span data-field="hero.lead2">{hero.lead2}</span> <b>Un seul interlocuteur, du premier croquis à la mise en ligne.</b></p>
                 <div className="ab-stats-hero">
                   <div><b>13</b><span>ans de studio</span></div>
                   <div><b>60+</b><span>marques</span></div>

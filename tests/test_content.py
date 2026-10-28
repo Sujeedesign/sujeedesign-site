@@ -9,6 +9,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app import content as content_store
+from app import admin
 from app import content_model
 from app.db import connect
 
@@ -67,7 +68,7 @@ def test_content_screen_lists_every_section(client: TestClient) -> None:
     login(client)
     response = client.get("/admin/contenu")
     assert response.status_code == 200
-    assert "Contenu du site" in response.text
+    assert ">Accueil<" in response.text
     for section in content_model.schema_for("home"):
         assert section["label"] in response.text
     assert 'name="csrf"' in response.text
@@ -239,3 +240,72 @@ def test_form_roundtrip_preserves_the_default_document() -> None:
 def test_defaults_file_is_valid_json() -> None:
     payload = json.loads(content_model.defaults_path().read_text(encoding="utf-8"))
     assert payload["hero"]["title"]["highlight"]
+
+
+# ---------------------------------------------------------------- pages du site
+
+
+def test_pages_screen_lists_editable_pages(client: TestClient) -> None:
+    login(client)
+    response = client.get("/admin/pages")
+    assert response.status_code == 200
+    for slug, label, path in admin.PAGES:
+        assert label in response.text
+        assert f"/admin/contenu?page={slug}" in response.text
+    # les présentations projet ne sont pas éditables en place
+    assert "/realisations/" not in response.text
+
+
+def test_inner_page_can_be_edited_by_form(client: TestClient) -> None:
+    login(client)
+    page = client.get("/admin/contenu?page=services")
+    assert page.status_code == 200
+    assert 'name="page" value="services"' in page.text
+
+    response = client.post(
+        "/admin/contenu",
+        data={
+            "csrf": _csrf(client, "/admin/contenu?page=services"),
+            "page": "services",
+            "action": "save",
+            "f_hero.kicker": "Services · test",
+        },
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+    assert response.headers["location"].startswith("/admin/contenu?page=services")
+
+    payload = client.get("/api/v1/content/services").json()
+    assert payload["data"]["hero"]["kicker"] == "Services · test"
+    assert payload["data"]["hero"]["title"][0] == "Cinq métiers,"
+    # l'accueil n'a pas bougé
+    home = client.get("/api/v1/content/home").json()
+    assert home["custom"] is False
+
+
+def test_editor_api_session_and_field_are_page_aware(client: TestClient) -> None:
+    login(client)
+    session = client.get("/api/editor/session?page=a-propos").json()
+    assert session["slug"] == "a-propos"
+    assert session["doc"]["hero"]["title"][0] == "Je dessine,"
+
+    response = client.post(
+        "/api/editor/champ",
+        json={
+            "path": "hero.kicker",
+            "value": "À propos · test en place",
+            "csrf": session["csrf"],
+            "slug": "a-propos",
+        },
+    )
+    assert response.status_code == 200, response.text
+    reread = client.get("/api/editor/session?page=a-propos").json()
+    assert reread["doc"]["hero"]["kicker"] == "À propos · test en place"
+    home = client.get("/api/v1/content/home").json()
+    assert home["custom"] is False
+
+
+def test_editor_api_refuses_unknown_page(client: TestClient) -> None:
+    login(client)
+    session = client.get("/api/editor/session?page=realisations/mistral").json()
+    assert session["slug"] == "home"

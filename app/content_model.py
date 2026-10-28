@@ -246,7 +246,81 @@ def schema_home() -> list[dict[str, Any]]:
     ]
 
 
-SCHEMAS: dict[str, list[dict[str, Any]]] = {"home": schema_home()}
+def _f(path: str, label: str, kind: str = "text") -> dict[str, Any]:
+    return {"path": path, "label": label, "type": kind}
+
+
+def schema_page(slug: str, title_lines: int, *, kicker: str = "", lead: str = "", extra: str = "") -> list[dict[str, Any]]:
+    """Gabarit commun aux pages secondaires : sur-titre, titre, chapô.
+
+    Les titres multi-lignes sont exposés ligne par ligne (et non en bloc) pour
+    rester éditables en place : le runtime écrit `page.hero.title.0`, `.1`, etc.
+    """
+    fields: list[dict[str, Any]] = []
+    if kicker:
+        fields.append(_f("hero.kicker", kicker))
+    for index in range(title_lines):
+        fields.append(_f(f"hero.title.{index}", f"Titre, ligne {index + 1}"))
+    if lead:
+        fields.append(_f("hero.lead", lead, "long"))
+    if extra:
+        fields.append(_f("hero.lead2", extra, "long"))
+    return [
+        {
+            "key": "hero",
+            "label": "Bandeau de tête",
+            "hint": "Le premier écran de la page. Reste court : c'est ce qu'on lit avant de défiler.",
+            "blocks": [{"label": slug, "fields": fields}],
+        }
+    ]
+
+
+PAGE_DEFAULTS: dict[str, dict[str, Any]] = {
+    "services": {
+        "hero": {
+            "kicker": "Services · Périmètre écrit",
+            "title": ["Cinq métiers,", "un seul interlocuteur."],
+            "lead": "Le périmètre est écrit avant de commencer. Les allers-retours sont inclus, et vous repartez avec les sources et les accès à votre nom.",
+        }
+    },
+    "realisations": {
+        "hero": {
+            "kicker": "Réalisations · 2013 — 2026",
+            "lead": "Identité, packaging, site, interface, édition, jeu web. Tout est livré, en ligne ou en rayon.",
+            "lead2": "Rien n’est une maquette de concours.",
+        }
+    },
+    "a-propos": {
+        "hero": {
+            "kicker": "À propos · Sujeepan Sabesan",
+            "title": ["Je dessine,", "je cadre,", "j'enseigne."],
+            "lead": "Treize ans de studio entre Cergy et Paris, à faire la même chose sous des formes différentes : donner une allure juste à des marques qui n'ont pas les moyens d'une agence. Identités, sites, images, emballages. Et depuis huit ans, des classes entières à qui je transmets la méthode.",
+            "lead2": "Vous parlez à la personne qui dessine, qui code quand il faut, qui cadre le shooting et qui répond.",
+        }
+    },
+    "agents-ia": {
+        "hero": {
+            "kicker": "Service · Agents IA",
+            "title": ["Un agent qui fait le travail.", "Pas une démo."],
+            "lead": "Vous avez testé ChatGPT, trouvé ça impressionnant, et rien n'a changé dans votre semaine. Normal : un modèle seul ne connaît ni vos clients, ni vos fichiers, ni vos règles. Un agent, si.",
+        }
+    },
+}
+
+
+def defaults_for(slug: str) -> dict[str, Any]:
+    if slug == "home":
+        return load_defaults()
+    return copy.deepcopy(PAGE_DEFAULTS.get(slug, {}))
+
+
+SCHEMAS: dict[str, list[dict[str, Any]]] = {
+    "home": schema_home(),
+    "services": schema_page("services", 2, kicker="Sur-titre", lead="Chapô"),
+    "realisations": schema_page("realisations", 0, kicker="Sur-titre", lead="Chapô", extra="Phrase en gras"),
+    "a-propos": schema_page("a-propos", 3, kicker="Sur-titre", lead="Chapô", extra="Deuxième paragraphe"),
+    "agents-ia": schema_page("agents-ia", 2, kicker="Sur-titre", lead="Chapô"),
+}
 
 
 def schema_for(slug: str) -> list[dict[str, Any]]:
@@ -324,6 +398,9 @@ def validate(slug: str, doc: dict[str, Any]) -> None:
                 raise ContentError(f"« {field['label']} » : une ligne est vide.")
         elif not str(value or "").strip():
             raise ContentError(f"« {field['label']} » ne peut pas être vide.")
+
+    if slug != "home":
+        return
 
     ghost = get_path(doc, "cases.items.0.ghost", "")
     for index in range(3):

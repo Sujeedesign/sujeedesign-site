@@ -11,7 +11,7 @@ from . import content_model
 
 router = APIRouter()
 
-SLUGS = {"home"}
+SLUGS = set(content_model.SCHEMAS)
 
 
 def _conn(request: Request) -> sqlite3.Connection:

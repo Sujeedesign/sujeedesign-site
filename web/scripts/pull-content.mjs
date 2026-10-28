@@ -13,7 +13,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const SLUGS = ["home"];
+const SLUGS = ["home", "services", "realisations", "a-propos", "agents-ia"];
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const base = (process.env.CONTENT_API_URL || "").trim().replace(/\/+$/, "");
 const strict = process.env.CONTENT_STRICT === "1";
