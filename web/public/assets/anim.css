@@ -130,7 +130,7 @@ html.no-anim [data-stagger] > *{ opacity: 1 !important; transform: none !importa
   border-radius:inherit;
   pointer-events:none;
 }
-/* voile : lisibilité du texte côté gauche, image préservée à droite */
+/* voile : lisibilité du texte côté gauche et en bas, image préservée en haut à droite */
 .case--photo .case__bg::after{
   content:"";
   position:absolute;
@@ -143,61 +143,29 @@ html.no-anim [data-stagger] > *{ opacity: 1 !important; transform: none !importa
       rgba(8,8,7,.56) 44%,
       rgba(8,8,7,.18) 66%,
       rgba(8,8,7,.06) 84%,
-      rgba(8,8,7,.34) 100%);
+      rgba(8,8,7,.34) 100%),
+    linear-gradient(to top,
+      rgba(8,8,7,.95) 0%,
+      rgba(8,8,7,.82) 22%,
+      rgba(8,8,7,.4) 44%,
+      rgba(8,8,7,0) 62%);
 }
 /* le visuel d'origine n'a plus de sens : la photo est le fond */
 .case--photo .case__visual{display:none!important}
 /* contenu au-dessus du fond et du voile */
-.case--photo .case__top,
 .case--photo .case__body,
-.case--photo .case__bar{position:relative;z-index:2}
-.case--photo .case__body,
-.case--photo.case--ui .case__body{
-  display:block!important;
-  grid-template-columns:none!important;
-  height:100%!important;
-  align-self:stretch!important;
-}
-.case--photo .case__text{
-  height:100%;
-  justify-content:center;
-  padding:clamp(4px,1vw,14px) 0 0;
-}
+.case--photo .case__foot{position:relative;z-index:2}
 .case--photo .case__ghost{z-index:1}
 /* sur une photo, le texte passe en clair quel que soit le ton de la carte */
 .case--photo,
 .case--photo .case__title,
-.case--photo .case__bar,
-.case--photo .case__bar span:last-child,
-.case--photo .case__idx,
-.case--photo .case__meta,
-.case--photo .case__sub{color:#F4F1EA}
-.case--photo .case__idx,
-.case--photo .case__idx *,
-.case--photo .case__meta,
-.case--photo .case__meta *,
-.case--photo .case__sub,
-.case--photo .case__sub *,
-.case--photo .case__bar,
-.case--photo .case__bar span,
-.case--photo .case__bar span:last-child{
-  color:#F4F1EA;
-  text-shadow:0 1px 10px rgba(0,0,0,.6);
-}
+.case--photo .case__kicker,
+.case--photo .case__cta{color:#F4F1EA}
+.case--photo .case__kicker{color:rgba(244,241,234,.86)}
+.case--photo .case__kicker,
+.case--photo .case__cta{text-shadow:0 1px 10px rgba(0,0,0,.6)}
 .case--photo .case__title{text-shadow:0 2px 24px rgba(0,0,0,.5)}
-.case--photo .case__bar{
-  background:rgba(10,10,9,.5);
-  border-color:rgba(244,241,234,.26);
-  backdrop-filter:blur(16px) saturate(140%);
-  -webkit-backdrop-filter:blur(16px) saturate(140%);
-}
-.case--photo .case__meta{
-  background:rgba(10,10,9,.4);
-  padding:5px 9px;
-  border-radius:2px;
-  backdrop-filter:blur(12px) saturate(130%);
-  -webkit-backdrop-filter:blur(12px) saturate(130%);
-}
+.case--photo .case__foot{border-top-color:rgba(244,241,234,.3)}
 .case--photo .case__ghost{-webkit-text-stroke-color:rgba(244,241,234,.2)}
 @media (max-width:860px){
   .case--photo .case__bg::after{
@@ -240,4 +208,24 @@ html.no-anim [data-stagger] > *{ opacity: 1 !important; transform: none !importa
      titre, au lieu de flotter a droite au niveau de la derniere ligne. */
   .hero--proj .hero__cols{flex-direction:column;align-items:flex-start;
     gap:clamp(18px,2.4vh,26px);max-width:44ch}
+}
+
+/* mobile : carte lisible, titre et CTA empilés (28/10) */
+@media (max-width:860px){
+  .case{min-height:min(64svh,560px);display:flex;flex-direction:column;justify-content:space-between}
+  .case__body{flex:1 1 auto}
+  .case__foot{flex-direction:column;align-items:flex-start;gap:10px;padding-top:0}
+  .case__foot .case__title{font-size:clamp(26px,7.4vw,36px)!important}
+  .case__cta{padding-bottom:0}
+}
+.case--photo .case__foot{position:relative}
+/* plaque sombre derrière le bloc texte : le bas de la photo ne vient plus
+   concurrencer la ligne mono ni le titre */
+.case--photo .case__foot::before{
+  content:"";position:absolute;z-index:-1;inset:-20px -120px -120px;
+  background:linear-gradient(to top,
+    rgba(8,8,7,.99) 0%,
+    rgba(8,8,7,.97) 42%,
+    rgba(8,8,7,.8) 70%,
+    rgba(8,8,7,0) 100%);
 }

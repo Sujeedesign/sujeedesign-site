@@ -97,16 +97,11 @@ export function Realisations() {
                 </div>
                 <div className="rl-p__info">
                   <p className="rl-p__kicker">
-                    {project.index} · {project.disciplines[0]}
+                    {project.index} · {project.disciplines.join(" · ")}
                     {project.year ? ` · ${project.year}` : ""}
                   </p>
                   <h2>{project.name}</h2>
                   <p className="rl-p__desc">{project.pitch}</p>
-                  <ul className="rl-p__tags">
-                    {project.disciplines.map((tag) => (
-                      <li key={tag}>{tag}</li>
-                    ))}
-                  </ul>
                   <a className="rl-p__link" href={realisationPath(project.slug)}>
                     Voir l’étude de cas <span aria-hidden="true">↗</span>
                   </a>

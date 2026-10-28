@@ -271,32 +271,28 @@ export function Cases() {
               <div className="case__top">
                 <span className="case__idx">{item.index}</span>
                 <span className="case__meta">
-                  {item.meta.map((line, index) => (
-                    <span key={line}>
-                      {index > 0 ? <br /> : null}
-                      {line}
-                    </span>
+                  {item.meta.map((line) => (
+                    <span key={line}>{line}</span>
                   ))}
                 </span>
               </div>
               <div className="case__body">
+                <CaseMedia href={item.href} kind={item.visual} />
+              </div>
+              <div className="case__foot">
                 <div className="case__text">
                   <h2 className="case__title" id={item.id}>
                     {item.title}
                   </h2>
-                  <div className="case__sub">
+                  <ul className="case__sub">
                     {item.tags.map((tag) => (
-                      <span key={tag}>{tag}</span>
+                      <li key={tag}>{tag}</li>
                     ))}
-                  </div>
+                  </ul>
                 </div>
-                <CaseMedia href={item.href} kind={item.visual} />
-              </div>
-              <div className="case__bar">
-                <span className="go">
-                  Voir le projet <span aria-hidden="true">↗</span>
+                <span className="case__cta">
+                  Voir l’étude de cas <span aria-hidden="true">↗</span>
                 </span>
-                <span>{item.barLabel}</span>
               </div>
               <span className="case__ghost" aria-hidden="true">
                 {item.ghost}
