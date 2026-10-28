@@ -1439,3 +1439,72 @@ body.has-dark-hero .nav.nav--open .brand__logo--light{display:none!important}
 /* Film des réalisations : huit projets au lieu de six, on resserre le
    défilement pour que la page reste parcourable (145svh -> 112svh). */
 @media (min-width:701px){ .rl-p{height:112svh} }
+
+/* ---------- Cartes de réalisations ----------
+   Même grammaire que les cartes projet de l'accueil : index + discipline en
+   haut à gauche, client et année à droite, visuel au centre, titre + mots-clés
+   en bas à gauche et un seul CTA à droite. Pas de barre, pas de filet. */
+.rl-cards{padding:clamp(34px,5vw,72px) 0 clamp(28px,4vw,56px)}
+.rl-cards__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(14px,1.5vw,22px)}
+.rl-card{position:relative;display:grid;grid-template-rows:auto 1fr auto;gap:clamp(14px,1.4vw,20px);
+  padding:clamp(16px,1.5vw,22px);text-decoration:none;color:var(--ink);background:var(--bg-2);
+  border:1px solid var(--line-2);overflow:hidden;
+  transition:transform .55s cubic-bezier(.22,.61,.36,1),border-color .4s ease,background-color .4s ease}
+.rl-card:hover{transform:translateY(-3px);border-color:var(--line)}
+.rl-card__top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.rl-card__idx{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;line-height:1.5;color:var(--accent)}
+.rl-card__meta{display:flex;flex-direction:column;gap:1px;text-align:right;
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;line-height:1.55;color:rgba(10,10,11,.72)}
+.rl-card__media{position:relative;display:block;overflow:hidden;aspect-ratio:16/10;background:rgba(10,10,11,.05)}
+.rl-card__media img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;
+  transition:transform .8s cubic-bezier(.22,.61,.36,1)}
+.rl-card:hover .rl-card__media img{transform:scale(1.02)}
+.rl-card__foot{display:flex;align-items:flex-end;justify-content:space-between;gap:clamp(12px,1.6vw,26px)}
+.rl-card__text{display:flex;flex-direction:column;gap:7px;min-width:0}
+.rl-card__title{margin:0;font-family:var(--display);font-weight:700;font-size:clamp(22px,2.2vw,36px)!important;
+  line-height:.98;letter-spacing:-.04em}
+.rl-card__tags{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+  line-height:1.5;color:rgba(10,10,11,.72)}
+.rl-card__cta{flex:0 0 auto;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--accent);white-space:nowrap;padding-bottom:2px}
+
+/* Teintes : le papier, le gris, l'encre */
+.rl-card--paper{background:var(--paper)}
+.rl-card--tint{background:var(--bg-2)}
+.rl-card--dark{background:#0C0B0A;border-color:rgba(244,241,234,.14);color:#F4F1EA}
+.rl-card--dark .rl-card__meta,.rl-card--dark .rl-card__tags{color:rgba(244,241,234,.66)}
+.rl-card--dark .rl-card__media{background:rgba(244,241,234,.06)}
+
+@media (max-width:860px){
+  .rl-cards__grid{grid-template-columns:minmax(0,1fr);gap:14px}
+  .rl-card__title{font-size:clamp(24px,6.6vw,32px)!important}
+}
+@media (max-width:430px){
+  .rl-card__foot{flex-direction:column;align-items:flex-start;gap:10px}
+  .rl-card__cta{padding-bottom:0}
+}
+
+/* ============================================================
+   Fiches projet : maillage interne (services liés, projets liés)
+   Bloc purement typographique, aucune couleur en dur hors variables.
+   ============================================================ */
+.pjx{margin-top:clamp(34px,4vw,56px);border-top:1px solid var(--line);padding-top:clamp(22px,2.4vw,32px)}
+.pjx + .pjx{margin-top:clamp(24px,2.6vw,36px)}
+.pjx__head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:clamp(14px,1.6vw,20px)}
+.pjx__head h2{font-family:var(--display);font-weight:600;font-size:clamp(18px,1.9vw,24px);line-height:1.05;letter-spacing:-.03em;margin:0}
+.pjx__head span{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.pjx__links{display:flex;flex-wrap:wrap;gap:10px}
+.pjx__link{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border:1px solid var(--line-2);text-decoration:none;color:inherit;
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;transition:background .3s,border-color .3s}
+.pjx__link span{color:var(--accent)}
+.pjx__link:hover{background:var(--bg-2);border-color:var(--accent);color:var(--accent)}
+.pjx__cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(14px,1.5vw,22px)}
+.pjx__card{display:grid;gap:10px;padding:clamp(12px,1.2vw,16px);border:1px solid var(--line-2);background:var(--bg-2);
+  text-decoration:none;color:inherit;transition:transform .5s cubic-bezier(.22,.61,.36,1),border-color .4s}
+.pjx__card:hover{transform:translateY(-3px);border-color:var(--line)}
+.pjx__card img{width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;display:block}
+.pjx__card span{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-2)}
+.pjx__card b{font-family:var(--display);font-weight:600;font-size:clamp(17px,1.6vw,22px);line-height:1.02;letter-spacing:-.03em}
+@media (max-width:860px){
+  .pjx__cards{grid-template-columns:minmax(0,1fr)}
+}

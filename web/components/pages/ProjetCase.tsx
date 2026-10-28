@@ -1,6 +1,7 @@
 import type { Project } from "@/content/projects";
 import { nextProject } from "@/content/projects";
-import { routes } from "@/lib/routes";
+import { linkedServices, relatedProjects } from "@/lib/project-links";
+import { realisationPath, routes } from "@/lib/routes";
 
 /** Métadonnées d'une étude de cas, dérivées de sa fiche. */
 export function projectMeta(project: Project): { title: string; description: string } {
@@ -13,6 +14,9 @@ export function projectMeta(project: Project): { title: string; description: str
 
 export function ProjetCase({ project }: { project: Project }) {
   const next = nextProject(project.slug);
+  // Maillage interne : services déduits des disciplines, puis deux fiches voisines.
+  const services = linkedServices(project);
+  const related = relatedProjects(project);
   const meta = [
     { label: "Client", value: project.client },
     { label: "Année", value: project.year },
@@ -88,6 +92,49 @@ export function ProjetCase({ project }: { project: Project }) {
                   <span>{result.label}</span>
                 </div>
               ))}
+            </div>
+          ) : null}
+
+          {services.length ? (
+            <div className="pjx">
+              <div className="pjx__head">
+                <h2>Prestations mobilisées</h2>
+                <span>Services</span>
+              </div>
+              <div className="pjx__links">
+                {services.map((service) => (
+                  <a className="pjx__link" href={service.href} key={service.slug}>
+                    {service.name} <span aria-hidden="true">↗</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {related.length ? (
+            <div className="pjx">
+              <div className="pjx__head">
+                <h2>Projets liés</h2>
+                <span>Réalisations</span>
+              </div>
+              <div className="pjx__cards">
+                {related.map((entry) => (
+                  <a className="pjx__card" href={realisationPath(entry.slug)} key={entry.slug}>
+                    {entry.images[0] ? (
+                      <img
+                        src={entry.images[0].src}
+                        alt=""
+                        width={entry.images[0].width}
+                        height={entry.images[0].height}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    ) : null}
+                    <span>{entry.disciplines.join(" · ")}</span>
+                    <b>{entry.name}</b>
+                  </a>
+                ))}
+              </div>
             </div>
           ) : null}
 
