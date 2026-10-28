@@ -48,6 +48,8 @@ gtag('js',new Date());gtag('config','${GA_MEASUREMENT_ID}',{anonymize_ip:true});
 
       {choice === null ? (
         <div
+          id="cookie-banner"
+          className="cookie-banner"
           role="dialog"
           aria-label="Mesure d'audience"
           style={{

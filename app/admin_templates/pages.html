@@ -17,13 +17,43 @@
       <a class="btn btn-ghost" href="{{ public_url }}" target="_blank" rel="noopener">Voir le site</a>
       <form method="post" action="/admin/contenu/publier">
         <input type="hidden" name="csrf" value="{{ csrf }}">
-        <button class="btn btn-accent" type="submit"{% if not publish_ready %} disabled title="Publication non configurée"{% endif %}>Publier les modifications</button>
+        <button class="btn btn-accent" type="submit"{% if not publish_ready %} disabled title="Publication automatique non configurée sur ce serveur"{% endif %}>Publier les modifications</button>
       </form>
     </div>
   </div>
 
+  <div class="grid grid-2 pages-grid">
+    {% for p in pages %}
+      <section class="card page-card">
+        <header class="card-head">
+          <h2>{{ p.label }}</h2>
+          <p class="muted small page-path">{{ p.path }}</p>
+        </header>
+        <div class="page-foot">
+          <div class="page-meta">
+            <span class="chip">{{ p.field_count }} champs</span>
+            {% if p.custom %}
+              <span class="badge badge-en-cours">modifiée</span>
+            {% else %}
+              <span class="badge badge-traite">défaut</span>
+            {% endif %}
+            <span class="muted small">
+              {% if p.updated_at %}enregistrée {{ p.updated_at | ago }}{% else %}jamais modifiée{% endif %}
+            </span>
+          </div>
+          <div class="page-actions">
+            <a class="btn btn-ghost btn-sm" href="/admin/contenu?page={{ p.slug }}">Éditer via formulaire</a>
+            <a class="btn btn-accent btn-sm" href="{{ p.path }}" target="_blank" rel="noopener">Éditer en place</a>
+          </div>
+        </div>
+      </section>
+    {% endfor %}
+  </div>
+
   {% if not publish_ready %}
-    <p class="warn small">Publication Coolify non configurée sur ce serveur : l'enregistrement fonctionne, la mise en ligne de la vitrine non.</p>
+    <div class="alert">
+      <div><b>Publication manuelle</b><span>L'enregistrement en base fonctionne : tes corrections sont bien sauvegardées. La mise en ligne automatique de la vitrine n'est pas branchée sur ce serveur.</span></div>
+    </div>
   {% endif %}
 
   <p class="note small">
@@ -32,30 +62,4 @@
     Le formulaire reste là comme secours. Les présentations projet ne sont pas listées ici : elles restent
     gérées côté admin projet et ne passent jamais par l'édition en place.
   </p>
-
-  <div class="grid grid-2">
-    {% for p in pages %}
-      <section class="card">
-        <header class="card-head">
-          <h2>{{ p.label }}</h2>
-          <p class="muted small">{{ p.path }}</p>
-        </header>
-        <div class="toolbar-info">
-          <span class="chip">{{ p.field_count }} champs</span>
-          {% if p.custom %}
-            <span class="badge badge-en-cours">modifiée</span>
-          {% else %}
-            <span class="badge badge-traite">référence</span>
-          {% endif %}
-          <span class="muted small">
-            {% if p.updated_at %}enregistrée {{ p.updated_at | ago }}{% else %}jamais modifiée{% endif %}
-          </span>
-        </div>
-        <div class="toolbar-actions">
-          <a class="btn btn-ghost btn-sm" href="/admin/contenu?page={{ p.slug }}">Formulaire</a>
-          <a class="btn btn-accent btn-sm" href="{{ p.path }}" target="_blank" rel="noopener">Éditer en place</a>
-        </div>
-      </section>
-    {% endfor %}
-  </div>
 {% endblock %}

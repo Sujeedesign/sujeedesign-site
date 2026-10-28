@@ -295,3 +295,52 @@ input[type=file]{display:none}
   padding:9px 10px;margin-bottom:6px;font-weight:600;
 }
 .site-link--edit:hover{background:rgba(201,52,15,.28)}
+
+/* --- Pages du site : lisibilité et états ------------------------------- */
+.btn[disabled],.btn:disabled{opacity:.35;cursor:not-allowed;filter:saturate(.4)}
+.btn[disabled]:hover,.btn:disabled:hover{transform:none;box-shadow:none}
+.card .toolbar-info{align-items:center;flex-wrap:wrap;gap:8px}
+.card .badge{flex:0 0 auto;align-self:center;line-height:1.5}
+.card .chip{flex:0 0 auto;align-self:center}
+.card .card-head{margin-bottom:10px}
+.card .card-head h2{font-size:17px;letter-spacing:-.01em}
+.card .card-head p{font-family:var(--mono);font-size:11px;opacity:.7}
+.alert{
+  display:flex;gap:10px;align-items:flex-start;
+  background:rgba(242,193,78,.08);border:1px solid rgba(242,193,78,.3);
+  border-radius:10px;padding:11px 13px;margin:0 0 14px;font-size:13px;line-height:1.5;
+  color:var(--warn,#F2C14E);
+}
+.alert b{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px}
+.alert span{color:var(--ink,#F4F1EA);opacity:.85;font-weight:400;text-transform:none;letter-spacing:0}
+.pages-grid{margin-top:4px}
+@media (max-width:900px){.pages-grid{grid-template-columns:1fr}}
+
+/* Cartes de pages : une seule ligne d'alignement, actions à droite. */
+.page-card .card-head{
+  display:flex; align-items:baseline; justify-content:space-between;
+  gap:12px; margin-bottom:12px;
+}
+.page-card .page-path{
+  font-family:var(--mono); font-size:11.5px; letter-spacing:.02em;
+  color:rgba(242,238,231,.62); flex:0 0 auto;
+}
+.page-card .card-head h2{font-size:16px; letter-spacing:.02em; margin:0}
+.page-foot{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; flex-wrap:wrap;
+}
+.page-meta{display:flex; align-items:center; gap:8px; flex-wrap:wrap; min-width:0}
+.page-meta .muted.small{color:rgba(242,238,231,.58)}
+.page-actions{display:flex; align-items:center; gap:8px; margin-left:auto}
+.page-actions .btn{white-space:nowrap}
+.page-card{padding-bottom:14px}
+@media (max-width:520px){
+  .page-card .card-head{flex-direction:column; align-items:flex-start; gap:2px}
+  .page-actions{width:100%; margin-left:0}
+  .page-actions .btn{flex:1 1 0; text-align:center}
+}
+
+/* Contraste des textes secondaires dans les cartes de pages. */
+.page-card .muted, .card .toolbar-info .muted{color:rgba(242,238,231,.72)}
+.page-meta .chip{background:rgba(255,255,255,.06); color:rgba(242,238,231,.9)}

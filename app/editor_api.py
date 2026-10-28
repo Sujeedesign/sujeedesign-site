@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import copy
 import sqlite3
+import threading
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -22,6 +23,10 @@ from . import content as content_store
 from . import content_model as model
 from . import repo
 from .admin import check_csrf, csrf_token, current_user, get_conn, require_admin
+
+# Deux requêtes identiques peuvent partir en parallèle (Entrée + blur). Sans
+# sérialisation, les deux lisent la même version et créent deux révisions.
+_WRITE_LOCK = threading.Lock()
 
 router = APIRouter(prefix="/api/editor", tags=["editor"])
 
@@ -112,27 +117,44 @@ def champ(request: Request, payload: FieldPayload, user: str = Depends(require_a
 
     conn = get_conn(request)
     try:
-        current = _doc(conn, slug)
-        previous = copy.deepcopy(current["data"])
-        doc = current["data"]
-        value = model._to_value(field, payload.value)
-        model.set_path(doc, field["path"], value)
-        try:
-            model.validate(slug, doc)
-        except model.ContentError as exc:
-            return JSONResponse({"ok": False, "error": str(exc)}, status_code=422)
-        if doc != previous:
-            repo.save_revision(
-                conn,
-                "content" if slug == SLUG else f"content:{slug}",
-                0,
-                previous,
-                f"avant édition en place ({field['path']})",
-                f"editeur:{user}",
-            )
-        content_store.save_doc(conn, slug, doc, author=f"editeur:{user}")
+        with _WRITE_LOCK:
+            return _write(conn, slug, field, payload, user)
     finally:
         conn.close()
+
+
+def _write(
+    conn: sqlite3.Connection,
+    slug: str,
+    field: dict[str, Any],
+    payload: "FieldPayload",
+    user: str,
+) -> JSONResponse:
+    """Lecture, validation puis écriture, sérialisées par _WRITE_LOCK."""
+    current = _doc(conn, slug)
+    previous = copy.deepcopy(current["data"])
+    doc = current["data"]
+    value = model._to_value(field, payload.value)
+    model.set_path(doc, field["path"], value)
+    try:
+        model.validate(slug, doc)
+    except model.ContentError as exc:
+        return JSONResponse({"ok": False, "error": str(exc)}, status_code=422)
+    if doc == previous:
+        # Valeur identique : double envoi (Entrée puis blur) ou simple focus.
+        # On ne réécrit rien pour ne pas polluer l'historique des révisions.
+        return JSONResponse(
+            {"ok": True, "slug": slug, "path": field["path"], "doc": doc, "unchanged": True}
+        )
+    repo.save_revision(
+        conn,
+        "content" if slug == SLUG else f"content:{slug}",
+        0,
+        previous,
+        f"avant édition en place ({field['path']})",
+        f"editeur:{user}",
+    )
+    content_store.save_doc(conn, slug, doc, author=f"editeur:{user}")
     return JSONResponse({"ok": True, "slug": slug, "path": field["path"], "doc": doc})
 
 

@@ -76,6 +76,8 @@ function setLines(el: HTMLElement, value: string) {
 
 const CSS = `
 body.sjd-editing{ padding-bottom:58px; }
+/* La bannière cookies n'a rien à faire par-dessus le dock d'édition. */
+body.sjd-editing .cookie-banner{ display:none !important; }
 body.sjd-editing [data-field]{
   cursor:text;
   outline:1.5px dashed rgba(201,52,15,.55);
@@ -163,6 +165,9 @@ export default function EditorRuntime() {
   const editingRef = useRef<HTMLElement | null>(null);
   const originalRef = useRef<string>("");
   const slugRef = useRef<string>("home");
+  // Dernière valeur réellement enregistrée par champ : évite le double POST
+  // qu'un Enter suivi d'un blur peut déclencher.
+  const savedRef = useRef<Map<string, string>>(new Map());
 
   const flash = useCallback((text: string, err = false) => {
     setToast({ text, err });
@@ -236,6 +241,7 @@ export default function EditorRuntime() {
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok || !data.ok) return { ok: false, error: data.error ?? "Enregistrement refusé" };
+        savedRef.current.set(path, value);
         markDirty(true);
         return { ok: true };
       } catch {
@@ -277,8 +283,13 @@ export default function EditorRuntime() {
     const before = originalRef.current;
     stopInline();
     if (value === before) return;
+    if (savedRef.current.get(path) === value) return;
+    // Marqué avant l'appel : le blur déclenché par stopInline() relance
+    // commitInline pendant que la requête est encore en vol.
+    savedRef.current.set(path, value);
     const res = await save(path, value);
     if (!res.ok) {
+      savedRef.current.delete(path);
       el.textContent = before;
       flash(res.error ?? "Refusé", true);
     } else {

@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import re
+from pathlib import Path
 
 from fastapi.testclient import TestClient
+
+from app.db import connect
 
 PASSWORD = "mot-de-passe-de-test"
 
@@ -136,3 +139,24 @@ def test_ecriture_refuse_une_origine_etrangere(client: TestClient) -> None:
     )
     assert response.status_code == 403
     assert response.json()["detail"] == "origine refusée"
+
+
+def test_double_envoi_ne_cree_pas_deux_revisions(client: TestClient, db_file: Path) -> None:
+    """Entrée puis blur renvoient la même valeur : une seule révision."""
+    login(client)
+    cookie = client.get("/api/editor/session?page=services").json()
+    csrf = cookie["csrf"]
+    payload = {"path": "hero.kicker", "value": "Un seul envoi", "csrf": csrf, "slug": "services"}
+    first = client.post("/api/editor/champ", json=payload)
+    assert first.status_code == 200, first.text
+    second = client.post("/api/editor/champ", json=payload)
+    assert second.status_code == 200, second.text
+    assert second.json().get("unchanged") is True
+    conn = connect(db_file)
+    try:
+        rows = conn.execute(
+            "select count(*) from revisions where entity_type='content:services'"
+        ).fetchone()[0]
+    finally:
+        conn.close()
+    assert rows == 1, rows
