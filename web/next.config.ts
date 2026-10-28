@@ -57,6 +57,9 @@ const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
   reactStrictMode: true,
+  // La normalisation du slash final est faite dans `middleware.ts` : sinon Next
+  // renvoie `/v5/` en 308 vers `/v5` avant de pouvoir appliquer le 301 direct.
+  skipTrailingSlashRedirect: true,
   async redirects() {
     return [
       // Préversion /v5 : chaque page rejoint son équivalent à la racine.
