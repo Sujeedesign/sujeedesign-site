@@ -29,7 +29,13 @@ export function middleware(request: NextRequest): NextResponse {
   const { pathname, search, origin } = request.nextUrl;
 
   if (host.toLowerCase() === `www.${APEX}`) {
-    return NextResponse.redirect(canonical(origin, pathname, search), 301);
+    // `request.nextUrl.origin` vaut l'origine interne du serveur (localhost) :
+    // on reconstruit l'URL absolue depuis l'hôte public, sinon Next renvoie un
+    // Location relatif et www boucle sur lui-même.
+    return NextResponse.redirect(
+      new URL(`${pathname}${search}`, `https://${APEX}`),
+      301,
+    );
   }
 
   if (pathname === "/v5" || pathname === "/v5/" || pathname.startsWith("/v5/")) {
