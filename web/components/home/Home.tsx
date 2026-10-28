@@ -56,7 +56,7 @@ export function Hero() {
         </h1>
         <div className="hero__cols">
           <p className="hero__lead">
-            {hero.lead.text}
+            {hero.lead.text}{" "}
             <b>{hero.lead.strong}</b>
           </p>
           <a className="hero__cta" href={hero.cta.href}>
