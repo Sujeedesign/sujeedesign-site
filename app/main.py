@@ -69,6 +69,9 @@ def create_app(db_file: Path | None = None) -> FastAPI:
         response.headers.setdefault("X-Frame-Options", "DENY")
         if request.url.path.startswith("/admin") or request.url.path.startswith("/api/"):
             response.headers.setdefault("Cache-Control", "no-store")
+            # Tout ce conteneur est un back office : on interdit l'indexation au
+            # niveau de la réponse, en plus du robots.txt du domaine public.
+            response.headers.setdefault("X-Robots-Tag", "noindex, nofollow")
             response.headers.setdefault(
                 "Content-Security-Policy",
                 "default-src 'self'; img-src 'self' data: blob: "
