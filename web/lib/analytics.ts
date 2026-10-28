@@ -5,7 +5,8 @@
  * quand même la priorité à la variable d'environnement pour pouvoir tester une
  * autre propriété sans toucher au code.
  */
-export const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID ?? "";
+export const GA_MEASUREMENT_ID =
+  process.env.NEXT_PUBLIC_GA_ID ?? "G-998CG8JQEJ";
 
 /** Jeton de vérification Search Console, méthode « balise HTML ». */
 export const GOOGLE_SITE_VERIFICATION =
