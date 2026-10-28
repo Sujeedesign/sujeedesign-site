@@ -14,7 +14,7 @@ import { JsonLd } from "@/components/site/JsonLd";
 import { PageShell } from "@/components/site/PageShell";
 import { pageMetadata } from "@/lib/page-metadata";
 import { routes, serviceHref, servicePath, serviceSlugs, type ServiceSlug } from "@/lib/routes";
-import { breadcrumbNode, pageGraph, serviceNode, webPageNode } from "@/lib/structured-data";
+import { breadcrumbNode, pageGraph, serviceCatalog, serviceNode, webPageNode } from "@/lib/structured-data";
 
 /**
  * Les pages service du v5, une par slug.
@@ -69,7 +69,7 @@ export default async function Page({ params }: Params) {
           breadcrumbNode([
             { name: "Accueil", path: routes.home },
             { name: "Services", path: routes.services },
-            { name: meta.title, path: servicePath(slug as ServiceSlug) },
+            { name: serviceCatalog[slug as ServiceSlug].name, path: servicePath(slug as ServiceSlug) },
           ]),
         ])}
       />
