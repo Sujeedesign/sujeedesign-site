@@ -47,15 +47,6 @@ export function middleware(request: NextRequest): NextResponse {
     return NextResponse.redirect(canonical(origin, clean, search), 308);
   }
 
-  // Le back office est servi par une rewrite externe : les en-têtes déclarés
-  // dans `next.config.ts` ne s'appliquent pas à la réponse qui vient de FastAPI.
-  // On les pose donc ici, sur la réponse de Next, pour que `noindex` survive.
-  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
-    const response = NextResponse.next();
-    response.headers.set("X-Robots-Tag", "noindex, nofollow");
-    return response;
-  }
-
   return NextResponse.next();
 }
 
