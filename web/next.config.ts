@@ -120,6 +120,12 @@ const nextConfig: NextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
         ],
       },
+      // Pages HTML : toujours revalidées, pour qu'un déploiement soit visible
+      // immédiatement (les assets, eux, restent en cache long ci-dessous).
+      {
+        source: "/((?!_next/|assets/|static-admin/|bo/|api/|admin|medias/|robots.txt|sitemap.xml|favicon).*)",
+        headers: [{ key: "Cache-Control", value: "public, max-age=0, must-revalidate" }],
+      },
       // Images du site (projets, partages).
       { source: "/assets/img/:path*", headers: [{ key: "Cache-Control", value: longCache }] },
       // Photographies et portraits posés à la racine de /assets.
