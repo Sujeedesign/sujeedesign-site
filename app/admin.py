@@ -13,7 +13,7 @@ import sqlite3
 from datetime import datetime
 from pathlib import Path
 from typing import Any
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
@@ -73,11 +73,30 @@ def csrf_token() -> str:
     return security.make_token(CSRF_PURPOSE, CSRF_TTL)
 
 
+def _allowed_hosts(request: Request) -> set[str]:
+    """Hôtes légitimes pour la vérification d'origine.
+
+    Derrière le proxy Next (rewrites /admin et /api/editor), le `Host` reçu
+    n'est pas forcément celui du navigateur : on accepte donc aussi
+    `X-Forwarded-Host` et le domaine public configuré.
+    """
+    hosts: set[str] = set()
+    for header in ("host", "x-forwarded-host"):
+        raw = request.headers.get(header, "")
+        if raw:
+            hosts.add(raw.split(",")[0].strip().lower())
+    public = urlparse(settings_module.public_base_url()).netloc.lower()
+    if public:
+        hosts.add(public)
+    return {h for h in hosts if h}
+
+
 def check_csrf(request: Request, token: str) -> None:
     supplied_origin = request.headers.get("origin") or request.headers.get("referer") or ""
     if supplied_origin:
-        host = request.headers.get("host", "")
-        if host and host not in supplied_origin:
+        hosts = _allowed_hosts(request)
+        origin_host = urlparse(supplied_origin).netloc.lower()
+        if hosts and origin_host and origin_host not in hosts:
             raise HTTPException(status_code=403, detail="origine refusée")
     if not security.verify_token(CSRF_PURPOSE, token or "", CSRF_TTL):
         raise HTTPException(status_code=403, detail="formulaire expiré, recharge la page")
@@ -146,6 +165,18 @@ def connexion(request: Request, password: str = Form("")) -> Response:
         secure=settings_module.cookie_secure(),
         path="/",
     )
+    # Repère lisible par le JavaScript de la vitrine : la session existe, le
+    # runtime d'édition peut tenter /api/editor/session. HttpOnly reste actif
+    # pour le cookie de session lui-même.
+    response.set_cookie(
+        security.EDIT_MARKER_COOKIE,
+        "1",
+        max_age=security.SESSION_TTL,
+        httponly=False,
+        samesite="lax",
+        secure=settings_module.cookie_secure(),
+        path="/",
+    )
     limiter.reset()
     return response
 
@@ -155,6 +186,7 @@ def deconnexion(request: Request, csrf: str = Form("")) -> Response:
     check_csrf(request, csrf)
     response = RedirectResponse("/admin/connexion", status_code=303)
     response.delete_cookie(security.SESSION_COOKIE, path="/")
+    response.delete_cookie(security.EDIT_MARKER_COOKIE, path="/")
     return response
 
 

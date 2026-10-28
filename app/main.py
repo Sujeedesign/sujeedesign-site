@@ -16,7 +16,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
-from . import admin, api_admin, contact, content_routes
+from . import admin, api_admin, contact, content_routes, editor_api
 from . import settings as settings_module
 from .db import connect, init_db
 from .ui import templates  # noqa: F401  (initialise les filtres Jinja)
@@ -96,6 +96,7 @@ def create_app(db_file: Path | None = None) -> FastAPI:
     app.include_router(contact.sync)
     app.include_router(content_routes.router)
     app.include_router(api_admin.router)
+    app.include_router(editor_api.router)
     return app
 
 

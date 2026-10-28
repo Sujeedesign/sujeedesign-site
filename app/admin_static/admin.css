@@ -287,3 +287,11 @@ input[type=file]{display:none}
   .toc-title{width:100%}
   .msg-meta{margin-left:0;width:100%}
 }
+
+/* Entrée vers l'édition en place sur la vitrine */
+.site-link--edit{
+  color:var(--ink,#F4F1EA);background:rgba(201,52,15,.16);
+  border:1px solid rgba(201,52,15,.45);border-radius:8px;
+  padding:9px 10px;margin-bottom:6px;font-weight:600;
+}
+.site-link--edit:hover{background:rgba(201,52,15,.28)}

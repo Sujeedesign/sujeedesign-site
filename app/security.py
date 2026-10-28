@@ -12,6 +12,8 @@ import time
 from threading import Lock
 
 SESSION_COOKIE = "sjd_admin"
+# Cookie non HttpOnly, simple drapeau lu par la vitrine pour charger l'éditeur.
+EDIT_MARKER_COOKIE = "sjd_edit"
 SESSION_TTL = 12 * 60 * 60
 FORM_TTL = 2 * 60 * 60
 

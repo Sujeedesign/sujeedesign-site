@@ -1,0 +1,138 @@
+"""API JSON de l'éditeur visuel : session, écriture d'un champ, publication."""
+
+from __future__ import annotations
+
+import re
+
+from fastapi.testclient import TestClient
+
+PASSWORD = "mot-de-passe-de-test"
+
+
+def _csrf(client: TestClient, path: str = "/admin/contenu") -> str:
+    match = re.search(r'name="csrf" value="([^"]+)"', client.get(path).text)
+    assert match, f"aucun jeton CSRF sur {path}"
+    return match.group(1)
+
+
+def login(client: TestClient) -> TestClient:
+    response = client.post("/admin/connexion", data={"password": PASSWORD}, follow_redirects=False)
+    assert response.status_code == 303, response.text
+    return client
+
+
+def test_session_refuse_les_anonymes(client: TestClient) -> None:
+    response = client.get("/api/editor/session")
+    assert response.status_code == 401
+    assert response.json()["ok"] is False
+
+
+def test_session_expose_document_et_schema(client: TestClient) -> None:
+    login(client)
+    response = client.get("/api/editor/session")
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["ok"] is True
+    assert payload["csrf"]
+    assert payload["doc"]["hero"]["title"]["first"]
+    sections = payload["sections"]
+    paths = {
+        field["path"]
+        for section in sections
+        for block in section["blocks"]
+        for field in block["fields"]
+    }
+    assert "hero.kicker" in paths
+    assert "medias" in payload
+    assert "publish_ready" in payload
+    assert "token" not in str(payload), "aucun secret Coolify ne doit sortir"
+
+
+def test_marqueur_edition_pose_a_la_connexion(client: TestClient) -> None:
+    response = client.post(
+        "/admin/connexion", data={"password": PASSWORD}, follow_redirects=False
+    )
+    cookies = response.headers.get_list("set-cookie")
+    assert any(c.startswith("sjd_edit=1") for c in cookies)
+    assert any("sjd_edit=1" in c and "HttpOnly" not in c for c in cookies)
+
+
+def test_ecriture_champ_puis_lecture(client: TestClient) -> None:
+    login(client)
+    csrf = client.get("/api/editor/session").json()["csrf"]
+    response = client.post(
+        "/api/editor/champ",
+        json={"path": "hero.kicker", "value": "Studio de test", "csrf": csrf},
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["doc"]["hero"]["kicker"] == "Studio de test"
+    assert client.get("/api/editor/session").json()["doc"]["hero"]["kicker"] == "Studio de test"
+
+
+def test_ecriture_refuse_sans_csrf(client: TestClient) -> None:
+    login(client)
+    response = client.post(
+        "/api/editor/champ", json={"path": "hero.kicker", "value": "pirate", "csrf": "faux"}
+    )
+    assert response.status_code in (400, 403)
+
+
+def test_ecriture_refuse_un_champ_inconnu(client: TestClient) -> None:
+    login(client)
+    csrf = client.get("/api/editor/session").json()["csrf"]
+    response = client.post(
+        "/api/editor/champ", json={"path": "hero.inconnu", "value": "x", "csrf": csrf}
+    )
+    assert response.status_code == 404
+
+
+def test_ecriture_refuse_une_valeur_invalide(client: TestClient) -> None:
+    login(client)
+    csrf = client.get("/api/editor/session").json()["csrf"]
+    response = client.post(
+        "/api/editor/champ", json={"path": "hero.kicker", "value": "   ", "csrf": csrf}
+    )
+    assert response.status_code == 422
+    assert response.json()["ok"] is False
+
+
+def test_publication_transmet_le_document(client: TestClient, monkeypatch) -> None:
+    login(client)
+    csrf = client.get("/api/editor/session").json()["csrf"]
+    calls: list[str] = []
+
+    def fake_publish(conn, slug="home"):
+        calls.append(slug)
+        return {"ok": True, "message": "Déploiement demandé"}
+
+    from app import content as content_store
+
+    monkeypatch.setattr(content_store, "request_publish", fake_publish)
+    response = client.post("/api/editor/publier", json={"csrf": csrf})
+    assert response.status_code == 200, response.text
+    assert response.json()["ok"] is True
+    assert calls == ["home"]
+
+def test_ecriture_accepte_l_origine_du_proxy(client: TestClient) -> None:
+    """Derrière les rewrites Next, l'origine du navigateur diffère du Host reçu."""
+    login(client)
+    csrf = client.get("/api/editor/session").json()["csrf"]
+    response = client.post(
+        "/api/editor/champ",
+        json={"path": "hero.title.first", "value": "Votre marque", "csrf": csrf},
+        headers={"origin": "https://sujeedesign.com", "x-forwarded-host": "sujeedesign.com"},
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["ok"] is True
+
+
+def test_ecriture_refuse_une_origine_etrangere(client: TestClient) -> None:
+    login(client)
+    csrf = client.get("/api/editor/session").json()["csrf"]
+    response = client.post(
+        "/api/editor/champ",
+        json={"path": "hero.title.first", "value": "Pirate", "csrf": csrf},
+        headers={"origin": "https://evil.example", "x-forwarded-host": "sujeedesign.com"},
+    )
+    assert response.status_code == 403
+    assert response.json()["detail"] == "origine refusée"
