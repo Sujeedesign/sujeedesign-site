@@ -15,6 +15,13 @@ const arrow = (
 
 const { hero, studio, cases, method, services, cta } = homeContent;
 
+/**
+ * Repère d'édition visuelle : `data-field` porte le chemin du champ dans
+ * `app/content_model.py` (hero.kicker, studio.stats.0.value, …). Le runtime
+ * (`components/editor`) lit ces attributs pour rendre la page éditable en place ;
+ * sans session admin, ils restent inertes et n'alourdissent rien d'autre.
+ */
+
 /** Projet mis en avant dans l'ouverture : premier cas du portfolio. */
 const featured = getProject("elerya");
 
@@ -48,25 +55,31 @@ export function Hero() {
       ></a>
 
       <div className="hero__content">
-        <p className="hero__kicker">{hero.kicker}</p>
+        <p className="hero__kicker" data-field="hero.kicker">
+          {hero.kicker}
+        </p>
         <h1 className="hero__title" id="heroTitle">
-          <span>{hero.title.first}{" "}</span>
-          <span className="hl">{hero.title.highlight}{" "}</span>
-          <span className="thin">{hero.title.last}</span>
+          <span data-field="hero.title.first">{hero.title.first}{" "}</span>
+          <span className="hl" data-field="hero.title.highlight">
+            {hero.title.highlight}{" "}
+          </span>
+          <span className="thin" data-field="hero.title.last">
+            {hero.title.last}
+          </span>
         </h1>
         <div className="hero__cols">
           <p className="hero__lead">
-            {hero.lead.text}{" "}
-            <b>{hero.lead.strong}</b>
+            <span data-field="hero.lead.text">{hero.lead.text}</span>{" "}
+            <b data-field="hero.lead.strong">{hero.lead.strong}</b>
           </p>
-          <a className="hero__cta" href={hero.cta.href}>
-            {hero.cta.label}
+          <a className="hero__cta" href={hero.cta.href} data-href-field="hero.cta.href">
+            <span data-field="hero.cta.label">{hero.cta.label}</span>
             {arrow}
           </a>
         </div>
       </div>
 
-      <div className="hero__tag" aria-hidden="true">
+      <div className="hero__tag" aria-hidden="true" data-field="hero.tag">
         {hero.tag}
       </div>
       <div className="scrollcue">
@@ -84,7 +97,7 @@ export function Studio() {
         <div className="sec-head rv">
           <div className="sec-num">01</div>
           <div>
-            <h2>
+            <h2 data-field="studio.title" data-multiline="1">
               {studio.title.map((line, index) => (
                 <span key={line}>
                   {index > 0 ? <br /> : null}
@@ -92,22 +105,24 @@ export function Studio() {
                 </span>
               ))}
             </h2>
-            <p>{studio.intro}</p>
+            <p data-field="studio.intro">{studio.intro}</p>
           </div>
-          <div className="side">{studio.aside}</div>
+          <div className="side" data-field="studio.aside">
+            {studio.aside}
+          </div>
         </div>
 
         <p className="statement rv">
-          {studio.statement.text}
-          <em>{studio.statement.emphasis}</em>
+          <span data-field="studio.statement.text">{studio.statement.text}</span>
+          <em data-field="studio.statement.emphasis">{studio.statement.emphasis}</em>
         </p>
 
         <div className="numbers rv">
-          {studio.stats.map((stat) => (
+          {studio.stats.map((stat, index) => (
             <div className="num" key={stat.label}>
-              <b>{stat.value}</b>
-              <span>{stat.label}</span>
-              <p>{stat.text}</p>
+              <b data-field={`studio.stats.${index}.value`}>{stat.value}</b>
+              <span data-field={`studio.stats.${index}.label`}>{stat.label}</span>
+              <p data-field={`studio.stats.${index}.text`}>{stat.text}</p>
             </div>
           ))}
         </div>
@@ -250,7 +265,7 @@ export function Cases() {
         <div className="sec-head rv">
           <div className="sec-num">02</div>
           <div>
-            <h2>
+            <h2 data-field="cases.title" data-multiline="1">
               {cases.title.map((line, index) => (
                 <span key={line}>
                   {index > 0 ? <br /> : null}
@@ -258,17 +273,17 @@ export function Cases() {
                 </span>
               ))}
             </h2>
-            <p>{cases.intro}</p>
+            <p data-field="cases.intro">{cases.intro}</p>
           </div>
           <div className="side">
-            <a className="side__link" href={cases.aside.href}>
-              {cases.aside.label}
+            <a className="side__link" href={cases.aside.href} data-href-field="cases.aside.href">
+              <span data-field="cases.aside.label">{cases.aside.label}</span>
             </a>
           </div>
         </div>
 
         <div className="stack">
-          {cases.items.map((item) => (
+          {cases.items.map((item, index) => (
             <a
               key={item.id}
               href={item.href}
@@ -284,8 +299,14 @@ export function Cases() {
                 />
               ) : null}
               <div className="case__top">
-                <span className="case__idx">{item.index}</span>
-                <span className="case__meta">
+                <span className="case__idx" data-field={`cases.items.${index}.index`}>
+                  {item.index}
+                </span>
+                <span
+                  className="case__meta"
+                  data-field={`cases.items.${index}.meta`}
+                  data-multiline="1"
+                >
                   {item.meta.map((line) => (
                     <span key={line}>{line}</span>
                   ))}
@@ -296,10 +317,18 @@ export function Cases() {
               </div>
               <div className="case__foot">
                 <div className="case__text">
-                  <h2 className="case__title" id={item.id}>
+                  <h2
+                    className="case__title"
+                    id={item.id}
+                    data-field={`cases.items.${index}.title`}
+                  >
                     {item.title}
                   </h2>
-                  <ul className="case__sub">
+                  <ul
+                    className="case__sub"
+                    data-field={`cases.items.${index}.tags`}
+                    data-multiline="1"
+                  >
                     {item.tags.map((tag) => (
                       <li key={tag}>{tag}</li>
                     ))}
@@ -309,7 +338,11 @@ export function Cases() {
                   Voir l’étude de cas <span aria-hidden="true">↗</span>
                 </span>
               </div>
-              <span className="case__ghost" aria-hidden="true">
+              <span
+                className="case__ghost"
+                aria-hidden="true"
+                data-field={`cases.items.${index}.ghost`}
+              >
                 {item.ghost}
               </span>
             </a>
@@ -327,21 +360,23 @@ export function Method() {
         <div className="sec-head rv">
           <div className="sec-num">03</div>
           <div>
-            <h2>{method.title}</h2>
-            <p>{method.intro}</p>
+            <h2 data-field="method.title">{method.title}</h2>
+            <p data-field="method.intro">{method.intro}</p>
           </div>
-          <div className="side">{method.aside}</div>
+          <div className="side" data-field="method.aside">
+            {method.aside}
+          </div>
         </div>
 
         <div className="steps rv">
-          {method.steps.map((step) => (
+          {method.steps.map((step, index) => (
             <div className="step" key={step.step}>
               <div className="k">
-                <span>{step.step}</span>
-                <b>{step.duration}</b>
+                <span data-field={`method.steps.${index}.step`}>{step.step}</span>
+                <b data-field={`method.steps.${index}.duration`}>{step.duration}</b>
               </div>
-              <h3>{step.title}</h3>
-              <p>{step.text}</p>
+              <h3 data-field={`method.steps.${index}.title`}>{step.title}</h3>
+              <p data-field={`method.steps.${index}.text`}>{step.text}</p>
             </div>
           ))}
         </div>
@@ -357,7 +392,7 @@ export function Services() {
         <div className="sec-head rv">
           <div className="sec-num">04</div>
           <div>
-            <h2>
+            <h2 data-field="services.title" data-multiline="1">
               {services.title.map((line, index) => (
                 <span key={line}>
                   {index > 0 ? <br /> : null}
@@ -365,17 +400,26 @@ export function Services() {
                 </span>
               ))}
             </h2>
-            <p>{services.intro}</p>
+            <p data-field="services.intro">{services.intro}</p>
           </div>
-          <div className="side">{services.aside}</div>
+          <div className="side" data-field="services.aside">
+            {services.aside}
+          </div>
         </div>
 
         <div className="rl-svc__grid rv">
-          {services.items.map((service) => (
-            <a className="rl-svc__card" href={service.href} key={service.number}>
-              <span className="rl-svc__n">{service.number}</span>
-              <h3>{service.title}</h3>
-              <p>{service.summary}</p>
+          {services.items.map((service, index) => (
+            <a
+              className="rl-svc__card"
+              href={service.href}
+              key={service.number}
+              data-href-field={`services.items.${index}.href`}
+            >
+              <span className="rl-svc__n" data-field={`services.items.${index}.number`}>
+                {service.number}
+              </span>
+              <h3 data-field={`services.items.${index}.title`}>{service.title}</h3>
+              <p data-field={`services.items.${index}.summary`}>{service.summary}</p>
               <span className="rl-svc__a" aria-hidden="true">
                 ↗
               </span>
@@ -393,9 +437,14 @@ export function CallToAction() {
       <div className="wrap">
         <div className="bandcta bandcta--dark cta-glow">
           <div className="glow" aria-hidden="true"></div>
-          <p>{cta.text}</p>
-          <a className="btn-fill btn-fill--light" href={cta.action.href}>
-            {cta.action.label} <span aria-hidden="true">↗</span>
+          <p data-field="cta.text">{cta.text}</p>
+          <a
+            className="btn-fill btn-fill--light"
+            href={cta.action.href}
+            data-href-field="cta.action.href"
+          >
+            <span data-field="cta.action.label">{cta.action.label}</span>{" "}
+            <span aria-hidden="true">↗</span>
           </a>
         </div>
       </div>
