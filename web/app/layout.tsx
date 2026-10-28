@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { BodyClass, bodyClassScript } from "@/components/site/body-class";
+import { Analytics } from "@/components/site/analytics";
 import { SiteScripts } from "@/components/site/scripts";
-import { professionalServiceJsonLd } from "@/content/site";
+import { GOOGLE_SITE_VERIFICATION } from "@/lib/analytics";
+import { assetHref } from "@/lib/asset-version";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://sujeedesign.com"),
@@ -39,6 +41,7 @@ export const metadata: Metadata = {
     images: ["/assets/img/og/studio.jpg"],
   },
   icons: { icon: [{ url: "/assets/favicon.svg", type: "image/svg+xml" }] },
+  verification: GOOGLE_SITE_VERIFICATION ? { google: GOOGLE_SITE_VERIFICATION } : undefined,
 };
 
 export const viewport: Viewport = {
@@ -57,21 +60,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Space+Grotesk:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap"
           rel="stylesheet"
         />
-        {/* CSS du v5, copiés à l'identique : rendu pixel-équivalent. */}
-        <link rel="stylesheet" href="/assets/site.css" />
-        <link rel="stylesheet" href="/assets/light.css" />
-        <link rel="stylesheet" href="/assets/ds.css" />
-        <link rel="stylesheet" href="/assets/anim.css" />
+        {/* CSS du v5, copiés à l'identique : rendu pixel-équivalent.
+            `?v=<hash>` : les noms ne sont pas versionnés, le paramètre évite qu'un
+            cache long serve une feuille périmée après déploiement. */}
+        <link rel="stylesheet" href={assetHref("site.css")} />
+        <link rel="stylesheet" href={assetHref("light.css")} />
+        <link rel="stylesheet" href={assetHref("ds.css")} />
+        <link rel="stylesheet" href={assetHref("anim.css")} />
       </head>
       <body suppressHydrationWarning>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(professionalServiceJsonLd()) }}
-        />
         <script dangerouslySetInnerHTML={{ __html: bodyClassScript }} />
         <BodyClass />
         {children}
         <SiteScripts />
+        <Analytics />
       </body>
     </html>
   );
