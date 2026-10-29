@@ -324,7 +324,7 @@ export default function EditorRuntime() {
     if (!session) return;
 
     const onClick = (event: MouseEvent) => {
-      if ((event.target as HTMLElement)?.closest("#sjd-dock, .sjd-pop, .sjd-toast")) return;
+      if ((event.target as HTMLElement)?.closest("#sjd-adminbar, #sjd-dock, .sjd-pop, .sjd-toast")) return;
       const el = resolveField(event);
       if (!el) {
         if (editingRef.current) void commitInline(editingRef.current);
