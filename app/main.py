@@ -17,6 +17,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import admin, api_admin, contact, content_routes, editor_api
+from . import content as content_store
 from . import settings as settings_module
 from .db import connect, init_db
 from .ui import templates  # noqa: F401  (initialise les filtres Jinja)
@@ -89,7 +90,14 @@ def create_app(db_file: Path | None = None) -> FastAPI:
     @app.get("/sante")
     @app.get("/api/health")  # compatibilité du healthcheck Coolify existant
     def sante() -> JSONResponse:
-        return JSONResponse({"ok": True, "service": "back office Sujee Design"})
+        # `publication` expose seulement l'état du mode rapide, jamais les secrets.
+        return JSONResponse(
+            {
+                "ok": True,
+                "service": "back office Sujee Design",
+                "publication": {"rapide": content_store.fast_publish_ready(), "deploiement": content_store.publish_ready()},
+            }
+        )
 
     app.include_router(admin.router)
     app.include_router(contact.router)
