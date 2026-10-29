@@ -2,19 +2,16 @@
 
 import { useEffect, useState } from "react";
 
-const EDIT_COOKIE = "sjd_edit";
-const SLUGS = new Set(["services", "realisations", "a-propos", "agents-ia"]);
+import { getActions, getState, patchState, subscribe } from "./adminbar-state";
 
-type State = { user: string; slug: string; pending: boolean; csrf: string } | null;
+const SLUGS = new Set(["services", "realisations", "a-propos", "agents-ia"]);
 
 function currentSlug(): string {
   const first = window.location.pathname.replace(/^\/+|\/+$/g, "").split("/")[0] ?? "";
   return SLUGS.has(first) ? first : "home";
 }
 
-function editCookieOn(): boolean {
-  return document.cookie.split("; ").some((c) => c.startsWith(`${EDIT_COOKIE}=1`));
-}
+type Session = { ok?: boolean; user?: string; pending?: boolean; publish_ready?: boolean };
 
 const CSS = `
 #sjd-adminbar{position:fixed;top:0;left:0;right:0;height:44px;z-index:2147483003;display:flex;align-items:center;gap:12px;padding:0 16px;background:#0A0A0B;color:#F4F1E8;font:500 12.5px/1 "Space Grotesk",system-ui,sans-serif;box-shadow:0 1px 0 rgba(255,255,255,.08)}
@@ -23,13 +20,23 @@ const CSS = `
 #sjd-adminbar .who b{font-weight:600;color:#F4F1E8}
 #sjd-adminbar .sep{width:1px;height:16px;background:rgba(255,255,255,.2)}
 #sjd-adminbar .state{color:#E8B04A;opacity:.9}
+#sjd-adminbar .dot{width:7px;height:7px;border-radius:50%;background:#C9340F;box-shadow:0 0 0 0 rgba(201,52,15,.6)}
+#sjd-adminbar .hint{margin-left:auto;opacity:.55;font-size:11.5px}
 #sjd-adminbar .push{margin-left:auto}
 #sjd-adminbar a,#sjd-adminbar button{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border:1px solid rgba(255,255,255,.22);border-radius:3px;background:transparent;color:inherit;font:inherit;text-decoration:none;cursor:pointer;transition:background .15s ease,border-color .15s ease}
 #sjd-adminbar a:hover,#sjd-adminbar button:hover{background:rgba(255,255,255,.1)}
 #sjd-adminbar button.accent{background:#C9340F;border-color:#C9340F;color:#fff}
 #sjd-adminbar button.accent:hover{background:#E03D13;border-color:#E03D13}
+#sjd-adminbar button.primary{background:#C9340F;border-color:#C9340F;color:#fff}
+#sjd-adminbar button.primary:hover{background:#E03D13;border-color:#E03D13}
+/* Aucune modification : le bouton Publier reste gris, désactivé. */
+#sjd-adminbar button.primary:disabled{background:transparent;border-color:rgba(255,255,255,.22);color:rgba(244,241,232,.45);cursor:default}
+#sjd-adminbar button.primary:disabled:hover{background:transparent}
 body.sjd-adminbar-on{padding-top:44px}
 body.sjd-adminbar-on .nav{top:44px}
+@media (max-width:900px){
+  #sjd-adminbar .hint{display:none}
+}
 @media (max-width:760px){
   #sjd-adminbar{font-size:11.5px;gap:8px;padding:0 10px}
   #sjd-adminbar .who,#sjd-adminbar .state,#sjd-adminbar .sep{display:none}
@@ -37,10 +44,11 @@ body.sjd-adminbar-on .nav{top:44px}
 `;
 
 export default function AdminBar() {
-  const [state, setState] = useState<State>(null);
+  const [state, setState] = useState(getState());
+
+  useEffect(() => subscribe(() => setState(getState())), []);
 
   useEffect(() => {
-    if (editCookieOn()) return; // le bandeau de l'éditeur prend le relais
     let cancelled = false;
     const slug = currentSlug();
     fetch(`/api/editor/session?page=${encodeURIComponent(slug)}`, {
@@ -48,9 +56,15 @@ export default function AdminBar() {
       headers: { accept: "application/json" },
     })
       .then((r) => (r.ok ? r.json() : null))
-      .then((data: { ok?: boolean; user?: string; pending?: boolean; csrf?: string } | null) => {
+      .then((data: Session | null) => {
         if (cancelled || !data?.ok || !data.user) return;
-        setState({ user: data.user, slug, pending: Boolean(data.pending), csrf: data.csrf ?? "" });
+        patchState({
+          ready: true,
+          user: data.user,
+          slug,
+          pending: Boolean(data.pending),
+          publishReady: Boolean(data.publish_ready),
+        });
       })
       .catch(() => undefined);
     return () => {
@@ -59,13 +73,15 @@ export default function AdminBar() {
   }, []);
 
   useEffect(() => {
-    if (!state) return;
+    if (!state.ready) return;
     document.body.classList.add("sjd-adminbar-on");
     return () => document.body.classList.remove("sjd-adminbar-on");
-  }, [state]);
+  }, [state.ready]);
 
-  if (!state) return null;
+  if (!state.ready) return null;
 
+  const { editing, pending, publishReady, publishing } = state;
+  const actions = getActions();
   const editHref = `/admin/editer?page=${encodeURIComponent(state.slug)}`;
 
   return (
@@ -76,18 +92,47 @@ export default function AdminBar() {
         <span className="who">
           Connecté : <b>{state.user}</b>
         </span>
-        {state.pending ? (
+        {editing ? (
           <>
             <span className="sep" />
-            <span className="state">Modifications non publiées</span>
+            <span className="dot" />
+            <span className="state">Édition en place</span>
+            {pending ? (
+              <>
+                <span className="sep" />
+                <span className="state">Modifications non publiées</span>
+              </>
+            ) : null}
+            <span className="hint">Cliquez un texte pour l’éditer · Entrée valider · Échap annuler</span>
+            <button
+              type="button"
+              className="primary"
+              onClick={() => actions.publish?.()}
+              disabled={!pending || !publishReady || publishing}
+              title={pending ? "Publier les modifications" : "Aucune modification à publier"}
+            >
+              {publishing ? "Publication…" : "Publier"}
+            </button>
+            <button type="button" onClick={() => actions.quit?.()}>
+              Quitter l’édition
+            </button>
           </>
-        ) : null}
-        <span className="push" />
-        <button type="button" className="accent" onClick={() => { window.location.href = editHref; }}>
-          Modifier la page
-        </button>
-        <a href="/admin/pages">Pages</a>
-        <a href="/admin">Tableau de bord</a>
+        ) : (
+          <>
+            {pending ? (
+              <>
+                <span className="sep" />
+                <span className="state">Modifications non publiées</span>
+              </>
+            ) : null}
+            <span className="push" />
+            <button type="button" className="accent" onClick={() => { window.location.href = editHref; }}>
+              Modifier la page
+            </button>
+            <a href="/admin/pages">Pages</a>
+            <a href="/admin">Tableau de bord</a>
+          </>
+        )}
       </div>
     </>
   );

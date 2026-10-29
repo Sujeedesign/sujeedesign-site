@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { patchState, setActions } from "./adminbar-state";
+
 /**
  * Runtime d'édition visuelle de la vitrine.
  *
@@ -76,29 +78,7 @@ function setLines(el: HTMLElement, value: string) {
 }
 
 const CSS = `
-body.sjd-editing{ padding-bottom:58px; padding-top:44px; }
-/* Bannière admin, au-dessus du header du site. */
-#sjd-banner{
-  position:fixed; top:0; left:0; right:0; height:44px; z-index:2147483004;
-  display:flex; align-items:center; gap:12px; padding:0 16px;
-  background:#0A0A0B; color:#F4F1E8;
-  font:500 12.5px/1 "Space Grotesk", system-ui, sans-serif;
-  box-shadow:0 1px 0 rgba(255,255,255,.08);
-}
-#sjd-banner .who{ display:flex; align-items:center; gap:8px; }
-#sjd-banner .who b{ color:#E8B04A; font-weight:600; letter-spacing:.06em; text-transform:uppercase; font-size:11px; }
-#sjd-banner .sep{ width:1px; height:16px; background:rgba(255,255,255,.2); }
-#sjd-banner .muted{ opacity:.62; font-size:12px; }
-#sjd-banner .push{ margin-left:auto; display:flex; align-items:center; gap:8px; }
-#sjd-banner a, #sjd-banner button{
-  font:500 12px/1 "Space Grotesk", system-ui, sans-serif; color:inherit; text-decoration:none;
-  background:transparent; border:1px solid rgba(255,255,255,.22); border-radius:3px;
-  padding:8px 12px; cursor:pointer;
-}
-#sjd-banner a:hover, #sjd-banner button:hover{ background:rgba(255,255,255,.1); }
-#sjd-banner button.accent{ background:#C9340F; border-color:#C9340F; }
-#sjd-banner button.accent:hover{ background:#E03D13; }
-/* La bannière cookies n'a rien à faire par-dessus le dock d'édition. */
+/* Le bandeau admin gère le décalage du header ; ici on ne règle que l'édition. */
 body.sjd-editing .cookie-banner{ display:none !important; }
 body.sjd-editing [data-field]{
   cursor:text;
@@ -114,35 +94,6 @@ body.sjd-editing [data-field], body.sjd-editing [data-field] *{ pointer-events:a
 body.sjd-editing [data-field]:hover{ outline-color:#C9340F; background:rgba(201,52,15,.06); }
 body.sjd-editing [data-field].sjd-selected{ outline:2px solid #C9340F; background:rgba(201,52,15,.07); }
 body.sjd-editing [data-field][contenteditable="true"]{ outline:2px solid #C9340F; background:rgba(255,255,255,.5); }
-#sjd-dock{
-  position:fixed; left:0; right:0; bottom:0; height:58px; z-index:2147483000;
-  display:flex; align-items:center; gap:14px; padding:0 18px;
-  background:rgba(10,10,11,.96); color:#F4F1E8;
-  font:500 12.5px/1 "Space Grotesk", system-ui, sans-serif;
-  letter-spacing:.01em;
-  box-shadow:0 -1px 0 rgba(255,255,255,.08);
-  backdrop-filter:blur(8px);
-}
-#sjd-dock .dot{ width:8px; height:8px; border-radius:50%; background:#C9340F; box-shadow:0 0 0 3px rgba(201,52,15,.28); }
-#sjd-dock .sep{ width:1px; height:18px; background:rgba(255,255,255,.18); }
-#sjd-dock .muted{ opacity:.6; font-size:12px; }
-#sjd-dock .state{ display:none; align-items:center; gap:7px; color:#E8B04A; font-size:12px; }
-#sjd-dock .state::before{ content:""; width:6px; height:6px; border-radius:50%; background:#E8B04A; }
-#sjd-dock.dirty .state{ display:flex; }
-#sjd-dock .push{ margin-left:auto; display:flex; align-items:center; gap:10px; }
-#sjd-dock button{
-  font:500 12.5px/1 "Space Grotesk", system-ui, sans-serif; color:inherit;
-  background:transparent; border:1px solid rgba(255,255,255,.22); border-radius:3px;
-  padding:9px 14px; cursor:pointer;
-}
-#sjd-dock button:hover{ background:rgba(255,255,255,.08); }
-#sjd-dock button.primary{ background:#C9340F; border-color:#C9340F; }
-#sjd-dock button.primary:hover{ background:#E03D13; }
-#sjd-dock button:disabled{ opacity:.5; cursor:default; }
-/* Rien à publier : le bouton reste gris. Dès qu'un champ change, il passe au rouge. */
-#sjd-dock button.primary:disabled{
-  background:transparent; border-color:rgba(255,255,255,.22); color:rgba(244,241,232,.45); opacity:1;
-}
 .sjd-tag{
   position:absolute; z-index:2147483001; transform:translateY(-100%);
   background:#C9340F; color:#fff; font:600 10px/1 "Space Grotesk", system-ui, sans-serif;
@@ -251,6 +202,14 @@ export default function EditorRuntime() {
         sessionRef.current = withSchema;
         setSession(withSchema);
         setPending(Boolean(data.pending));
+        patchState({
+          ready: true,
+          user: data.user ?? "",
+          slug: slugRef.current,
+          editing: true,
+          pending: Boolean(data.pending),
+          publishReady: Boolean(data.publish_ready),
+        });
         document.body.classList.add("sjd-editing");
         applyValues(withSchema);
       })
@@ -274,6 +233,7 @@ export default function EditorRuntime() {
         if (!res.ok || !data.ok) return { ok: false, error: data.error ?? "Enregistrement refusé" };
         savedRef.current.set(path, value);
         if (typeof data.pending === "boolean") setPending(data.pending);
+        if (typeof data.pending === "boolean") patchState({ pending: data.pending });
         return { ok: true };
       } catch {
         return { ok: false, error: "Serveur injoignable" };
@@ -471,6 +431,7 @@ export default function EditorRuntime() {
   const publish = async () => {
     if (!sessionRef.current) return;
     setPublishing(true);
+    patchState({ publishing: true });
     try {
       const res = await fetch("/api/editor/publier", {
         method: "POST",
@@ -481,6 +442,7 @@ export default function EditorRuntime() {
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.ok) {
         setPending(Boolean(data.pending ?? false));
+        patchState({ pending: Boolean(data.pending ?? false) });
         flash("Publication lancée, le site se met à jour dans ~1 min");
       } else {
         flash(data.error ?? "Publication impossible", true);
@@ -489,6 +451,7 @@ export default function EditorRuntime() {
       flash("Serveur injoignable", true);
     } finally {
       setPublishing(false);
+      patchState({ publishing: false });
     }
   };
 
@@ -497,6 +460,7 @@ export default function EditorRuntime() {
     // /admin/editer le remet à "1" pour une nouvelle session d'édition.
     document.cookie = `${EDIT_COOKIE}=0; path=/; samesite=lax`;
     document.body.classList.remove("sjd-editing");
+    patchState({ editing: false, publishing: false });
     setSession(null);
     // Sortie de l'éditeur = retour dans l'admin, jamais sur la page publique.
     window.location.href = "/admin";
@@ -514,57 +478,19 @@ export default function EditorRuntime() {
     }, 350);
   };
 
+  // Une seule barre sur la page : celle du bandeau admin, qui déclenche les
+  // actions de l'éditeur. Plus de dock séparé.
+  useEffect(() => {
+    if (!session) return;
+    setActions({ quit, publish });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session, pending, publishing]);
+
   if (!session) return null;
 
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
-      <div id="sjd-banner">
-        <span className="who">
-          <b>Admin</b>
-          <span className="sep" />
-          <span className="muted">Connecté : {session.user}</span>
-        </span>
-        <span className="push">
-          <span className="muted">Vous êtes dans l’admin du site</span>
-          <button type="button" className="accent" onClick={modifierPage}>
-            Modifier la page
-          </button>
-          <a href="/admin/pages">Pages</a>
-          <a href="/admin">Tableau de bord</a>
-          <button type="button" onClick={quit}>
-            Quitter l’édition
-          </button>
-        </span>
-      </div>
-      <div id="sjd-dock" className={pending ? "dirty" : ""}>
-        <span className="dot" />
-        <span>Édition en place</span>
-        <span className="sep" />
-        <span className="muted">{session.user}</span>
-        <span className="state">Modifications non publiées</span>
-        <span className="push">
-          <span className="muted">Cliquez un texte pour l’éditer · Entrée pour valider · Échap pour annuler</span>
-          <button type="button" onClick={quit}>
-            Quitter
-          </button>
-          <button
-            type="button"
-            className="primary"
-            onClick={publish}
-            disabled={publishing || !session.publish_ready || !pending}
-            title={
-              !session.publish_ready
-                ? "Publication Coolify non configurée sur ce serveur"
-                : pending
-                  ? "Reconstruire la vitrine avec le contenu enregistré"
-                  : "Aucune modification à publier"
-            }
-          >
-            {publishing ? "Publication…" : "Publier"}
-          </button>
-        </span>
-      </div>
 
       {pop ? (
         <div className="sjd-pop" style={{ top: pop.top, left: pop.left }}>
