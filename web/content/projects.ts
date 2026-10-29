@@ -36,10 +36,23 @@ export type Project = {
   duration?: string;
   sections: ProjectSection[];
   results?: { value: string; label: string }[];
+  /**
+   * Visuel de couverture, indépendant de la galerie.
+   *
+   * Utilisé par les cartes d'accueil, le film de /realisations, la vignette du
+   * projet suivant et l'image de partage. Absent, la première image de la
+   * galerie fait office de couverture.
+   */
+  cover?: ProjectImage;
   images: ProjectImage[];
   tags: string[];
   tone: "paper" | "tint" | "dark";
 };
+
+/** Couverture d'un projet : visuel dédié s'il existe, sinon la première image de la galerie. */
+export function coverOf(project: Project): ProjectImage | undefined {
+  return project.cover ?? project.images[0];
+}
 
 export const projects: Project[] = [
   {

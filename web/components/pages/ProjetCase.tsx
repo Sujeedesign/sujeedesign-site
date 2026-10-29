@@ -1,5 +1,5 @@
 import type { Project } from "@/content/projects";
-import { nextProject } from "@/content/projects";
+import { coverOf, nextProject } from "@/content/projects";
 import { linkedServices, relatedProjects } from "@/lib/project-links";
 import { realisationPath, routes } from "@/lib/routes";
 
@@ -120,12 +120,12 @@ export function ProjetCase({ project }: { project: Project }) {
               <div className="pjx__cards">
                 {related.map((entry) => (
                   <a className="pjx__card" href={realisationPath(entry.slug)} key={entry.slug}>
-                    {entry.images[0] ? (
+                    {coverOf(entry) ? (
                       <img
-                        src={entry.images[0].src}
+                        src={coverOf(entry)?.src}
                         alt=""
-                        width={entry.images[0].width}
-                        height={entry.images[0].height}
+                        width={coverOf(entry)?.width}
+                        height={coverOf(entry)?.height}
                         loading="lazy"
                         decoding="async"
                       />

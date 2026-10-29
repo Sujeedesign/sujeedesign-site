@@ -7,7 +7,7 @@
  * La liste vient de `content/projects.ts` : ajouter un projet le publie ici,
  * sur sa fiche et dans le plan du site.
  */
-import { projects } from "@/content/projects";
+import { coverOf, projects } from "@/content/projects";
 import { pageHero, type PageDoc } from "@/content/pages";
 import { realisationPath } from "@/lib/routes";
 
@@ -95,10 +95,10 @@ export function Realisations({ doc }: { doc?: PageDoc }) {
             <div className="rl-p__media">
               <img
                 className="rl-p__img"
-                src={project.images[0]?.src}
-                alt={project.images[0]?.alt ?? project.name}
-                width={project.images[0]?.width}
-                height={project.images[0]?.height}
+                src={coverOf(project)?.src}
+                alt={coverOf(project)?.alt ?? project.name}
+                width={coverOf(project)?.width}
+                height={coverOf(project)?.height}
                 loading={i < 2 ? "eager" : "lazy"}
                 decoding="async"
               />

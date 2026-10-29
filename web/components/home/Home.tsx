@@ -1,5 +1,5 @@
 import type { HomeContent } from "@/lib/content/schema";
-import { getProject } from "@/content/projects";
+import { coverOf, getProject } from "@/content/projects";
 
 const arrow = (
   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -24,7 +24,7 @@ const arrow = (
 const featured = getProject("elerya");
 
 /** Image du LCP de l'accueil : le fond du hero. Ses dimensions sont celles du fichier. */
-export const heroPhoto = featured?.images[0];
+export const heroPhoto = featured ? coverOf(featured) : undefined;
 
 export function Hero({ doc }: { doc: HomeContent }) {
   const { hero } = doc;
@@ -229,14 +229,15 @@ function projectSlug(href: string) {
 
 /** Photo de couverture du projet, posée en fond de carte quand elle existe. */
 function photoSrc(href: string) {
-  return getProject(projectSlug(href))?.images[0]?.src ?? null;
+  const project = getProject(projectSlug(href));
+  return project ? coverOf(project)?.src ?? null : null;
 }
 
 /** Visuel réel du projet quand il existe, sinon l'illustration d'origine. */
 function CaseMedia({ href, kind }: { href: string; kind: "pack" | "sign" | "ui" }) {
   const slug = projectSlug(href);
   const project = getProject(slug);
-  const image = project?.images[0];
+  const image = project ? coverOf(project) : undefined;
   if (!image) return <CaseVisual kind={kind} />;
   return (
     <div className="case__visual case__visual--photo">
