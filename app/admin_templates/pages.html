@@ -2,53 +2,48 @@
 {% block title %}Pages du site{% endblock %}
 {% block heading %}Pages du site{% endblock %}
 {% block content %}
-  <div class="toolbar card">
-    <div class="toolbar-info">
-      <strong>{{ pages | length }} pages éditables</strong>
-      <span class="muted small">
-        {% if publication %}
-          Dernière publication : {{ publication.status }} ({{ publication.created_at | ago }})
-        {% else %}
-          Aucune publication depuis ce back office
-        {% endif %}
-      </span>
+  <header class="page-head">
+    <div class="title-wrap">
+      <h1>Pages du site</h1>
+      <p class="sub">
+        {{ pages | length }} pages éditables
+        {% if publication %}· dernière publication {{ publication.created_at | ago }}{% else %}· aucune publication depuis ce back office{% endif %}
+      </p>
     </div>
-    <div class="toolbar-actions">
+    <div class="page-actions">
       <a class="btn btn-ghost" href="{{ public_url }}" target="_blank" rel="noopener">Voir le site</a>
       <form method="post" action="/admin/contenu/publier">
         <input type="hidden" name="csrf" value="{{ csrf }}">
         <button class="btn btn-accent" type="submit"{% if not publish_ready %} disabled title="Publication automatique non configurée sur ce serveur"{% endif %}>Publier les modifications</button>
       </form>
     </div>
-  </div>
+  </header>
 
-  <div class="grid grid-2 pages-grid">
-    {% for p in pages %}
-      <section class="card page-card">
-        <header class="card-head">
-          <h2>{{ p.label }}</h2>
-          <p class="muted small page-path">{{ p.path }}</p>
-        </header>
-        <div class="page-foot">
-          <div class="page-meta">
-            <span class="chip">{{ p.field_count }} champs</span>
-            {% if p.custom %}
-              <span class="badge badge-en-cours">modifiée</span>
-            {% else %}
-              <span class="badge badge-traite">défaut</span>
-            {% endif %}
-            <span class="muted small">
-              {% if p.updated_at %}enregistrée {{ p.updated_at | ago }}{% else %}jamais modifiée{% endif %}
+  <section class="card">
+    <ul class="list page-list">
+      {% for p in pages %}
+        <li class="page-row">
+          <div class="page-row-main">
+            <div class="page-row-title">
+              <h2>{{ p.label }}</h2>
+              {% if p.custom %}<span class="badge badge-en-cours">modifiée</span>{% endif %}
+            </div>
+            <span class="page-row-meta-muted">
+              <span class="page-row-path">{{ p.path }}</span>
+              <span class="dot-sep">·</span>
+              <span>{{ p.field_count }} champs</span>
+              <span class="dot-sep">·</span>
+              <span>{% if p.updated_at %}enregistrée {{ p.updated_at | ago }}{% else %}contenu d'origine{% endif %}</span>
             </span>
           </div>
           <div class="page-actions">
-            <a class="btn btn-ghost btn-sm" href="/admin/contenu?page={{ p.slug }}">Éditer via formulaire</a>
-            <a class="btn btn-accent btn-sm" href="/admin/editer?page={{ p.slug }}">Éditer en place</a>
+            <a class="btn btn-ghost btn-sm" href="/admin/contenu?page={{ p.slug }}">Formulaire</a>
+            <a class="btn btn-line btn-sm" href="/admin/editer?page={{ p.slug }}">Éditer en place →</a>
           </div>
-        </div>
-      </section>
-    {% endfor %}
-  </div>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
 
   {% if not publish_ready %}
     <div class="alert">
@@ -56,10 +51,10 @@
     </div>
   {% endif %}
 
-  <p class="note small">
+  <p class="note">
     <span class="note-k">Comment ça marche</span>
     « Éditer en place » ouvre la vraie page, connecté : clique un texte, corrige, c'est enregistré.
-    Le formulaire reste là comme secours. Les présentations projet ne sont pas listées ici : elles restent
-    gérées côté admin projet et ne passent jamais par l'édition en place.
+    Le formulaire reste là comme secours. Les présentations projet se gèrent depuis
+    <a href="/admin/projets">Projets</a>.
   </p>
 {% endblock %}

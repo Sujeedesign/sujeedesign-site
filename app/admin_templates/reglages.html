@@ -2,49 +2,78 @@
 {% block title %}Réglages{% endblock %}
 {% block heading %}Réglages{% endblock %}
 {% block content %}
+  <header class="page-head">
+    <div class="title-wrap">
+      <h1>Réglages</h1>
+      <p class="sub">Identité, contacts, publication et sécurité du back office.</p>
+    </div>
+  </header>
+
   <form class="card form-card" method="post" action="/admin/reglages">
     <input type="hidden" name="csrf" value="{{ csrf }}">
     <header class="card-head"><h2>Identité et contacts</h2><p class="muted small">Ces valeurs alimentent le back office et les emails.</p></header>
-    <div class="form-grid">
+    <div class="form-grid form-grid--2">
       {% for key, label, kind in fields %}
         <label class="field">
-          <span>{{ label }}</span>
-          <input type="{{ kind or 'text' }}" name="f_{{ key }}" value="{{ values.get(key, '') }}">
+          <span>{{ label }}{% if key == 'phone' %}<em class="hint">(optionnel)</em>{% endif %}</span>
+          <input type="{{ kind or 'text' }}" name="f_{{ key }}" value="{{ values.get(key, '') }}"
+                 {% if kind == 'url' %}placeholder="https://"{% elif key == 'phone' %}placeholder="+33 6 12 34 56 78"{% endif %}>
         </label>
       {% endfor %}
     </div>
-    <button class="btn btn-accent" type="submit">Enregistrer</button>
+    <div class="form-foot">
+      <button class="btn btn-accent" type="submit">Enregistrer</button>
+    </div>
   </form>
 
-  <section class="card">
-    <header class="card-head"><h2>Publication</h2></header>
-    {% if publication %}
-      <p class="small">Dernière demande : {{ publication.created_at | datetimefr }}</p>
-      <p class="small">Statut : <span class="badge">{{ publication.status }}</span>
-        {% if publication.deployment %} · déploiement <code>{{ publication.deployment }}</code>{% endif %}
-      </p>
-    {% else %}
-      <p class="small muted">Aucune publication déclenchée depuis le back office.</p>
-    {% endif %}
-    {% if publish_ready %}
-      <p class="small muted">La publication envoie le contenu à la vitrine Next puis déclenche le déploiement Coolify.</p>
-      <form method="post" action="/admin/contenu/publier">
-        <input type="hidden" name="csrf" value="{{ csrf }}">
-        <button class="btn btn-line" type="submit">Publier maintenant</button>
-      </form>
-    {% else %}
-      <p class="warn small">Publication non configurée : la variable <code>COOLIFY_TOKEN</code> manque sur le serveur du back office.</p>
-    {% endif %}
-  </section>
+  <div class="grid grid-2 grid--stretch">
+    <section class="card">
+      <header class="card-head"><h2>Publication</h2><p class="muted small">Envoi du contenu à la vitrine puis déploiement Coolify.</p></header>
+      {% if publication %}
+        <ul class="list list-tight">
+          <li class="list-row">
+            <div class="list-body"><strong>Dernière publication</strong><span class="muted small">{{ publication.created_at | datetimefr }}</span></div>
+            <span class="badge {% if publication.status in ('publie', 'ok', 'succes') %}badge-traite{% endif %}">{{ publication.status | replace('_', ' ') | capitalize }}</span>
+          </li>
+          {% if publication.deployment %}
+            <li class="list-row">
+              <div class="list-body"><strong>Déploiement</strong><span class="muted small mono">{{ publication.deployment }}</span></div>
+            </li>
+          {% endif %}
+          <li class="list-row">
+            <div class="list-body"><strong>Accès Coolify</strong><span class="muted small">Jeton serveur</span></div>
+            {% if publish_ready %}
+              <span class="badge badge-traite">Configurée</span>
+            {% else %}
+              <span class="badge badge--off">Non configurée</span>
+            {% endif %}
+          </li>
+        </ul>
+      {% else %}
+        <p class="empty">Aucune publication déclenchée depuis le back office.</p>
+      {% endif %}
+      {% if publish_ready %}
+        <form method="post" action="/admin/contenu/publier" class="form-foot">
+          <input type="hidden" name="csrf" value="{{ csrf }}">
+          <button class="btn btn-line" type="submit">Publier maintenant</button>
+        </form>
+      {% else %}
+        <p class="note note--inline">
+          <span class="note-k">À configurer</span>
+          La variable <code>COOLIFY_TOKEN</code> doit être renseignée sur le serveur du back office avant de pouvoir publier.
+        </p>
+      {% endif %}
+    </section>
 
-  <section class="card">
-    <header class="card-head"><h2>Sécurité</h2></header>
-    <ul class="plain">
-      <li>Un seul mot de passe protège le back office, fourni par la variable <code>SITE_ADMIN_PASSWORD</code>.</li>
-      <li>Session signée, expiration 12 heures, cookies <code>HttpOnly</code> et <code>SameSite=Lax</code>.</li>
-      <li>Toutes les actions de modification exigent un jeton CSRF.</li>
-      <li>Tentatives de connexion limitées : blocage temporaire après plusieurs échecs.</li>
-      <li>Aucune page publique n'est servie par ce service.</li>
-    </ul>
-  </section>
+    <section class="card">
+      <header class="card-head"><h2>Sécurité</h2><p class="muted small">Ce qui protège l'accès à l'administration.</p></header>
+      <ul class="plain">
+        <li>Un seul mot de passe protège le back office, fourni par la variable <code>SITE_ADMIN_PASSWORD</code>.</li>
+        <li>Session signée, expiration 12 heures, cookies <code>HttpOnly</code> et <code>SameSite=Lax</code>.</li>
+        <li>Toutes les actions de modification exigent un jeton CSRF.</li>
+        <li>Tentatives de connexion limitées : blocage temporaire après plusieurs échecs.</li>
+        <li>Aucune page publique n'est servie par ce service.</li>
+      </ul>
+    </section>
+  </div>
 {% endblock %}

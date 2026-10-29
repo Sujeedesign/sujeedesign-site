@@ -5,32 +5,42 @@
   {% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
 {% endblock %}
 {% block content %}
-  <p class="muted small"><a class="link" href="/admin/pages">← Pages du site</a></p>
+  <header class="page-head">
+    <div class="title-wrap">
+      <p class="kicker"><a class="link" href="/admin/pages">Retour aux pages</a></p>
+      <h1>{{ page_label }}</h1>
+      <p class="sub">
+        {% if doc.updated_at %}Enregistré {{ doc.updated_at | ago }}{% else %}Version de référence{% endif %}
+        {% if publication %}· dernière publication {{ publication.status }} {{ publication.created_at | ago }}{% endif %}
+      </p>
+    </div>
+  </header>
 
-  <form method="post" action="/admin/contenu" class="content-form" data-dirty-guard>
+  <form method="post" action="/admin/contenu" class="content-form content-form--read" data-dirty-guard>
     <input type="hidden" name="csrf" value="{{ csrf }}">
     <input type="hidden" name="page" value="{{ slug }}">
 
-    <div class="toolbar card">
+    <div class="toolbar card toolbar--sticky">
       <div class="toolbar-info">
-        <strong>{{ doc.updated_at and ('Enregistré ' ~ (doc.updated_at | ago)) or 'Version de référence' }}</strong>
-        <span class="muted small">
-          {% if publication %}
-            Dernière publication : {{ publication.status }} ({{ publication.created_at | ago }})
-          {% else %}
-            Aucune publication depuis ce back office
-          {% endif %}
-        </span>
+        {% if publication %}
+          <span class="pill">en ligne</span>
+          <span class="muted small">Publié {{ publication.created_at | ago }}</span>
+        {% else %}
+          <span class="pill">brouillon</span>
+          <span class="muted small">Aucune publication depuis ce back office</span>
+        {% endif %}
       </div>
       <div class="toolbar-actions">
-        <a class="btn btn-line" href="/admin/editer?page={{ slug }}">Éditer en place</a>
-        <button class="btn btn-ghost" type="submit" name="action" value="save">Enregistrer</button>
+        <a class="btn btn-ghost" href="/admin/editer?page={{ slug }}">Éditer en place</a>
+        <button class="btn btn-line" type="submit" name="action" value="save">Enregistrer</button>
         <button class="btn btn-accent" type="submit" name="action" value="publier"{% if not publish_ready %} disabled title="Publication non configurée"{% endif %}>Enregistrer et publier</button>
       </div>
     </div>
 
     {% if not publish_ready %}
-      <p class="warn small">Publication Coolify non configurée sur ce serveur : l'enregistrement fonctionne, la mise en ligne de la vitrine non.</p>
+      <div class="alert">
+        <div><b>Publication non configurée</b><span>L'enregistrement fonctionne, la mise en ligne de la vitrine non : la variable <code>COOLIFY_TOKEN</code> manque sur ce serveur.</span></div>
+      </div>
     {% endif %}
 
     <div class="content-layout">
@@ -52,7 +62,7 @@
               <div class="block">
                 {% if block.label %}<h3 class="mini-title">{{ block.label }}</h3>{% endif %}
                 {% for field in block.fields %}
-                  <label class="field">
+                  <label class="field{% if field.type == 'lines' or field.long %} full{% endif %}">
                     <span>{{ field.label }}{% if field.hint %}<em class="hint">{{ field.hint }}</em>{% endif %}</span>
                     {% if field.type == 'lines' %}
                       <textarea name="f_{{ field.path }}" rows="{{ field.rows or 3 }}" spellcheck="true">{{ field.value }}</textarea>

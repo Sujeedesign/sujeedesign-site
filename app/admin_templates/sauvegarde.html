@@ -2,20 +2,53 @@
 {% block title %}Sauvegarde{% endblock %}
 {% block heading %}Sauvegarde{% endblock %}
 {% block content %}
-  <section class="card">
-    <header class="card-head"><h2>Base actuelle</h2></header>
-    <p class="small">Fichier : <code>{{ path }}</code></p>
-    <p class="small">Taille : {{ (size / 1024) | round(1) }} Ko</p>
-    <ul class="plain">
-      {% for table, count in counts.items() %}
-        <li><strong>{{ table }}</strong> : {{ count }} enregistrement{{ count > 1 and 's' or '' }}</li>
-      {% endfor %}
-    </ul>
-  </section>
+  {% set labels = {'messages': 'Messages', 'medias': 'Médias', 'content_docs': 'Pages et blocs', 'revisions': 'Révisions', 'publications': 'Publications', 'projets': 'Projets', 'prestations': 'Prestations'} %}
+  <header class="page-head">
+    <div class="title-wrap">
+      <h1>Sauvegarde</h1>
+      <p class="sub">État de la base locale et export complet des données.</p>
+    </div>
+  </header>
 
-  <section class="card">
-    <header class="card-head"><h2>Exporter</h2></header>
-    <p class="small muted">Télécharge un JSON complet : contenu, messages, médias, réglages et historique.</p>
-    <a class="btn btn-accent" href="/admin/sauvegarde/export.json">Télécharger l'export JSON</a>
-  </section>
+  <div class="grid grid-2 grid-top grid--stretch">
+    <section class="card">
+      <header class="card-head"><h2>Base de données</h2><p class="muted small">Fichier SQLite du back office.</p></header>
+      <ul class="list list-tight">
+        <li class="list-row">
+          <div class="list-body"><strong>Fichier</strong></div>
+          <span class="mono-num">{{ path }}</span>
+        </li>
+        <li class="list-row">
+          <div class="list-body"><strong>Taille</strong></div>
+          <span class="mono-num">{{ (size / 1024) | round(1) | replace('.', ',') }} Ko</span>
+        </li>
+      </ul>
+      <header class="card-head card-head--inner"><h2>Données</h2></header>
+      <ul class="list list-tight counts">
+        {% for table, count in counts.items() %}
+          <li class="list-row">
+            <div class="list-body"><span>{{ labels.get(table, table) }}</span></div>
+            <span class="mono-num">{{ count }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <section class="card card--split">
+      <header class="card-head"><h2>Export JSON</h2><p class="muted small">Archive de tout le contenu du back office.</p></header>
+      <ul class="plain plain-tight">
+        <li>Pages et textes publiés</li>
+        <li>Messages reçus</li>
+        <li>Médias et réglages</li>
+        <li>Projets, prestations et historique</li>
+      </ul>
+      <p class="note note--inline">
+        <span class="note-k">À conserver</span>
+        Téléchargez une copie et conservez-la hors du serveur avant toute grosse modification.
+      </p>
+      <div class="form-foot">
+        <a class="btn btn-accent" href="/admin/sauvegarde/export.json">Télécharger l'export JSON</a>
+      </div>
+    </section>
+  </div>
 {% endblock %}

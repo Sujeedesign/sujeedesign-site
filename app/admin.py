@@ -655,10 +655,10 @@ def reglages(request: Request, user: str = Depends(require_admin)) -> Response:
         publish_ready=content_store.publish_ready(),
         fields=(
             ("site_name", "Nom du site", "text"),
-            ("tagline", "Accroche", "text"),
+            ("tagline", "Slogan / accroche", "text"),
             ("email", "Email de contact", "email"),
             ("phone", "Téléphone", "tel"),
-            ("site_url", "Adresse de la vitrine", "url"),
+            ("site_url", "URL du site public", "url"),
             ("linkedin", "LinkedIn", "url"),
             ("behance", "Behance", "url"),
             ("city", "Ville", "text"),
