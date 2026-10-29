@@ -72,6 +72,30 @@ def test_ecriture_champ_puis_lecture(client: TestClient) -> None:
     assert client.get("/api/editor/session").json()["doc"]["hero"]["kicker"] == "Studio de test"
 
 
+def test_ecriture_d_une_ligne_de_titre(client: TestClient) -> None:
+    """Un titre multiligne est rendu ligne par ligne : `hero.title.0` doit passer."""
+    login(client)
+    csrf = client.get("/api/editor/session?page=services").json()["csrf"]
+    response = client.post(
+        "/api/editor/champ",
+        json={"slug": "services", "path": "hero.title.0", "value": "Services de test", "csrf": csrf},
+    )
+    assert response.status_code == 200, response.text
+    doc = client.get("/api/editor/session?page=services").json()["doc"]
+    assert doc["hero"]["title"][0] == "Services de test"
+    assert isinstance(doc["hero"]["title"][1], str)
+
+
+def test_ecriture_refuse_un_index_hors_liste(client: TestClient) -> None:
+    login(client)
+    csrf = client.get("/api/editor/session?page=services").json()["csrf"]
+    for path in ("hero.title.12", "hero.lead.0"):
+        response = client.post(
+            "/api/editor/champ", json={"slug": "services", "path": path, "value": "x", "csrf": csrf}
+        )
+        assert response.status_code == 404, (path, response.text)
+
+
 def test_ecriture_refuse_sans_csrf(client: TestClient) -> None:
     login(client)
     response = client.post(

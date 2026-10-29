@@ -281,7 +281,129 @@ PAGE_DEFAULTS: dict[str, dict[str, Any]] = {
             "kicker": "Services · Périmètre écrit",
             "title": ["Cinq métiers,", "un seul interlocuteur."],
             "lead": "Le périmètre est écrit avant de commencer. Les allers-retours sont inclus, et vous repartez avec les sources et les accès à votre nom.",
-        }
+            "meta": [
+                {"label": "Périmètre", "text": "Écrit avant le premier trait, validé par vous, pas de rallonge surprise."},
+                {"label": "Livrables", "text": "Sources, accès à votre nom, documentation et prise en main."},
+                {"label": "Durée", "text": "D'une semaine pour un audit à six semaines pour un site complet."},
+            ],
+        },
+        "prestations": {
+            "num": "01",
+            "title": ["Cinq façons", "de travailler ensemble."],
+            "lead": "Un seul interlocuteur du cadrage à la livraison. Chaque métier peut se prendre seul ou s'enchaîner, avec un périmètre écrit à chaque fois.",
+            "side": "Prestations",
+            "rows": [
+                {
+                    "n": "01",
+                    "dur": "3 à 5 semaines",
+                    "title": "Identité de marque",
+                    "summary": "Nom, logotype, système typographique, couleurs, guide d'usage. Un système qui tient sur un menu, une carte de visite et une devanture.",
+                    "tags": ["Nom", "Logotype", "Typographie", "Couleurs", "Guide"],
+                    "more": "Voir le détail",
+                    "href": "/services/identite-de-marque",
+                },
+                {
+                    "n": "02",
+                    "dur": "1 à 3 semaines",
+                    "title": "Direction artistique",
+                    "summary": "Print, éditions, campagnes, photographie. Je tiens le ton visuel sur la durée, pas seulement sur la première campagne.",
+                    "tags": ["Print", "Photo", "Campagne", "Édition"],
+                    "more": "Voir le détail",
+                    "href": "/services/direction-artistique",
+                },
+                {
+                    "n": "03",
+                    "dur": "3 à 6 semaines",
+                    "title": "Site & e-commerce",
+                    "summary": "Design, intégration WordPress ou Shopify, SEO technique, performance, formation. Vous gardez la main sur le contenu.",
+                    "tags": ["UX", "Design", "WordPress", "Shopify", "SEO"],
+                    "more": "Voir le détail",
+                    "href": "/services/site-ecommerce",
+                },
+                {
+                    "n": "04",
+                    "dur": "En continu",
+                    "title": "Contenu & réseaux",
+                    "summary": "Ligne éditoriale, gabarits réutilisables, production régulière. Le but est que vous puissiez continuer sans moi.",
+                    "tags": ["Ligne édito", "Gabarits", "Photo", "Rédaction"],
+                    "more": "Voir le détail",
+                    "href": "/services/contenu-reseaux",
+                },
+                {
+                    "n": "05",
+                    "dur": "1 à 4 semaines",
+                    "title": "Agents IA",
+                    "summary": "Audit des tâches répétitives, automatisations, assistants internes, formation. On mesure le temps gagné, sinon on arrête.",
+                    "tags": ["Audit", "Automatisation", "Agents", "Formation"],
+                    "more": "Voir la page agents",
+                    "href": "/agents-ia",
+                },
+            ],
+        },
+        "methode": {
+            "num": "02",
+            "title": ["Comment ça", "se passe."],
+            "lead": "Trois temps, un point de validation à chaque étape. Rien ne part en production sans votre accord écrit.",
+            "side": "Méthode",
+            "steps": [
+                {
+                    "n": "01",
+                    "title": "Cadrer",
+                    "text": "Un appel, un audit de l'existant, un périmètre écrit. Si le projet ne tient pas debout, je le dis avant de commencer.",
+                    "dur": "1 semaine",
+                },
+                {
+                    "n": "02",
+                    "title": "Concevoir",
+                    "text": "Deux directions maximum, présentées sur du réel : vos pages, vos supports, vos mots.",
+                    "dur": "2 à 4 semaines",
+                },
+                {
+                    "n": "03",
+                    "title": "Livrer",
+                    "text": "Mise en ligne, sources, accès à votre nom, documentation et prise en main.",
+                    "dur": "1 à 3 semaines",
+                },
+            ],
+        },
+        "livrables": {
+            "intro": "Tout ce qui est produit vous appartient. Aucun verrou, aucune dépendance à mon compte.",
+            "items": [
+                {"title": "Sources", "text": "Fichiers de travail, pas seulement les exports."},
+                {"title": "Accès", "text": "Hébergement, domaine et CMS à votre nom."},
+                {"title": "Documentation", "text": "Ce qui est livré, comment le modifier, qui contacter."},
+                {"title": "Prise en main", "text": "Une session pour que vous puissiez continuer seul."},
+            ],
+        },
+        "faq": {
+            "num": "03",
+            "title": ["Les questions", "qui reviennent."],
+            "lead": "Les quatre qui arrivent à chaque premier appel.",
+            "side": "FAQ",
+            "items": [
+                {
+                    "q": "Comment démarre un projet ?",
+                    "a": "Par un appel de trente minutes : ce que vous vendez, ce qui coince, ce que vous voulez obtenir. J'envoie ensuite un périmètre écrit, et le projet démarre quand il est validé.",
+                },
+                {
+                    "q": "Combien de temps pour un site complet ?",
+                    "a": "Trois à six semaines pour un site vitrine de cinq à dix pages, hors production de contenu. Le délai dépend surtout de la vitesse à laquelle les textes et les visuels arrivent.",
+                },
+                {
+                    "q": "Qui fait les textes ?",
+                    "a": "Vous, ou moi en option. Dans les deux cas, je fournis la structure et les niveaux de titre : c'est ce qui fait la différence entre une page qui convertit et une page qui décrit.",
+                },
+                {
+                    "q": "Et après la livraison ?",
+                    "a": "Vous partez avec les sources, les accès et une documentation. Une maintenance est possible, jamais obligatoire. Je réponds sous 48 h ouvrées, même après la fin du projet.",
+                },
+            ],
+        },
+        "cta": {
+            "text": "Vous ne savez pas par quel bout commencer ?",
+            "label": "Décrire mon besoin",
+            "href": "mailto:s.sujeepan.pro@gmail.com?subject=Un%20projet",
+        },
     },
     "realisations": {
         "hero": {
@@ -314,9 +436,105 @@ def defaults_for(slug: str) -> dict[str, Any]:
     return copy.deepcopy(PAGE_DEFAULTS.get(slug, {}))
 
 
+SECTION_LABELS: dict[str, str] = {
+    "hero": "Bandeau de tête",
+    "prestations": "Prestations",
+    "methode": "Méthode",
+    "livrables": "Ce que vous gardez",
+    "faq": "Questions fréquentes",
+    "cta": "Appel à l'action",
+}
+
+FIELD_LABELS: dict[str, str] = {
+    "kicker": "Sur-titre",
+    "title": "Titre",
+    "lead": "Chapô",
+    "lead2": "Deuxième paragraphe",
+    "intro": "Introduction",
+    "text": "Texte",
+    "summary": "Résumé",
+    "label": "Libellé",
+    "side": "Mention latérale",
+    "num": "Numéro",
+    "n": "Numéro",
+    "tag": "Étiquette",
+    "tags": "Étiquettes",
+    "more": "Libellé du lien",
+    "href": "Lien",
+    "q": "Question",
+    "a": "Réponse",
+    "item": "Élément",
+    "items": "Éléments",
+    "row": "Ligne",
+    "rows": "Lignes",
+    "step": "Étape",
+    "steps": "Étapes",
+    "meta": "Mentions",
+    "dur": "Durée",
+}
+
+
+def _label_for(key: str, fallback: str = "") -> str:
+    if key in FIELD_LABELS:
+        return FIELD_LABELS[key]
+    if fallback:
+        return fallback
+    return key.replace("_", " ").capitalize()
+
+
+def _walk_fields(node: Any, path: str, out: list[dict[str, Any]], parent: str = "") -> None:
+    """Décline un dictionnaire de contenu en champs éditables, dans l'ordre du JSON.
+
+    Les listes de textes deviennent un champ par élément (`rows.0.tags.2`) pour
+    rester éditables une à une ; seule la liste `title` d'un bloc devient un
+    champ multiligne, parce que le front la rend ligne par ligne.
+    """
+    if isinstance(node, dict):
+        for key, value in node.items():
+            child = f"{path}.{key}" if path else key
+            if isinstance(value, list) and key == "title" and all(isinstance(item, str) for item in value):
+                out.append(_field(child, "Titre (une ligne par ligne)", "lines"))
+            elif isinstance(value, (dict, list)):
+                _walk_fields(value, child, out, key)
+            else:
+                out.append(_field(child, _label_for(key)))
+    elif isinstance(node, list):
+        base = parent[:-1] if parent.endswith("s") else parent
+        for index, item in enumerate(node):
+            child = f"{path}.{index}"
+            if isinstance(item, str):
+                out.append(_field(child, f"{_label_for(base)} {index + 1}"))
+            else:
+                _walk_fields(item, child, out, "")
+
+
+def schema_defaults(slug: str) -> list[dict[str, Any]]:
+    """Schéma déduit des valeurs par défaut : un champ par feuille de contenu.
+
+    Évite d'écrire deux fois la structure (défauts + formulaire), et garantit
+    qu'aucun texte affiché sur la page n'échappe à l'édition en place.
+    """
+    data = defaults_for(slug)
+    sections: list[dict[str, Any]] = []
+    for key, value in data.items():
+        fields: list[dict[str, Any]] = []
+        _walk_fields(value, key, fields)
+        if not fields:
+            continue
+        sections.append(
+            {
+                "key": key,
+                "label": SECTION_LABELS.get(key, key.replace("_", " ").capitalize()),
+                "hint": "",
+                "blocks": [{"label": SECTION_LABELS.get(key, key.replace("_", " ").capitalize()), "fields": fields}],
+            }
+        )
+    return sections
+
+
 SCHEMAS: dict[str, list[dict[str, Any]]] = {
     "home": schema_home(),
-    "services": schema_page("services", 2, kicker="Sur-titre", lead="Chapô"),
+    "services": schema_defaults("services"),
     "realisations": schema_page("realisations", 0, kicker="Sur-titre", lead="Chapô", extra="Phrase en gras"),
     "a-propos": schema_page("a-propos", 3, kicker="Sur-titre", lead="Chapô", extra="Deuxième paragraphe"),
     "agents-ia": schema_page("agents-ia", 2, kicker="Sur-titre", lead="Chapô"),

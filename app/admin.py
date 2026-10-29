@@ -290,6 +290,28 @@ def pages(request: Request, user: str = Depends(require_admin)) -> Response:
     )
 
 
+@router.get("/admin/editer")
+def editer_en_place(request: Request, page: str = "", user: str = Depends(require_admin)) -> Response:
+    """Ouvre la vraie page du site en mode édition.
+
+    Le repère `sjd_edit` est reposé à chaque passage : c'est ce qui rend
+    l'édition réutilisable après un « Quitter » (qui le remet à "0").
+    """
+    slug = content_page(page)
+    target = PAGE_PATHS[slug]
+    response = RedirectResponse(target, status_code=303)
+    response.set_cookie(
+        security.EDIT_MARKER_COOKIE,
+        "1",
+        max_age=security.SESSION_TTL,
+        httponly=False,
+        samesite="lax",
+        secure=settings_module.cookie_secure(),
+        path="/",
+    )
+    return response
+
+
 @router.get("/admin/contenu", response_class=HTMLResponse)
 def contenu(request: Request, page: str = "", user: str = Depends(require_admin)) -> Response:
     """Édition par formulaire d'une page : le secours de l'édition en place."""

@@ -3,6 +3,7 @@ import { BodyClass, bodyClassScript } from "@/components/site/body-class";
 import { Analytics } from "@/components/site/analytics";
 import { SiteScripts } from "@/components/site/scripts";
 import EditorRuntime from "@/components/editor/EditorRuntime";
+import AdminBar from "@/components/editor/AdminBar";
 import { GOOGLE_SITE_VERIFICATION } from "@/lib/analytics";
 import { assetHref } from "@/lib/asset-version";
 
@@ -72,6 +73,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body suppressHydrationWarning>
         <script dangerouslySetInnerHTML={{ __html: bodyClassScript }} />
         <BodyClass />
+        <AdminBar />
         {children}
         <EditorRuntime />
         <SiteScripts />

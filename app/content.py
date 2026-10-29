@@ -159,6 +159,8 @@ def request_publish(conn: sqlite3.Connection, slug: str = "home") -> dict[str, A
         (slug, deployment, json.dumps(result, ensure_ascii=False)[:400]),
     )
     conn.commit()
+    # Le déploiement va relire la base : c'est cette version qui part en ligne.
+    mark_published(conn, slug)
     return {"ok": True, "deployment": deployment}
 
 
@@ -187,6 +189,49 @@ def last_publication(conn: sqlite3.Connection) -> dict[str, Any] | None:
         except Exception:  # réseau : on garde le statut connu
             pass
     return entry
+
+
+def mark_published(conn: sqlite3.Connection, slug: str | None = None) -> None:
+    """Photographie le contenu au moment où il part réellement en ligne.
+
+    Un déploiement Next embarque toutes les pages : par défaut on photographie
+    donc l'ensemble des slugs du modèle. Sert de référence à
+    `has_pending_changes` : tant que le document courant est identique à cette
+    photo, le bouton Publier doit rester grisé.
+    """
+    slugs = list(model.SCHEMAS) if slug is None else [slug]
+    for one in slugs:
+        doc = load_doc(conn, one)
+        conn.execute(
+            "INSERT INTO content_published (slug, data, published_at) VALUES (?, ?, ?) "
+            "ON CONFLICT(slug) DO UPDATE SET data = excluded.data, published_at = excluded.published_at",
+            (one, json.dumps(doc["data"], ensure_ascii=False, sort_keys=True), _now()),
+        )
+    conn.commit()
+
+
+def has_pending_changes(conn: sqlite3.Connection, slug: str | None = None) -> bool:
+    """Vrai si une page enregistrée diffère de la dernière mise en ligne.
+
+    Première consultation sans photo de référence (base antérieure à cette
+    fonction) : on prend le contenu courant comme référence, sinon le bouton
+    resterait coloré indéfiniment alors que rien ne vient d'être touché.
+    """
+    slugs = list(model.SCHEMAS) if slug is None else [slug]
+    for one in slugs:
+        doc = load_doc(conn, one)
+        current = json.dumps(doc["data"], ensure_ascii=False, sort_keys=True)
+        row = conn.execute("SELECT data FROM content_published WHERE slug = ?", (one,)).fetchone()
+        if row is None:
+            mark_published(conn, one)
+            continue
+        try:
+            reference = json.dumps(json.loads(row["data"]), ensure_ascii=False, sort_keys=True)
+        except ValueError:
+            return True
+        if current != reference:
+            return True
+    return False
 
 
 def wait_hint(seconds: int = 90) -> str:

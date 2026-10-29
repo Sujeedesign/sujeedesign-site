@@ -24,7 +24,7 @@
         {% endfor %}
       </nav>
       <div class="side-foot">
-        <a class="site-link site-link--edit" href="{{ (page_path or '/') if slug is defined else public_url }}"{% if slug is defined %} target="_blank" rel="noopener"{% endif %}>
+        <a class="site-link site-link--edit" href="/admin/editer{% if slug is defined and slug %}?page={{ slug }}{% endif %}">
           Éditer {{ ('« ' ~ page_label ~ ' »') if slug is defined and slug != 'home' else 'la page d’accueil' }} en place <span aria-hidden="true">→</span>
         </a>
         <a class="site-link" href="{{ public_url }}" target="_blank" rel="noopener">

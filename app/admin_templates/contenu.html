@@ -23,7 +23,7 @@
         </span>
       </div>
       <div class="toolbar-actions">
-        <a class="btn btn-line" href="{{ page_path }}" target="_blank" rel="noopener">Éditer en place</a>
+        <a class="btn btn-line" href="/admin/editer?page={{ slug }}">Éditer en place</a>
         <button class="btn btn-ghost" type="submit" name="action" value="save">Enregistrer</button>
         <button class="btn btn-accent" type="submit" name="action" value="publier"{% if not publish_ready %} disabled title="Publication non configurée"{% endif %}>Enregistrer et publier</button>
       </div>

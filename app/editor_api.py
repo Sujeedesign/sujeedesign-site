@@ -51,6 +51,24 @@ class PublishPayload(BaseModel):
     slug: str = SLUG
 
 
+def _resolve_field(fields: dict[str, dict[str, Any]], path: str) -> dict[str, Any] | None:
+    """Champ du schéma visé par un `data-field`, y compris une ligne d'un titre.
+
+    Le front rend les titres multilignes (`hero.title`) ligne par ligne, chaque
+    ligne portant `hero.title.0`, `hero.title.1`… Le schéma, lui, ne déclare que
+    la liste. On accepte donc l'index d'une liste de textes et on le traite comme
+    un champ simple.
+    """
+    field = fields.get(path)
+    if field is not None:
+        return field
+    parent, _, index = path.rpartition(".")
+    base = fields.get(parent)
+    if base is None or not index.isdigit() or base.get("type") != "lines":
+        return None
+    return {**base, "path": path, "type": "text", "label": f"{base.get('label', parent)} {int(index) + 1}"}
+
+
 def _fields(slug: str) -> dict[str, dict[str, Any]]:
     return {field["path"]: field for field in model.fields_for(slug)}
 
@@ -89,6 +107,7 @@ def session(request: Request, page: str | None = None) -> JSONResponse:
     try:
         doc = _doc(conn, slug)
         medias = _medias(conn)
+        pending = content_store.has_pending_changes(conn)
     finally:
         conn.close()
     return JSONResponse(
@@ -102,6 +121,7 @@ def session(request: Request, page: str | None = None) -> JSONResponse:
             "sections": model.form_sections(slug, doc["data"]),
             "medias": medias,
             "publish_ready": content_store.publish_ready(),
+            "pending": pending,
         }
     )
 
@@ -111,7 +131,7 @@ def champ(request: Request, payload: FieldPayload, user: str = Depends(require_a
     check_csrf(request, payload.csrf)
     slug = _slug(payload.slug)
     fields = _fields(slug)
-    field = fields.get(payload.path)
+    field = _resolve_field(fields, payload.path)
     if field is None:
         raise HTTPException(status_code=404, detail="champ inconnu")
 
@@ -135,7 +155,12 @@ def _write(
     previous = copy.deepcopy(current["data"])
     doc = current["data"]
     value = model._to_value(field, payload.value)
-    model.set_path(doc, field["path"], value)
+    try:
+        model.set_path(doc, field["path"], value)
+    except (IndexError, KeyError, TypeError):
+        # Index hors liste (`hero.title.9` sur une liste de 2) : le champ existe
+        # au sens du schéma mais pas dans ce document.
+        return JSONResponse({"ok": False, "error": "champ inconnu"}, status_code=404)
     try:
         model.validate(slug, doc)
     except model.ContentError as exc:
@@ -144,7 +169,14 @@ def _write(
         # Valeur identique : double envoi (Entrée puis blur) ou simple focus.
         # On ne réécrit rien pour ne pas polluer l'historique des révisions.
         return JSONResponse(
-            {"ok": True, "slug": slug, "path": field["path"], "doc": doc, "unchanged": True}
+            {
+                "ok": True,
+                "slug": slug,
+                "path": field["path"],
+                "doc": doc,
+                "unchanged": True,
+                "pending": content_store.has_pending_changes(conn),
+            }
         )
     repo.save_revision(
         conn,
@@ -155,7 +187,15 @@ def _write(
         f"editeur:{user}",
     )
     content_store.save_doc(conn, slug, doc, author=f"editeur:{user}")
-    return JSONResponse({"ok": True, "slug": slug, "path": field["path"], "doc": doc})
+    return JSONResponse(
+        {
+            "ok": True,
+            "slug": slug,
+            "path": field["path"],
+            "doc": doc,
+            "pending": content_store.has_pending_changes(conn),
+        }
+    )
 
 
 @router.post("/publier")
@@ -165,8 +205,10 @@ def publier(request: Request, payload: PublishPayload, user: str = Depends(requi
     conn = get_conn(request)
     try:
         result = content_store.request_publish(conn, slug)
+        pending = content_store.has_pending_changes(conn)
     finally:
         conn.close()
+    result["pending"] = pending
     status = 200 if result.get("ok") else 502
     return JSONResponse(result, status_code=status)
 

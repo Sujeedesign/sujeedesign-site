@@ -22,6 +22,7 @@ type Session = {
   csrf: string;
   sections: Section[];
   publish_ready: boolean;
+  pending: boolean;
 };
 type Section = {
   title?: string;
@@ -75,7 +76,28 @@ function setLines(el: HTMLElement, value: string) {
 }
 
 const CSS = `
-body.sjd-editing{ padding-bottom:58px; }
+body.sjd-editing{ padding-bottom:58px; padding-top:44px; }
+/* Bannière admin, au-dessus du header du site. */
+#sjd-banner{
+  position:fixed; top:0; left:0; right:0; height:44px; z-index:2147483004;
+  display:flex; align-items:center; gap:12px; padding:0 16px;
+  background:#0A0A0B; color:#F4F1E8;
+  font:500 12.5px/1 "Space Grotesk", system-ui, sans-serif;
+  box-shadow:0 1px 0 rgba(255,255,255,.08);
+}
+#sjd-banner .who{ display:flex; align-items:center; gap:8px; }
+#sjd-banner .who b{ color:#E8B04A; font-weight:600; letter-spacing:.06em; text-transform:uppercase; font-size:11px; }
+#sjd-banner .sep{ width:1px; height:16px; background:rgba(255,255,255,.2); }
+#sjd-banner .muted{ opacity:.62; font-size:12px; }
+#sjd-banner .push{ margin-left:auto; display:flex; align-items:center; gap:8px; }
+#sjd-banner a, #sjd-banner button{
+  font:500 12px/1 "Space Grotesk", system-ui, sans-serif; color:inherit; text-decoration:none;
+  background:transparent; border:1px solid rgba(255,255,255,.22); border-radius:3px;
+  padding:8px 12px; cursor:pointer;
+}
+#sjd-banner a:hover, #sjd-banner button:hover{ background:rgba(255,255,255,.1); }
+#sjd-banner button.accent{ background:#C9340F; border-color:#C9340F; }
+#sjd-banner button.accent:hover{ background:#E03D13; }
 /* La bannière cookies n'a rien à faire par-dessus le dock d'édition. */
 body.sjd-editing .cookie-banner{ display:none !important; }
 body.sjd-editing [data-field]{
@@ -117,6 +139,10 @@ body.sjd-editing [data-field][contenteditable="true"]{ outline:2px solid #C9340F
 #sjd-dock button.primary{ background:#C9340F; border-color:#C9340F; }
 #sjd-dock button.primary:hover{ background:#E03D13; }
 #sjd-dock button:disabled{ opacity:.5; cursor:default; }
+/* Rien à publier : le bouton reste gris. Dès qu'un champ change, il passe au rouge. */
+#sjd-dock button.primary:disabled{
+  background:transparent; border-color:rgba(255,255,255,.22); color:rgba(244,241,232,.45); opacity:1;
+}
 .sjd-tag{
   position:absolute; z-index:2147483001; transform:translateY(-100%);
   background:#C9340F; color:#fff; font:600 10px/1 "Space Grotesk", system-ui, sans-serif;
@@ -155,8 +181,9 @@ body.sjd-editing [data-field][contenteditable="true"]{ outline:2px solid #C9340F
 export default function EditorRuntime() {
   const [session, setSession] = useState<Session | null>(null);
   const sessionRef = useRef<Session | null>(null);
-  const dirtyRef = useRef(false);
-  const [dirty, setDirty] = useState(false);
+  // Modifications non publiées, telles que le serveur les voit : c'est la
+  // seule source de vérité pour l'état du bouton Publier.
+  const [pending, setPending] = useState(false);
   const [pop, setPop] = useState<{ path: string; label: string; top: number; left: number } | null>(null);
   const [popValue, setPopValue] = useState("");
   const [toast, setToast] = useState<{ text: string; err?: boolean } | null>(null);
@@ -200,6 +227,14 @@ export default function EditorRuntime() {
         }
         el.textContent = text;
       });
+      // Titre multiligne rendu ligne par ligne : chaque ligne porte son index.
+      if (Array.isArray(raw) && field.type === "lines") {
+        raw.forEach((line, index) => {
+          const el = document.querySelector<HTMLElement>(`[data-field="${field.path}.${index}"]`);
+          if (!el || el.isContentEditable) return;
+          el.textContent = String(line);
+        });
+      }
     }
   };
 
@@ -215,6 +250,7 @@ export default function EditorRuntime() {
         const withSchema: Session = { ...data, sections: data.sections ?? [] };
         sessionRef.current = withSchema;
         setSession(withSchema);
+        setPending(Boolean(data.pending));
         document.body.classList.add("sjd-editing");
         applyValues(withSchema);
       })
@@ -223,11 +259,6 @@ export default function EditorRuntime() {
       cancelled = true;
     };
   }, []);
-
-  const markDirty = (value: boolean) => {
-    dirtyRef.current = value;
-    setDirty(value);
-  };
 
   const save = useCallback(
     async (path: string, value: string): Promise<{ ok: boolean; error?: string }> => {
@@ -242,7 +273,7 @@ export default function EditorRuntime() {
         const data = await res.json().catch(() => ({}));
         if (!res.ok || !data.ok) return { ok: false, error: data.error ?? "Enregistrement refusé" };
         savedRef.current.set(path, value);
-        markDirty(true);
+        if (typeof data.pending === "boolean") setPending(data.pending);
         return { ok: true };
       } catch {
         return { ok: false, error: "Serveur injoignable" };
@@ -251,7 +282,23 @@ export default function EditorRuntime() {
     [],
   );
 
-  const fieldMeta = (path: string) => sessionRef.current ? flatten(sessionRef.current.sections).get(path) : undefined;
+  // Un titre multiligne est déclaré comme une liste (`hero.title`) mais rendu
+  // ligne par ligne (`hero.title.0`). On hérite donc des métadonnées du parent
+  // pour que chaque ligne reste éditable.
+  const fieldMeta = (path: string) => {
+    const session = sessionRef.current;
+    if (!session) return undefined;
+    const map = flatten(session.sections);
+    const direct = map.get(path);
+    if (direct) return direct;
+    const split = path.match(/^(.*)\.(\d+)$/);
+    if (!split) return undefined;
+    const parentPath = split[1] ?? "";
+    const parent = map.get(parentPath);
+    if (!parent || parent.type !== "lines") return undefined;
+    const parentLabel = parent.label ?? parentPath;
+    return { ...parent, path, type: "text", label: `${parentLabel} ${Number(split[2]) + 1}` };
+  };
 
   const stopInline = () => {
     const el = editingRef.current;
@@ -433,7 +480,7 @@ export default function EditorRuntime() {
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.ok) {
-        markDirty(false);
+        setPending(Boolean(data.pending ?? false));
         flash("Publication lancée, le site se met à jour dans ~1 min");
       } else {
         flash(data.error ?? "Publication impossible", true);
@@ -446,11 +493,25 @@ export default function EditorRuntime() {
   };
 
   const quit = () => {
-    // On garde le repère à "0" pour la session : se reconnecter à l'admin le
-    // repasse à "1" et rouvre l'édition.
+    // Le repère repasse à "0" : la vitrine redevient publique. Le passage par
+    // /admin/editer le remet à "1" pour une nouvelle session d'édition.
     document.cookie = `${EDIT_COOKIE}=0; path=/; samesite=lax`;
     document.body.classList.remove("sjd-editing");
     setSession(null);
+    // Sortie de l'éditeur = retour dans l'admin, jamais sur la page publique.
+    window.location.href = "/admin";
+  };
+
+  const modifierPage = () => {
+    const first = document.querySelector<HTMLElement>("[data-field]");
+    if (!first) {
+      flash("Aucun champ éditable sur cette page", true);
+      return;
+    }
+    first.scrollIntoView({ behavior: "smooth", block: "center" });
+    window.setTimeout(() => {
+      first.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    }, 350);
   };
 
   if (!session) return null;
@@ -458,7 +519,25 @@ export default function EditorRuntime() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
-      <div id="sjd-dock" className={dirty ? "dirty" : ""}>
+      <div id="sjd-banner">
+        <span className="who">
+          <b>Admin</b>
+          <span className="sep" />
+          <span className="muted">Connecté : {session.user}</span>
+        </span>
+        <span className="push">
+          <span className="muted">Vous êtes dans l’admin du site</span>
+          <button type="button" className="accent" onClick={modifierPage}>
+            Modifier la page
+          </button>
+          <a href="/admin/pages">Pages</a>
+          <a href="/admin">Tableau de bord</a>
+          <button type="button" onClick={quit}>
+            Quitter l’édition
+          </button>
+        </span>
+      </div>
+      <div id="sjd-dock" className={pending ? "dirty" : ""}>
         <span className="dot" />
         <span>Édition en place</span>
         <span className="sep" />
@@ -473,8 +552,14 @@ export default function EditorRuntime() {
             type="button"
             className="primary"
             onClick={publish}
-            disabled={publishing || !session.publish_ready}
-            title={session.publish_ready ? "Reconstruire la vitrine avec le contenu enregistré" : "Publication Coolify non configurée sur ce serveur"}
+            disabled={publishing || !session.publish_ready || !pending}
+            title={
+              !session.publish_ready
+                ? "Publication Coolify non configurée sur ce serveur"
+                : pending
+                  ? "Reconstruire la vitrine avec le contenu enregistré"
+                  : "Aucune modification à publier"
+            }
           >
             {publishing ? "Publication…" : "Publier"}
           </button>

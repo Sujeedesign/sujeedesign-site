@@ -10,7 +10,7 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-SCHEMA_VERSION = 5
+SCHEMA_VERSION = 6
 
 # Colonnes ajoutées après la première mise en production. Chaque entrée est
 # appliquée une seule fois, dans l'ordre, par `migrate` (idempotent).
@@ -96,6 +96,12 @@ CREATE TABLE IF NOT EXISTS publications (
   deployment TEXT NOT NULL DEFAULT '',
   detail TEXT NOT NULL DEFAULT '',
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS content_published (
+  slug TEXT PRIMARY KEY,
+  data TEXT NOT NULL DEFAULT '{}',
+  published_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE TABLE IF NOT EXISTS _meta (
