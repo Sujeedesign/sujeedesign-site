@@ -21,14 +21,10 @@
     <div class="card stat">
       <span class="stat-k">Contenu du site</span>
       <strong class="stat-v stat-v-sm">
-        {% if doc.updated_at %}modifié {{ doc.updated_at | ago }}{% else %}version de référence{% endif %}
+        {% if publication %}{{ publication.created_at | ago }}{% elif doc.updated_at %}{{ doc.updated_at | ago }}{% else %}référence{% endif %}
       </strong>
       <span class="stat-s">
-        {% if publication %}
-          publication {{ publication.status }} {{ publication.created_at | ago }}
-        {% else %}
-          aucune publication depuis ce back office
-        {% endif %}
+        {% if publication %}dernière publication {{ publication.status }}{% else %}dernière modification du contenu{% endif %}
       </span>
     </div>
   </section>
@@ -62,8 +58,9 @@
         <h2>Actions</h2>
       </header>
       <div class="stack">
-        <a class="btn btn-line" href="/admin/pages">Modifier le contenu du site</a>
-        <a class="btn btn-line" href="/admin/apercu">Ouvrir l'aperçu de la vitrine</a>
+        <a class="btn btn-accent" href="/admin/pages">Modifier le contenu du site</a>
+        <a class="btn btn-line" href="/admin/projets">Gérer le catalogue projets</a>
+        <a class="btn btn-line" href="/admin/prestations">Gérer les prestations</a>
         <a class="btn btn-line" href="/admin/sauvegarde">Exporter une sauvegarde</a>
       </div>
       <hr class="rule">

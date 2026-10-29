@@ -12,24 +12,36 @@
   <div class="shell">
     <aside class="side" id="side">
       <a class="brand" href="/admin">
-        <span class="dot"></span>
-        <span class="brand-txt"><strong>Sujee Design</strong><small>back office</small></span>
+        <span class="brand-mark" aria-hidden="true">S</span>
+        <span class="brand-txt"><strong>Sujee Design</strong><span>back office</span></span>
       </a>
-      <nav class="nav">
-        {% for key, label, href in nav %}
-          {% set is_active = (active == href) or (href != '/admin' and active.startswith(href)) or (key == 'pages' and active.startswith('/admin/contenu')) %}
-          <a class="nav-link{% if is_active %} is-active{% endif %}" href="{{ href }}">
-            <span class="ln"></span>{{ label }}
-          </a>
+
+      <nav class="nav" aria-label="Navigation du back office">
+        {% for group in nav %}
+          <div class="nav-group">
+            <p class="nav-h">{{ group.label }}</p>
+            {% for item in group['items'] %}
+              <a class="nav-link{% if item.on %} is-active{% endif %}" href="{{ item.href }}"{% if item.on %} aria-current="page"{% endif %}>
+                <span class="idx">{{ item.idx }}</span>
+                <span class="lbl">{{ item.label }}</span>
+                {% if item.cnt %}<span class="cnt">{{ item.cnt }}</span>{% endif %}
+              </a>
+            {% endfor %}
+          </div>
         {% endfor %}
       </nav>
+
       <div class="side-foot">
         <a class="site-link site-link--edit" href="/admin/editer{% if slug is defined and slug %}?page={{ slug }}{% endif %}">
-          Éditer {{ ('« ' ~ page_label ~ ' »') if slug is defined and slug != 'home' else 'la page d’accueil' }} en place <span aria-hidden="true">→</span>
+          <span>Éditer {{ ('« ' ~ page_label ~ ' »') if slug is defined and slug and slug != 'home' else 'l’accueil' }}</span> <span aria-hidden="true">→</span>
         </a>
         <a class="site-link" href="{{ public_url }}" target="_blank" rel="noopener">
           Voir le site public <span aria-hidden="true">↗</span>
         </a>
+        <div class="who">
+          <span class="ava" aria-hidden="true">SS</span>
+          <span class="meta"><b>Sujeepan</b><span>administrateur</span></span>
+        </div>
         <form method="post" action="/admin/deconnexion">
           <input type="hidden" name="csrf" value="{{ csrf }}">
           <button class="btn btn-ghost btn-sm" type="submit">Déconnexion</button>

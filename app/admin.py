@@ -19,6 +19,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Uplo
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 
+from . import catalogue
 from . import content as content_store
 from . import content_model
 from . import repo
@@ -73,15 +74,62 @@ def revision_slug(entity_type: str) -> str:
     return CONTENT_SLUG
 
 
-NAV = (
-    ("tableau_de_bord", "Tableau de bord", "/admin"),
-    ("pages", "Pages du site", "/admin/pages"),
-    ("messages", "Messages", "/admin/messages"),
-    ("medias", "Médias", "/admin/medias"),
-    ("apercu", "Aperçu", "/admin/apercu"),
-    ("reglages", "Réglages", "/admin/reglages"),
-    ("sauvegarde", "Sauvegarde", "/admin/sauvegarde"),
+# Navigation : cinq groupes, un seul niveau. L'ancien onglet « Aperçu » a été
+# retiré (il dupliquait le lien « Voir le site ») et le catalogue a désormais sa
+# place : les projets et les prestations sont des contenus structurés, pas des
+# pages de texte.
+NAV_GROUPS: tuple[tuple[str, tuple[tuple[str, str, str], ...]], ...] = (
+    ("Pilotage", (("tableau_de_bord", "Tableau de bord", "/admin"),)),
+    (
+        "Catalogue",
+        (
+            ("projets", "Projets", "/admin/projets"),
+            ("prestations", "Prestations", "/admin/prestations"),
+        ),
+    ),
+    ("Contenu", (("pages", "Pages du site", "/admin/pages"),)),
+    ("Échanges", (("messages", "Messages", "/admin/messages"),)),
+    (
+        "Système",
+        (
+            ("medias", "Médias", "/admin/medias"),
+            ("reglages", "Réglages", "/admin/reglages"),
+            ("sauvegarde", "Sauvegarde", "/admin/sauvegarde"),
+        ),
+    ),
 )
+
+# Préfixes qui gardent un onglet actif sur ses sous-pages.
+NAV_PREFIXES = {
+    "pages": ("/admin/pages", "/admin/contenu"),
+    "projets": ("/admin/projets",),
+    "prestations": ("/admin/prestations",),
+}
+
+
+def nav_groups(active: str, badges: dict[str, int] | None = None) -> list[dict[str, Any]]:
+    badges = badges or {}
+    groups: list[dict[str, Any]] = []
+    index = 0
+    for label, items in NAV_GROUPS:
+        entries = []
+        for key, item_label, href in items:
+            index += 1
+            prefixes = NAV_PREFIXES.get(key, (href,))
+            on = active == href if href == "/admin" else any(active.startswith(p) for p in prefixes)
+            entries.append(
+                {
+                    "key": key,
+                    "label": item_label,
+                    "href": href,
+                    "idx": str(index).zfill(2),
+                    "on": on,
+                    "cnt": badges.get(key) or 0,
+                }
+            )
+        groups.append({"label": label, "items": entries})
+    return groups
+
 
 
 # ------------------------------------------------------------------- session
@@ -147,13 +195,30 @@ def back(url: str, message: str = "", kind: str = "ok") -> RedirectResponse:
     return RedirectResponse(url, status_code=303)
 
 
+def _nav_badges(request: Request) -> dict[str, int]:
+    """Compteurs de la barre latérale : brouillons et messages non traités."""
+    try:
+        conn = get_conn(request)
+    except Exception:  # base pas encore ouverte (page de connexion)
+        return {}
+    try:
+        nouveaux = repo.message_counts(conn).get("nouveau", 0)
+        brouillons = conn.execute("SELECT COUNT(*) AS n FROM projets WHERE statut = 'brouillon'").fetchone()["n"]
+    except sqlite3.Error:
+        return {}
+    finally:
+        conn.close()
+    return {"messages": int(nouveaux or 0), "projets": int(brouillons or 0)}
+
+
 def render(request: Request, template: str, **context: Any) -> HTMLResponse:
     user = current_user(request)
+    active = request.url.path
     base = {
         "request": request,
         "user": user,
-        "nav": NAV,
-        "active": request.url.path,
+        "nav": nav_groups(active, _nav_badges(request)),
+        "active": active,
         "csrf": csrf_token(),
         "flash": request.query_params.get("flash", ""),
         "flash_kind": request.query_params.get("kind", "ok"),
@@ -617,26 +682,239 @@ async def reglages_save(request: Request, user: str = Depends(require_admin)) ->
     return back("/admin/reglages", "Réglages enregistrés.")
 
 
-# -------------------------------------------------------------------- aperçu
+# ------------------------------------------------------------------ projets
 
 
-@router.get("/admin/apercu", response_class=HTMLResponse)
-def apercu(request: Request, user: str = Depends(require_admin)) -> Response:
+def _rows(form: Any, prefix: str, names: tuple[str, ...]) -> list[tuple[str, ...]]:
+    columns = [list(form.getlist(f"{prefix}_{name}")) for name in names]
+    total = max((len(col) for col in columns), default=0)
+    rows = []
+    for index in range(total):
+        rows.append(tuple((col[index] if index < len(col) else "") for col in columns))
+    return rows
+
+
+@router.get("/admin/projets", response_class=HTMLResponse)
+def projets(request: Request, statut: str = "", user: str = Depends(require_admin)) -> Response:
     conn = get_conn(request)
     try:
-        values = settings_module.all_settings(conn)
-        doc = content_store.load_doc(conn, CONTENT_SLUG)
-        publication = content_store.last_publication(conn)
+        items = catalogue.list_projets(conn)
     finally:
         conn.close()
-    site = (values.get("site_url") or settings_module.public_base_url()).rstrip("/")
+    if statut in catalogue.STATUTS:
+        items = [item for item in items if item["statut"] == statut]
     return render(
         request,
-        "apercu.html",
-        site=site,
-        publication=publication,
-        doc=doc,
-        publish_ready=content_store.publish_ready(),
+        "projets.html",
+        projets=items,
+        statut=statut,
+        counts=_catalogue_counts(request, "projets"),
+    )
+
+
+def _catalogue_counts(request: Request, table: str) -> dict[str, int]:
+    conn = get_conn(request)
+    try:
+        rows = conn.execute(f"SELECT statut, COUNT(*) AS n FROM {table} GROUP BY statut").fetchall()
+    finally:
+        conn.close()
+    counts = {"tous": 0, "brouillon": 0, "publie": 0}
+    for row in rows:
+        counts[str(row["statut"])] = int(row["n"])
+        counts["tous"] += int(row["n"])
+    return counts
+
+
+@router.get("/admin/projets/nouveau", response_class=HTMLResponse)
+def projet_nouveau(request: Request, user: str = Depends(require_admin)) -> Response:
+    return render(
+        request,
+        "projet_form.html",
+        projet={"id": None, "slug": "", "nom": "", "client": "", "annee": "", "ville": "",
+                "pitch": "", "scope": "", "duree": "", "ton": "paper", "statut": "brouillon",
+                "disciplines": [], "tags": [], "images": [], "sections": [], "results": []},
+        counts=_catalogue_counts(request, "projets"),
+        mode="new",
+    )
+
+
+@router.get("/admin/projets/{projet_id}", response_class=HTMLResponse)
+def projet_editer(request: Request, projet_id: int, user: str = Depends(require_admin)) -> Response:
+    conn = get_conn(request)
+    try:
+        projet = catalogue.get_projet(conn, projet_id)
+    finally:
+        conn.close()
+    if projet is None:
+        raise HTTPException(status_code=404, detail="projet introuvable")
+    return render(
+        request,
+        "projet_form.html",
+        projet=projet,
+        counts=_catalogue_counts(request, "projets"),
+        mode="edit",
+    )
+
+
+@router.post("/admin/projets")
+async def projet_save(request: Request, user: str = Depends(require_admin)) -> Response:
+    form = await request.form()
+    check_csrf(request, str(form.get("csrf") or ""))
+    payload: dict[str, Any] = dict(form)
+    payload["images"] = _rows(form, "image", ("src", "alt", "w", "h"))
+    payload["sections"] = _rows(form, "section", ("k", "label", "title", "body", "bullets"))
+    payload["results"] = _rows(form, "result", ("value", "label"))
+    raw_id = str(form.get("id") or "").strip()
+    conn = get_conn(request)
+    try:
+        projet_id = catalogue.save_projet(conn, payload, int(raw_id) if raw_id.isdigit() else None)
+    finally:
+        conn.close()
+    return back(f"/admin/projets/{projet_id}", "Projet enregistré.")
+
+
+@router.post("/admin/projets/{projet_id}/statut")
+async def projet_statut(request: Request, projet_id: int, user: str = Depends(require_admin)) -> Response:
+    form = await request.form()
+    check_csrf(request, str(form.get("csrf") or ""))
+    conn = get_conn(request)
+    try:
+        catalogue.set_projet_statut(conn, projet_id, str(form.get("statut") or ""))
+    finally:
+        conn.close()
+    return back("/admin/projets", "Statut mis à jour.")
+
+
+@router.post("/admin/projets/{projet_id}/position")
+async def projet_position(request: Request, projet_id: int, user: str = Depends(require_admin)) -> Response:
+    form = await request.form()
+    check_csrf(request, str(form.get("csrf") or ""))
+    direction = -1 if str(form.get("dir") or "") == "up" else 1
+    conn = get_conn(request)
+    try:
+        catalogue.move_projet(conn, projet_id, direction)
+    finally:
+        conn.close()
+    return back("/admin/projets")
+
+
+@router.post("/admin/projets/{projet_id}/supprimer")
+async def projet_supprimer(request: Request, projet_id: int, user: str = Depends(require_admin)) -> Response:
+    form = await request.form()
+    check_csrf(request, str(form.get("csrf") or ""))
+    conn = get_conn(request)
+    try:
+        catalogue.delete_projet(conn, projet_id)
+    finally:
+        conn.close()
+    return back("/admin/projets", "Projet supprimé.")
+
+
+# -------------------------------------------------------------- prestations
+
+
+@router.get("/admin/prestations", response_class=HTMLResponse)
+def prestations(request: Request, statut: str = "", user: str = Depends(require_admin)) -> Response:
+    conn = get_conn(request)
+    try:
+        items = catalogue.list_prestations(conn)
+    finally:
+        conn.close()
+    if statut in catalogue.STATUTS:
+        items = [item for item in items if item["statut"] == statut]
+    return render(request, "prestations.html", prestations=items, statut=statut,
+                  counts=_catalogue_counts(request, "prestations"))
+
+
+@router.get("/admin/prestations/nouveau", response_class=HTMLResponse)
+def prestation_nouvelle(request: Request, user: str = Depends(require_admin)) -> Response:
+    return render(
+        request,
+        "prestation_form.html",
+        prestation={"id": None, "slug": "", "nom": "", "accroche": "", "description": "",
+                    "prix": "", "duree": "", "statut": "brouillon", "livrables": []},
+        counts=_catalogue_counts(request, "prestations"),
+        mode="new",
+    )
+
+
+@router.get("/admin/prestations/{prestation_id}", response_class=HTMLResponse)
+def prestation_editer(request: Request, prestation_id: int, user: str = Depends(require_admin)) -> Response:
+    conn = get_conn(request)
+    try:
+        prestation = catalogue.get_prestation(conn, prestation_id)
+    finally:
+        conn.close()
+    if prestation is None:
+        raise HTTPException(status_code=404, detail="prestation introuvable")
+    return render(request, "prestation_form.html", prestation=prestation,
+                  counts=_catalogue_counts(request, "prestations"), mode="edit")
+
+
+@router.post("/admin/prestations")
+async def prestation_save(request: Request, user: str = Depends(require_admin)) -> Response:
+    form = await request.form()
+    check_csrf(request, str(form.get("csrf") or ""))
+    payload: dict[str, Any] = dict(form)
+    raw_id = str(form.get("id") or "").strip()
+    conn = get_conn(request)
+    try:
+        prestation_id = catalogue.save_prestation(conn, payload, int(raw_id) if raw_id.isdigit() else None)
+    finally:
+        conn.close()
+    return back(f"/admin/prestations/{prestation_id}", "Prestation enregistrée.")
+
+
+@router.post("/admin/prestations/{prestation_id}/statut")
+async def prestation_statut(request: Request, prestation_id: int, user: str = Depends(require_admin)) -> Response:
+    form = await request.form()
+    check_csrf(request, str(form.get("csrf") or ""))
+    conn = get_conn(request)
+    try:
+        catalogue.set_prestation_statut(conn, prestation_id, str(form.get("statut") or ""))
+    finally:
+        conn.close()
+    return back("/admin/prestations", "Statut mis à jour.")
+
+
+@router.post("/admin/prestations/{prestation_id}/position")
+async def prestation_position(request: Request, prestation_id: int, user: str = Depends(require_admin)) -> Response:
+    form = await request.form()
+    check_csrf(request, str(form.get("csrf") or ""))
+    direction = -1 if str(form.get("dir") or "") == "up" else 1
+    conn = get_conn(request)
+    try:
+        catalogue.move_prestation(conn, prestation_id, direction)
+    finally:
+        conn.close()
+    return back("/admin/prestations")
+
+
+@router.post("/admin/prestations/{prestation_id}/supprimer")
+async def prestation_supprimer(request: Request, prestation_id: int, user: str = Depends(require_admin)) -> Response:
+    form = await request.form()
+    check_csrf(request, str(form.get("csrf") or ""))
+    conn = get_conn(request)
+    try:
+        catalogue.delete_prestation(conn, prestation_id)
+    finally:
+        conn.close()
+    return back("/admin/prestations", "Prestation supprimée.")
+
+
+@router.get("/admin/catalogue/export.json")
+def catalogue_export(request: Request, user: str = Depends(require_admin)) -> Response:
+    """Catalogue publié au format attendu par la vitrine Next."""
+    conn = get_conn(request)
+    try:
+        body = catalogue.export_json(conn)
+    finally:
+        conn.close()
+    filename = f"sujee-catalogue-{datetime.now():%Y-%m-%d}.json"
+    return Response(
+        body,
+        media_type="application/json; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
 

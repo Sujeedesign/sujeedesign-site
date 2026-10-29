@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Prestations{% endblock %}
+{% block heading %}Catalogue <span>/</span> <b>Prestations</b>{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div class="title-wrap">
+    <h1>Prestations</h1>
+    <p class="sub">Le catalogue de services : accroche, description, tarif et livrables. Brouillon = invisible sur le site.</p>
+  </div>
+  <div class="page-actions">
+    <a class="btn btn-ghost btn-sm" href="/admin/catalogue/export.json">Export JSON</a>
+    <a class="btn btn-accent btn-sm" href="/admin/prestations/nouveau">Nouvelle prestation</a>
+  </div>
+</div>
+
+<div class="filters" style="margin-bottom:14px">
+  <a class="chip{% if not statut %} is-active{% endif %}" href="/admin/prestations">Toutes <span>{{ counts.tous }}</span></a>
+  <a class="chip{% if statut == 'brouillon' %} is-active{% endif %}" href="/admin/prestations?statut=brouillon">Brouillons <span>{{ counts.brouillon }}</span></a>
+  <a class="chip{% if statut == 'publie' %} is-active{% endif %}" href="/admin/prestations?statut=publie">Publiées <span>{{ counts.publie }}</span></a>
+</div>
+
+{% if prestations %}
+<section class="ledger">
+  <div class="ledger-head">
+    <h2>Catalogue</h2>
+    <span class="count">{{ prestations|length }}</span>
+    <span class="spacer"></span>
+    <span class="tiny muted">glisser l'ordre avec les flèches</span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Prestation</th>
+        <th>Tarif</th>
+        <th>Durée</th>
+        <th>Livrables</th>
+        <th>Statut</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in prestations %}
+      <tr>
+        <td>
+          <strong>{{ p.nom }}</strong>
+          <div class="tiny muted">{{ p.accroche or p.slug }}</div>
+        </td>
+        <td class="num">{{ p.prix or '—' }}</td>
+        <td class="num">{{ p.duree or '—' }}</td>
+        <td class="num">{{ p.livrables|length }}</td>
+        <td>
+          {% if p.statut == 'publie' %}
+            <span class="badge badge-traite">publié</span>
+          {% else %}
+            <span class="badge badge-en-cours">brouillon</span>
+          {% endif %}
+        </td>
+        <td>
+          <div class="inline-form" style="justify-content:flex-end">
+            <form method="post" action="/admin/prestations/{{ p.id }}/position" class="inline-form">
+              <input type="hidden" name="csrf" value="{{ csrf }}">
+              <button class="btn btn-sm" name="dir" value="up" type="submit" title="Monter">↑</button>
+              <button class="btn btn-sm" name="dir" value="down" type="submit" title="Descendre">↓</button>
+            </form>
+            <a class="btn btn-sm btn-ghost" href="/admin/prestations/{{ p.id }}">Éditer</a>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% else %}
+  <div class="card"><p class="empty">Aucune prestation pour ce filtre.</p></div>
+{% endif %}
+{% endblock %}

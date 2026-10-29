@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Nouvelle prestation' if mode == 'new' else prestation.nom }}{% endblock %}
+{% block heading %}Catalogue <span>/</span> <a href="/admin/prestations">Prestations</a> <span>/</span> <b>{{ 'nouvelle' if mode == 'new' else prestation.slug }}</b>{% endblock %}
+{% block content %}
+<form method="post" action="/admin/prestations" class="content-form">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  {% if prestation.id %}<input type="hidden" name="id" value="{{ prestation.id }}">{% endif %}
+
+  <div class="page-head">
+    <div class="title-wrap">
+      <h1>{{ 'Nouvelle prestation' if mode == 'new' else prestation.nom or 'Prestation sans titre' }}</h1>
+      <p class="sub">Ce que tu proposes, à quel prix, avec quels livrables.</p>
+    </div>
+    <div class="page-actions">
+      <a class="btn btn-ghost btn-sm" href="/admin/prestations">Retour</a>
+      <button class="btn btn-accent btn-sm" type="submit">Enregistrer</button>
+    </div>
+  </div>
+
+  <div class="workspace">
+    <div class="stack" style="gap:16px">
+      <section class="card">
+        <div class="card-head"><h2>Prestation</h2></div>
+        <div class="form-grid">
+          <label class="field"><span>Nom</span><input type="text" name="nom" value="{{ prestation.nom }}" required></label>
+          <label class="field"><span>Slug</span><input type="text" name="slug" value="{{ prestation.slug }}" placeholder="auto depuis le nom"></label>
+          <label class="field"><span>Tarif</span><input type="text" name="prix" value="{{ prestation.prix }}" placeholder="1 200 € / jour"></label>
+          <label class="field"><span>Durée</span><input type="text" name="duree" value="{{ prestation.duree }}" placeholder="2 semaines"></label>
+        </div>
+        <label class="field"><span>Accroche <em class="hint">une ligne, affichée dans la liste</em></span><input type="text" name="accroche" value="{{ prestation.accroche }}" placeholder="Une marque qui tient debout."></label>
+        <label class="field"><span>Description</span><textarea name="description" rows="7">{{ prestation.description }}</textarea></label>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h2>Livrables</h2></div>
+        <label class="field"><span>Un livrable par ligne</span><textarea name="livrables" rows="6" placeholder="Direction artistique&#10;Maquettes Figma&#10;Déclinaisons social">{{ prestation.livrables|join('\n') }}</textarea></label>
+      </section>
+    </div>
+
+    <aside class="stack" style="gap:16px">
+      <section class="card">
+        <div class="card-head"><h2>Publication</h2></div>
+        <label class="field"><span>Statut</span>
+          <select name="statut">
+            <option value="brouillon"{% if prestation.statut == 'brouillon' %} selected{% endif %}>Brouillon</option>
+            <option value="publie"{% if prestation.statut == 'publie' %} selected{% endif %}>Publié</option>
+          </select>
+        </label>
+        <p class="tiny muted">Une prestation brouillon n'apparaît pas dans l'export public. L'ordre se règle depuis la liste, boutons ↑ ↓.</p>
+      </section>
+    </aside>
+  </div>
+
+  <div class="page-actions" style="justify-content:flex-end">
+    <button class="btn btn-accent" type="submit">Enregistrer</button>
+  </div>
+</form>
+
+{% if prestation.id %}
+<form method="post" action="/admin/prestations/{{ prestation.id }}/supprimer" class="inline-form" style="margin-top:12px" data-confirm="Supprimer définitivement cette prestation ?">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <button class="btn btn-danger btn-sm" type="submit">Supprimer la prestation</button>
+</form>
+{% endif %}
+{% endblock %}

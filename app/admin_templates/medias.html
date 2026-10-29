@@ -12,10 +12,14 @@
       </label>
       <span class="upload-name" data-file-name></span>
     </div>
-    <label class="field"><span>Texte alternatif</span><input type="text" name="alt" placeholder="Décrit l'image pour l'accessibilité"></label>
-    <label class="field"><span>Légende (facultatif)</span><input type="text" name="caption"></label>
-    <label class="field"><span>Crédit (facultatif)</span><input type="text" name="credit"></label>
-    <button class="btn btn-accent" type="submit">Téléverser</button>
+    <div class="form-grid">
+      <label class="field"><span>Texte alternatif</span><input type="text" name="alt" placeholder="Décrit l'image pour l'accessibilité"></label>
+      <label class="field"><span>Légende (facultatif)</span><input type="text" name="caption"></label>
+      <label class="field"><span>Crédit (facultatif)</span><input type="text" name="credit"></label>
+    </div>
+    <div class="toolbar-actions">
+      <button class="btn btn-accent" type="submit">Téléverser</button>
+    </div>
   </form>
 
   {% if medias %}

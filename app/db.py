@@ -10,7 +10,7 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-SCHEMA_VERSION = 6
+SCHEMA_VERSION = 7
 
 # Colonnes ajoutées après la première mise en production. Chaque entrée est
 # appliquée une seule fois, dans l'ordre, par `migrate` (idempotent).
@@ -25,6 +25,8 @@ REQUIRED_TABLES = (
     "revisions",
     "content_docs",
     "publications",
+    "projets",
+    "prestations",
     "_meta",
 )
 
@@ -103,6 +105,45 @@ CREATE TABLE IF NOT EXISTS content_published (
   data TEXT NOT NULL DEFAULT '{}',
   published_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS projets (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  slug TEXT NOT NULL UNIQUE,
+  nom TEXT NOT NULL DEFAULT '',
+  client TEXT NOT NULL DEFAULT '',
+  annee TEXT NOT NULL DEFAULT '',
+  ville TEXT NOT NULL DEFAULT '',
+  pitch TEXT NOT NULL DEFAULT '',
+  scope TEXT NOT NULL DEFAULT '',
+  duree TEXT NOT NULL DEFAULT '',
+  ton TEXT NOT NULL DEFAULT 'paper',
+  disciplines TEXT NOT NULL DEFAULT '[]',
+  tags TEXT NOT NULL DEFAULT '[]',
+  images TEXT NOT NULL DEFAULT '[]',
+  sections TEXT NOT NULL DEFAULT '[]',
+  results TEXT NOT NULL DEFAULT '[]',
+  statut TEXT NOT NULL DEFAULT 'brouillon',
+  position INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_projets_statut ON projets(statut, position);
+
+CREATE TABLE IF NOT EXISTS prestations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  slug TEXT NOT NULL UNIQUE,
+  nom TEXT NOT NULL DEFAULT '',
+  accroche TEXT NOT NULL DEFAULT '',
+  description TEXT NOT NULL DEFAULT '',
+  prix TEXT NOT NULL DEFAULT '',
+  duree TEXT NOT NULL DEFAULT '',
+  livrables TEXT NOT NULL DEFAULT '[]',
+  statut TEXT NOT NULL DEFAULT 'brouillon',
+  position INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_prestations_statut ON prestations(statut, position);
 
 CREATE TABLE IF NOT EXISTS _meta (
   key TEXT PRIMARY KEY,

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Projets{% endblock %}
+{% block heading %}Catalogue <span>/</span> <b>Projets</b>{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div class="title-wrap">
+    <h1>Projets</h1>
+    <p class="sub">Les études de cas de la vitrine. Un projet <strong>brouillon</strong> n'apparaît pas sur le site.</p>
+  </div>
+  <div class="page-actions">
+    <a class="btn btn-ghost btn-sm" href="/admin/catalogue/export.json">Export JSON</a>
+    <a class="btn btn-accent btn-sm" href="/admin/projets/nouveau">Nouveau projet</a>
+  </div>
+</div>
+
+<div class="filters" style="margin-bottom:14px">
+  <a class="chip{% if not statut %} is-active{% endif %}" href="/admin/projets">Tous <span>{{ counts.tous }}</span></a>
+  <a class="chip{% if statut == 'brouillon' %} is-active{% endif %}" href="/admin/projets?statut=brouillon">Brouillons <span>{{ counts.brouillon }}</span></a>
+  <a class="chip{% if statut == 'publie' %} is-active{% endif %}" href="/admin/projets?statut=publie">Publiés <span>{{ counts.publie }}</span></a>
+</div>
+
+{% if projets %}
+  <div class="lib-grid">
+    {% for p in projets %}
+      <article class="lib-card">
+        <div class="lib-thumb">
+          {% if p.cover %}
+            <img src="{{ p.cover.src }}" alt="{{ p.cover.alt }}">
+          {% else %}
+            <i>{{ p.nom[:2]|upper }}</i>
+          {% endif %}
+        </div>
+        <div class="lib-body">
+          <div class="page-meta">
+            {% if p.statut == 'publie' %}
+              <span class="badge badge-traite">publié</span>
+            {% else %}
+              <span class="badge badge-en-cours">brouillon</span>
+            {% endif %}
+            {% if p.client %}<span class="tag">{{ p.client }}</span>{% endif %}
+            {% if p.annee %}<span class="tag">{{ p.annee }}</span>{% endif %}
+          </div>
+          <h3>{{ p.nom }}</h3>
+          <p>{{ p.pitch or 'Pas encore de pitch.' }}</p>
+          <div class="page-meta">
+            <span class="tiny muted">{{ p.ville or 'lieu non renseigné' }}</span>
+            <span class="dot"></span>
+            <span class="tiny muted">{{ p.images|length }} visuel{{ 's' if p.images|length > 1 }}</span>
+            <span class="dot"></span>
+            <span class="tiny muted">{{ p.sections|length }} section{{ 's' if p.sections|length > 1 }}</span>
+          </div>
+        </div>
+        <div class="lib-foot">
+          <form method="post" action="/admin/projets/{{ p.id }}/position" class="inline-form">
+            <input type="hidden" name="csrf" value="{{ csrf }}">
+            <button class="btn btn-sm" name="dir" value="up" type="submit" title="Monter">↑</button>
+            <button class="btn btn-sm" name="dir" value="down" type="submit" title="Descendre">↓</button>
+          </form>
+          <div class="spacer"></div>
+          <a class="btn btn-sm btn-ghost" href="/admin/projets/{{ p.id }}">Éditer</a>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="card"><p class="empty">Aucun projet pour ce filtre. Commence par « Nouveau projet ».</p></div>
+{% endif %}
+{% endblock %}

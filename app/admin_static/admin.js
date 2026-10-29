@@ -45,6 +45,35 @@
     });
   });
 
+  // Répéteurs de colonnes : images, sections, résultats.
+  document.querySelectorAll("[data-repeat]").forEach(function (box) {
+    var rows = box.querySelector("[data-rows]");
+    var tpl = box.querySelector("template");
+    var card = box.closest(".card");
+    var addBtn = card ? card.querySelector("[data-add]") : null;
+
+    if (addBtn && tpl && rows) {
+      addBtn.addEventListener("click", function () {
+        rows.appendChild(tpl.content.cloneNode(true));
+        var last = rows.lastElementChild;
+        var first = last && last.querySelector("input, textarea");
+        if (first) first.focus();
+      });
+    }
+
+    box.addEventListener("click", function (event) {
+      var del = event.target.closest("[data-del]");
+      if (!del) return;
+      var row = del.closest(".repeat-row");
+      if (!row || !rows) return;
+      if (rows.querySelectorAll(".repeat-row").length > 1) {
+        row.remove();
+      } else {
+        row.querySelectorAll("input, textarea").forEach(function (field) { field.value = ""; });
+      }
+    });
+  });
+
   // Garde-fou : prévenir en quittant un formulaire modifié.
   var dirty = false;
   var guarded = document.querySelector("[data-dirty-guard]");

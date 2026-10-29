@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Nouveau projet' if mode == 'new' else projet.nom }}{% endblock %}
+{% block heading %}Catalogue <span>/</span> <a href="/admin/projets">Projets</a> <span>/</span> <b>{{ 'nouveau' if mode == 'new' else projet.slug }}</b>{% endblock %}
+
+{% macro image_row(src='', alt='', w='', h='') %}
+  <div class="repeat-row">
+    <div class="r-fields" style="grid-template-columns:minmax(0,2fr) minmax(0,1.4fr) 70px 70px">
+      <input type="text" name="image_src" value="{{ src }}" placeholder="/medias/…jpg">
+      <input type="text" name="image_alt" value="{{ alt }}" placeholder="texte alternatif">
+      <input type="text" name="image_w" value="{{ w }}" placeholder="larg.">
+      <input type="text" name="image_h" value="{{ h }}" placeholder="haut.">
+    </div>
+    <button class="btn btn-sm btn-danger r-del" type="button" data-del title="Retirer">✕</button>
+  </div>
+{% endmacro %}
+
+{% macro section_row(s={}) %}
+  <div class="repeat-row">
+    <div class="r-fields" style="grid-template-columns:64px 150px minmax(0,1fr)">
+      <input type="text" name="section_k" value="{{ s.get('k','') }}" placeholder="01">
+      <input type="text" name="section_label" value="{{ s.get('label','') }}" placeholder="libellé">
+      <input type="text" name="section_title" value="{{ s.get('title','') }}" placeholder="titre de la section">
+    </div>
+    <div class="r-fields" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)">
+      <textarea name="section_body" placeholder="Paragraphes (une ligne vide entre deux)">{{ (s.get('paragraphs') or [])|join('\n\n') }}</textarea>
+      <textarea name="section_bullets" placeholder="Puces (une par ligne)">{{ (s.get('bullets') or [])|join('\n') }}</textarea>
+    </div>
+    <button class="btn btn-sm btn-danger r-del" type="button" data-del title="Retirer">✕</button>
+  </div>
+{% endmacro %}
+
+{% macro result_row(r={}) %}
+  <div class="repeat-row">
+    <div class="r-fields" style="grid-template-columns:110px minmax(0,1fr)">
+      <input type="text" name="result_value" value="{{ r.get('value','') }}" placeholder="+35 %">
+      <input type="text" name="result_label" value="{{ r.get('label','') }}" placeholder="trafic organique">
+    </div>
+    <button class="btn btn-sm btn-danger r-del" type="button" data-del title="Retirer">✕</button>
+  </div>
+{% endmacro %}
+
+{% block content %}
+<form method="post" action="/admin/projets" class="content-form">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  {% if projet.id %}<input type="hidden" name="id" value="{{ projet.id }}">{% endif %}
+
+  <div class="page-head">
+    <div class="title-wrap">
+      <h1>{{ 'Nouveau projet' if mode == 'new' else projet.nom or 'Projet sans titre' }}</h1>
+      <p class="sub">Une étude de cas : identité, contexte, sections narrées et résultats chiffrés.</p>
+    </div>
+    <div class="page-actions">
+      <a class="btn btn-ghost btn-sm" href="/admin/projets">Retour</a>
+      <button class="btn btn-accent btn-sm" type="submit">Enregistrer</button>
+    </div>
+  </div>
+
+  <div class="workspace">
+    <div class="stack" style="gap:16px">
+      <section class="card">
+        <div class="card-head"><h2>Identité</h2></div>
+        <div class="form-grid">
+          <label class="field"><span>Nom du projet</span><input type="text" name="nom" value="{{ projet.nom }}" required></label>
+          <label class="field"><span>Slug</span><input type="text" name="slug" value="{{ projet.slug }}" placeholder="auto depuis le nom"></label>
+          <label class="field"><span>Client</span><input type="text" name="client" value="{{ projet.client }}"></label>
+          <label class="field"><span>Année</span><input type="text" name="annee" value="{{ projet.annee }}"></label>
+          <label class="field"><span>Ville</span><input type="text" name="ville" value="{{ projet.ville }}"></label>
+          <label class="field"><span>Durée</span><input type="text" name="duree" value="{{ projet.duree }}" placeholder="6 semaines"></label>
+        </div>
+        <label class="field"><span>Accroche</span><textarea name="pitch" rows="3" placeholder="Une phrase qui résume le projet.">{{ projet.pitch }}</textarea></label>
+        <label class="field"><span>Périmètre</span><textarea name="scope" rows="3" placeholder="Ce qui était inclus.">{{ projet.scope }}</textarea></label>
+        <div class="form-grid">
+          <label class="field"><span>Disciplines <em class="hint">une par ligne</em></span><textarea name="disciplines" rows="3">{{ projet.disciplines|join('\n') }}</textarea></label>
+          <label class="field"><span>Tags <em class="hint">un par ligne</em></span><textarea name="tags" rows="3">{{ projet.tags|join('\n') }}</textarea></label>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h2>Visuels</h2><span class="spacer"></span><button class="btn btn-sm" type="button" data-add>+ Image</button></div>
+        <div class="repeat" data-repeat>
+          <div data-rows>
+            {% for image in projet.images %}{{ image_row(image.src, image.alt, image.width or '', image.height or '') }}{% endfor %}
+            {% if not projet.images %}{{ image_row() }}{% endif %}
+          </div>
+          <template>{{ image_row() }}</template>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h2>Sections</h2><span class="spacer"></span><button class="btn btn-sm" type="button" data-add>+ Section</button></div>
+        <div class="repeat" data-repeat>
+          <div data-rows>
+            {% for section in projet.sections %}{{ section_row(section) }}{% endfor %}
+            {% if not projet.sections %}{{ section_row() }}{% endif %}
+          </div>
+          <template>{{ section_row() }}</template>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h2>Résultats</h2><span class="spacer"></span><button class="btn btn-sm" type="button" data-add>+ Résultat</button></div>
+        <div class="repeat" data-repeat>
+          <div data-rows>
+            {% for result in projet.results %}{{ result_row(result) }}{% endfor %}
+            {% if not projet.results %}{{ result_row() }}{% endif %}
+          </div>
+          <template>{{ result_row() }}</template>
+        </div>
+      </section>
+    </div>
+
+    <aside class="stack" style="gap:16px">
+      <section class="card">
+        <div class="card-head"><h2>Publication</h2></div>
+        <label class="field"><span>Statut</span>
+          <select name="statut">
+            <option value="brouillon"{% if projet.statut == 'brouillon' %} selected{% endif %}>Brouillon</option>
+            <option value="publie"{% if projet.statut == 'publie' %} selected{% endif %}>Publié</option>
+          </select>
+        </label>
+        <label class="field"><span>Traitement visuel</span>
+          <select name="ton">
+            <option value="paper"{% if projet.ton == 'paper' %} selected{% endif %}>Paper</option>
+            <option value="tint"{% if projet.ton == 'tint' %} selected{% endif %}>Tint</option>
+            <option value="dark"{% if projet.ton == 'dark' %} selected{% endif %}>Dark</option>
+          </select>
+        </label>
+        <p class="tiny muted">Seuls les projets publiés sortent dans l'export JSON et sur la vitrine. {% if projet.id %}L'ordre se règle depuis la liste, avec les flèches de chaque carte.{% else %}L'ordre se règle après le premier enregistrement.{% endif %}</p>
+      </section>
+
+      {% if projet.id %}
+      <section class="card">
+        <div class="card-head"><h2>Zone sensible</h2></div>
+        <p class="tiny muted">La suppression est définitive. Le projet disparaît de la vitrine.</p>
+      </section>
+      {% endif %}
+    </aside>
+  </div>
+
+  <div class="page-actions" style="justify-content:flex-end">
+    <button class="btn btn-accent" type="submit">Enregistrer</button>
+  </div>
+</form>
+
+{% if projet.id %}
+<form method="post" action="/admin/projets/{{ projet.id }}/supprimer" class="inline-form" style="margin-top:12px" data-confirm="Supprimer définitivement ce projet ?">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <button class="btn btn-danger btn-sm" type="submit">Supprimer le projet</button>
+</form>
+{% endif %}
+{% endblock %}
