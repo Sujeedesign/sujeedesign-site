@@ -184,3 +184,30 @@ def test_double_envoi_ne_cree_pas_deux_revisions(client: TestClient, db_file: Pa
     finally:
         conn.close()
     assert rows == 1, rows
+
+
+def test_publier_reste_grisé_tant_que_rien_ne_change(client: TestClient) -> None:
+    """Règle : sans modification enregistrée, `pending` est faux (bouton grisé)."""
+    login(client)
+    session = client.get("/api/editor/session?page=services").json()
+    assert session["pending"] is False
+
+
+def test_une_modification_allume_le_bouton_puis_la_publication_l_eteint(
+    client: TestClient, monkeypatch
+) -> None:
+    login(client)
+    csrf = client.get("/api/editor/session?page=services").json()["csrf"]
+    written = client.post(
+        "/api/editor/champ",
+        json={"slug": "services", "path": "hero.lead", "value": "Périmètre modifié", "csrf": csrf},
+    )
+    assert written.status_code == 200, written.text
+    assert written.json()["pending"] is True
+
+    monkeypatch.setattr("app.content.publish_ready", lambda: True)
+    monkeypatch.setattr("app.content._coolify", lambda *a, **k: {"deployments": [{"message": "ok"}]})
+    published = client.post("/api/editor/publier", json={"csrf": csrf, "slug": "services"})
+    assert published.status_code == 200, published.text
+    assert published.json()["pending"] is False
+    assert client.get("/api/editor/session?page=services").json()["pending"] is False
