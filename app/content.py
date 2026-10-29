@@ -81,8 +81,14 @@ def publish_config() -> dict[str, str]:
 
 
 def publish_ready() -> bool:
+    """Publication possible dès qu'un des deux chemins est configuré.
+
+    Cache Next (revalidation, quelques secondes) ou redéploiement Coolify
+    (secours). Exiger le jeton Coolify bloquait à tort le bouton « Publier »
+    quand seule la revalidation était configurée.
+    """
     config = publish_config()
-    return bool(config["token"] and config["uuid"])
+    return fast_publish_ready() or bool(config["token"] and config["uuid"])
 
 
 # Le conteneur joint Coolify par le réseau Docker ; l'URL publique passe par le

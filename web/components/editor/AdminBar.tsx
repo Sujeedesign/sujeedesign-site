@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 import {
   clearCookie,
@@ -36,9 +37,17 @@ function hasAdminMarker(): boolean {
   return readCookie("sjd_admin_ui") === "1" || readCookie("sjd_edit") === "1";
 }
 
-function pageSlug(): string {
-  const first = window.location.pathname.replace(/^\/+|\/+$/g, "").split("/")[0] ?? "";
-  return ["services", "realisations", "a-propos", "agents-ia"].includes(first) ? first : "home";
+/** Pages dont le contenu est éditable en place (miroir de app/admin.py). */
+const EDITABLE = ["services", "realisations", "a-propos", "agents-ia"];
+
+function slugOf(pathname: string): string | null {
+  const first = pathname.replace(/^\/+|\/+$/g, "").split("/")[0] ?? "";
+  if (EDITABLE.includes(first)) return first;
+  return pathname === "/" ? "home" : null;
+}
+
+function pageSlug(pathname: string): string {
+  return slugOf(pathname) ?? "home";
 }
 
 const CSS = `
@@ -77,6 +86,15 @@ const CSS = `
 #sjd-adminbar button.primary{ background:#C9340F; border-color:#C9340F; color:#fff; }
 #sjd-adminbar button.primary:hover:not(:disabled){ background:#e0440f; }
 #sjd-adminbar button:disabled{ opacity:.32; cursor:not-allowed; }
+/* Publier : gris neutre tant qu'il n'y a rien à publier, accent dès qu'une
+   modification attend. Plus lisible qu'une simple baisse d'opacité. */
+#sjd-adminbar button.primary:disabled{
+  background:rgba(255,255,255,.10); border-color:rgba(255,255,255,.18);
+  color:rgba(244,241,232,.42); opacity:1;
+}
+#sjd-adminbar button.primary:not(:disabled){
+  box-shadow:0 0 0 1px rgba(201,52,15,.5), 0 2px 10px rgba(201,52,15,.32);
+}
 #sjd-adminbar button.ghost{ border-color:transparent; opacity:.7; }
 #sjd-adminbar button.ghost:hover{ opacity:1; background:rgba(255,255,255,.08); }
 #sjd-adminbar .sep{ width:1px; height:16px; background:rgba(255,255,255,.14); }
@@ -86,32 +104,74 @@ body.sjd-adminbar-on{ padding-top:var(--sjd-admin-h, 38px); }
 body.sjd-adminbar-on .nav{ top:var(--sjd-admin-h, 38px); }
 @media (max-width:900px){
   #sjd-adminbar{ height:auto; min-height:38px; flex-wrap:wrap; padding:7px 10px; gap:8px; }
-  #sjd-adminbar .who, #sjd-adminbar .hint, #sjd-adminbar .state{ display:none; }
+  #sjd-adminbar .who, #sjd-adminbar .hint, #sjd-adminbar .state, #sjd-adminbar .tag,
+  #sjd-adminbar .dot, #sjd-adminbar .sep{ display:none; }
+  /* L'élément « push » (margin-left:auto) consomme toute la largeur libre et
+     provoque un retour à la ligne des boutons : on l'écarte sur petit écran. */
+  #sjd-adminbar .push{ display:none; }
+  /* Les libellés doivent tenir sur une ligne, sinon la barre double de hauteur. */
+  #sjd-adminbar button, #sjd-adminbar a.btn{ white-space:nowrap; }
+  #sjd-adminbar a.btn{ display:inline-flex; align-items:center; height:30px; padding:0 10px; }
+  /* Le libellé « Non publié » fait passer la barre sur deux lignes : on garde
+     la pastille, la couleur du bouton Publier dit le reste. */
+  #sjd-adminbar .pending{ font-size:0; gap:0; }
+  #sjd-adminbar .pending::before{ width:6px; height:6px; }
 }
 `;
+
+/**
+ * Sonde de session.
+ *
+ * Règle d'affichage : dès qu'une session admin existe, le bandeau est là, sur
+ * toutes les pages. Deux verrous ont sauté :
+ *  - on ne rend plus le bandeau après la réponse de l'API mais dès qu'un
+ *    marqueur est lisible : la barre apparaît immédiatement, la sonde ne fait
+ *    que compléter (identité, modifications en attente) ;
+ *  - la sonde tourne à chaque page, même sans marqueur : une session encore
+ *    valide dont le drapeau a disparu affiche quand même le bandeau. Le coût
+ *    est un 401 sans accès base pour un visiteur anonyme.
+ * Seule une réponse 401 (reason "anon") le masque ; une erreur réseau ou un 5xx
+ * ne doit jamais le faire disparaître.
+ */
+async function probe(slug: string): Promise<SessionProbe | null> {
+  const res = await fetch(`/api/editor/session?page=${encodeURIComponent(slug)}`, {
+    credentials: "same-origin",
+    headers: { accept: "application/json" },
+    cache: "no-store",
+  });
+  if (res.status === 401) return { ok: false };
+  if (!res.ok) throw new Error(`sonde ${res.status}`);
+  return (await res.json()) as SessionProbe;
+}
 
 export default function AdminBar() {
   const [bar, setBar] = useState(getState());
   const [mounted, setMounted] = useState(false);
+  const [marker, setMarker] = useState(false);
+  const [denied, setDenied] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => subscribe(() => setBar(getState())), []);
 
-  // Sonde de session : uniquement si le marqueur admin est présent, pour ne pas
-  // appeler l'API depuis chaque visite anonyme.
   useEffect(() => {
     setMounted(true);
-    if (!hasAdminMarker()) return;
-    const slug = pageSlug();
+    const hasMarker = hasAdminMarker();
+    setMarker(hasMarker);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    const slug = pageSlug(pathname);
+    if (slugOf(pathname)) patchState({ slug });
+    // Sans marqueur, un refus précédent ne doit pas coller : la session a pu
+    // être ouverte entre-temps dans un autre onglet.
+    if (!marker) setDenied(false);
     let alive = true;
-    fetch(`/api/editor/session?page=${encodeURIComponent(slug)}`, {
-      credentials: "same-origin",
-      headers: { accept: "application/json" },
-    })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data: SessionProbe | null) => {
-        if (!alive) return;
-        if (!data?.ok) {
-          // Session expirée : on efface le marqueur pour ne plus sonder.
+    probe(slug)
+      .then((data) => {
+        if (!alive || !data) return;
+        if (!data.ok) {
+          setDenied(true);
           clearCookie("sjd_admin_ui");
           return;
         }
@@ -123,24 +183,42 @@ export default function AdminBar() {
           publishReady: Boolean(data.publish_ready),
         });
       })
-      .catch(() => {});
+      .catch(() => {
+        // API momentanément injoignable : on garde le bandeau tel quel.
+      });
     return () => {
       alive = false;
     };
-  }, []);
+  }, [mounted, marker, pathname]);
 
-  // La hauteur réelle du bandeau sert de marge sur mobile.
+  const visible = mounted && !denied && (marker || bar.ready);
+
+  // La hauteur réelle du bandeau décale le header fixe et le flux de la page.
+  // Mesure dynamique : sur mobile le bandeau passe sur deux lignes, une valeur
+  // figée à 38px laissait le header sous le bandeau.
   useEffect(() => {
-    document.body.classList.toggle("sjd-adminbar-on", bar.ready);
-    if (!bar.ready) return;
+    document.body.classList.toggle("sjd-adminbar-on", visible);
+    if (!visible) return;
     const el = document.getElementById("sjd-adminbar");
-    if (el) document.body.style.setProperty("--sjd-admin-h", `${el.offsetHeight}px`);
-  }, [bar.ready]);
+    if (!el) return;
+    const sync = () => {
+      document.body.style.setProperty("--sjd-admin-h", `${el.offsetHeight}px`);
+    };
+    sync();
+    const ro = new ResizeObserver(sync);
+    ro.observe(el);
+    window.addEventListener("resize", sync);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", sync);
+    };
+  }, [visible, bar.editing]);
 
-  if (!mounted || !bar.ready) return null;
+  if (!visible) return null;
 
   const editing = bar.editing;
   const canPublish = bar.pending && bar.publishReady && !bar.publishing;
+  const editable = slugOf(pathname) !== null;
 
   return (
     <>
@@ -192,9 +270,11 @@ export default function AdminBar() {
             <a className="btn" href="/admin">
               Tableau de bord
             </a>
-            <button type="button" className="primary" onClick={demanderEdition}>
-              Modifier la page
-            </button>
+            {editable ? (
+              <button type="button" className="primary" onClick={demanderEdition}>
+                Modifier la page
+              </button>
+            ) : null}
           </>
         )}
       </div>
