@@ -1,4 +1,7 @@
+import aProposJson from "@/content/a-propos.json";
+import agentsIaJson from "@/content/agents-ia.json";
 import homeJson from "@/content/home.json";
+import realisationsJson from "@/content/realisations.json";
 import servicesJson from "@/content/services.json";
 import { homeSchema, type HomeContent } from "@/lib/content/schema";
 
@@ -32,10 +35,14 @@ const merge = (base: unknown, patch: unknown): unknown => {
 const fallbackFor = (slug: string): unknown => {
   if (slug === "home") return homeJson;
   if (slug === "services") return servicesJson;
+  if (slug === "realisations") return realisationsJson;
+  if (slug === "a-propos") return aProposJson;
+  if (slug === "agents-ia") return agentsIaJson;
   return null;
 };
 
-type ContentSlug = "home" | "services";
+/** Pages secondaires : même mécanique que l'accueil, document `{ hero }`. */
+export type PageSlug = "realisations" | "a-propos" | "agents-ia";
 
 async function fetchDocument(slug: string): Promise<unknown | null> {
   const base = (process.env.CONTENT_API_URL || "").trim().replace(/\/+$/, "");
@@ -70,4 +77,11 @@ export async function getServicesContent(): Promise<typeof servicesJson> {
   const remote = await fetchDocument("services");
   const merged = remote ? merge(fallbackFor("services"), remote) : fallbackFor("services");
   return merged as typeof servicesJson;
+}
+
+/** Document d'une page secondaire (bannière), servi depuis la base si possible. */
+export async function getPageContent(slug: PageSlug) {
+  const remote = await fetchDocument(slug);
+  const base = fallbackFor(slug);
+  return (remote ? merge(base, remote) : base) as { hero?: Record<string, unknown> };
 }

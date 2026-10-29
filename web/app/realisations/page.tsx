@@ -3,12 +3,16 @@ import { Realisations, pageMeta } from "@/components/pages/Realisations";
 import { JsonLd } from "@/components/site/JsonLd";
 import { PageShell } from "@/components/site/PageShell";
 import { pageMetadata } from "@/lib/page-metadata";
+import { getPageContent } from "@/lib/content/live";
 import { routes } from "@/lib/routes";
 import { breadcrumbNode, pageGraph, webPageNode } from "@/lib/structured-data";
 
 export const metadata: Metadata = pageMetadata(pageMeta, routes.realisations, "/assets/img/og/realisations.jpg");
 
-export default function Page() {
+export const revalidate = 3600;
+
+export default async function Page() {
+  const doc = await getPageContent("realisations");
   return (
     <PageShell current={routes.realisations}>
       <JsonLd
@@ -21,7 +25,7 @@ export default function Page() {
         ])}
       />
       <main id="main">
-        <Realisations />
+        <Realisations doc={doc} />
       </main>
     </PageShell>
   );

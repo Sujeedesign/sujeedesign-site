@@ -1,14 +1,14 @@
 /** Portage du v5 : a-propos.html. Balisage d'origine, liens en urls propres. */
-import { pageHero, line } from "@/content/pages";
+import { pageHero, line, type PageDoc } from "@/content/pages";
 
-const hero = pageHero("a-propos");
 
 export const pageMeta = {
   "title": "À propos — Sujeepan Sabesan, designer",
   "description": "Sujeepan Sabesan, designer indépendant entre Cergy et Paris depuis 2013 : direction artistique, photo et vidéo, UX/UI, IA générative, web et formation."
 };
 
-export function APropos() {
+export function APropos({ doc }: { doc?: PageDoc }) {
+  const hero = pageHero(doc);
   return (
     <>
 <div>

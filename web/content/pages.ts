@@ -27,8 +27,12 @@ export const pageDocs: Record<string, PageDoc> = {
   "agents-ia": agentsIa,
 };
 
-export function pageHero(slug: string): PageHero {
-  return pageDocs[slug]?.hero ?? {};
+/**
+ * Bannière d'une page secondaire. Le document vient de la base (voir
+ * `lib/content/live.ts`) ; `pageDocs` ne sert plus que de repli au build.
+ */
+export function pageHero(doc: PageDoc | undefined): PageHero {
+  return doc?.hero ?? {};
 }
 
 /** Ligne de titre : renvoie la valeur enregistrée ou le texte de repli. */

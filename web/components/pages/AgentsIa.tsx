@@ -1,14 +1,14 @@
 /** Portage du v5 : agents-ia.html. Balisage d'origine, liens en urls propres. */
-import { pageHero, line } from "@/content/pages";
+import { pageHero, line, type PageDoc } from "@/content/pages";
 
-const hero = pageHero("agents-ia");
 
 export const pageMeta = {
   "title": "Agents IA & automatisation — Sujee Design",
   "description": "Agents IA auto-hébergés pour PME et indépendants : veille, devis, contenu, support. Connectés à vos outils par MCP, modèles locaux, accès contrôlés."
 };
 
-export function AgentsIa() {
+export function AgentsIa({ doc }: { doc?: PageDoc }) {
+  const hero = pageHero(doc);
   return (
     <>
 <div>

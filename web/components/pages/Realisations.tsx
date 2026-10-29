@@ -8,10 +8,9 @@
  * sur sa fiche et dans le plan du site.
  */
 import { projects } from "@/content/projects";
-import { pageHero } from "@/content/pages";
+import { pageHero, type PageDoc } from "@/content/pages";
 import { realisationPath } from "@/lib/routes";
 
-const hero = pageHero("realisations");
 
 const count = projects.length;
 const firstYear = 2013;
@@ -31,7 +30,8 @@ const toneClass: Record<string, string> = {
   dark: "rl-p rl-p--dark",
 };
 
-export function Realisations() {
+export function Realisations({ doc }: { doc?: PageDoc }) {
+  const hero = pageHero(doc);
   return (
     <div>
       <header className="rl-hero">
