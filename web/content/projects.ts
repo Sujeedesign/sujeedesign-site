@@ -178,6 +178,12 @@ export const projects: Project[] = [
         ],
       },
     ],
+    cover: {
+      src: "/assets/img/projet/saft-energy-storage/02.jpg",
+      alt: "Choix du personnage dans le jeu Saft Energy Storage",
+      width: 1920,
+      height: 1080,
+    },
     images: [
       {
         src: "/assets/img/projet/saft-energy-storage/01.jpg",
@@ -250,6 +256,12 @@ export const projects: Project[] = [
         ],
       },
     ],
+    cover: {
+      src: "/assets/img/projet/lg-sales-talk/03.jpg",
+      alt: "Écran d’arguments produit LG Sales talk",
+      width: 1920,
+      height: 1080,
+    },
     images: [
       {
         src: "/assets/img/projet/lg-sales-talk/01.jpg",
@@ -328,6 +340,12 @@ export const projects: Project[] = [
         ],
       },
     ],
+    cover: {
+      src: "/assets/img/projet/dekra/03.jpg",
+      alt: "Diapositive DEKRA, mise en page des objectifs",
+      width: 1920,
+      height: 1080,
+    },
     images: [
       {
         src: "/assets/img/projet/dekra/01.jpg",
@@ -545,6 +563,12 @@ export const projects: Project[] = [
         ],
       },
     ],
+    cover: {
+      src: "/assets/img/projet/elerya/04.jpg",
+      alt: "Déclinaison Elerya sur un gabarit e-commerce",
+      width: 1920,
+      height: 1080,
+    },
     images: [
       {
         src: "/assets/img/projet/elerya/01.jpg",
