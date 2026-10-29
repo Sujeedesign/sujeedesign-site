@@ -39,9 +39,10 @@ export type Project = {
   /**
    * Visuel de couverture, indépendant de la galerie.
    *
-   * Utilisé par les cartes d'accueil, le film de /realisations, la vignette du
-   * projet suivant et l'image de partage. Absent, la première image de la
-   * galerie fait office de couverture.
+   * Utilisé par la carte d'accueil, le film de /realisations et la vignette des
+   * projets liés. Absent, la première image de la galerie fait office de
+   * couverture. L'image de partage (Open Graph) reste le fichier dédié
+   * `public/assets/img/og/<slug>.jpg`, au format 1200×630.
    */
   cover?: ProjectImage;
   images: ProjectImage[];
