@@ -24,10 +24,10 @@ const arrow = (
 const featured = getProject("elerya");
 
 /** Image du LCP de l'accueil : le fond du hero. Ses dimensions sont celles du fichier. */
-/* L'ouverture garde la première image de la galerie : la couverture (`cover`)
-   sert aux cartes, au film et au partage, pas au fond plein écran, où un
-   visuel pensé pour une vignette casse le contraste du titre. */
-export const heroPhoto = featured?.images[0];
+/* L'ouverture suit le visuel de couverture du projet mis en avant : Sujee a
+   retravaillé ces images pour qu'elles tiennent aussi en plein écran. Repli
+   sur la première image de la galerie si aucune couverture n'est définie. */
+export const heroPhoto = featured?.cover ?? featured?.images[0];
 
 export function Hero({ doc }: { doc: HomeContent }) {
   const { hero } = doc;
