@@ -99,6 +99,12 @@ export const projects: Project[] = [
         ],
       },
     ],
+    cover: {
+      src: "/assets/img/projet/club-med/cover.jpg",
+      alt: "Plage turquoise et logo Club Med, ouverture du système TEd",
+      width: 1920,
+      height: 1280,
+    },
     images: [
       {
         src: "/assets/img/projet/club-med/02.jpg",
@@ -179,10 +185,10 @@ export const projects: Project[] = [
       },
     ],
     cover: {
-      src: "/assets/img/projet/saft-energy-storage/02.jpg",
-      alt: "Choix du personnage dans le jeu Saft Energy Storage",
+      src: "/assets/img/projet/saft-energy-storage/cover.jpg",
+      alt: "Super-héros du jeu Energy Storage, Saft a Total Company",
       width: 1920,
-      height: 1080,
+      height: 1280,
     },
     images: [
       {
@@ -257,10 +263,10 @@ export const projects: Project[] = [
       },
     ],
     cover: {
-      src: "/assets/img/projet/lg-sales-talk/03.jpg",
-      alt: "Écran d’arguments produit LG Sales talk",
+      src: "/assets/img/projet/lg-sales-talk/cover.jpg",
+      alt: "Femme vue à travers le hublot d'une machine à laver LG",
       width: 1920,
-      height: 1080,
+      height: 1280,
     },
     images: [
       {
@@ -341,10 +347,10 @@ export const projects: Project[] = [
       },
     ],
     cover: {
-      src: "/assets/img/projet/dekra/03.jpg",
-      alt: "Diapositive DEKRA, mise en page des objectifs",
+      src: "/assets/img/projet/dekra/cover.jpg",
+      alt: "Conductrice souriante, campagne Drive with confidence de DEKRA",
       width: 1920,
-      height: 1080,
+      height: 1280,
     },
     images: [
       {
@@ -419,6 +425,12 @@ export const projects: Project[] = [
         ],
       },
     ],
+    cover: {
+      src: "/assets/img/projet/analog-way/cover.jpg",
+      alt: "Processeur Ascender 48 devant le site Analog Way, InfoComm 2015",
+      width: 1920,
+      height: 1280,
+    },
     images: [
       {
         src: "/assets/img/projet/analog-way/01.jpg",
@@ -497,6 +509,12 @@ export const projects: Project[] = [
         ],
       },
     ],
+    cover: {
+      src: "/assets/img/projet/evenement-spectacle/cover.jpg",
+      alt: "Danseuse en jupe rouge sur l'accueil de L'Événement Spectacle",
+      width: 1920,
+      height: 1280,
+    },
     images: [
       {
         src: "/assets/img/projet/evenement-spectacle/01.jpg",
@@ -564,10 +582,10 @@ export const projects: Project[] = [
       },
     ],
     cover: {
-      src: "/assets/img/projet/elerya/04.jpg",
-      alt: "Déclinaison Elerya sur un gabarit e-commerce",
+      src: "/assets/img/projet/elerya/cover.jpg",
+      alt: "Sac Elerya porté en extérieur, direction photo de la collection",
       width: 1920,
-      height: 1080,
+      height: 1280,
     },
     images: [
       {
