@@ -130,25 +130,24 @@ html.no-anim [data-stagger] > *{ opacity: 1 !important; transform: none !importa
   border-radius:inherit;
   pointer-events:none;
 }
-/* voile : lisibilité du texte côté gauche et en bas, image préservée en haut à droite */
+/* Voile : une seule nappe régulière sur TOUTE la carte (aucun coin laissé
+   vif, sinon l'image paraît à moitié traitée), volontairement discrète.
+   Le bas est un peu plus dense pour porter le titre et le pied de carte ;
+   la lisibilité fine du texte reste assurée par les text-shadow plus bas. */
 .case--photo .case__bg::after{
   content:"";
   position:absolute;
   inset:0;
   background:
-    radial-gradient(110% 80% at 100% 0%, rgba(8,8,7,.26), rgba(8,8,7,0) 56%),
-    linear-gradient(100deg,
-      rgba(8,8,7,.80) 0%,
-      rgba(8,8,7,.60) 24%,
-      rgba(8,8,7,.32) 44%,
-      rgba(8,8,7,.08) 68%,
-      rgba(8,8,7,.02) 86%,
-      rgba(8,8,7,.20) 100%),
-    linear-gradient(to top,
-      rgba(8,8,7,.84) 0%,
-      rgba(8,8,7,.58) 18%,
-      rgba(8,8,7,.2) 36%,
-      rgba(8,8,7,0) 54%);
+    linear-gradient(to bottom,
+      rgba(8,8,7,.20) 0%,
+      rgba(8,8,7,.20) 44%,
+      rgba(8,8,7,.34) 70%,
+      rgba(8,8,7,.62) 100%),
+    linear-gradient(96deg,
+      rgba(8,8,7,.16) 0%,
+      rgba(8,8,7,.08) 52%,
+      rgba(8,8,7,.10) 100%);
 }
 /* le visuel d'origine n'a plus de sens : la photo est le fond */
 .case--photo .case__visual{display:none!important}
@@ -172,10 +171,10 @@ html.no-anim [data-stagger] > *{ opacity: 1 !important; transform: none !importa
 @media (max-width:860px){
   .case--photo .case__bg::after{
     background:linear-gradient(to bottom,
-      rgba(8,8,7,.28) 0%,
-      rgba(8,8,7,.30) 26%,
-      rgba(8,8,7,.46) 56%,
-      rgba(8,8,7,.76) 100%);
+      rgba(8,8,7,.22) 0%,
+      rgba(8,8,7,.20) 46%,
+      rgba(8,8,7,.32) 74%,
+      rgba(8,8,7,.58) 100%);
   }
 }
 
