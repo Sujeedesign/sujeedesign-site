@@ -51,10 +51,28 @@ def test_session_expose_document_et_schema(client: TestClient) -> None:
     assert "token" not in str(payload), "aucun secret Coolify ne doit sortir"
 
 
-def test_marqueur_edition_pose_a_la_connexion(client: TestClient) -> None:
+def test_connexion_ne_declenche_pas_le_mode_edition(client: TestClient) -> None:
+    """Se connecter ne doit jamais activer l'édition : c'est une proposition.
+
+    La connexion pose seulement un marqueur lisible par la vitrine, qui lui
+    permet de sonder la session sans appeler l'API pour les anonymes.
+    """
     response = client.post(
         "/admin/connexion", data={"password": PASSWORD}, follow_redirects=False
     )
+    cookies = response.headers.get_list("set-cookie")
+    assert any(c.startswith("sjd_admin_ui=1") for c in cookies)
+    assert any("sjd_admin_ui=1" in c and "HttpOnly" not in c for c in cookies)
+    assert not any(c.startswith("sjd_edit=1") for c in cookies), (
+        "la connexion ne doit pas armer l'édition en place"
+    )
+
+
+def test_page_editer_arme_l_edition_ponctuellement(client: TestClient) -> None:
+    login(client)
+    response = client.get("/admin/editer?page=services", follow_redirects=False)
+    assert response.status_code == 303
+    assert response.headers["location"].endswith("/services")
     cookies = response.headers.get_list("set-cookie")
     assert any(c.startswith("sjd_edit=1") for c in cookies)
     assert any("sjd_edit=1" in c and "HttpOnly" not in c for c in cookies)

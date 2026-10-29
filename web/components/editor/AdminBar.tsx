@@ -2,135 +2,199 @@
 
 import { useEffect, useState } from "react";
 
-import { getActions, getState, patchState, subscribe } from "./adminbar-state";
+import {
+  clearCookie,
+  demanderEdition,
+  demanderPublication,
+  demanderSortie,
+  getState,
+  patchState,
+  readCookie,
+  subscribe,
+} from "./adminbar-state";
 
-const SLUGS = new Set(["services", "realisations", "a-propos", "agents-ia"]);
+/**
+ * Bandeau admin unique de la vitrine, affiché au-dessus du header.
+ *
+ * Deux visages :
+ *  - consultation : l'admin connecté voit qui il est, un accès au tableau de
+ *    bord et le bouton « Modifier la page » ; le site reste strictement en
+ *    lecture. Être connecté ne déclenche plus l'édition ;
+ *  - édition : une seule barre, avec « Publier » et « Quitter l'édition ».
+ *    Quitter ramène à la consultation sur la même page.
+ */
 
-function currentSlug(): string {
-  const first = window.location.pathname.replace(/^\/+|\/+$/g, "").split("/")[0] ?? "";
-  return SLUGS.has(first) ? first : "home";
+type SessionProbe = {
+  ok?: boolean;
+  user?: string;
+  pending?: boolean;
+  publish_ready?: boolean;
+};
+
+/** Marqueur posé à la connexion admin : évite un appel API pour les visiteurs. */
+function hasAdminMarker(): boolean {
+  return readCookie("sjd_admin_ui") === "1" || readCookie("sjd_edit") === "1";
 }
 
-type Session = { ok?: boolean; user?: string; pending?: boolean; publish_ready?: boolean };
+function pageSlug(): string {
+  const first = window.location.pathname.replace(/^\/+|\/+$/g, "").split("/")[0] ?? "";
+  return ["services", "realisations", "a-propos", "agents-ia"].includes(first) ? first : "home";
+}
 
 const CSS = `
-#sjd-adminbar{position:fixed;top:0;left:0;right:0;height:44px;z-index:2147483003;display:flex;align-items:center;gap:12px;padding:0 16px;background:#0A0A0B;color:#F4F1E8;font:500 12.5px/1 "Space Grotesk",system-ui,sans-serif;box-shadow:0 1px 0 rgba(255,255,255,.08)}
-#sjd-adminbar .tag{font:700 10.5px/1 "Space Grotesk",system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#0A0A0B;background:#E8B04A;padding:4px 6px;border-radius:2px}
-#sjd-adminbar .who{opacity:.72}
-#sjd-adminbar .who b{font-weight:600;color:#F4F1E8}
-#sjd-adminbar .sep{width:1px;height:16px;background:rgba(255,255,255,.2)}
-#sjd-adminbar .state{color:#E8B04A;opacity:.9}
-#sjd-adminbar .dot{width:7px;height:7px;border-radius:50%;background:#C9340F;box-shadow:0 0 0 0 rgba(201,52,15,.6)}
-#sjd-adminbar .hint{margin-left:auto;opacity:.55;font-size:11.5px}
-#sjd-adminbar .push{margin-left:auto}
-#sjd-adminbar a,#sjd-adminbar button{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border:1px solid rgba(255,255,255,.22);border-radius:3px;background:transparent;color:inherit;font:inherit;text-decoration:none;cursor:pointer;transition:background .15s ease,border-color .15s ease}
-#sjd-adminbar a:hover,#sjd-adminbar button:hover{background:rgba(255,255,255,.1)}
-#sjd-adminbar button.accent{background:#C9340F;border-color:#C9340F;color:#fff}
-#sjd-adminbar button.accent:hover{background:#E03D13;border-color:#E03D13}
-#sjd-adminbar button.primary{background:#C9340F;border-color:#C9340F;color:#fff}
-#sjd-adminbar button.primary:hover{background:#E03D13;border-color:#E03D13}
-/* Aucune modification : le bouton Publier reste gris, désactivé. */
-#sjd-adminbar button.primary:disabled{background:transparent;border-color:rgba(255,255,255,.22);color:rgba(244,241,232,.45);cursor:default}
-#sjd-adminbar button.primary:disabled:hover{background:transparent}
-body.sjd-adminbar-on{padding-top:44px}
-body.sjd-adminbar-on .nav{top:44px}
-@media (max-width:900px){
-  #sjd-adminbar .hint{display:none}
+#sjd-adminbar{
+  position:fixed; top:0; left:0; right:0; z-index:2147483000;
+  display:flex; align-items:center; gap:10px;
+  height:38px; padding:0 14px;
+  background:#0A0A0B; color:#F4F1E8;
+  font:500 11.5px/1 "Space Grotesk", system-ui, sans-serif;
+  letter-spacing:.02em;
+  border-bottom:1px solid rgba(255,255,255,.12);
 }
-@media (max-width:760px){
-  #sjd-adminbar{font-size:11.5px;gap:8px;padding:0 10px}
-  #sjd-adminbar .who,#sjd-adminbar .state,#sjd-adminbar .sep{display:none}
+#sjd-adminbar .dot{ width:6px; height:6px; border-radius:50%; background:#3ecf8e; flex:none; }
+#sjd-adminbar.mode-edit .dot{ background:#C9340F; box-shadow:0 0 0 3px rgba(201,52,15,.22); }
+#sjd-adminbar .tag{
+  font-weight:600; font-size:9.5px; letter-spacing:.12em; text-transform:uppercase;
+  color:#E8B04A; padding:3px 6px; border:1px solid rgba(232,176,74,.45); border-radius:2px;
+}
+#sjd-adminbar .who{ opacity:.62; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:28ch; }
+#sjd-adminbar .state{ opacity:.62; }
+#sjd-adminbar.mode-edit .state{ color:#F4F1E8; opacity:1; }
+#sjd-adminbar .hint{ opacity:.42; font-size:10.5px; }
+#sjd-adminbar .push{ margin-left:auto; }
+#sjd-adminbar .pending{
+  display:inline-flex; align-items:center; gap:6px; color:#E8B04A;
+  font-size:10.5px; letter-spacing:.02em;
+}
+#sjd-adminbar .pending::before{ content:""; width:5px; height:5px; border-radius:50%; background:#E8B04A; }
+#sjd-adminbar button, #sjd-adminbar a.btn{
+  font:500 11.5px/1 "Space Grotesk", system-ui, sans-serif; color:#F4F1E8;
+  background:transparent; border:1px solid rgba(255,255,255,.2); border-radius:3px;
+  padding:8px 12px; cursor:pointer; text-decoration:none; white-space:nowrap;
+  transition:background-color .15s ease, border-color .15s ease, color .15s ease, opacity .15s ease;
+}
+#sjd-adminbar button:hover:not(:disabled), #sjd-adminbar a.btn:hover{ background:rgba(255,255,255,.1); }
+#sjd-adminbar button.primary{ background:#C9340F; border-color:#C9340F; color:#fff; }
+#sjd-adminbar button.primary:hover:not(:disabled){ background:#e0440f; }
+#sjd-adminbar button:disabled{ opacity:.32; cursor:not-allowed; }
+#sjd-adminbar button.ghost{ border-color:transparent; opacity:.7; }
+#sjd-adminbar button.ghost:hover{ opacity:1; background:rgba(255,255,255,.08); }
+#sjd-adminbar .sep{ width:1px; height:16px; background:rgba(255,255,255,.14); }
+/* Bandeau présent : le header est en position fixe, il faut donc le décaler
+   explicitement, puis décaler le flux de la page de la même hauteur. */
+body.sjd-adminbar-on{ padding-top:var(--sjd-admin-h, 38px); }
+body.sjd-adminbar-on .nav{ top:var(--sjd-admin-h, 38px); }
+@media (max-width:900px){
+  #sjd-adminbar{ height:auto; min-height:38px; flex-wrap:wrap; padding:7px 10px; gap:8px; }
+  #sjd-adminbar .who, #sjd-adminbar .hint, #sjd-adminbar .state{ display:none; }
 }
 `;
 
 export default function AdminBar() {
-  const [state, setState] = useState(getState());
+  const [bar, setBar] = useState(getState());
+  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => subscribe(() => setState(getState())), []);
+  useEffect(() => subscribe(() => setBar(getState())), []);
 
+  // Sonde de session : uniquement si le marqueur admin est présent, pour ne pas
+  // appeler l'API depuis chaque visite anonyme.
   useEffect(() => {
-    let cancelled = false;
-    const slug = currentSlug();
+    setMounted(true);
+    if (!hasAdminMarker()) return;
+    const slug = pageSlug();
+    let alive = true;
     fetch(`/api/editor/session?page=${encodeURIComponent(slug)}`, {
       credentials: "same-origin",
       headers: { accept: "application/json" },
     })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data: Session | null) => {
-        if (cancelled || !data?.ok || !data.user) return;
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: SessionProbe | null) => {
+        if (!alive) return;
+        if (!data?.ok) {
+          // Session expirée : on efface le marqueur pour ne plus sonder.
+          clearCookie("sjd_admin_ui");
+          return;
+        }
         patchState({
           ready: true,
-          user: data.user,
+          user: data.user ?? "",
           slug,
           pending: Boolean(data.pending),
           publishReady: Boolean(data.publish_ready),
         });
       })
-      .catch(() => undefined);
+      .catch(() => {});
     return () => {
-      cancelled = true;
+      alive = false;
     };
   }, []);
 
+  // La hauteur réelle du bandeau sert de marge sur mobile.
   useEffect(() => {
-    if (!state.ready) return;
-    document.body.classList.add("sjd-adminbar-on");
-    return () => document.body.classList.remove("sjd-adminbar-on");
-  }, [state.ready]);
+    document.body.classList.toggle("sjd-adminbar-on", bar.ready);
+    if (!bar.ready) return;
+    const el = document.getElementById("sjd-adminbar");
+    if (el) document.body.style.setProperty("--sjd-admin-h", `${el.offsetHeight}px`);
+  }, [bar.ready]);
 
-  if (!state.ready) return null;
+  if (!mounted || !bar.ready) return null;
 
-  const { editing, pending, publishReady, publishing } = state;
-  const actions = getActions();
-  const editHref = `/admin/editer?page=${encodeURIComponent(state.slug)}`;
+  const editing = bar.editing;
+  const canPublish = bar.pending && bar.publishReady && !bar.publishing;
 
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
-      <div id="sjd-adminbar">
+      <div id="sjd-adminbar" className={editing ? "mode-edit" : ""} data-state={editing ? "edition" : "consultation"}>
+        <span className="dot" aria-hidden />
         <span className="tag">Admin</span>
-        <span className="who">
-          Connecté : <b>{state.user}</b>
-        </span>
+        {bar.user ? <span className="who">{bar.user}</span> : null}
+        <span className="sep" aria-hidden />
+
         {editing ? (
           <>
-            <span className="sep" />
-            <span className="dot" />
             <span className="state">Édition en place</span>
-            {pending ? (
-              <>
-                <span className="sep" />
-                <span className="state">Modifications non publiées</span>
-              </>
-            ) : null}
-            <span className="hint">Cliquez un texte pour l’éditer · Entrée valider · Échap annuler</span>
+            <span className="hint">Cliquez un texte · Entrée pour enregistrer · Échap pour annuler</span>
+          </>
+        ) : (
+          <span className="state">Consultation</span>
+        )}
+
+        <span className="push" />
+
+        {bar.pending ? (
+          <span className="pending" title="Des modifications ne sont pas encore visibles par les visiteurs">
+            Non publié
+          </span>
+        ) : null}
+
+        {editing ? (
+          <>
             <button
               type="button"
               className="primary"
-              onClick={() => actions.publish?.()}
-              disabled={!pending || !publishReady || publishing}
-              title={pending ? "Publier les modifications" : "Aucune modification à publier"}
+              onClick={demanderPublication}
+              disabled={!canPublish}
+              title={
+                bar.pending
+                  ? "Publier les modifications sur le site en ligne"
+                  : "Aucune modification à publier"
+              }
             >
-              {publishing ? "Publication…" : "Publier"}
+              {bar.publishing ? "Publication…" : "Publier"}
             </button>
-            <button type="button" onClick={() => actions.quit?.()}>
+            <button type="button" className="ghost" onClick={demanderSortie}>
               Quitter l’édition
             </button>
           </>
         ) : (
           <>
-            {pending ? (
-              <>
-                <span className="sep" />
-                <span className="state">Modifications non publiées</span>
-              </>
-            ) : null}
-            <span className="push" />
-            <button type="button" className="accent" onClick={() => { window.location.href = editHref; }}>
+            <a className="btn" href="/admin">
+              Tableau de bord
+            </a>
+            <button type="button" className="primary" onClick={demanderEdition}>
               Modifier la page
             </button>
-            <a href="/admin/pages">Pages</a>
-            <a href="/admin">Tableau de bord</a>
           </>
         )}
       </div>

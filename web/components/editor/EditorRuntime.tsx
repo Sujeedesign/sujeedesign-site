@@ -2,15 +2,19 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { patchState, setActions } from "./adminbar-state";
+import { clearCookie, getState, patchState, readCookie, subscribe } from "./adminbar-state";
 
 /**
  * Runtime d'édition visuelle de la vitrine.
  *
- * Ne s'active que si le repère de session `sjd_edit=1` est présent (posé par
- * l'admin à la connexion) : le composant interroge alors `/api/editor/session`,
- * qui vérifie la vraie session admin côté FastAPI. Sans session, rien ne
- * s'affiche et les `data-field` restent inertes.
+ * Deux états bien distincts, décidés par l'utilisateur :
+ *  - consultation : un admin connecté voit le bandeau et peut cliquer
+ *    « Modifier la page » ; les `data-field` restent inertes ;
+ *  - édition : ouverte au clic (ou via /admin/editer, une seule fois), le corps
+ *    reçoit `sjd-editing`, les textes deviennent cliquables.
+ *
+ * Le runtime ne s'active donc plus parce qu'une session admin existe : c'est
+ * exactement ce qui faisait basculer le site en édition à la simple visite.
  *
  * Édition : cliquez un texte, tapez, Entrée pour enregistrer, Échap pour
  * annuler. Les champs multilignes (titres sur plusieurs lignes, listes)
@@ -33,6 +37,7 @@ type Section = {
 };
 
 const EDIT_COOKIE = "sjd_edit";
+const SESSION_MARKER = "sjd_admin_ui";
 const MULTILINE_TYPES = new Set(["long", "lines", "tags", "list"]);
 const PAGE_SLUGS = new Set(["services", "realisations", "a-propos", "agents-ia"]);
 
@@ -43,7 +48,12 @@ function currentSlug(): string {
 }
 
 function hasEditCookie(): boolean {
-  return document.cookie.split("; ").some((c) => c.startsWith(`${EDIT_COOKIE}=1`));
+  return readCookie(EDIT_COOKIE) === "1";
+}
+
+/** Vrai si une session admin est probable : évite un appel API par visiteur. */
+export function hasSessionMarker(): boolean {
+  return readCookie(SESSION_MARKER) === "1" || readCookie(EDIT_COOKIE) === "1";
 }
 
 function flatten(sections: Section[]): Map<string, FieldMeta> {
@@ -130,6 +140,8 @@ body.sjd-editing [data-field][contenteditable="true"]{ outline:2px solid #C9340F
 `;
 
 export default function EditorRuntime() {
+  // État de la barre (intentions incluses), tenu à jour via le store partagé.
+  const [bar, setBar] = useState(getState());
   const [session, setSession] = useState<Session | null>(null);
   const sessionRef = useRef<Session | null>(null);
   // Modifications non publiées, telles que le serveur les voit : c'est la
@@ -143,18 +155,21 @@ export default function EditorRuntime() {
   const editingRef = useRef<HTMLElement | null>(null);
   const originalRef = useRef<string>("");
   const slugRef = useRef<string>("home");
+  const activatingRef = useRef(false);
   // Dernière valeur réellement enregistrée par champ : évite le double POST
   // qu'un Enter suivi d'un blur peut déclencher.
   const savedRef = useRef<Map<string, string>>(new Map());
+
+  useEffect(() => subscribe(() => setBar(getState())), []);
 
   const flash = useCallback((text: string, err = false) => {
     setToast({ text, err });
     window.setTimeout(() => setToast(null), 2600);
   }, []);
 
-  // Le HTML servi par la vitrine est figé au build : sans ce report, une valeur
-  // enregistrée resterait invisible jusqu'à la publication. On applique donc le
-  // document enregistré sur les champs dès l'activation (aperçu du brouillon).
+  // Le HTML servi par la vitrine peut précéder le dernier enregistrement : on
+  // applique le document sur les champs à l'ouverture de l'édition (aperçu du
+  // brouillon, y compris modifications non publiées).
   const applyValues = (data: Session) => {
     for (const field of flatten(data.sections ?? []).values()) {
       const raw = field.value;
@@ -189,35 +204,81 @@ export default function EditorRuntime() {
     }
   };
 
-  // Activation : seulement si le repère de session est présent.
-  useEffect(() => {
-    if (!hasEditCookie()) return;
-    let cancelled = false;
+  const stopInline = () => {
+    const el = editingRef.current;
+    if (!el) return;
+    el.removeAttribute("contenteditable");
+    el.classList.remove("sjd-selected");
+    const tag = el.parentElement?.querySelector(`.sjd-tag[data-for="${el.dataset.field}"]`);
+    tag?.remove();
+    editingRef.current = null;
+  };
+
+  /** Ouvre l'édition en place : session fraîche, champs armés. */
+  const activate = async () => {
+    if (activatingRef.current || sessionRef.current) return;
+    activatingRef.current = true;
     slugRef.current = currentSlug();
-    fetch(`/api/editor/session?page=${encodeURIComponent(slugRef.current)}`, { credentials: "same-origin", headers: { accept: "application/json" } })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data: Session | null) => {
-        if (cancelled || !data?.ok) return;
-        const withSchema: Session = { ...data, sections: data.sections ?? [] };
-        sessionRef.current = withSchema;
-        setSession(withSchema);
-        setPending(Boolean(data.pending));
-        patchState({
-          ready: true,
-          user: data.user ?? "",
-          slug: slugRef.current,
-          editing: true,
-          pending: Boolean(data.pending),
-          publishReady: Boolean(data.publish_ready),
-        });
-        document.body.classList.add("sjd-editing");
-        applyValues(withSchema);
-      })
-      .catch(() => undefined);
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    try {
+      const res = await fetch(
+        `/api/editor/session?page=${encodeURIComponent(slugRef.current)}`,
+        { credentials: "same-origin", headers: { accept: "application/json" } },
+      );
+      if (!res.ok) {
+        patchState({ editing: false });
+        flash("Session admin expirée : reconnecte-toi", true);
+        return;
+      }
+      const data = (await res.json()) as Session | null;
+      if (!data?.ok) {
+        patchState({ editing: false });
+        flash("Session admin expirée : reconnecte-toi", true);
+        return;
+      }
+      const withSchema: Session = { ...data, sections: data.sections ?? [] };
+      sessionRef.current = withSchema;
+      setSession(withSchema);
+      setPending(Boolean(data.pending));
+      patchState({
+        ready: true,
+        user: data.user ?? "",
+        slug: slugRef.current,
+        editing: true,
+        pending: Boolean(data.pending),
+        publishReady: Boolean(data.publish_ready),
+        publishing: false,
+      });
+      document.body.classList.add("sjd-editing");
+      applyValues(withSchema);
+      flash("Mode édition : cliquez un texte pour le modifier");
+    } catch {
+      patchState({ editing: false });
+      flash("Serveur injoignable", true);
+    } finally {
+      activatingRef.current = false;
+    }
+  };
+
+  /** Ferme l'édition sans quitter la page : le site redevient un simple aperçu. */
+  const shutdown = () => {
+    stopInline();
+    setPop(null);
+    document.body.classList.remove("sjd-editing");
+    savedRef.current.clear();
+    sessionRef.current = null;
+    setSession(null);
+    patchState({ editing: false, publishing: false });
+  };
+
+  // Demande d'ouverture / fermeture venant du bandeau.
+  useEffect(() => {
+    if (bar.editing) {
+      void activate();
+    } else if (sessionRef.current) {
+      shutdown();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bar.editing]);
 
   const save = useCallback(
     async (path: string, value: string): Promise<{ ok: boolean; error?: string }> => {
@@ -246,9 +307,9 @@ export default function EditorRuntime() {
   // ligne par ligne (`hero.title.0`). On hérite donc des métadonnées du parent
   // pour que chaque ligne reste éditable.
   const fieldMeta = (path: string) => {
-    const session = sessionRef.current;
-    if (!session) return undefined;
-    const map = flatten(session.sections);
+    const current = sessionRef.current;
+    if (!current) return undefined;
+    const map = flatten(current.sections);
     const direct = map.get(path);
     if (direct) return direct;
     const split = path.match(/^(.*)\.(\d+)$/);
@@ -258,16 +319,6 @@ export default function EditorRuntime() {
     if (!parent || parent.type !== "lines") return undefined;
     const parentLabel = parent.label ?? parentPath;
     return { ...parent, path, type: "text", label: `${parentLabel} ${Number(split[2]) + 1}` };
-  };
-
-  const stopInline = () => {
-    const el = editingRef.current;
-    if (!el) return;
-    el.removeAttribute("contenteditable");
-    el.classList.remove("sjd-selected");
-    const tag = el.parentElement?.querySelector(`.sjd-tag[data-for="${el.dataset.field}"]`);
-    tag?.remove();
-    editingRef.current = null;
   };
 
   const startInline = (el: HTMLElement, path: string) => {
@@ -319,7 +370,7 @@ export default function EditorRuntime() {
     return (under?.closest("[data-field]") as HTMLElement | null) ?? null;
   };
 
-  // Interactions globales en mode édition.
+  // Interactions globales : uniquement pendant l'édition.
   useEffect(() => {
     if (!session) return;
 
@@ -334,7 +385,7 @@ export default function EditorRuntime() {
         if (action) {
           event.preventDefault();
           event.stopPropagation();
-          flash("Mode édition : quittez l’édition pour naviguer");
+          flash("Mode édition : cliquez « Quitter l’édition » pour naviguer");
         }
         return;
       }
@@ -459,36 +510,28 @@ export default function EditorRuntime() {
     }
   };
 
-  const quit = () => {
-    // Le repère repasse à "0" : la vitrine redevient publique. Le passage par
-    // /admin/editer le remet à "1" pour une nouvelle session d'édition.
-    document.cookie = `${EDIT_COOKIE}=0; path=/; samesite=lax`;
-    document.body.classList.remove("sjd-editing");
-    patchState({ editing: false, publishing: false });
-    setSession(null);
-    // Sortie de l'éditeur = retour dans l'admin, jamais sur la page publique.
-    window.location.href = "/admin";
-  };
-
-  const modifierPage = () => {
-    const first = document.querySelector<HTMLElement>("[data-field]");
-    if (!first) {
-      flash("Aucun champ éditable sur cette page", true);
-      return;
-    }
-    first.scrollIntoView({ behavior: "smooth", block: "center" });
-    window.setTimeout(() => {
-      first.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    }, 350);
-  };
-
-  // Une seule barre sur la page : celle du bandeau admin, qui déclenche les
-  // actions de l'éditeur. Plus de dock séparé.
+  // Intentions du bandeau : publier, quitter. Aucune fonction ne circule dans
+  // le store, donc plus de bouton branché sur du vide.
   useEffect(() => {
-    if (!session) return;
-    setActions({ quit, publish });
+    if (bar.publishSeq > 0) void publish();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, pending, publishing]);
+  }, [bar.publishSeq]);
+
+  useEffect(() => {
+    if (bar.quitSeq === 0) return;
+    // Le repère ponctuel est effacé : la prochaine visite du site est un aperçu.
+    clearCookie(EDIT_COOKIE);
+    shutdown();
+    flash("Mode édition quitté");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bar.quitSeq]);
+
+  // /admin/editer pose `sjd_edit=1` : demande d'édition consommée une seule fois.
+  useEffect(() => {
+    if (!hasEditCookie()) return;
+    clearCookie(EDIT_COOKIE);
+    patchState({ editing: true });
+  }, []);
 
   if (!session) return null;
 

@@ -12,7 +12,11 @@ import time
 from threading import Lock
 
 SESSION_COOKIE = "sjd_admin"
-# Cookie non HttpOnly, simple drapeau lu par la vitrine pour charger l'éditeur.
+# Cookie non HttpOnly : simple drapeau lu par la vitrine. Sa seule fonction est
+# d'éviter un appel /api/editor/session pour les visiteurs anonymes.
+UI_MARKER_COOKIE = "sjd_admin_ui"
+# Cookie non HttpOnly posé uniquement par /admin/editer : demande explicite
+# d'ouverture de l'édition en place. Consommé une seule fois par la vitrine.
 EDIT_MARKER_COOKIE = "sjd_edit"
 SESSION_TTL = 12 * 60 * 60
 FORM_TTL = 2 * 60 * 60

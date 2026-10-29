@@ -196,11 +196,12 @@ def connexion(request: Request, password: str = Form("")) -> Response:
         secure=settings_module.cookie_secure(),
         path="/",
     )
-    # Repère lisible par le JavaScript de la vitrine : la session existe, le
-    # runtime d'édition peut tenter /api/editor/session. HttpOnly reste actif
-    # pour le cookie de session lui-même.
+    # Repère lisible par le JavaScript de la vitrine : une session admin existe,
+    # le runtime peut donc interroger /api/editor/session. HttpOnly reste actif
+    # pour le cookie de session lui-même. Ce drapeau n'active PAS l'édition :
+    # consulter le site en étant connecté reste un simple aperçu.
     response.set_cookie(
-        security.EDIT_MARKER_COOKIE,
+        security.UI_MARKER_COOKIE,
         "1",
         max_age=security.SESSION_TTL,
         httponly=False,
@@ -217,6 +218,7 @@ def deconnexion(request: Request, csrf: str = Form("")) -> Response:
     check_csrf(request, csrf)
     response = RedirectResponse("/admin/connexion", status_code=303)
     response.delete_cookie(security.SESSION_COOKIE, path="/")
+    response.delete_cookie(security.UI_MARKER_COOKIE, path="/")
     response.delete_cookie(security.EDIT_MARKER_COOKIE, path="/")
     return response
 
@@ -294,8 +296,9 @@ def pages(request: Request, user: str = Depends(require_admin)) -> Response:
 def editer_en_place(request: Request, page: str = "", user: str = Depends(require_admin)) -> Response:
     """Ouvre la vraie page du site en mode édition.
 
-    Le repère `sjd_edit` est reposé à chaque passage : c'est ce qui rend
-    l'édition réutilisable après un « Quitter » (qui le remet à "0").
+    Le repère `sjd_edit` est une demande ponctuelle : la vitrine l'ouvre puis
+    l'efface aussitôt. Une visite ultérieure du site reste donc en simple
+    consultation, même si l'onglet a été fermé en pleine édition.
     """
     slug = content_page(page)
     target = PAGE_PATHS[slug]
