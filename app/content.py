@@ -137,7 +137,10 @@ def request_publish(conn: sqlite3.Connection, slug: str = "home") -> dict[str, A
     if not publish_ready():
         return {"ok": False, "error": "publication non configurée : COOLIFY_TOKEN manquant"}
     try:
-        result = _coolify(f"/api/v1/deploy?uuid={config['uuid']}&force=false", method="POST")
+        # force=true : sans ça Coolify réutilise l'image taguée sur le SHA git
+        # (le contenu vit en base, pas dans le dépôt) et saute le build, donc
+        # pull-content.mjs ne récupère jamais les modifications publiées.
+        result = _coolify(f"/api/v1/deploy?uuid={config['uuid']}&force=true", method="POST")
     except (urllib.error.HTTPError, urllib.error.URLError, RuntimeError, ValueError) as exc:
         detail = str(exc)
         conn.execute(
