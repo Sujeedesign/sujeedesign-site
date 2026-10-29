@@ -12,7 +12,7 @@
     {% if error %}<div class="flash flash-error" role="alert">{{ error }}</div>{% endif %}
     <label class="field" for="password">
       <span>Mot de passe</span>
-      <input id="password" type="password" name="password" autocomplete="current-password" required autofocus>
+      <input id="password" type="password" name="password" autocomplete="current-password" required>
     </label>
     <button class="btn btn-accent btn-block" type="submit">Se connecter</button>
     <p class="auth-foot">Vitrine publique : <a href="{{ public_url }}" target="_blank" rel="noopener">{{ public_url | replace('https://', '') }}</a></p>

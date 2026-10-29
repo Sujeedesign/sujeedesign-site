@@ -59,15 +59,16 @@
               {% if section.hint %}<p class="muted small">{{ section.hint }}</p>{% endif %}
             </header>
             {% for block in section.blocks %}
-              <div class="block">
+              <div class="block form-grid">
                 {% if block.label %}<h3 class="mini-title">{{ block.label }}</h3>{% endif %}
                 {% for field in block.fields %}
-                  <label class="field{% if field.type == 'lines' or field.long %} full{% endif %}">
+                  {% set long_text = field.type == 'long' or (field.type == 'text' and (field.long or (field.value or '') | length > 60)) %}
+                  <label class="field{% if field.type == 'lines' or long_text %} full{% endif %}">
                     <span>{{ field.label }}{% if field.hint %}<em class="hint">{{ field.hint }}</em>{% endif %}</span>
                     {% if field.type == 'lines' %}
                       <textarea name="f_{{ field.path }}" rows="{{ field.rows or 3 }}" spellcheck="true">{{ field.value }}</textarea>
-                    {% elif field.type == 'text' and field.long %}
-                      <textarea name="f_{{ field.path }}" rows="3">{{ field.value }}</textarea>
+                    {% elif long_text %}
+                      <textarea name="f_{{ field.path }}" rows="2" spellcheck="true">{{ field.value }}</textarea>
                     {% elif field.type == 'select' %}
                       <select name="f_{{ field.path }}">
                         {% for choice in field.choices %}
@@ -84,6 +85,14 @@
             {% endfor %}
           </section>
         {% endfor %}
+      </div>
+    </div>
+
+    <div class="form-foot form-foot--end">
+      <span class="muted small">Les modifications ne sont visibles qu'après publication.</span>
+      <div class="toolbar-actions">
+        <button class="btn btn-line" type="submit" name="action" value="save">Enregistrer</button>
+        <button class="btn btn-accent" type="submit" name="action" value="publier"{% if not publish_ready %} disabled title="Publication non configurée"{% endif %}>Enregistrer et publier</button>
       </div>
     </div>
   </form>
