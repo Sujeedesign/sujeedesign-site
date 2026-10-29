@@ -211,3 +211,81 @@ def test_une_modification_allume_le_bouton_puis_la_publication_l_eteint(
     assert published.status_code == 200, published.text
     assert published.json()["pending"] is False
     assert client.get("/api/editor/session?page=services").json()["pending"] is False
+
+
+def _modifier(client: TestClient, slug: str = "services") -> str:
+    csrf = client.get(f"/api/editor/session?page={slug}").json()["csrf"]
+    written = client.post(
+        "/api/editor/champ",
+        json={"slug": slug, "path": "hero.lead", "value": "Périmètre modifié en direct", "csrf": csrf},
+    )
+    assert written.status_code == 200, written.text
+    return csrf
+
+
+def test_publication_rapide_invalide_le_cache_sans_deploiement(
+    client: TestClient, monkeypatch
+) -> None:
+    """Le cache Next remplace le build : la publication ne doit pas déployer."""
+    login(client)
+    csrf = _modifier(client)
+    monkeypatch.setenv("WEB_REVALIDATE_URL", "https://sujeedesign.com/")
+    monkeypatch.setenv("REVALIDATE_SECRET", "secret-de-test")
+    appels: list[str] = []
+    monkeypatch.setattr("app.content._revalidate", lambda: appels.append("cache"))
+
+    def _interdit(*args, **kwargs):
+        raise AssertionError("Coolify ne doit pas être appelé quand le cache répond")
+
+    monkeypatch.setattr("app.content._coolify", _interdit)
+    published = client.post("/api/editor/publier", json={"csrf": csrf, "slug": "services"})
+    assert published.status_code == 200, published.text
+    assert published.json()["mode"] == "cache"
+    assert published.json()["pending"] is False
+    assert appels == ["cache"]
+
+
+def test_cache_injoignable_retombe_sur_le_deploiement(client: TestClient, monkeypatch) -> None:
+    """Si le site ne répond pas, on repart sur le rebuild complet plutôt que bloquer."""
+    login(client)
+    csrf = _modifier(client)
+    monkeypatch.setenv("WEB_REVALIDATE_URL", "https://sujeedesign.com")
+    monkeypatch.setenv("REVALIDATE_SECRET", "secret-de-test")
+
+    def _panne() -> None:
+        raise RuntimeError("cache injoignable")
+
+    monkeypatch.setattr("app.content._revalidate", _panne)
+    monkeypatch.setattr("app.content.publish_ready", lambda: True)
+    monkeypatch.setattr(
+        "app.content._coolify", lambda *a, **k: {"deployments": [{"deployment_uuid": "abc"}]}
+    )
+    published = client.post("/api/editor/publier", json={"csrf": csrf, "slug": "services"})
+    assert published.status_code == 200, published.text
+    assert published.json()["deployment"] == "abc"
+
+
+def test_revalidation_appelle_la_route_avec_le_secret(monkeypatch) -> None:
+    """Contrat avec la route Next : POST /api/revalidate + en-tête secret."""
+    monkeypatch.setenv("WEB_REVALIDATE_URL", "https://sujeedesign.com/")
+    monkeypatch.setenv("REVALIDATE_SECRET", "secret-de-test")
+    seen: list[tuple[str, str, bytes | None]] = []
+
+    class _Response:
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+    def _urlopen(request, timeout=0):
+        seen.append((request.full_url, request.get_header("X-revalidate-secret"), request.data))
+        return _Response()
+
+    monkeypatch.setattr("app.content.urllib.request.urlopen", _urlopen)
+    from app import content as content_store
+
+    content_store._revalidate()
+    assert seen == [("https://sujeedesign.com/api/revalidate", "secret-de-test", b"")]

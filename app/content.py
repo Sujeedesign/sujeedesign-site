@@ -131,8 +131,59 @@ def _coolify(path: str, method: str = "GET", payload: dict[str, Any] | None = No
     raise last or RuntimeError("Coolify injoignable")
 
 
+def revalidate_config() -> dict[str, str]:
+    """Paramètres de la publication rapide (invalidation du cache Next)."""
+    return {
+        "url": (os.environ.get("WEB_REVALIDATE_URL", "") or "").strip().rstrip("/"),
+        "secret": (os.environ.get("REVALIDATE_SECRET", "") or "").strip(),
+    }
+
+
+def fast_publish_ready() -> bool:
+    config = revalidate_config()
+    return bool(config["url"] and config["secret"])
+
+
+def _revalidate() -> None:
+    """Demande au site Next de jeter son cache de contenu (tag `content`).
+
+    Le HTML est ensuite régénéré en tâche de fond depuis la base : quelques
+    secondes, sans build Docker ni rolling update.
+    """
+    config = revalidate_config()
+    request = urllib.request.Request(
+        f"{config['url']}/api/revalidate",
+        method="POST",
+        headers={"x-revalidate-secret": config["secret"]},
+        data=b"",
+    )
+    with urllib.request.urlopen(request, timeout=15) as response:
+        if response.status >= 300:
+            raise RuntimeError(f"revalidation refusée ({response.status})")
+
+
 def request_publish(conn: sqlite3.Connection, slug: str = "home") -> dict[str, Any]:
-    """Déclenche le déploiement de l'app Next et journalise la demande."""
+    """Met le contenu en ligne : cache Next d'abord, déploiement en secours."""
+    if fast_publish_ready():
+        try:
+            _revalidate()
+        except (urllib.error.HTTPError, urllib.error.URLError, RuntimeError, ValueError) as exc:
+            # Cache injoignable : on retombe sur l'ancien chemin (rebuild complet),
+            # pour ne jamais laisser une publication silencieusement bloquée.
+            conn.execute(
+                "INSERT INTO publications (slug, status, detail) VALUES (?, 'repli', ?)",
+                (slug, f"cache indisponible, déploiement complet : {exc}"[:400]),
+            )
+            conn.commit()
+        else:
+            conn.execute(
+                "INSERT INTO publications (slug, status, detail) VALUES (?, 'en ligne', ?)",
+                (slug, json.dumps({"mode": "cache", "url": revalidate_config()["url"]})),
+            )
+            conn.commit()
+            mark_published(conn, slug)
+            return {"ok": True, "mode": "cache", "deployment": ""}
+
     config = publish_config()
     if not publish_ready():
         return {"ok": False, "error": "publication non configurée : COOLIFY_TOKEN manquant"}

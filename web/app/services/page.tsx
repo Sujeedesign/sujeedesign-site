@@ -3,6 +3,7 @@ import { Services, pageMeta } from "@/components/pages/Services";
 import { JsonLd } from "@/components/site/JsonLd";
 import { PageShell } from "@/components/site/PageShell";
 import { pageMetadata } from "@/lib/page-metadata";
+import { getServicesContent } from "@/lib/content/live";
 import { routes, type ServiceSlug } from "@/lib/routes";
 import { breadcrumbNode, pageGraph, serviceNode, webPageNode } from "@/lib/structured-data";
 
@@ -20,7 +21,10 @@ const summaryServices: ServiceSlug[] = [
   "contenu-reseaux",
 ];
 
-export default function Page() {
+export const revalidate = 3600;
+
+export default async function Page() {
+  const doc = await getServicesContent();
   return (
     <PageShell current={routes.services}>
       <JsonLd
@@ -34,7 +38,7 @@ export default function Page() {
         ])}
       />
       <main id="main">
-        <Services />
+        <Services doc={doc} />
       </main>
     </PageShell>
   );

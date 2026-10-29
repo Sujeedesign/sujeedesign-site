@@ -1,62 +1,64 @@
 /** Portage du v5 : services.html. Contenu piloté par `content/services.json`. */
-import doc from "@/content/services.json";
+import type servicesJson from "@/content/services.json";
 
 type Dict = Record<string, any>;
-
-const D = doc as Dict;
+export type ServicesDoc = typeof servicesJson;
 
 /** Valeur de contenu enregistrée, sinon le texte de repli du gabarit. */
-function v<T>(path: string, fallback: T): T {
-  const found = path.split(".").reduce<any>((acc, key) => (acc == null ? undefined : acc[key]), D);
-  return found === undefined || found === null || found === "" ? fallback : (found as T);
+function read(D: Dict) {
+  const v = <T,>(path: string, fallback: T): T => {
+    const found = path.split(".").reduce<any>((acc, key) => (acc == null ? undefined : acc[key]), D);
+    return found === undefined || found === null || found === "" ? fallback : (found as T);
+  };
+  const arr = (path: string, fallback: string[]): string[] => {
+    const found = v<string[]>(path, fallback);
+    return Array.isArray(found) && found.length ? found : fallback;
+  };
+
+  const hero = {
+    kicker: v("hero.kicker", "Services · Périmètre écrit"),
+    title: arr("hero.title", ["Cinq métiers,", "un seul interlocuteur."]),
+    lead: v("hero.lead", "Le périmètre est écrit avant de commencer."),
+    meta: v("hero.meta", [] as { label: string; text: string }[]),
+  };
+
+  const prestations = {
+    num: v("prestations.num", "01"),
+    title: arr("prestations.title", ["Cinq façons", "de travailler ensemble."]),
+    lead: v("prestations.lead", ""),
+    side: v("prestations.side", "Prestations"),
+    rows: v("prestations.rows", [] as Dict[]),
+  };
+
+  const methode = {
+    num: v("methode.num", "02"),
+    title: arr("methode.title", ["Comment ça", "se passe."]),
+    lead: v("methode.lead", ""),
+    side: v("methode.side", "Méthode"),
+    steps: v("methode.steps", [] as Dict[]),
+  };
+
+  const livrables = {
+    intro: v("livrables.intro", ""),
+    items: v("livrables.items", [] as Dict[]),
+  };
+
+  const faq = {
+    num: v("faq.num", "03"),
+    title: arr("faq.title", ["Les questions", "qui reviennent."]),
+    lead: v("faq.lead", ""),
+    side: v("faq.side", "FAQ"),
+    items: v("faq.items", [] as Dict[]),
+  };
+
+  const cta = {
+    text: v("cta.text", ""),
+    label: v("cta.label", "Décrire mon besoin"),
+    href: v("cta.href", "mailto:s.sujeepan.pro@gmail.com?subject=Un%20projet"),
+  };
+
+  return { hero, prestations, methode, livrables, faq, cta };
 }
-
-function arr(path: string, fallback: string[]): string[] {
-  const found = v<string[]>(path, fallback);
-  return Array.isArray(found) && found.length ? found : fallback;
-}
-
-const hero = {
-  kicker: v("hero.kicker", "Services · Périmètre écrit"),
-  title: arr("hero.title", ["Cinq métiers,", "un seul interlocuteur."]),
-  lead: v("hero.lead", "Le périmètre est écrit avant de commencer."),
-  meta: v("hero.meta", [] as { label: string; text: string }[]),
-};
-
-const prestations = {
-  num: v("prestations.num", "01"),
-  title: arr("prestations.title", ["Cinq façons", "de travailler ensemble."]),
-  lead: v("prestations.lead", ""),
-  side: v("prestations.side", "Prestations"),
-  rows: v("prestations.rows", [] as Dict[]),
-};
-
-const methode = {
-  num: v("methode.num", "02"),
-  title: arr("methode.title", ["Comment ça", "se passe."]),
-  lead: v("methode.lead", ""),
-  side: v("methode.side", "Méthode"),
-  steps: v("methode.steps", [] as Dict[]),
-};
-
-const livrables = {
-  intro: v("livrables.intro", ""),
-  items: v("livrables.items", [] as Dict[]),
-};
-
-const faq = {
-  num: v("faq.num", "03"),
-  title: arr("faq.title", ["Les questions", "qui reviennent."]),
-  lead: v("faq.lead", ""),
-  side: v("faq.side", "FAQ"),
-  items: v("faq.items", [] as Dict[]),
-};
-
-const cta = {
-  text: v("cta.text", ""),
-  label: v("cta.label", "Décrire mon besoin"),
-  href: v("cta.href", "mailto:s.sujeepan.pro@gmail.com?subject=Un%20projet"),
-};
 
 const MEDIA = [
   { src: "/assets/img/svc-identite.jpg", alt: "Papeterie de marque : cartes, monogramme embossé et nuancier, sur fond papier." },
@@ -71,7 +73,8 @@ export const pageMeta = {
   "description": "Identité de marque, direction artistique, sites WordPress et Shopify, contenu, agents IA. Périmètre écrit, livraison documentée, sources à votre nom."
 };
 
-export function Services() {
+export function Services({ doc }: { doc: ServicesDoc }) {
+  const { hero, prestations, methode, livrables, faq, cta } = read(doc as Dict);
   return (
     <>
 <div>

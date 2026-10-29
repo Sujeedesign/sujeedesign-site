@@ -443,7 +443,11 @@ export default function EditorRuntime() {
       if (res.ok && data.ok) {
         setPending(Boolean(data.pending ?? false));
         patchState({ pending: Boolean(data.pending ?? false) });
-        flash("Publication lancée, le site se met à jour dans ~1 min");
+        flash(
+          data.mode === "cache"
+            ? "Publié : le site se met à jour dans quelques secondes"
+            : "Publication lancée, le site se met à jour dans ~1 min",
+        );
       } else {
         flash(data.error ?? "Publication impossible", true);
       }

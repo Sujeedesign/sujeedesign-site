@@ -1,4 +1,4 @@
-import { homeContent } from "@/content/home";
+import type { HomeContent } from "@/lib/content/schema";
 import { getProject } from "@/content/projects";
 
 const arrow = (
@@ -13,8 +13,6 @@ const arrow = (
   </svg>
 );
 
-const { hero, studio, cases, method, services, cta } = homeContent;
-
 /**
  * Repère d'édition visuelle : `data-field` porte le chemin du champ dans
  * `app/content_model.py` (hero.kicker, studio.stats.0.value, …). Le runtime
@@ -28,7 +26,8 @@ const featured = getProject("elerya");
 /** Image du LCP de l'accueil : le fond du hero. Ses dimensions sont celles du fichier. */
 export const heroPhoto = featured?.images[0];
 
-export function Hero() {
+export function Hero({ doc }: { doc: HomeContent }) {
+  const { hero } = doc;
   return (
     <header className="hero hero--proj" id="top">
       <div className="hero__bg" aria-hidden="true">
@@ -90,7 +89,8 @@ export function Hero() {
   );
 }
 
-export function Studio() {
+export function Studio({ doc }: { doc: HomeContent }) {
+  const { studio } = doc;
   return (
     <section className="section" id="studio">
       <div className="wrap">
@@ -258,7 +258,8 @@ const caseClass: Record<string, string> = {
   ui: "case case--ui",
 };
 
-export function Cases() {
+export function Cases({ doc }: { doc: HomeContent }) {
+  const { cases } = doc;
   return (
     <section className="section section--tint" id="travaux">
       <div className="wrap">
@@ -353,7 +354,8 @@ export function Cases() {
   );
 }
 
-export function Method() {
+export function Method({ doc }: { doc: HomeContent }) {
+  const { method } = doc;
   return (
     <section className="section" id="methode">
       <div className="wrap">
@@ -385,7 +387,8 @@ export function Method() {
   );
 }
 
-export function Services() {
+export function Services({ doc }: { doc: HomeContent }) {
+  const { services } = doc;
   return (
     <section className="section section--tint" id="prestations">
       <div className="wrap">
@@ -431,7 +434,8 @@ export function Services() {
   );
 }
 
-export function CallToAction() {
+export function CallToAction({ doc }: { doc: HomeContent }) {
+  const { cta } = doc;
   return (
     <section className="cta-section">
       <div className="wrap">
