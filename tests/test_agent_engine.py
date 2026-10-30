@@ -236,3 +236,10 @@ def test_une_seule_question_par_message():
 
     artefact = "Parlons-en. Quel est votre besoin ? (En attente de votre réponse…)"
     assert engine._one_question(artefact) == "Parlons-en. Quel est votre besoin ?"
+
+    # Un récapitulatif se termine par une seule question : il doit rester entier.
+    recap = (
+        "Voici ce que j'ai retenu : atelier de céramique à Paris 11e, image premium, "
+        "logo, charte et packaging, livraison avant mars. Est-ce bien cela ?"
+    )
+    assert engine._one_question(recap) == recap

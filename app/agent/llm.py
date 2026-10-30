@@ -11,7 +11,7 @@ from typing import Any, Callable, Iterator
 import httpx
 
 MISTRAL_URL = "https://api.mistral.ai/v1/chat/completions"
-DEFAULT_MODEL = "mistral-medium-latest"
+DEFAULT_MODEL = "ministral-8b-latest"
 FALLBACK_MODEL = "mistral-small-latest"
 
 
@@ -32,6 +32,22 @@ def _retry_delay(response: httpx.Response) -> float:
     except ValueError:
         delay = 4.0
     return max(1.0, min(delay, 20.0))
+
+
+def configured_key(url: str) -> str:
+    """Clé adaptée au fournisseur visé.
+
+    Le fournisseur change sans redéploiement (variables runtime) : on choisit la
+    clé selon l'hôte de l'endpoint, sinon une clé Mistral envoyée à Google (ou
+    l'inverse) rend l'agent muet en production.
+    """
+    explicit = os.environ.get("AGENT_LLM_KEY", "")
+    host = url.lower()
+    if "groq.com" in host and os.environ.get("API_GROQ"):
+        return os.environ["API_GROQ"]
+    if "mistral.ai" in host and os.environ.get("API_MISTRAL"):
+        return os.environ["API_MISTRAL"]
+    return explicit or os.environ.get("MISTRAL_API_KEY") or os.environ.get("API_MISTRAL", "")
 
 
 class LLMError(RuntimeError):
@@ -82,12 +98,7 @@ class MistralClient:
         transport: httpx.BaseTransport | None = None,
         timeout: float = 60.0,
     ) -> None:
-        self.api_key = (
-            api_key
-            or os.environ.get("AGENT_LLM_KEY")
-            or os.environ.get("MISTRAL_API_KEY")
-            or os.environ.get("API_MISTRAL", "")
-        )
+        self.api_key = api_key or configured_key(endpoint())
         self.model = model or os.environ.get("AGENT_MODEL", DEFAULT_MODEL)
         self._client = httpx.Client(transport=transport, timeout=timeout)
 

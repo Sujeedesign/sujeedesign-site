@@ -215,9 +215,9 @@ def _one_question(text: str, keep: int = 2) -> str:
     La promesse « une question à la fois » est donc tenue côté serveur.
     """
     cleaned = _clean(text)
-    mark = cleaned.find("?")
-    if mark == -1:
+    if cleaned.count("?") <= 1:
         return cleaned
+    mark = cleaned.find("?")
     head = cleaned[: mark + 1].strip()
     sentences = [part for part in _SENTENCE.split(head) if part.strip()]
     if len(sentences) > keep:
