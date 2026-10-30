@@ -9,7 +9,7 @@ import { breadcrumbNode, pageGraph, webPageNode } from "@/lib/structured-data";
 const pageMeta = {
   title: "Contact : parlons de votre projet",
   description:
-    "Décrivez votre projet à l'assistant de Sujee Design : cadrage immédiat, fourchette budgétaire et créneau d'appel de 30 minutes. Réponse sous 24 h ouvrées.",
+    "Décrivez votre projet à l'assistant de Sujee Design : cadrage pas à pas, puis créneau d'appel de 30 minutes. Réponse sous 24 h ouvrées.",
 };
 
 export const metadata: Metadata = pageMetadata(pageMeta, routes.contact, "/assets/img/og/contact.jpg");

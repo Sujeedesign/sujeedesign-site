@@ -8,7 +8,9 @@ Chaque tour produit un flux d'événements prêt pour le SSE :
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
+import time
 from typing import Any, Iterator
 
 from . import store
@@ -78,14 +80,15 @@ def turn(
     toolbox = ToolBox(conn, session_id, google, notify=notify)
     messages = _history(conn, session_id)
     answer = ""
+    pending = ""
 
     for round_index in range(MAX_TOOL_ROUNDS):
         output: TurnOutput | None = None
+        turn_text = ""
         try:
             for event in llm.stream(messages, TOOL_SPECS):
                 if "delta" in event:
-                    answer += event["delta"]
-                    yield {"type": "delta", "text": event["delta"]}
+                    turn_text += event["delta"]
                 else:
                     output = event["done"]
         except LLMError as error:
@@ -102,13 +105,22 @@ def turn(
             yield {"type": "error", "message": "Réponse incomplète du modèle."}
             return
 
+        turn_text = _clean(turn_text)
         messages.append(assistant_message(output))
+
+        # Les outils du tour précédent ont pu mettre des nouvelles à jour.
         for event in toolbox.events:
             yield event
         toolbox.events = []
 
         if not output.tool_calls:
+            answer = turn_text or pending
             break
+
+        # Tour d'outils : le texte produit avant l'appel est un brouillon
+        # (souvent une reformulation partielle). On le garde de côté sans
+        # l'afficher, sinon le visiteur lit la réponse deux fois de suite.
+        pending = turn_text or pending
 
         result: dict[str, Any] = {}
         for call in output.tool_calls:
@@ -123,12 +135,10 @@ def turn(
             result = toolbox.call(name, arguments)
             messages.append(_tool_result(call, result))
 
-        if round_index == MAX_TOOL_ROUNDS - 1 and output.tool_calls:
+        if round_index == MAX_TOOL_ROUNDS - 1:
             # Dernier tour d'outils : on laisse le modèle conclure une fois de plus.
             final = llm.run(messages, tools=[])
-            for chunk in _chunks(final.text):
-                answer += chunk
-                yield {"type": "delta", "text": chunk}
+            answer = _clean(final.text) or pending
             break
 
     if not answer.strip():
@@ -139,7 +149,10 @@ def turn(
                 + [
                     {
                         "role": "system",
-                        "content": "[consigne] Réponds maintenant au visiteur en une ou deux phrases, sans appeler d'outil.",
+                        "content": (
+                            "[consigne] Réponds maintenant au visiteur en une seule question, "
+                            "deux phrases maximum, sans appeler d'outil."
+                        ),
                     }
                 ],
                 tools=[],
@@ -148,11 +161,13 @@ def turn(
             print(f"agent: conclusion indisponible · {error}")
             final = None
         if final is not None:
-            for chunk in _chunks(final.text):
-                answer += chunk
-                yield {"type": "delta", "text": chunk}
+            answer = _clean(final.text) or pending
 
     if answer.strip():
+        answer = _one_question(answer)
+        for chunk in _chunks(answer):
+            yield {"type": "delta", "text": chunk}
+            time.sleep(0.012)
         store.add_message(conn, session_id, "assistant", answer)
 
     if toolbox.handed_off:
@@ -172,3 +187,39 @@ def turn(
 
 def _chunks(text: str, size: int = 24) -> list[str]:
     return [text[index : index + size] for index in range(0, len(text), size)] or [""]
+
+
+_PREAMBLE = re.compile(
+    r"(?:^|\s)(?:refined|brouillon|draft|final answer|reformulation)\s*:\s*",
+    re.IGNORECASE,
+)
+_AWAITING = re.compile(r"\s*\((?:en attente|awaiting)[^)]*\)", re.IGNORECASE)
+_SENTENCE = re.compile(r"(?<=[.!?…])\s+")
+
+
+def _clean(text: str) -> str:
+    """Retire les marqueurs techniques que le modèle laisse parfois fuiter."""
+    cleaned = (text or "").strip()
+    for _ in range(3):
+        stripped = _PREAMBLE.sub(" ", cleaned).strip()
+        if stripped == cleaned:
+            break
+        cleaned = stripped
+    return _AWAITING.sub("", cleaned).strip()
+
+
+def _one_question(text: str, keep: int = 2) -> str:
+    """Garantit une seule question : on coupe après le premier point d'interrogation.
+
+    Les modèles, même bien briefés, glissent parfois plusieurs questions d'affilée.
+    La promesse « une question à la fois » est donc tenue côté serveur.
+    """
+    cleaned = _clean(text)
+    mark = cleaned.find("?")
+    if mark == -1:
+        return cleaned
+    head = cleaned[: mark + 1].strip()
+    sentences = [part for part in _SENTENCE.split(head) if part.strip()]
+    if len(sentences) > keep:
+        head = " ".join(sentences[-(keep - 1) :]) if keep > 1 else sentences[-1]
+    return head.strip()

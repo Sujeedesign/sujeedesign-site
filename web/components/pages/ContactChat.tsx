@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent, KeyboardEvent } from "react";
+import { LiquidBackdrop } from "@/components/site/LiquidBackdrop";
 import styles from "./ContactChat.module.css";
 
 type Role = "agent" | "user";
@@ -33,7 +34,7 @@ const PROJECT_TYPES = [
 ];
 
 const WELCOME =
-  "Bonjour, je suis l'assistant de Sujee. Dites-moi en quelques mots ce que vous avez en tête : je cadre le besoin, je vous donne une fourchette et je vous propose un créneau d'appel.";
+  "Bonjour, je suis l'assistant de Sujee. Dites-moi en quelques mots ce que vous avez en tête : on cadre le besoin ensemble, puis je vous propose un créneau d'appel.";
 
 const STORAGE_KEY = "sjd-contact-v1";
 
@@ -344,7 +345,9 @@ export default function ContactChat() {
   const busy = phase === "streaming";
 
   return (
-    <div className={styles.shell}>
+    <div className={styles.scene}>
+      <LiquidBackdrop />
+      <div className={styles.shell}>
       <section className={styles.brief} aria-label="Comment ça marche">
         <p className="kick">
           <span className="live-dot" aria-hidden="true" />
@@ -354,8 +357,8 @@ export default function ContactChat() {
           Parlons de <em>votre projet</em>.
         </h1>
         <p className={styles.lead}>
-          Décrivez votre besoin en quelques phrases. L'assistant cerne le contexte, propose une fourchette
-          budgétaire, puis vous ouvre un créneau d'appel de 30 minutes avec Sujee.
+          Décrivez votre besoin en quelques phrases. L'assistant cerne le contexte, étape par étape,
+          puis vous ouvre un créneau d'appel de 30 minutes avec Sujee.
         </p>
 
         <ol className={styles.steps} aria-label="Progression de la conversation">
@@ -404,7 +407,7 @@ export default function ContactChat() {
               </span>
             </div>
             <div className={styles.meter} aria-hidden="true">
-              <span className={styles.meterLabel}>{String(progress).padStart(3, "0")}%</span>
+              <span className={styles.meterLabel}>{progress}%</span>
               <span className={styles.meterTrack}>
                 <span className={styles.meterFill} style={{ transform: `scaleX(${progress / 100})` }} />
               </span>
@@ -468,7 +471,7 @@ export default function ContactChat() {
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
               onKeyDown={onKeyDown}
-              placeholder={busy ? "L'assistant répond…" : "Décrivez votre projet, votre deadline, votre budget…"}
+              placeholder={busy ? "L'assistant répond…" : "Décrivez votre projet en quelques mots…"}
               rows={1}
               maxLength={4000}
               disabled={busy}
@@ -599,6 +602,7 @@ export default function ContactChat() {
           </p>
         </div>
       </section>
+      </div>
     </div>
   );
 }

@@ -220,3 +220,19 @@ def test_limite_de_tours(conn):
     store.touch(conn, session_id, turns=engine.MAX_TURNS)
     events = _collect(conn, session_id, "Encore une question", FakeLLM([]), google)
     assert events[0]["type"] == "error"
+
+
+def test_une_seule_question_par_message():
+    """Le modèle ne doit jamais empiler deux questions ni laisser fuiter un préfixe."""
+    brut = "C'est noté. Refined: Quel type de site ? Et quelle activité ? Quel budget ?"
+    assert engine._clean(brut) == "C'est noté. Quel type de site ? Et quelle activité ? Quel budget ?"
+    assert engine._one_question(brut) == "C'est noté. Quel type de site ?"
+
+    simple = "Merci, c'est clair. Quelle est votre échéance ?"
+    assert engine._one_question(simple) == simple
+
+    sans_question = "Je vous propose le premier créneau de mardi."
+    assert engine._one_question(sans_question) == sans_question
+
+    artefact = "Parlons-en. Quel est votre besoin ? (En attente de votre réponse…)"
+    assert engine._one_question(artefact) == "Parlons-en. Quel est votre besoin ?"
