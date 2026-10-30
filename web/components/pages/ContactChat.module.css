@@ -4,11 +4,20 @@
   position: relative;
   isolation: isolate;
   overflow: clip;
+  /* Le header est fixe : sans cette garde, la console démarre sous la nav
+     et son en-tête (identité de l'assistant) est rogné. */
+  padding-top: clamp(76px, 7vw, 96px);
+  /* Héro plein écran : la scène couvre au moins le viewport, le footer
+     ne remonte plus sous la console. */
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
 }
 
 .scene > .shell {
   position: relative;
   z-index: 1;
+  flex: 1 1 auto;
 }
 
 .shell {
@@ -915,6 +924,29 @@
 
 .legal a:hover {
   color: var(--accent);
+}
+
+/* Desktop : la console tient toute la colonne du héro (plus de vide sous
+   le panneau quand la scène est en pleine hauteur). */
+@media (min-width: 1025px) {
+  .shell {
+    align-items: stretch;
+  }
+
+  .panel {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .frame {
+    flex: 1 1 auto;
+  }
+
+  .log {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+  }
 }
 
 /* Responsive ---------------------------------------------------------- */
