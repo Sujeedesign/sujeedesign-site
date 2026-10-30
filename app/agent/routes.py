@@ -47,11 +47,14 @@ def _conn(request: Request) -> sqlite3.Connection:
     return connect(request.app.state.db_path)
 
 
-def _allowed(request: Request) -> bool:
+def _allowed_session(request: Request) -> bool:
     ip = client_ip(request)
-    sessions = _limiter(request, "agent_session_limiter").allow(f"s:{ip}", SESSION_LIMIT, 3600)
-    messages = _limiter(request, "agent_chat_limiter").allow(f"c:{ip}", CHAT_LIMIT, 3600)
-    return sessions and messages
+    return _limiter(request, "agent_session_limiter").allow(f"s:{ip}", SESSION_LIMIT, 3600)
+
+
+def _allowed_chat(request: Request) -> bool:
+    ip = client_ip(request)
+    return _limiter(request, "agent_chat_limiter").allow(f"c:{ip}", CHAT_LIMIT, 3600)
 
 
 def _sse(event: dict[str, Any]) -> str:
@@ -72,7 +75,7 @@ def health() -> JSONResponse:
 
 @router.post("/session")
 async def session(request: Request) -> JSONResponse:
-    if not _allowed(request):
+    if not _allowed_session(request):
         raise HTTPException(status_code=429, detail="Trop de demandes. Réessayez plus tard ou écrivez-nous.")
     conn = _conn(request)
     try:
@@ -85,7 +88,7 @@ async def session(request: Request) -> JSONResponse:
 
 @router.post("/chat")
 async def chat(request: Request) -> StreamingResponse:
-    if not _allowed(request):
+    if not _allowed_chat(request):
         raise HTTPException(status_code=429, detail="Trop de messages. Réessayez plus tard.")
     try:
         payload = await request.json()

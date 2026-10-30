@@ -204,6 +204,12 @@ export default function ContactChat() {
             body: "{}",
             signal: controller.signal,
           });
+          if (opening.status === 429) {
+            const detail = (await opening.json().catch(() => null)) as { detail?: string } | null;
+            setPhase("idle");
+            setError(detail?.detail ?? "Trop de demandes. Réessayez dans un moment ou utilisez le formulaire.");
+            return;
+          }
           if (!opening.ok) throw new Error(`HTTP ${opening.status}`);
           const opened = (await opening.json()) as { session_id?: string };
           if (!opened.session_id) throw new Error("Session sans identifiant");
@@ -223,6 +229,12 @@ export default function ContactChat() {
           setSessionId(null);
           setPhase("idle");
           setError("La conversation a expiré, renvoyez votre message.");
+          return;
+        }
+        if (response.status === 429) {
+          const detail = (await response.json().catch(() => null)) as { detail?: string } | null;
+          setPhase("idle");
+          setError(detail?.detail ?? "Trop de messages. Réessayez dans un moment ou utilisez le formulaire.");
           return;
         }
         if (!response.ok || !response.body) {

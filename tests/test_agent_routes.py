@@ -61,6 +61,26 @@ def test_chat_refuse_un_message_vide(client: TestClient) -> None:
     assert response.status_code == 400
 
 
+def test_plusieurs_sessions_ne_bloquent_pas_le_chat(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Le quota de sessions ne doit pas consommer celui des messages."""
+    monkeypatch.setattr(agent_routes, "MistralClient", lambda: object())
+    monkeypatch.setattr(agent_routes, "CalendarClient", lambda: object())
+
+    def fake_turn(conn: sqlite3.Connection, sid: str, message: str, llm, google):
+        yield {"type": "done", "session": sid, "step": "accueil", "status": "ouverture", "reference": ""}
+
+    monkeypatch.setattr(agent_engine, "turn", fake_turn)
+
+    session_id = ""
+    for _ in range(agent_routes.SESSION_LIMIT):
+        created = client.post("/api/agent/session")
+        assert created.status_code == 200
+        session_id = created.json()["session_id"]
+
+    response = client.post("/api/agent/chat", json={"session_id": session_id, "message": "Bonjour"})
+    assert response.status_code == 200
+
+
 def test_sync_leads_exige_le_jeton(client: TestClient) -> None:
     assert client.get("/api/sync/agent-leads").status_code in (401, 403)
     ok = client.get("/api/sync/agent-leads", headers={"X-Sync-Token": "jeton-de-test"})
