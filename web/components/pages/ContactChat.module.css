@@ -3,7 +3,13 @@
 .scene {
   position: relative;
   isolation: isolate;
-  overflow: clip;
+  overflow-x: clip;
+  /* Fond animé plein écran : les gouttières de .wrap rognaient la scène
+     (44 px de chaque côté) et créaient l'arête verticale au bord de la
+     console. On étend la scène sur toute la largeur du conteneur et on
+     remet la gouttière en padding pour garder l'alignement du contenu. */
+  margin-inline: calc(var(--pad) * -1);
+  padding-inline: var(--pad);
   /* Le header est fixe : sans cette garde, la console démarre sous la nav
      et son en-tête (identité de l'assistant) est rogné. */
   padding-top: clamp(76px, 7vw, 96px);
@@ -293,10 +299,13 @@
   flex-direction: column;
   min-height: 440px;
   border: 1px solid var(--glass-edge);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
+  /* Cadre carré : plus d'angle arrondi sur la console (demande Raj). */
+  border-radius: 0;
+  /* Verre plus clair : le fond animé reste lisible derrière la console
+     au lieu d'être masqué par une plaque blanche à 72 %. */
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: var(--blur) saturate(1.35);
+  -webkit-backdrop-filter: var(--blur) saturate(1.35);
   box-shadow: 0 30px 60px -46px rgba(10, 10, 11, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.8);
   overflow: hidden;
   animation: console-in 900ms cubic-bezier(0.2, 0.7, 0.2, 1) 80ms both,
@@ -984,7 +993,7 @@
   }
 
   .frame {
-    border-radius: 14px;
+    border-radius: 0;
   }
 
   .log {
