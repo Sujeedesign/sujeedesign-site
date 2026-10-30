@@ -67,6 +67,10 @@ def _parse_tool_calls(chunks: dict[int, dict[str, Any]]) -> list[dict[str, Any]]
                 "function": {"name": name, "arguments": json.dumps(arguments, ensure_ascii=False)},
             }
         )
+        # Gemini 3 renvoie une signature de raisonnement à restituer tel quel.
+        extra = chunk.get("extra_content")
+        if extra:
+            calls[-1]["extra_content"] = extra
     return calls
 
 
@@ -151,6 +155,8 @@ class MistralClient:
                                 chunk = chunks.setdefault(index, {"function": {"name": "", "arguments": ""}})
                                 if call.get("id"):
                                     chunk["id"] = call["id"]
+                                if call.get("extra_content"):
+                                    chunk["extra_content"] = call["extra_content"]
                                 function = call.get("function") or {}
                                 if function.get("name"):
                                     chunk["function"]["name"] = function["name"]
