@@ -42,7 +42,15 @@ export const metadata: Metadata = {
     description: "Identité, direction artistique, sites et outils IA, entre Cergy et Paris.",
     images: ["/assets/img/og/studio.jpg"],
   },
-  icons: { icon: [{ url: "/assets/favicon.svg", type: "image/svg+xml" }] },
+  icons: {
+    icon: [
+      { url: "/assets/favicon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    shortcut: ["/favicon.ico"],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
   verification: GOOGLE_SITE_VERIFICATION ? { google: GOOGLE_SITE_VERIFICATION } : undefined,
 };
 
