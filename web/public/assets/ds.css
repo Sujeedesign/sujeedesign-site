@@ -554,7 +554,8 @@ body.has-dark-hero .nav:not(.scrolled) .nav-cta:hover{
    Zones tactiles confortables sur mobile (48 px de haut minimum)
    ============================================================ */
 @media (max-width: 900px){
-  footer .foot span{ display: inline-flex; }
+  /* `inline-flex` écrasait les nœuds texte du span (©2026Sujee Design) */
+  footer .foot span{ display: inline-block; }
   footer .foot a{ display: inline-block; padding: 9px 0; }
   .foot-social a{ padding: 11px 0; }
   .legal .toc a{ display: inline-block; padding: 10px 0; }

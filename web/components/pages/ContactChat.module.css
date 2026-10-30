@@ -36,6 +36,9 @@
   line-height: 0.98;
   letter-spacing: -0.03em;
   color: var(--ink);
+  overflow-wrap: break-word;
+  hyphens: auto;
+  max-width: 100%;
 }
 
 .title em {
@@ -109,6 +112,8 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted);
+  min-width: 0;
+  overflow-wrap: anywhere;
   transition: color 0.4s var(--ease);
 }
 
@@ -173,6 +178,7 @@
   text-transform: uppercase;
   color: var(--muted);
   margin-bottom: 4px;
+  overflow-wrap: anywhere;
 }
 
 .facts dd {
@@ -180,6 +186,8 @@
   font-size: 0.85rem;
   line-height: 1.4;
   color: var(--ink);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .direct {
@@ -461,6 +469,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
   max-width: 88%;
   animation: rise 0.5s var(--ease) both;
 }
@@ -934,12 +943,8 @@
   }
 
   .facts {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 14px;
-  }
-
-  .facts > div:last-child {
-    grid-column: 1 / -1;
   }
 
   .row {
