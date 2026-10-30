@@ -126,7 +126,10 @@ export default function ContactChat() {
     0,
     STEPS.findIndex((step) => step.key === stepKey),
   );
-  const progress = Math.min(100, Math.round(((stepIndex + ratio) / STEPS.length) * 100));
+  const progress =
+    stepKey === "confirme"
+      ? 100
+      : Math.min(99, Math.round(((stepIndex + ratio) / STEPS.length) * 100));
 
   const handleEvent = useCallback((name: string, data: Record<string, unknown>) => {
     if ((name === "delta" || name === "token") && typeof data.text === "string") {

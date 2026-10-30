@@ -13,7 +13,7 @@ import sqlite3
 import time
 from typing import Any, Iterator
 
-from . import store
+from . import slots, store
 from .google import CalendarClient
 from .llm import LLMError, MistralClient, TurnOutput, assistant_message
 from .prompt import build_system_prompt, reminder
@@ -79,6 +79,13 @@ def turn(
 
     toolbox = ToolBox(conn, session_id, google, notify=notify)
     messages = _history(conn, session_id)
+    # Certaines transitions clés (validation du récap, choix d'un créneau) sont
+    # pilotées côté serveur : un petit modèle les oublie trop souvent.
+    pre = _preflight(toolbox, store.get_session(conn, session_id), message)
+    for event in toolbox.events:
+        yield event
+    toolbox.events = []
+    messages.extend(pre)
     answer = ""
     pending = ""
 
@@ -176,6 +183,14 @@ def turn(
         store.touch(conn, session_id, status=store.STATUS_DROPPED)
 
     final = store.get_session(conn, session_id)
+    if final:
+        fields = store.session_fields(final)
+        yield {
+            "type": "progress",
+            "filled": len(fields),
+            "total": len(store.FIELDS),
+            "missing": store.missing_fields(fields),
+        }
     yield {
         "type": "done",
         "session": session_id,
@@ -187,6 +202,104 @@ def turn(
 
 def _chunks(text: str, size: int = 24) -> list[str]:
     return [text[index : index + size] for index in range(0, len(text), size)] or [""]
+
+
+_VALIDATION = re.compile(
+    r"^\s*(?:oui|ok|okay|yes|d'accord|parfait|exact|c'est (?:bon|exact|parfait|ça|ca)|"
+    r"ça marche|ca marche|on y va|vas-y|je valide|valide)\b",
+    re.IGNORECASE,
+)
+_EMAIL = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
+_PHONE = re.compile(r"(?:\+33|0)\s?[1-9](?:[\s.-]?\d{2}){4}")
+_ORDINAL = re.compile(r"\b(?:le\s+)?(premier|1er|deuxième|deuxieme|2e|troisième|troisieme|3e)\b", re.IGNORECASE)
+
+
+def _flat(value: str) -> str:
+    text = " ".join((value or "").lower().split())
+    for source, target in (("é", "e"), ("è", "e"), ("ê", "e"), ("à", "a"), ("ç", "c"), ("ô", "o"), ("û", "u")):
+        text = text.replace(source, target)
+    return text
+
+
+def _proposal_slots(row: Any) -> list[dict[str, str]]:
+    """Reconstruit les créneaux proposés (id + libellé) depuis la session."""
+    found: list[dict[str, str]] = []
+    for raw in store.session_proposals(row):
+        start = slots.parse_slot(raw)
+        if start is None:
+            continue
+        found.append({"id": slots.slot_id(start), "label": ToolBox._label(start)})
+    return found
+
+
+def _pick_slot(row: Any, message: str) -> dict[str, str] | None:
+    """Retrouve le créneau visé par le visiteur (bouton cliqué ou texte libre)."""
+    proposals = _proposal_slots(row)
+    if not proposals:
+        return None
+    said = _flat(message)
+    for proposal in proposals:
+        if _flat(proposal["label"]) and _flat(proposal["label"]) in said:
+            return proposal
+    if len(proposals) > 1:
+        match = _ORDINAL.search(said)
+        if match:
+            index = {"premier": 0, "1er": 0, "deuxieme": 1, "2e": 1, "troisieme": 2, "3e": 2}.get(
+                _flat(match.group(1)).replace("è", "e")
+            )
+            if index is not None and index < len(proposals):
+                return proposals[index]
+    return None
+
+
+def _preflight(toolbox: ToolBox, row: Any, message: str) -> list[dict[str, Any]]:
+    """Transitions déterministes : le serveur avance même si le modèle hésite."""
+    if row is None:
+        return []
+    step = str(row["step"] or "")
+    recap_ok = int(row["recap_ok"] or 0)
+
+    if step == "recap" and not recap_ok and _VALIDATION.match(message):
+        result = toolbox.call("request_slots", {})
+        if result.get("ok"):
+            listed = " · ".join(f"{item['quand']} [id {item['id']}]" for item in result.get("creneaux") or [])
+            return [
+                {
+                    "role": "system",
+                    "content": (
+                        "[consigne serveur] Le visiteur valide la reformulation. Les créneaux "
+                        "réels sont déjà affichés sous forme de boutons. Annonce-les en une "
+                        f"phrase, sans markdown, et demande lequel lui convient. Créneaux : {listed}"
+                    ),
+                }
+            ]
+        return [
+            {
+                "role": "system",
+                "content": (
+                    "[consigne serveur] Les créneaux sont indisponibles : "
+                    f"{result.get('error') or 'agenda injoignable'}. Propose le formulaire via handoff_form."
+                ),
+            }
+        ]
+
+    if step == "creneaux":
+        choice = _pick_slot(row, message)
+        if choice is None:
+            return []
+        email = _EMAIL.search(message)
+        phone = _PHONE.search(message)
+        details = [f"Le visiteur a choisi le créneau {choice['label']} [id {choice['id']}]."]
+        if email:
+            details.append(f"Email détecté : {email.group(0)}.")
+        if phone:
+            details.append(f"Téléphone détecté : {phone.group(0)}.")
+        details.append(
+            "Si tu as son nom et son email, appelle book_meeting avec slot_start="
+            f"{choice['id']}. Sinon demande son nom et son email en une seule phrase."
+        )
+        return [{"role": "system", "content": "[consigne serveur] " + " ".join(details)}]
+    return []
 
 
 _PREAMBLE = re.compile(
@@ -205,6 +318,9 @@ def _clean(text: str) -> str:
         if stripped == cleaned:
             break
         cleaned = stripped
+    cleaned = re.sub(r"\*\*(.+?)\*\*", r"\1", cleaned)
+    cleaned = re.sub(r"(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])", r"\1", cleaned)
+    cleaned = re.sub(r"__(\S(?:.*?\S)?)__", r"\1", cleaned)
     return _AWAITING.sub("", cleaned).strip()
 
 

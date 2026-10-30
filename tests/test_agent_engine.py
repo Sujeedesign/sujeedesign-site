@@ -49,7 +49,7 @@ class FakeGoogle:
         self.mails: list[dict] = []
         self.fail_event = False
 
-    def available_slots(self, count=3, booked_per_day=None):
+    def available_slots(self, count=3, booked_per_day=None, taken=None):
         return list(self.available)
 
     def create_event(self, start, attendee_email, attendee_name, summary, description):
@@ -220,6 +220,63 @@ def test_limite_de_tours(conn):
     store.touch(conn, session_id, turns=engine.MAX_TURNS)
     events = _collect(conn, session_id, "Encore une question", FakeLLM([]), google)
     assert events[0]["type"] == "error"
+
+
+def test_validation_du_recap_declenche_les_creneaux(conn):
+    """« Oui » sur le récapitulatif doit lancer request_slots sans dépendre du modèle."""
+    start = slots.candidates()[0]
+    google = FakeGoogle(available=[start])
+    session_id = engine.prepare_session(conn)
+    store.merge_fields(conn, session_id, FIELDS)
+    store.touch(
+        conn,
+        session_id,
+        step="recap",
+        recap="Refonte d'identité pour un studio de yoga, avant mars.",
+        recap_ok=0,
+    )
+    store.add_message(conn, session_id, "assistant", "Est-ce bien cela ?")
+
+    llm = FakeLLM([[TurnOutput(text="Parfait, voici les créneaux.")]])
+    events = _collect(conn, session_id, "Oui, c'est exact.", llm, google)
+
+    kinds = [event.get("type") for event in events]
+    assert "slots" in kinds
+    row = store.get_session(conn, session_id)
+    assert row["step"] == "creneaux"
+    assert store.session_proposals(row)
+
+
+def test_creneau_choisi_est_transmis_au_modele(conn):
+    """Le libellé cliqué doit être traduit en identifiant de créneau."""
+    start = slots.candidates()[0]
+    google = FakeGoogle(available=[start])
+    session_id = engine.prepare_session(conn)
+    store.merge_fields(conn, session_id, FIELDS)
+    store.touch(conn, session_id, step="creneaux", recap="Récapitulatif.", recap_ok=1)
+    store.set_proposals(conn, session_id, [slots.slot_id(start)])
+
+    toolbox = agent_tools.ToolBox(conn, session_id, google)  # type: ignore[arg-type]
+    row = store.get_session(conn, session_id)
+    assert row is not None
+    hint = engine._preflight(toolbox, row, f"Le créneau {agent_tools.ToolBox._label(start)} me convient")
+
+    assert len(hint) == 1
+    assert slots.slot_id(start) in hint[0]["content"]
+    assert "book_meeting" in hint[0]["content"]
+
+
+def test_creneaux_deja_reserves_ne_sont_plus_proposes(conn):
+    """Un créneau réservé en base ne doit jamais revenir dans les propositions."""
+    start = slots.candidates()[0]
+    store.reserve_slot(conn, slots.slot_id(start), "sid", "a@b.fr")
+    assert slots.slot_id(start) in store.taken_slots(conn)
+    picked = slots.pick(now=slots.now_paris(), taken=store.taken_slots(conn), count=3)
+    assert slots.slot_id(start) not in [slots.slot_id(item) for item in picked]
+
+
+def test_markdown_retire_des_reponses():
+    assert engine._clean("**Bonjour**, quel est votre projet ?") == "Bonjour, quel est votre projet ?"
 
 
 def test_une_seule_question_par_message():

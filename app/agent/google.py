@@ -169,14 +169,19 @@ class CalendarClient:
                 intervals.append((start, end))
         return intervals
 
-    def available_slots(self, count: int = 3, booked_per_day: dict[str, int] | None = None) -> list[datetime]:
+    def available_slots(
+        self,
+        count: int = 3,
+        booked_per_day: dict[str, int] | None = None,
+        taken: set[str] | None = None,
+    ) -> list[datetime]:
         now = slots.now_paris()
         horizon = now + timedelta(days=slots.HORIZON_DAYS + 1)
         try:
             busy = self.busy(now, horizon)
         except GoogleError:
             busy = []
-        return slots.pick(now, busy, count=count, booked_per_day=booked_per_day)
+        return slots.pick(now, busy, count=count, booked_per_day=booked_per_day, taken=taken)
 
     def create_event(
         self,

@@ -87,18 +87,22 @@ def pick(
     count: int = 3,
     booked_per_day: dict[str, int] | None = None,
     horizon_days: int = HORIZON_DAYS,
+    taken: set[str] | None = None,
 ) -> list[datetime]:
     """Trois créneaux libres, un par jour tant que possible.
 
     `booked_per_day` compte les rendez-vous déjà posés par l'agent, pour
-    respecter le plafond quotidien.
+    respecter le plafond quotidien ; `taken` liste les créneaux déjà réservés.
     """
     busy = busy or []
     booked = dict(booked_per_day or {})
+    taken = taken or set()
     free = [
         start
         for start in candidates(now, horizon_days)
-        if is_free(start, busy) and booked.get(day_key(start), 0) < MAX_PER_DAY
+        if is_free(start, busy)
+        and booked.get(day_key(start), 0) < MAX_PER_DAY
+        and slot_id(start) not in taken
     ]
     chosen: list[datetime] = []
     seen_days: set[str] = set()

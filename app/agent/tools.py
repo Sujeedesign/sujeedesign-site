@@ -199,8 +199,30 @@ class ToolBox:
             )
         if not row["recap"]:
             return self._error("Appelle d'abord submit_recap avec la reformulation.")
+        previous = [slots.parse_slot(item) for item in store.session_proposals(row)]
+        previous = [start for start in previous if start is not None and start > slots.now_paris()]
+        if str(row["step"] or "") == "creneaux" and previous:
+            labels = [self._label(start) for start in previous]
+            self.events.append(
+                {
+                    "type": "slots",
+                    "slots": [
+                        {"id": slots.slot_id(start), "label": label}
+                        for start, label in zip(previous, labels)
+                    ],
+                }
+            )
+            return {
+                "ok": True,
+                "deja_proposes": True,
+                "creneaux": [
+                    {"id": slots.slot_id(s), "quand": label} for s, label in zip(previous, labels)
+                ],
+            }
         booked = store.bookings_per_day(self.conn)
-        available = self.google.available_slots(count=3, booked_per_day=booked)
+        available = self.google.available_slots(
+            count=3, booked_per_day=booked, taken=store.taken_slots(self.conn)
+        )
         if not available:
             store.touch(self.conn, self.session_id, step="recap")
             return self._error(
@@ -246,7 +268,13 @@ class ToolBox:
 
         if not store.reserve_slot(self.conn, slot_start, self.session_id, email):
             store.set_proposals(self.conn, self.session_id, [])
-            return self._error("Ce créneau vient d'être pris. Rappelle request_slots pour en proposer d'autres.")
+            fresh = self.request_slots({})
+            return {
+                "ok": False,
+                "erreur": "Ce créneau vient d'être pris.",
+                "nouveaux_creneaux": fresh.get("creneaux", []),
+                "consigne": "Présente uniquement ces nouveaux créneaux, sans en inventer.",
+            }
 
         reference = store.next_reference(self.conn)
         summary = self._summary(fields)

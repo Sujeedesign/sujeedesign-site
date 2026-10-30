@@ -234,6 +234,11 @@ def release_slot(conn: sqlite3.Connection, slot_start: str) -> None:
     conn.commit()
 
 
+def taken_slots(conn: sqlite3.Connection) -> set[str]:
+    """Créneaux déjà réservés, pour ne plus les proposer."""
+    return {str(row["slot_start"]) for row in conn.execute("SELECT slot_start FROM agent_bookings")}
+
+
 def bookings_per_day(conn: sqlite3.Connection, horizon_days: int = 15) -> dict[str, int]:
     from . import slots as slots_module
 
