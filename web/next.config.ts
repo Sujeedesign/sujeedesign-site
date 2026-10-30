@@ -89,6 +89,8 @@ const nextConfig: NextConfig = {
         statusCode: 301,
       },
       { source: "/v5/mentions-legales.html", destination: "/mentions-legales", statusCode: 301 },
+      // Ancienne page contact statique : renvoie vers la nouvelle page dédiée.
+      { source: "/contact.html", destination: "/contact", statusCode: 301 },
       { source: "/v5/:path*", destination: "/", statusCode: 301 },
       ...legacyUrls.map((url) => ({ ...url, statusCode: 301 as const })),
     ];
