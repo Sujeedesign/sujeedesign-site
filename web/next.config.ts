@@ -18,7 +18,6 @@ const legacyUrls: Array<{ source: string; destination: string }> = [
   { source: "/realisations.html", destination: "/realisations" },
   { source: "/services.html", destination: "/services" },
   { source: "/apropos.html", destination: "/a-propos" },
-  { source: "/contact.html", destination: "/a-propos#contact" },
   { source: "/mentions-legales.html", destination: "/mentions-legales" },
   { source: "/identite.html", destination: "/services/identite-de-marque" },
   { source: "/creation-visuelle.html", destination: "/services/direction-artistique" },
@@ -40,7 +39,6 @@ const legacyUrls: Array<{ source: string; destination: string }> = [
   { source: "/realisations/psw", destination: "/realisations" },
 
   // Site FastAPI en production (slugs antérieurs au v5)
-  { source: "/contact", destination: "/a-propos#contact" },
   { source: "/services/identite", destination: "/services/identite-de-marque" },
   { source: "/services/creation-visuelle", destination: "/services/direction-artistique" },
   { source: "/services/web", destination: "/services/site-ecommerce" },
@@ -184,6 +182,8 @@ const nextConfig: NextConfig = {
         { source: "/admin/:path*", destination: `${admin}/admin/:path*` },
         { source: "/medias/:path*", destination: `${admin}/medias/:path*` },
         { source: "/api/admin/:path*", destination: `${admin}/api/admin/:path*` },
+        // Agent de contact : la page publique parle à FastAPI par la même origine.
+        { source: "/api/agent/:path*", destination: `${admin}/api/agent/:path*` },
         { source: "/api/editor/:path*", destination: `${admin}/api/editor/:path*` },
         // Assets du back office et de l'éditeur visuel : le site Next possède son
         // propre dossier public/assets, on ne relaie que les fichiers qui lui

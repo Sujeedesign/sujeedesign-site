@@ -24,6 +24,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}${routes.services}`, lastModified: now, changeFrequency: "monthly", priority: 0.9 },
     { url: `${SITE_URL}${routes.aPropos}`, lastModified: now, changeFrequency: "yearly", priority: 0.7 },
     { url: `${SITE_URL}${routes.agentsIa}`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${SITE_URL}${routes.contact}`, lastModified: now, changeFrequency: "yearly", priority: 0.9 },
     {
       url: `${SITE_URL}${routes.mentionsLegales}`,
       lastModified: now,

@@ -11,6 +11,7 @@ export const routes = {
   services: "/services",
   aPropos: "/a-propos",
   agentsIa: "/agents-ia",
+  contact: "/contact",
   mentionsLegales: "/mentions-legales",
 } as const;
 

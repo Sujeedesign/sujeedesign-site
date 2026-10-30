@@ -189,6 +189,9 @@ def init_db(conn: sqlite3.Connection) -> None:
         (),
     )
     migrate(conn)
+    from .agent.schema import init_agent_db
+
+    init_agent_db(conn)
 
 
 def get_meta(conn: sqlite3.Connection, key: str, default: str = "") -> str:

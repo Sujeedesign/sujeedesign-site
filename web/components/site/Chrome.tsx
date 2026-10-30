@@ -133,7 +133,7 @@ export function SiteNav({ solid = false, current }: { solid?: boolean; current?:
             <span></span>
           </button>
           <span className="t">Cergy · Paris</span>
-          <a className="nav-cta" href={mailto("Un projet")}>
+          <a className="nav-cta" href={routes.contact}>
             Parlons de votre besoin
             {arrow}
           </a>
@@ -157,7 +157,7 @@ export function SiteNav({ solid = false, current }: { solid?: boolean; current?:
         <a className="navpanel__l" href={routes.aPropos}>
           À propos
         </a>
-        <a className="navpanel__cta" href={mailto("Un projet")}>
+        <a className="navpanel__cta" href={routes.contact}>
           <span>Parlons de votre besoin</span>
           {arrow}
         </a>
