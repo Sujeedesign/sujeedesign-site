@@ -25,7 +25,7 @@ from ..contact import client_ip, require_sync
 from ..contact import validate as validate_contact
 from ..db import connect
 from . import engine, store
-from .google import CalendarClient
+from .google import CalendarClient, load_config
 from .llm import MistralClient
 
 router = APIRouter(prefix="/api/agent", tags=["agent"])
@@ -70,7 +70,10 @@ def _ip_hash(request: Request) -> str:
 
 @router.get("/health")
 def health() -> JSONResponse:
-    return JSONResponse({"ok": True, "agent": "contact"})
+    """Sonde de santé : indique aussi si Google Calendar est branché en prod."""
+    return JSONResponse(
+        {"ok": True, "agent": "contact", "calendar": load_config().configured}
+    )
 
 
 @router.post("/session")
