@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Demandes du chat{% endblock %}
+{% block heading %}Demandes du chat{% endblock %}
+{% block content %}
+  <header class="page-head">
+    <div class="title-wrap">
+      <h1>Demandes du chat</h1>
+      <p class="sub">
+        {% if leads %}
+          {{ leads | length }} demande{{ 's' if leads | length > 1 }} qualifiée{{ 's' if leads | length > 1 }} par l'agent de contact · {{ bookings | length }} créneau{{ 'x' if bookings | length > 1 }} réservé{{ 's' if bookings | length > 1 }}
+        {% else %}
+          Les projets qualifiés par l'agent de la page contact arrivent ici.
+        {% endif %}
+      </p>
+    </div>
+  </header>
+
+  {% if leads %}
+    <div class="msg-list">
+      {% for lead in leads %}
+        <article class="card msg" id="lead-{{ lead.id }}">
+          <header class="msg-head">
+            <span class="avatar">{{ (lead.name or 'Sans nom') | initials }}</span>
+            <div class="msg-id">
+              <strong>{{ lead.name or 'Sans nom' }}</strong>
+              <span class="muted small">
+                <a href="mailto:{{ lead.email }}">{{ lead.email or 'email manquant' }}</a>
+                {% if lead.phone %} · <a href="tel:{{ lead.phone }}">{{ lead.phone }}</a>{% endif %}
+              </span>
+            </div>
+            <div class="msg-meta">
+              <span class="badge badge-{{ lead.status_class }}">{{ lead.status_label }}</span>
+              <span class="muted small">{{ lead.created_at | datetimefr }}</span>
+              {% if lead.reference %}<span class="msg-ref">{{ lead.reference }}</span>{% endif %}
+            </div>
+          </header>
+
+          {% if lead.slot_start %}
+            <div class="msg-tags">
+              <span class="tag acc">rendez-vous {{ lead.slot_label }}</span>
+            </div>
+          {% endif %}
+
+          {% if lead.summary %}<p class="msg-text">{{ lead.summary }}</p>{% endif %}
+
+          {% if lead.fields %}
+            <div class="note demande-details">
+              {% for key, value in lead.fields.items() %}
+                {% if value %}<div><span class="note-k">{{ labels.get(key, key) }}</span> {{ value }}</div>{% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          <div class="msg-actions">
+            <div class="msg-links">
+              <a class="btn btn-accent btn-sm" href="mailto:{{ lead.email }}?subject=Votre%20projet%20%E2%80%94%20Sujee%20Design">Répondre</a>
+              <form method="post" action="/admin/demandes/{{ lead.id }}/supprimer" data-confirm="Supprimer cette demande et libérer son créneau ?">
+                <input type="hidden" name="csrf" value="{{ csrf }}">
+                <button class="btn btn-danger btn-sm" type="submit">Supprimer</button>
+              </form>
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card empty-box">
+      <p class="empty-title">Aucune demande pour le moment</p>
+      <p class="muted small">Les conversations qualifiées depuis la page contact du site arrivent ici.</p>
+    </div>
+  {% endif %}
+{% endblock %}

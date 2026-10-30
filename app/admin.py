@@ -25,6 +25,7 @@ from . import content_model
 from . import repo
 from . import security
 from . import settings as settings_module
+from .agent.store import FIELD_LABELS
 from .db import connect
 from .ui import templates
 
@@ -88,7 +89,13 @@ NAV_GROUPS: tuple[tuple[str, tuple[tuple[str, str, str], ...]], ...] = (
         ),
     ),
     ("Contenu", (("pages", "Pages du site", "/admin/pages"),)),
-    ("Échanges", (("messages", "Messages", "/admin/messages"),)),
+    (
+        "Échanges",
+        (
+            ("messages", "Messages", "/admin/messages"),
+            ("demandes", "Demandes du chat", "/admin/demandes"),
+        ),
+    ),
     (
         "Système",
         (
@@ -204,11 +211,21 @@ def _nav_badges(request: Request) -> dict[str, int]:
     try:
         nouveaux = repo.message_counts(conn).get("nouveau", 0)
         brouillons = conn.execute("SELECT COUNT(*) AS n FROM projets WHERE statut = 'brouillon'").fetchone()["n"]
+        demandes = _demandes_a_traiter(conn)
     except sqlite3.Error:
         return {}
     finally:
         conn.close()
-    return {"messages": int(nouveaux or 0), "projets": int(brouillons or 0)}
+    return {"messages": int(nouveaux or 0), "projets": int(brouillons or 0), "demandes": demandes}
+
+
+def _demandes_a_traiter(conn: sqlite3.Connection) -> int:
+    """Nombre de demandes du chat encore à traiter (table absente = 0)."""
+    try:
+        row = conn.execute("SELECT COUNT(*) AS n FROM agent_leads WHERE status = 'qualifie'").fetchone()
+    except sqlite3.Error:
+        return 0
+    return int(row["n"] or 0)
 
 
 def render(request: Request, template: str, **context: Any) -> HTMLResponse:
@@ -541,6 +558,100 @@ def message_supprimer(request: Request, message_id: int, csrf: str = Form("")) -
     finally:
         conn.close()
     return back("/admin/messages", "Message supprimé.")
+
+
+# ------------------------------------------------------------ demandes du chat
+
+
+@router.get("/admin/demandes", response_class=HTMLResponse)
+def demandes(request: Request, user: str = Depends(require_admin)) -> Response:
+    conn = get_conn(request)
+    try:
+        leads = [
+            dict(row)
+            for row in conn.execute(
+                "SELECT * FROM agent_leads ORDER BY id DESC LIMIT 200"
+            ).fetchall()
+        ]
+        bookings = [
+            dict(row)
+            for row in conn.execute(
+                "SELECT * FROM agent_bookings ORDER BY slot_start ASC LIMIT 200"
+            ).fetchall()
+        ]
+    except sqlite3.Error:
+        leads, bookings = [], []
+    finally:
+        conn.close()
+    for lead in leads:
+        try:
+            lead["fields"] = json.loads(lead.get("fields") or "{}")
+        except ValueError:
+            lead["fields"] = {}
+        lead["slot_label"] = _slot_label(lead.get("slot_start") or "")
+        lead["status_label"] = STATUS_LABELS.get(str(lead.get("status")), str(lead.get("status") or ""))
+        lead["status_class"] = STATUS_CLASSES.get(str(lead.get("status")), "archivee")
+    return render(request, "demandes.html", leads=leads, bookings=bookings, labels=FIELD_LABELS)
+
+
+STATUS_CLASSES = {
+    "qualifie": "nouveau",
+    "qualifiee": "nouveau",
+    "convertie": "traite",
+    "archivee": "archivee",
+}
+
+
+STATUS_LABELS = {
+    "qualifie": "à traiter",
+    "qualifiee": "à traiter",
+    "convertie": "convertie",
+    "archivee": "archivée",
+}
+
+
+def _slot_label(value: str) -> str:
+    """Créneau ISO -> « lundi 2 novembre à 09:00 » (heure de Paris)."""
+    try:
+        start = datetime.fromisoformat(value)
+    except ValueError:
+        return ""
+    from zoneinfo import ZoneInfo
+
+    if start.tzinfo is None:
+        start = start.replace(tzinfo=ZoneInfo("UTC"))
+    local = start.astimezone(ZoneInfo("Europe/Paris"))
+    jours = ("lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche")
+    mois = (
+        "janvier",
+        "février",
+        "mars",
+        "avril",
+        "mai",
+        "juin",
+        "juillet",
+        "août",
+        "septembre",
+        "octobre",
+        "novembre",
+        "décembre",
+    )
+    return f"{jours[local.weekday()]} {local.day} {mois[local.month - 1]} à {local:%H:%M}"
+
+
+@router.post("/admin/demandes/{lead_id}/supprimer")
+def demande_supprimer(request: Request, lead_id: int, csrf: str = Form("")) -> Response:
+    check_csrf(request, csrf)
+    conn = get_conn(request)
+    try:
+        row = conn.execute("SELECT slot_start, event_id FROM agent_leads WHERE id = ?", (lead_id,)).fetchone()
+        if row is not None and row["slot_start"]:
+            conn.execute("DELETE FROM agent_bookings WHERE slot_start = ?", (row["slot_start"],))
+        conn.execute("DELETE FROM agent_leads WHERE id = ?", (lead_id,))
+        conn.commit()
+    finally:
+        conn.close()
+    return back("/admin/demandes", "Demande supprimée.")
 
 
 # -------------------------------------------------------------------- médias

@@ -535,6 +535,14 @@ a.stat:hover { background: rgba(255, 255, 255, 0.015); }
 .badge-nouveau { color: #ffb59b; border-color: rgba(255, 74, 23, 0.4); background: var(--accent-soft); }
 .badge-en-cours { color: var(--warn); border-color: rgba(231, 194, 104, 0.35); background: rgba(231, 194, 104, 0.08); }
 .badge-traite { color: var(--ok); border-color: rgba(139, 216, 166, 0.3); background: rgba(139, 216, 166, 0.07); }
+.badge-qualifiee { color: #ffb59b; border-color: rgba(255, 74, 23, 0.45); background: var(--accent-soft); }
+.badge-convertie { color: var(--ok); border-color: rgba(139, 216, 166, 0.3); background: rgba(139, 216, 166, 0.07); }
+.badge-archivee { color: var(--dim); }
+.demande-details { display: flex; flex-direction: column; gap: 9px; }
+.demande-details > div { line-height: 1.5; }
+.demande-details .note-k { display: block; margin-bottom: 2px; letter-spacing: 0.06em; }
+.msg-ref { font-family: var(--mono); font-size: 10px; color: var(--dim); opacity: 0.75; }
+.msg-meta .badge { margin-right: 2px; }
 .tag { border-radius: 2px; text-transform: none; letter-spacing: 0.02em; font-size: 10px; color: var(--dim); }
 .tag.acc { color: #ffb59b; border-color: rgba(255, 74, 23, 0.35); }
 
