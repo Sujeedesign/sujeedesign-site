@@ -463,8 +463,9 @@ def _branding_words(text: str) -> str:
     """Nettoie un morceau de message pour n'en garder que le nom du branding."""
     rest = _EMAIL.sub(" ", text or "")
     rest = _PHONE.sub(" ", rest)
+    rest = re.sub(r"^(?:le|la|les|du|de|des)\s+", "", rest)
     rest = re.sub(
-        r"(?i)^\s*(?:le|la|les|mon|ma|notre|du|de|des|nom|branding|marque|projet|"
+        r"(?i)^\s*(?:mon|ma|notre|nom|branding|marque|projet|"
         r"c'est|ces|s'appelle|sappelle|s'appellera|sera|est|pour|nomme|appele|appelle|et|sujet)\b\s*",
         "",
         rest,
@@ -474,10 +475,11 @@ def _branding_words(text: str) -> str:
     words = [
         word
         for word in _words(rest)
-        if _flat(word) not in _NAME_NOISE and _flat(word) not in _MODE_WORDS
+        if (word != word.lower() or _flat(word) not in _NAME_NOISE)
+        and _flat(word) not in _MODE_WORDS
     ]
     words = [word for word in words if not any(char.isdigit() for char in word)]
-    while words and _flat(words[0]) in {"le", "la", "les", "mon", "ma", "notre", "du", "de", "des", "est", "sera", "pour", "nom", "sujet"}:
+    while words and _flat(words[0]) in {"est", "sera", "pour", "nom", "sujet"}:
         words.pop(0)
     if not words or len(words) > 8:
         return ""

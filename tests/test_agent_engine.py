@@ -495,6 +495,16 @@ def test_creneau_saisi_puis_coordonnees_au_tour_suivant(conn):
     assert store.get_session(conn, session_id)["status"] == store.STATUS_BOOKED
 
 
+def test_extraction_des_details_dans_une_phrase_condensee():
+    phrase = "Claire Martin, claire@example.com, 06 12 34 56 78, branding Le Fournil, en visio"
+    assert engine._guess_name(phrase) == "Claire Martin"
+    assert engine._guess_branding(phrase) == "Le Fournil"
+    assert engine._guess_mode(phrase) == "visio"
+    assert engine._guess_branding("le branding c'est Vaasam") == "Vaasam"
+    assert engine._guess_name("06 12 34 56 78") == ""
+    assert engine._guess_branding("en visio, ce sera plus simple") == ""
+
+
 def test_parcours_detaille_nom_email_telephone_branding_et_format(conn):
     """Chaque information est demandée une seule fois, puis la réservation aboutit."""
     google = FakeGoogle(available=slots.candidates()[:3])
