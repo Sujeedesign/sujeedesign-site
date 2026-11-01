@@ -311,4 +311,6 @@ def test_le_message_ne_recopie_pas_les_creneaux_affiches(conn):
 
     message = "".join(e["text"] for e in events if e.get("type") == "delta")
     assert "novembre" not in message
-    assert "Lequel vous convient" in message
+    assert "14h" not in message
+    assert len(message) < 120
+    assert "créneaux" in message

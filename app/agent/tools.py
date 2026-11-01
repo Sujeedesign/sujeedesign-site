@@ -109,6 +109,7 @@ class ToolBox:
         self.notify = notify
         self.events: list[dict[str, Any]] = []
         self.booking: dict[str, Any] | None = None
+        self.slots_emitted = False
         self.handed_off = False
 
     # -- helpers ----------------------------------------------------------
@@ -218,15 +219,17 @@ class ToolBox:
         store.set_proposals(self.conn, self.session_id, [slots.slot_id(start) for start in available])
         store.touch(self.conn, self.session_id, step="creneaux", recap_ok=1)
         labels = [self._label(start) for start in available]
-        self.events.append(
-            {
-                "type": "slots",
-                "slots": [
-                    {"id": slots.slot_id(start), "label": label}
-                    for start, label in zip(available, labels)
-                ],
-            }
-        )
+        if not self.slots_emitted:
+            self.slots_emitted = True
+            self.events.append(
+                {
+                    "type": "slots",
+                    "slots": [
+                        {"id": slots.slot_id(start), "label": label}
+                        for start, label in zip(available, labels)
+                    ],
+                }
+            )
         return {"ok": True, "creneaux": [{"id": slots.slot_id(s), "quand": label} for s, label in zip(available, labels)]}
 
     def book_meeting(self, arguments: dict[str, Any]) -> dict[str, Any]:
