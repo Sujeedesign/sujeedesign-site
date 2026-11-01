@@ -44,8 +44,9 @@ class FakeGoogle:
         self.mails: list[dict] = []
         self.fail_event = False
 
-    def available_slots(self, count=3, booked_per_day=None, taken=None):
-        return list(self.available)
+    def available_slots(self, count=3, booked_per_day=None, taken=None, moment=""):
+        self.asked_moment = moment
+        return [start for start in self.available if slots.matches_moment(start, moment)]
 
     def create_event(self, start, attendee_email, attendee_name, summary, description, location=""):
         if self.fail_event:
@@ -123,8 +124,18 @@ def test_parcours_complet_jusqu_au_rendez_vous(conn):
     assert not any(event["type"] == "slots" for event in first)
 
     second = _collect(conn, session_id, "Studio de yoga à Paris 11e", llm, google, notifications.append)
-    assert any(event["type"] == "slots" for event in second)
-    assert store.get_session(conn, session_id)["step"] == "creneaux"
+    assert any(event["type"] == "moment" for event in second)
+    assert not any(event["type"] == "slots" for event in second)
+    row_apres = store.get_session(conn, session_id)
+    assert row_apres is not None
+    assert row_apres["step"] == "moment"
+
+    # La demi-journée choisie suffit : le serveur affiche les créneaux sans le modèle.
+    third = _collect(conn, session_id, "Plutôt le matin", llm, google, notifications.append)
+    assert any(event["type"] == "slots" for event in third)
+    row_creneaux = store.get_session(conn, session_id)
+    assert row_creneaux is not None
+    assert row_creneaux["step"] == "creneaux"
 
     row = store.get_session(conn, session_id)
     first_choice = engine._choice_by_id(row, store.session_proposals(row)[0])
@@ -233,22 +244,50 @@ def test_limite_de_tours(conn):
     assert events[0]["type"] == "error"
 
 
-def test_qualification_complete_ouvre_les_creneaux_sans_le_modele(conn):
-    """Type + activité connus : le serveur ouvre les créneaux sans récapitulatif."""
+def test_qualification_complete_demande_la_demi_journee_avant_les_creneaux(conn):
+    """Type + activité connus : le serveur demande matin ou après-midi, sans créneau."""
     start = slots.candidates()[0]
     google = FakeGoogle(available=[start])
     session_id = engine.prepare_session(conn)
     store.merge_fields(conn, session_id, FIELDS)
     store.add_message(conn, session_id, "assistant", "Pour quelle activité ?")
 
-    llm = FakeLLM([[TurnOutput(text="Parfait, voici les créneaux.")]])
+    llm = FakeLLM([[TurnOutput(text="Vous préférez le matin ou l'après-midi ?")]])
     events = _collect(conn, session_id, "Studio de yoga à Paris 11e", llm, google)
 
     kinds = [event.get("type") for event in events]
-    assert "slots" in kinds
+    assert "moment" in kinds
+    assert "slots" not in kinds
     row = store.get_session(conn, session_id)
-    assert row["step"] == "creneaux"
-    assert store.session_proposals(row)
+    assert row is not None
+    assert row["step"] == "moment"
+    assert not store.session_proposals(row)
+    message = "".join(e["text"] for e in events if e.get("type") == "delta")
+    assert "matin" in message and "après-midi" in message
+
+
+def test_reponse_matin_ouvre_les_creneaux_du_matin_sans_le_modele(conn):
+    """La réponse « le matin » affiche les créneaux du matin, sans appel au modèle."""
+    matin = [start for start in slots.candidates() if start.hour < slots.MORNING_END_HOUR]
+    apres_midi = [start for start in slots.candidates() if start.hour >= slots.MORNING_END_HOUR]
+    assert matin and apres_midi
+    google = FakeGoogle(available=[apres_midi[0], matin[0]])
+    session_id = engine.prepare_session(conn)
+    store.merge_fields(conn, session_id, FIELDS)
+    store.touch(conn, session_id, step="moment")
+
+    llm = FakeLLM([])
+    events = _collect(conn, session_id, "Le matin de préférence", llm, google)
+
+    assert llm.calls == 0
+    # La question ne doit pas être reposée quand la réponse est déjà dans le message.
+    assert not any(e.get("type") == "moment" for e in events)
+    shown = next(e for e in events if e.get("type") == "slots")
+    assert shown["moment"] == "Matin"
+    assert [item["label"] for item in shown["slots"]] == [agent_tools.ToolBox._label(matin[0])]
+    assert google.asked_moment == "matin"
+    message = "".join(e["text"] for e in events if e.get("type") == "delta")
+    assert "matin" in message.lower()
 
 
 def test_creneau_choisi_est_transmis_au_modele(conn):
@@ -325,6 +364,8 @@ def test_le_message_ne_recopie_pas_les_creneaux_affiches(conn):
     google = FakeGoogle(available=[start])
     session_id = engine.prepare_session(conn)
     store.merge_fields(conn, session_id, FIELDS)
+    # Demi-journée déjà connue : on teste la formation du message, pas la question.
+    store.set_details(conn, session_id, {"moment": "Matin"})
 
     bavard = (
         "Les créneaux viennent de s'afficher. Lequel vous convient ?\n"
@@ -356,7 +397,8 @@ def test_reponse_activite_enregistree_meme_si_le_modele_oublie_l_outil(conn):
 
     row = store.get_session(conn, session_id)
     assert store.session_fields(row)["context"] == "Studio de yoga à Paris 11e"
-    assert "slots" in [e.get("type") for e in events]
+    # La qualification est complète : le serveur demande la demi-journée.
+    assert "moment" in [e.get("type") for e in events]
 
 
 def test_horaires_inventes_remplaces_par_la_question_utile(conn):

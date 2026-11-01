@@ -29,6 +29,11 @@ TOOL_SPECS: list[dict[str, Any]] = [
                 "properties": {
                     "project_type": {"type": "string", "description": "Nature du projet"},
                     "context": {"type": "string", "description": "Activité, secteur, contexte"},
+                    "moment": {
+                        "type": "string",
+                        "enum": ["matin", "apres-midi"],
+                        "description": "Demi-journée préférée, seulement si le visiteur vient de la donner",
+                    },
                 },
             },
         },
@@ -37,8 +42,17 @@ TOOL_SPECS: list[dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "request_slots",
-            "description": "Demande les créneaux réellement disponibles. Appelé automatiquement dès que la qualification est complète.",
-            "parameters": {"type": "object", "properties": {}},
+            "description": "Demande les créneaux réellement disponibles, filtrés sur la demi-journée choisie. Appelé automatiquement dès que la qualification est complète et le moment connu.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "moment": {
+                        "type": "string",
+                        "enum": ["matin", "apres-midi"],
+                        "description": "Demi-journée préférée par le visiteur",
+                    }
+                },
+            },
         },
     },
     {
@@ -144,7 +158,13 @@ class ToolBox:
 
     # -- outils -----------------------------------------------------------
     def record_fields(self, arguments: dict[str, Any]) -> dict[str, Any]:
-        payload = arguments.get("fields") if isinstance(arguments.get("fields"), dict) else arguments
+        raw_fields = arguments.get("fields")
+        payload: dict[str, Any] = raw_fields if isinstance(raw_fields, dict) else dict(arguments)
+        moment = slots.normalize_moment(str(arguments.get("moment") or payload.get("moment") or ""))
+        if moment:
+            # On enregistre un libellé lisible ; la comparaison repasse par normalize_moment.
+            store.set_details(self.conn, self.session_id, {"moment": slots.MOMENT_LABELS[moment]})
+            payload = {key: value for key, value in payload.items() if key != "moment"}
         fields = store.merge_fields(self.conn, self.session_id, payload)
         missing = store.missing_fields(fields)
         self.events.append(
@@ -163,12 +183,32 @@ class ToolBox:
         # Qualification : type de projet connu, activité à préciser.
         if missing and "project_type" not in missing:
             store.touch(self.conn, self.session_id, step="qualification")
-        # Qualification complète : le serveur ouvre les créneaux sans attendre.
+        # Qualification complète : on demande d'abord la demi-journée préférée,
+        # puis le serveur ouvre les créneaux correspondants sans attendre.
         # Pas de récapitulatif, pas de validation à demander : on va au rendez-vous.
         if not missing:
             row = self._session()
             if row["status"] != store.STATUS_BOOKED and not store.session_proposals(row):
-                opened = self.request_slots({})
+                moment = slots.normalize_moment(store.session_fields(row).get("moment", ""))
+                if not moment:
+                    store.touch(self.conn, self.session_id, step="moment")
+                    self.events.append(
+                        {
+                            "type": "moment",
+                            "question": "Vous préférez le matin ou l'après-midi ?",
+                            "options": [
+                                {"value": "matin", "label": "Le matin"},
+                                {"value": "apres-midi", "label": "L'après-midi"},
+                            ],
+                        }
+                    )
+                    result["consigne"] = (
+                        "Qualification complète. Demande en une seule question s'il préfère le matin "
+                        "ou l'après-midi. Les créneaux s'afficheront tout seuls après sa réponse : "
+                        "n'appelle pas request_slots et ne propose aucun horaire."
+                    )
+                    return result
+                opened = self.request_slots({"moment": moment})
                 result["slots"] = opened.get("creneaux", [])
                 if opened.get("ok"):
                     result["consigne"] = (
@@ -190,20 +230,29 @@ class ToolBox:
                 "Créneaux indisponibles tant que ces points manquent : "
                 + ", ".join(store.FIELD_LABELS[k] for k in missing)
             )
+        known = slots.normalize_moment(fields.get("moment", ""))
+        moment = slots.normalize_moment(str(arguments.get("moment") or "")) or known
+        if moment and moment != known:
+            # Le visiteur change de demi-journée : on remplace les créneaux affichés.
+            store.set_details(self.conn, self.session_id, {"moment": slots.MOMENT_LABELS[moment]})
         previous = [slots.parse_slot(item) for item in store.session_proposals(row)]
         previous = [start for start in previous if start is not None and start > slots.now_paris()]
-        if str(row["step"] or "") == "creneaux" and previous:
+        if str(row["step"] or "") == "creneaux" and previous and moment == known:
             labels = [self._label(start) for start in previous]
             return {
                 "ok": True,
                 "deja_proposes": True,
+                "moment": slots.MOMENT_LABELS.get(moment, ""),
                 "creneaux": [
                     {"id": slots.slot_id(s), "quand": label} for s, label in zip(previous, labels)
                 ],
             }
         booked = store.bookings_per_day(self.conn)
         available = self.google.available_slots(
-            count=3, booked_per_day=booked, taken=store.taken_slots(self.conn)
+            count=3,
+            booked_per_day=booked,
+            taken=store.taken_slots(self.conn),
+            moment=moment,
         )
         if not available:
             store.touch(self.conn, self.session_id, step="creneaux")
@@ -218,13 +267,20 @@ class ToolBox:
             self.events.append(
                 {
                     "type": "slots",
+                    "moment": slots.MOMENT_LABELS.get(moment, ""),
                     "slots": [
                         {"id": slots.slot_id(start), "label": label}
                         for start, label in zip(available, labels)
                     ],
                 }
             )
-        return {"ok": True, "creneaux": [{"id": slots.slot_id(s), "quand": label} for s, label in zip(available, labels)]}
+        return {
+            "ok": True,
+            "moment": slots.MOMENT_LABELS.get(moment, ""),
+            # Faux si la demi-journée demandée est saturée : le modèle doit le dire.
+            "moment_respecte": all(slots.matches_moment(start, moment) for start in available),
+            "creneaux": [{"id": slots.slot_id(s), "quand": label} for s, label in zip(available, labels)],
+        }
 
     def book_meeting(self, arguments: dict[str, Any]) -> dict[str, Any]:
         row = self._session()

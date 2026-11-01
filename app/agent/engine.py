@@ -92,8 +92,10 @@ def turn(
     messages.extend(pre)
     answer = ""
     pending = ""
-    # Choix du créneau + coordonnées : chemin serveur déterministe.
-    answer = _server_slot_turn(toolbox, store.get_session(conn, session_id), message)
+    # Demi-journée puis choix du créneau : chemins serveur déterministes.
+    answer = _server_moment_turn(toolbox, store.get_session(conn, session_id), message)
+    if not answer:
+        answer = _server_slot_turn(toolbox, store.get_session(conn, session_id), message)
     if answer:
         for event in toolbox.events:
             slots_shown = slots_shown or event.get("type") == "slots"
@@ -174,17 +176,32 @@ def turn(
         missing = store.missing_fields(store.session_fields(row_now))
         if len(missing) == 1 and guess and "?" not in guess and len(guess) <= 200:
             store.merge_fields(conn, session_id, {missing[0]: guess})
-            if not store.missing_fields(
-                store.session_fields(store.get_session(conn, session_id))
-            ):
-                toolbox.call("request_slots", {})
+            fields_now = store.session_fields(store.get_session(conn, session_id))
+            if not store.missing_fields(fields_now):
+                moment = slots.normalize_moment(fields_now.get("moment", ""))
+                if not moment:
+                    # Les créneaux attendent la demi-journée préférée.
+                    store.touch(conn, session_id, step="moment")
+                    toolbox.events.append(
+                        {
+                            "type": "moment",
+                            "question": "Vous préférez le matin ou l'après-midi ?",
+                            "options": [
+                                {"value": "matin", "label": "Le matin"},
+                                {"value": "apres-midi", "label": "L'après-midi"},
+                            ],
+                        }
+                    )
+                    answer = "Vous préférez le matin ou l'après-midi ?"
+                else:
+                    toolbox.call("request_slots", {"moment": moment})
                 opened = False
                 for event in toolbox.events:
                     slots_shown = slots_shown or event.get("type") == "slots"
                     opened = opened or event.get("type") == "slots"
                     yield event
                 toolbox.events = []
-                if not opened:
+                if moment and not opened:
                     answer = (
                         "Je n'ai pas de créneau en ligne ces prochains jours. "
                         "Écrivez à hello@sujeedesign.com et je vous propose un horaire."
@@ -221,7 +238,11 @@ def turn(
             elif had_slots:
                 answer = "Choisissez l'un des créneaux affichés pour réserver l'appel de 30 minutes."
             else:
-                answer = "Les créneaux viennent de s'afficher. Lequel vous convient ?"
+                moment = slots.normalize_moment(store.session_fields(row_now).get("moment", ""))
+                if moment:
+                    answer = f"Voici les créneaux {slots.MOMENTS[moment]}. Lequel vous convient ?"
+                else:
+                    answer = "Les créneaux viennent de s'afficher. Lequel vous convient ?"
         else:
             fields = store.session_fields(row_now) if row_now else {}
             if _fake_slots(answer) and not toolbox.booking:
@@ -540,6 +561,33 @@ def _guess_mode(message: str) -> str:
     return ""
 
 
+def _server_moment_turn(toolbox: ToolBox, row: Any, message: str) -> str:
+    """Demi-journée préférée : dès que le visiteur répond matin / après-midi,
+    le serveur ouvre les créneaux correspondants sans passer par le modèle.
+
+    Retourne la phrase à afficher (vide si le tour ne relève pas de ce chemin).
+    """
+    if row is None or str(row["step"] or "") != "moment":
+        return ""
+    folded = slots.normalize_moment(message)
+    if not folded:
+        return ""
+    if store.missing_fields(store.session_fields(row)):
+        return ""
+    result = toolbox.call("request_slots", {"moment": folded})
+    if not result.get("ok"):
+        return ""
+    if not result.get("moment_respecte", True):
+        return (
+            f"Rien de libre {slots.MOMENTS[folded]} dans les deux prochaines semaines. "
+            "Voici les créneaux les plus proches : lequel vous conviendrait ?"
+        )
+    return (
+        f"Parfait, voici les créneaux {slots.MOMENTS[folded]}. "
+        "Dites-moi lequel vous convient (ou cliquez dessus)."
+    )
+
+
 def _server_slot_turn(toolbox: ToolBox, row: Any, message: str) -> str:
     """Choix du créneau et coordonnées : piloté par le serveur, sans le modèle.
 
@@ -627,11 +675,38 @@ def _preflight(toolbox: ToolBox, row: Any, message: str) -> list[dict[str, Any]]
     fields = store.session_fields(row)
     if (
         not store.missing_fields(fields)
-        and step in ("accueil", "qualification", "recap", "coordonnees")
+        and step in ("accueil", "qualification", "recap", "coordonnees", "moment")
         and not store.session_proposals(row)
         and row["status"] != store.STATUS_BOOKED
+        # Une réponse « le matin » est traitée par _server_moment_turn juste après.
+        and not slots.normalize_moment(message)
     ):
-        result = toolbox.call("request_slots", {})
+        moment = slots.normalize_moment(fields.get("moment", ""))
+        if not moment:
+            # Une seule question avant les créneaux : matin ou après-midi.
+            store.touch(toolbox.conn, toolbox.session_id, step="moment")
+            toolbox.events.append(
+                {
+                    "type": "moment",
+                    "question": "Vous préférez le matin ou l'après-midi ?",
+                    "options": [
+                        {"value": "matin", "label": "Le matin"},
+                        {"value": "apres-midi", "label": "L'après-midi"},
+                    ],
+                }
+            )
+            return [
+                {
+                    "role": "system",
+                    "content": (
+                        "[consigne serveur] La qualification est complète. Demande en une seule "
+                        "question courte s'il préfère le matin ou l'après-midi. Ne propose aucun "
+                        "horaire, ne parle pas de créneaux déjà affichés : ils s'afficheront "
+                        "après sa réponse."
+                    ),
+                }
+            ]
+        result = toolbox.call("request_slots", {"moment": moment})
         if result.get("ok"):
             listed = " · ".join(
                 f"{item['quand']} [id {item['id']}]" for item in result.get("creneaux") or []

@@ -76,6 +76,7 @@ export default function ContactChat() {
   const [stepKey, setStepKey] = useState<string>("accueil");
   const [ratio, setRatio] = useState(0);
   const [slots, setSlots] = useState<Slot[]>([]);
+  const [moments, setMoments] = useState<string[]>([]);
   const [booking, setBooking] = useState<Booking | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [handoffOpen, setHandoffOpen] = useState(false);
@@ -172,6 +173,15 @@ export default function ContactChat() {
     }
     if (name === "slots" && Array.isArray(data.slots)) {
       setSlots(data.slots as Slot[]);
+      setMoments([]);
+      return;
+    }
+    if (name === "moment" && Array.isArray(data.options)) {
+      setMoments(
+        (data.options as { label?: string }[])
+          .map((option) => (typeof option.label === "string" ? option.label : ""))
+          .filter((label) => label.length > 0),
+      );
       return;
     }
     if (name === "booking") {
@@ -200,6 +210,7 @@ export default function ContactChat() {
       setError(null);
       setDraft("");
       setSlots([]);
+      setMoments([]);
       setPhase("streaming");
       setMessages((prev) => [...prev, { id: nextId(), role: "user", text }]);
 
@@ -447,6 +458,16 @@ export default function ContactChat() {
                 {PROJECT_TYPES.map((type) => (
                   <button key={type} type="button" onClick={() => void send(type)}>
                     {type}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {moments.length > 0 && (
+              <div className={styles.slots} aria-label="Disponibilité préférée">
+                {moments.map((label) => (
+                  <button key={label} type="button" onClick={() => void send(label)} disabled={busy}>
+                    {label}
                   </button>
                 ))}
               </div>

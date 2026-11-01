@@ -20,12 +20,15 @@ FIELD_LABELS = {
     "branding": "branding à réaliser",
     "phone": "téléphone",
     "call_mode": "point visio ou téléphonique",
+    "moment": "moment préféré (matin / après-midi)",
 }
 # Détails demandés au moment de la réservation (jamais avant les créneaux).
-DETAILS: tuple[str, ...] = ("branding", "phone", "call_mode")
+# `moment` est demandé juste avant les créneaux : c'est une préférence de
+# demi-journée, pas un point de qualification.
+DETAILS: tuple[str, ...] = ("moment", "branding", "phone", "call_mode")
 CALL_MODES = {"visio": "visio", "telephone": "téléphonique"}
 # `recap` et `coordonnees` restent déclarés pour les sessions déjà ouvertes en base.
-STEPS = ("accueil", "qualification", "coordonnees", "creneaux", "confirme")
+STEPS = ("accueil", "qualification", "coordonnees", "moment", "creneaux", "confirme")
 STATUS_OPEN = "ouverte"
 STATUS_QUALIFIED = "qualifiee"
 STATUS_BOOKED = "rdv"

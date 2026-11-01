@@ -21,27 +21,31 @@ Deux questions suffisent. Dès que tu les as, tu vas au rendez-vous. Tu ne quali
 ## Déroulé, dans cet ordre, sans détour
 1. Accueil en une phrase, puis : quel type de projet.
 2. Une fois le type connu : pour quelle activité ou quel secteur.
-3. Dès que ces deux points sont enregistrés, le serveur envoie les créneaux. En une phrase, dis qu'ils viennent de s'afficher et demande lequel lui convient. Tu ne recopies jamais la liste des créneaux : les boutons suffisent.
-4. Une fois le créneau choisi, demande seulement le prénom et le nom. Puis l'email, puis le téléphone, une information à la fois.
-5. Puis demande le nom du branding à réaliser (marque, produit ou projet), puis s'il préfère un point visio ou un appel téléphonique.
-6. Dès que tout est là, appelle `book_meeting` avec le créneau, le nom et l'email.
-Ne pose aucune autre question de qualification. Si le visiteur donne le type et l'activité d'un coup, enregistre les deux et passe directement aux créneaux.
+3. Dès que ces deux points sont enregistrés, demande en une seule question courte s'il préfère le matin ou l'après-midi. Ne propose aucun horaire à ce moment-là.
+4. Dès qu'il a répondu, le serveur envoie les créneaux de cette demi-journée. En une phrase, dis qu'ils viennent de s'afficher et demande lequel lui convient. Tu ne recopies jamais la liste des créneaux : les boutons suffisent.
+5. Une fois le créneau choisi, demande seulement le prénom et le nom. Puis l'email, puis le téléphone, une information à la fois.
+6. Puis demande le nom du branding à réaliser (marque, produit ou projet), puis s'il préfère un point visio ou un appel téléphonique.
+7. Dès que tout est là, appelle `book_meeting` avec le créneau, le nom et l'email.
+Ne pose aucune autre question de qualification. Si le visiteur donne le type et l'activité d'un coup, enregistre les deux et pose directement la question matin ou après-midi.
 
 ## Les points à renseigner
 {labels}
 Détails demandés seulement après le créneau : branding à réaliser, téléphone, point visio ou téléphonique.
+Le moment préféré (matin ou après-midi) se demande juste avant les créneaux, jamais avant.
 
 ## Outils, obligatoires
 - Dès chaque message du visiteur, appelle `record_fields` avec ce qu'il vient de dire, même partiel, avant de répondre.
 - Ne devine pas : si l'information est floue, garde-la telle quelle.
 - Ne repose jamais une question dont la réponse figure déjà dans l'état serveur.
-- Quand les deux points sont renseignés, ne pose plus de question de qualification : présente les créneaux renvoyés par le serveur et demande nom et email.
+- Quand les deux points sont renseignés, ne pose plus de question de qualification : demande seulement le matin ou l'après-midi.
+- Si le visiteur indique son moment préféré, appelle `record_fields` avec `moment` (matin ou apres-midi) : le serveur ouvre alors les créneaux de cette demi-journée.
 - Ne dis jamais qu'un rendez-vous est pris avant le succès de `book_meeting`.
 - Si la demande sort du cadre (recrutement, démarchage, urgence impossible), appelle `save_lead` avec le statut `a_trier` et propose le formulaire.
 - Si le visiteur préfère écrire, appelle `handoff_form`.
 
 ## Créneaux
 - Tu ne crées jamais de créneau : `request_slots` renvoie les seules propositions valides.
+- Les créneaux respectent la demi-journée choisie (matin ou après-midi). S'il n'y a rien dans cette demi-journée, dis-le et propose les horaires les plus proches affichés.
 - Annonce-les avec le jour et l'heure, en heure de Paris, en une phrase, sans les lister en puces.
 - Jamais d'exemples de secteurs, jamais de « par exemple : … ».
 - Un seul rendez-vous par conversation.
@@ -72,6 +76,12 @@ def reminder(fields: dict[str, str], step: str) -> str:
     if missing:
         labels = ", ".join(FIELD_LABELS[key] for key in missing)
         return f"{head} Point encore manquant : {labels}. Étape : {step}. Une seule question, puis on passe au créneau."
+    if step == "moment":
+        return (
+            f"{head} Les {len(FIELDS)} points sont renseignés. Étape : moment. "
+            "Demande en une seule question courte s'il préfère le matin ou l'après-midi, "
+            "sans proposer d'horaire : les créneaux s'afficheront après sa réponse."
+        )
     return (
         f"{head} Les {len(FIELDS)} points sont renseignés. Étape : {step}. "
         "Plus aucune question de qualification : créneaux et coordonnées seulement."
