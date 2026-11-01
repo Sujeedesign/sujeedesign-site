@@ -277,8 +277,9 @@ def _preflight(toolbox: ToolBox, row: Any, message: str) -> list[dict[str, Any]]
                     "role": "system",
                     "content": (
                         "[consigne serveur] Les deux points sont renseignés et les créneaux "
-                        "réels sont déjà affichés en boutons. Annonce-les en une phrase, sans "
-                        "markdown, et demande prénom, nom et email dans la même phrase. "
+                        "réels sont déjà affichés en boutons. En une phrase, dis qu'ils sont "
+                        "affichés, sans les recopier en liste, et demande lequel lui convient. "
+                        "Ne demande pas encore ses coordonnées et n'annonce aucune vérification. "
                         f"Aucune autre question. Créneaux : {listed}"
                     ),
                 }
