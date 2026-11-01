@@ -120,9 +120,10 @@ html.no-anim [data-stagger] > *{ opacity: 1 !important; transform: none !importa
 .case--photo{position:sticky;background:#0b0b0a;border:0;box-shadow:none}
 .case--photo .case__bg{
   position:absolute;
-  /* bordure neutralisée sur la carte photo : sinon elle reste visible en
-     liseré tout autour de l'image (overflow:hidden la ramène au padding box) */
-  inset:0;
+  /* Le fond déborde de 1px (clipé par overflow:hidden de la carte) : sans
+     ce dépassement, un liseré clair restait visible en haut et à gauche,
+     là où le recadrage 'cover' tombait sur une fraction de pixel. */
+  inset:-1px;
   z-index:0;
   background-size:cover;
   background-position:center;
@@ -130,24 +131,29 @@ html.no-anim [data-stagger] > *{ opacity: 1 !important; transform: none !importa
   border-radius:inherit;
   pointer-events:none;
 }
-/* Voile : une seule nappe régulière sur TOUTE la carte (aucun coin laissé
-   vif, sinon l'image paraît à moitié traitée), volontairement discrète.
-   Le bas est un peu plus dense pour porter le titre et le pied de carte ;
-   la lisibilité fine du texte reste assurée par les text-shadow plus bas. */
+/* Voile : une seule nappe régulière sur TOUTE la carte (aucune zone laissée
+   vive, sinon l'image paraît à moitié traitée). La nappe de base est
+   volontairement très légère : la photo doit garder sa luminosité naturelle
+   (100 %), le voile ne sert qu'à poser un léger filtre uniforme. Le bas
+   s'assombrit pour porter le titre et le pied de carte. */
 .case--photo .case__bg::after{
   content:"";
   position:absolute;
   inset:0;
   background:
     linear-gradient(to bottom,
-      rgba(8,8,7,.20) 0%,
-      rgba(8,8,7,.20) 44%,
-      rgba(8,8,7,.34) 70%,
-      rgba(8,8,7,.62) 100%),
+      rgba(8,8,7,.40) 0%,
+      rgba(8,8,7,.14) 72px,
+      rgba(8,8,7,0) 146px),
+    linear-gradient(to bottom,
+      rgba(8,8,7,.08) 0%,
+      rgba(8,8,7,.08) 48%,
+      rgba(8,8,7,.20) 74%,
+      rgba(8,8,7,.44) 100%),
     linear-gradient(96deg,
-      rgba(8,8,7,.16) 0%,
-      rgba(8,8,7,.08) 52%,
-      rgba(8,8,7,.10) 100%);
+      rgba(8,8,7,.06) 0%,
+      rgba(8,8,7,.02) 55%,
+      rgba(8,8,7,.04) 100%);
 }
 /* le visuel d'origine n'a plus de sens : la photo est le fond */
 .case--photo .case__visual{display:none!important}
@@ -171,10 +177,10 @@ html.no-anim [data-stagger] > *{ opacity: 1 !important; transform: none !importa
 @media (max-width:860px){
   .case--photo .case__bg::after{
     background:linear-gradient(to bottom,
-      rgba(8,8,7,.22) 0%,
-      rgba(8,8,7,.20) 46%,
-      rgba(8,8,7,.32) 74%,
-      rgba(8,8,7,.58) 100%);
+      rgba(8,8,7,.10) 0%,
+      rgba(8,8,7,.10) 50%,
+      rgba(8,8,7,.20) 76%,
+      rgba(8,8,7,.42) 100%);
   }
 }
 
