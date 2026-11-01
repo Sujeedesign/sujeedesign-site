@@ -20,6 +20,12 @@ const siteSchema = z.object({
     country: z.string().min(1),
   }),
   socials: z.array(z.object({ label: z.string(), href: z.string().url() })).min(1),
+  /**
+   * Fiche Google Business Profile. Entité `/g/11z_z7_hpr` dans le Knowledge
+   * Graph. Sert de `sameAs` sur le studio et sur la personne, sans apparaître
+   * dans le rail social du site.
+   */
+  googleProfile: z.string().url().optional(),
 });
 
 export const site = siteSchema.parse({
@@ -31,6 +37,7 @@ export const site = siteSchema.parse({
   founder: "Sujeepan Sabesan",
   areaServed: ["Cergy", "Paris", "Île-de-France"],
   address: { locality: "Cergy", region: "Île-de-France", country: "FR" },
+  googleProfile: "https://www.google.com/maps/search/?api=1&query=Sujeepan+Sabesan+Cergy",
   socials: [
     { label: "Behance", href: "https://www.behance.net/SujeepanSabesan" },
     { label: "Instagram design", href: "https://www.instagram.com/sujeepan.sabesan.design/" },
@@ -57,7 +64,10 @@ export function professionalServiceJsonLd() {
       addressRegion: site.address.region,
       addressCountry: site.address.country,
     },
-    sameAs: site.socials.map((social) => social.href),
+    sameAs: [
+      ...site.socials.map((social) => social.href),
+      ...(site.googleProfile ? [site.googleProfile] : []),
+    ],
     knowsAbout: [
       "Identité de marque",
       "Direction artistique",

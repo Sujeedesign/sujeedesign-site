@@ -51,6 +51,11 @@ export const serviceCatalog: Record<ServiceSlug, { name: string; serviceType: st
   "agents-ia": { name: "Agents IA", serviceType: "Automatisation et agents IA" },
 };
 
+/** Profils publics qui identifient le studio et la personne : réseaux et fiche Google. */
+function sameAsLinks() {
+  return [...site.socials.map((social) => social.href), ...(site.googleProfile ? [site.googleProfile] : [])];
+}
+
 /** Le studio, ancré sur `#studio`. */
 export function studioNode() {
   return {
@@ -69,7 +74,7 @@ export function studioNode() {
       addressRegion: site.address.region,
       addressCountry: site.address.country,
     },
-    sameAs: site.socials.map((social) => social.href),
+    sameAs: sameAsLinks(),
     knowsAbout: Object.values(serviceCatalog).map((service) => service.name),
   };
 }
@@ -84,7 +89,7 @@ export function personNode() {
     url: absoluteUrl(routes.aPropos),
     image: imageObject(ogImage("a-propos")),
     worksFor: { "@id": SCHEMA_IDS.studio },
-    sameAs: site.socials.map((social) => social.href),
+    sameAs: sameAsLinks(),
   };
 }
 
