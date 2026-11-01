@@ -13,11 +13,6 @@ from app.agent import tools as agent_tools
 FIELDS = {
     "project_type": "Refonte d'identité visuelle",
     "context": "Studio de yoga à Paris 11e, deux ans d'existence",
-    "objective": "Attirer une clientèle plus large et professionnaliser l'image",
-    "scope": "Logo, charte, cartes de visite, déclinaisons réseaux sociaux",
-    "deadline": "Avant mars prochain",
-    "decision_maker": "La fondatrice décide, associée consultée",
-    "budget": "Enveloppe autour de 3 000 euros",
 }
 
 
@@ -86,24 +81,18 @@ def test_parcours_complet_jusqu_au_rendez_vous(conn):
     llm = FakeLLM(
         [
             [
-                TurnOutput(text="Bonjour, de quoi avez-vous besoin ?", tool_calls=[_call("record_fields", **FIELDS)]),
-                TurnOutput(text="Merci, je regarde."),
+                TurnOutput(
+                    text="Merci. Pour quelle activité ?",
+                    tool_calls=[_call("record_fields", project_type="Refonte d'identité visuelle")],
+                ),
+                TurnOutput(text="Merci. Pour quelle activité ?"),
             ],
             [
                 TurnOutput(
-                    text="Je reformule.",
-                    tool_calls=[
-                        _call(
-                            "submit_recap",
-                            recap="Refonte d'identité pour un studio de yoga, livrables logo et charte, avant mars.",
-                        )
-                    ],
+                    text="Parfait, voici les créneaux.",
+                    tool_calls=[_call("record_fields", context="Studio de yoga à Paris 11e")],
                 ),
-                TurnOutput(text="Est-ce que cette reformulation est juste ?"),
-            ],
-            [
-                TurnOutput(text="Voici des créneaux.", tool_calls=[_call("request_slots")]),
-                TurnOutput(text="Quel créneau vous arrange ?"),
+                TurnOutput(text="Lequel vous convient ?"),
             ],
             [
                 TurnOutput(
@@ -124,15 +113,13 @@ def test_parcours_complet_jusqu_au_rendez_vous(conn):
 
     first = _collect(conn, session_id, "Bonjour, je veux refaire mon identité", llm, google, notifications.append)
     assert any(event["type"] == "progress" for event in first)
-    assert store.get_session(conn, session_id)["step"] == "recap"
+    assert not any(event["type"] == "slots" for event in first)
 
-    _collect(conn, session_id, "Oui c'est ça", llm, google, notifications.append)
-    third = _collect(conn, session_id, "Le premier me va", llm, google, notifications.append)
-    assert any(event["type"] == "slots" for event in third)
+    second = _collect(conn, session_id, "Studio de yoga à Paris 11e", llm, google, notifications.append)
+    assert any(event["type"] == "slots" for event in second)
     assert store.get_session(conn, session_id)["step"] == "creneaux"
 
-    events = _collect(conn, session_id, "Claire Martin, claire@example.com", llm, google, notifications.append)
-    types = [event["type"] for event in events]
+    events = _collect(conn, session_id, "Le premier me va, Claire Martin, claire@example.com", llm, google, notifications.append)
     assert any(event["type"] == "booking" for event in events)
 
     session = store.get_session(conn, session_id)
@@ -162,8 +149,7 @@ def test_creneaux_refuses_si_qualification_incomplete(conn):
     toolbox = agent_tools.ToolBox(conn, session_id, google)
     result = toolbox.request_slots({})
     assert result["ok"] is False
-    assert "nature du projet" not in result["error"] or True
-    assert "contexte et activité" in result["error"]
+    assert "activité / secteur" in result["error"]
     assert google.events == []
 
 
@@ -222,23 +208,16 @@ def test_limite_de_tours(conn):
     assert events[0]["type"] == "error"
 
 
-def test_validation_du_recap_declenche_les_creneaux(conn):
-    """« Oui » sur le récapitulatif doit lancer request_slots sans dépendre du modèle."""
+def test_qualification_complete_ouvre_les_creneaux_sans_le_modele(conn):
+    """Type + activité connus : le serveur ouvre les créneaux sans récapitulatif."""
     start = slots.candidates()[0]
     google = FakeGoogle(available=[start])
     session_id = engine.prepare_session(conn)
     store.merge_fields(conn, session_id, FIELDS)
-    store.touch(
-        conn,
-        session_id,
-        step="recap",
-        recap="Refonte d'identité pour un studio de yoga, avant mars.",
-        recap_ok=0,
-    )
-    store.add_message(conn, session_id, "assistant", "Est-ce bien cela ?")
+    store.add_message(conn, session_id, "assistant", "Pour quelle activité ?")
 
     llm = FakeLLM([[TurnOutput(text="Parfait, voici les créneaux.")]])
-    events = _collect(conn, session_id, "Oui, c'est exact.", llm, google)
+    events = _collect(conn, session_id, "Studio de yoga à Paris 11e", llm, google)
 
     kinds = [event.get("type") for event in events]
     assert "slots" in kinds

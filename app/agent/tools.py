@@ -28,11 +28,7 @@ TOOL_SPECS: list[dict[str, Any]] = [
                 "type": "object",
                 "properties": {
                     "project_type": {"type": "string", "description": "Nature du projet"},
-                    "context": {"type": "string", "description": "Contexte, activité, existant"},
-                    "objective": {"type": "string", "description": "Objectif visé"},
-                    "scope": {"type": "string", "description": "Périmètre et livrables"},
-                    "deadline": {"type": "string", "description": "Échéance souhaitée"},
-                    "decision_maker": {"type": "string", "description": "Qui décide et comment c'est validé"},
+                    "context": {"type": "string", "description": "Activité, secteur, contexte"},
                 },
             },
         },
@@ -40,20 +36,8 @@ TOOL_SPECS: list[dict[str, Any]] = [
     {
         "type": "function",
         "function": {
-            "name": "submit_recap",
-            "description": "Enregistre la reformulation du besoin avant validation par le visiteur.",
-            "parameters": {
-                "type": "object",
-                "properties": {"recap": {"type": "string", "description": "Reformulation en 3 à 5 lignes"}},
-                "required": ["recap"],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
             "name": "request_slots",
-            "description": "Demande les créneaux réellement disponibles. À appeler seulement après validation de la reformulation.",
+            "description": "Demande les créneaux réellement disponibles. Appelé automatiquement dès que la qualification est complète.",
             "parameters": {"type": "object", "properties": {}},
         },
     },
@@ -143,7 +127,6 @@ class ToolBox:
     def call(self, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         handler = {
             "record_fields": self.record_fields,
-            "submit_recap": self.submit_recap,
             "request_slots": self.request_slots,
             "book_meeting": self.book_meeting,
             "save_lead": self.save_lead,
@@ -163,8 +146,6 @@ class ToolBox:
         payload = arguments.get("fields") if isinstance(arguments.get("fields"), dict) else arguments
         fields = store.merge_fields(self.conn, self.session_id, payload)
         missing = store.missing_fields(fields)
-        if not missing and self._session()["step"] in ("accueil", "qualification"):
-            store.touch(self.conn, self.session_id, step="recap")
         self.events.append(
             {
                 "type": "progress",
@@ -173,20 +154,28 @@ class ToolBox:
                 "missing": missing,
             }
         )
-        return {"ok": True, "renseignes": [store.FIELD_LABELS[k] for k in fields], "manquants": [store.FIELD_LABELS[k] for k in missing]}
-
-    def submit_recap(self, arguments: dict[str, Any]) -> dict[str, Any]:
-        fields = self._fields()
-        missing = store.missing_fields(fields)
-        if missing:
-            return self._error(
-                "Il manque encore : " + ", ".join(store.FIELD_LABELS[k] for k in missing) + ". Pose la question."
-            )
-        recap = _slug(arguments.get("recap", ""))
-        if len(recap) < 20:
-            return self._error("Reformulation trop courte. Reprends le besoin en 3 à 5 lignes.")
-        store.touch(self.conn, self.session_id, recap=recap, step="recap", recap_ok=0)
-        return {"ok": True, "consigne": "Affiche la reformulation et demande une validation explicite."}
+        result: dict[str, Any] = {
+            "ok": True,
+            "renseignes": [store.FIELD_LABELS[k] for k in fields],
+            "manquants": [store.FIELD_LABELS[k] for k in missing],
+        }
+        # Qualification complète : le serveur ouvre les créneaux sans attendre.
+        # Pas de récapitulatif, pas de validation à demander : on va au rendez-vous.
+        if not missing:
+            row = self._session()
+            if row["status"] != store.STATUS_BOOKED and not store.session_proposals(row):
+                opened = self.request_slots({})
+                result["slots"] = opened.get("creneaux", [])
+                if opened.get("ok"):
+                    result["consigne"] = (
+                        "Les créneaux réels sont déjà affichés en boutons. Annonce-les en une phrase "
+                        "et demande prénom, nom et email en une seule phrase. Ne pose aucune autre question."
+                    )
+                else:
+                    result["consigne"] = (
+                        "Créneaux indisponibles. Propose au visiteur d'écrire via le formulaire et appelle handoff_form."
+                    )
+        return result
 
     def request_slots(self, arguments: dict[str, Any]) -> dict[str, Any]:
         row = self._session()
@@ -197,8 +186,6 @@ class ToolBox:
                 "Créneaux indisponibles tant que ces points manquent : "
                 + ", ".join(store.FIELD_LABELS[k] for k in missing)
             )
-        if not row["recap"]:
-            return self._error("Appelle d'abord submit_recap avec la reformulation.")
         previous = [slots.parse_slot(item) for item in store.session_proposals(row)]
         previous = [start for start in previous if start is not None and start > slots.now_paris()]
         if str(row["step"] or "") == "creneaux" and previous:
@@ -224,7 +211,7 @@ class ToolBox:
             count=3, booked_per_day=booked, taken=store.taken_slots(self.conn)
         )
         if not available:
-            store.touch(self.conn, self.session_id, step="recap")
+            store.touch(self.conn, self.session_id, step="creneaux")
             return self._error(
                 "Aucun créneau libre dans les deux prochaines semaines. Propose au visiteur d'écrire via le formulaire et appelle handoff_form."
             )
@@ -247,8 +234,8 @@ class ToolBox:
         if row["status"] == store.STATUS_BOOKED:
             return self._error("Un rendez-vous est déjà pris dans cette conversation.")
         fields = store.session_fields(row)
-        if len(store.missing_fields(fields)) or not row["recap_ok"]:
-            return self._error("La qualification n'est pas terminée ou la reformulation n'est pas validée.")
+        if len(store.missing_fields(fields)):
+            return self._error("La qualification n'est pas terminée. Reprends les points manquants.")
         start = slots.parse_slot(str(arguments.get("slot_start", "")))
         if start is None:
             return self._error("Créneau illisible. Utilise l'identifiant renvoyé par request_slots.")
@@ -371,7 +358,7 @@ class ToolBox:
 
     def handoff_form(self, arguments: dict[str, Any]) -> dict[str, Any]:
         self.handed_off = True
-        store.touch(self.conn, self.session_id, step="recap", status=store.STATUS_FORM)
+        store.touch(self.conn, self.session_id, step="coordonnees", status=store.STATUS_FORM)
         self.events.append({"type": "handoff", "reason": _slug(arguments.get("reason", ""))})
         return {"ok": True, "consigne": "Dis au visiteur que le formulaire s'ouvre sous le chat et qu'il peut y détailler son besoin."}
 

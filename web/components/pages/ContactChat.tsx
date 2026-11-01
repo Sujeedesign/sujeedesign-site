@@ -18,8 +18,7 @@ type LeadField = { name: string; email: string; phone: string; project_type: str
 
 const STEPS = [
   { key: "accueil", label: "Projet" },
-  { key: "qualification", label: "Contexte" },
-  { key: "recap", label: "Reformulation" },
+  { key: "qualification", label: "Activité" },
   { key: "creneaux", label: "Créneau" },
   { key: "confirme", label: "Confirmé" },
 ] as const;
@@ -34,7 +33,7 @@ const PROJECT_TYPES = [
 ];
 
 const WELCOME =
-  "Bonjour, je suis l'assistant de Sujee. Dites-moi en quelques mots ce que vous avez en tête : on cadre le besoin ensemble, puis je vous propose un créneau d'appel.";
+  "Bonjour, je suis l'assistant de Sujee. Deux questions suffisent, puis je vous ouvre un créneau d'appel de 30 minutes. Quel type de projet avez-vous en tête ?";
 
 const STORAGE_KEY = "sjd-contact-v1";
 
@@ -433,6 +432,16 @@ export default function ContactChat() {
                   <i />
                   <i />
                 </span>
+              </div>
+            )}
+
+            {messages.length === 1 && phase === "idle" && !booking && (
+              <div className={styles.slots} aria-label="Types de projet fréquents">
+                {PROJECT_TYPES.map((type) => (
+                  <button key={type} type="button" onClick={() => void send(type)}>
+                    {type}
+                  </button>
+                ))}
               </div>
             )}
 

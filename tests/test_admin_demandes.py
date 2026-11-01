@@ -58,7 +58,7 @@ def test_demandes_liste_les_leads(client: TestClient, conn: sqlite3.Connection) 
     assert "camille@exemple.fr" in html
     assert "DEM-2026-0001" in html
     assert "Refonte d&#39;identité pour un studio de yoga." in html or "Refonte d'identité" in html
-    assert "nature du projet" in html
+    assert "type de projet" in html
     assert "lundi 2 novembre à 09:00" in html
 
 

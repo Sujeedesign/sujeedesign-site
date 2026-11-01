@@ -8,23 +8,18 @@ import sqlite3
 from datetime import date, datetime, timedelta
 from typing import Any
 
+# Parcours volontairement court : deux points suffisent pour ouvrir un créneau.
+# Le reste (décideur, budget, délais, périmètre) se traite en réunion.
 FIELDS: tuple[str, ...] = (
     "project_type",
     "context",
-    "objective",
-    "scope",
-    "deadline",
-    "decision_maker",
 )
 FIELD_LABELS = {
-    "project_type": "nature du projet",
-    "context": "contexte et activité",
-    "objective": "objectif",
-    "scope": "périmètre et livrables",
-    "deadline": "échéance",
-    "decision_maker": "décideur et validation",
+    "project_type": "type de projet",
+    "context": "activité / secteur",
 }
-STEPS = ("accueil", "qualification", "recap", "coordonnees", "creneaux", "confirme")
+# `recap` et `coordonnees` restent déclarés pour les sessions déjà ouvertes en base.
+STEPS = ("accueil", "qualification", "coordonnees", "creneaux", "confirme")
 STATUS_OPEN = "ouverte"
 STATUS_QUALIFIED = "qualifiee"
 STATUS_BOOKED = "rdv"

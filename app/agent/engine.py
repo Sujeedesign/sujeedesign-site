@@ -257,31 +257,32 @@ def _preflight(toolbox: ToolBox, row: Any, message: str) -> list[dict[str, Any]]
     if row is None:
         return []
     step = str(row["step"] or "")
-    recap_ok = int(row["recap_ok"] or 0)
 
-    if step == "recap" and not recap_ok and _VALIDATION.match(message):
+    # Qualification complète mais créneaux pas encore ouverts (le modèle a
+    # oublié de les demander) : le serveur les ouvre lui-même.
+    fields = store.session_fields(row)
+    if (
+        not store.missing_fields(fields)
+        and step in ("accueil", "qualification", "recap", "coordonnees")
+        and not store.session_proposals(row)
+        and row["status"] != store.STATUS_BOOKED
+    ):
         result = toolbox.call("request_slots", {})
         if result.get("ok"):
-            listed = " · ".join(f"{item['quand']} [id {item['id']}]" for item in result.get("creneaux") or [])
+            listed = " · ".join(
+                f"{item['quand']} [id {item['id']}]" for item in result.get("creneaux") or []
+            )
             return [
                 {
                     "role": "system",
                     "content": (
-                        "[consigne serveur] Le visiteur valide la reformulation. Les créneaux "
-                        "réels sont déjà affichés sous forme de boutons. Annonce-les en une "
-                        f"phrase, sans markdown, et demande lequel lui convient. Créneaux : {listed}"
+                        "[consigne serveur] Les deux points sont renseignés et les créneaux "
+                        "réels sont déjà affichés en boutons. Annonce-les en une phrase, sans "
+                        "markdown, et demande prénom, nom et email dans la même phrase. "
+                        f"Aucune autre question. Créneaux : {listed}"
                     ),
                 }
             ]
-        return [
-            {
-                "role": "system",
-                "content": (
-                    "[consigne serveur] Les créneaux sont indisponibles : "
-                    f"{result.get('error') or 'agenda injoignable'}. Propose le formulaire via handoff_form."
-                ),
-            }
-        ]
 
     if step == "creneaux":
         choice = _pick_slot(row, message)

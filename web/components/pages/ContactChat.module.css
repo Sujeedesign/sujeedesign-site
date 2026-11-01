@@ -935,11 +935,11 @@
   color: var(--accent);
 }
 
-/* Desktop : la console tient toute la colonne du héro (plus de vide sous
-   le panneau quand la scène est en pleine hauteur). */
+/* Desktop : console à hauteur stable. La boîte ne grandit plus au fil des
+   échanges : le fil défile à l'intérieur, le cadre garde sa taille. */
 @media (min-width: 1025px) {
   .shell {
-    align-items: stretch;
+    align-items: start;
   }
 
   .panel {
@@ -948,7 +948,8 @@
   }
 
   .frame {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
+    height: clamp(480px, 60svh, 640px);
   }
 
   .log {
@@ -964,6 +965,17 @@
   .shell {
     grid-template-columns: 1fr;
     gap: 36px;
+  }
+
+  /* Même sur tablette la console garde une hauteur stable. */
+  .frame {
+    height: min(72svh, 600px);
+  }
+
+  .log {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
   }
 
   .brief {
@@ -994,11 +1006,14 @@
 
   .frame {
     border-radius: 0;
+    height: min(76svh, 560px);
   }
 
   .log {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
     padding: 18px 15px 4px;
-    max-height: 44vh;
   }
 
   .composer,

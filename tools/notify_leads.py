@@ -22,14 +22,10 @@ import urllib.request
 
 HERMES = "/opt/hermes/bin/hermes"
 
+# Seuls deux points sont collectés dans le chat ; le reste se traite en réunion.
 LABELS = [
-    ("project_type", "Projet"),
-    ("context", "Contexte"),
-    ("goal", "Objectif"),
-    ("scope", "Périmètre"),
-    ("deadline", "Échéance"),
-    ("decision_maker", "Décideur"),
-    ("budget", "Enveloppe"),
+    ("project_type", "Type de projet"),
+    ("context", "Activité"),
 ]
 
 
