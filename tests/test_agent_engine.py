@@ -512,6 +512,45 @@ def test_creneau_avec_heure_absente_n_est_pas_remplace_par_un_autre(conn):
     assert engine._pick_slot(row, "jeudi 5 novembre à 15h00") is None
 
 
+def test_le_creneau_est_not_e_puis_une_seule_question_le_nom(conn):
+    """Après le créneau, une seule demande : le nom. Pas d'email ni de téléphone."""
+    google = FakeGoogle(available=slots.candidates()[:3])
+    session_id = _session_avec_creneaux(conn, google)
+    start = _creneau_unique(google.available)
+
+    events = _collect(
+        conn, session_id, f"le {start.day} à {start.hour:02d}h{start.minute:02d}", FakeLLM([]), google
+    )
+    message = "".join(e["text"] for e in events if e.get("type") == "delta")
+    assert "noté" in message.lower()
+    assert message.count("?") == 1
+    assert "nom" in message.lower()
+    assert "email" not in message.lower()
+    assert "téléphone" not in message.lower()
+
+
+def test_details_demandes_un_par_un_jusqu_au_bout(conn):
+    """Nom, email, téléphone, branding, format : une question par message."""
+    google = FakeGoogle(available=slots.candidates()[:3])
+    session_id = _session_avec_creneaux(conn, google)
+    start = _creneau_unique(google.available)
+
+    _collect(conn, session_id, f"le {start.day} à {start.hour:02d}h{start.minute:02d}", FakeLLM([]), google)
+
+    tours = [
+        ("Claire Martin", "email"),
+        ("claire@example.com", "téléphone"),
+        ("06 12 34 56 78", "branding"),
+        ("Vaasam", "visio"),
+    ]
+    for texte, attendu in tours:
+        events = _collect(conn, session_id, texte, FakeLLM([]), google)
+        message = "".join(e["text"] for e in events if e.get("type") == "delta")
+        assert message.count("?") == 1, message
+        assert attendu in message.lower(), (texte, message)
+        assert not google.events
+
+
 def test_extraction_des_details_dans_une_phrase_condensee():
     phrase = "Claire Martin, claire@example.com, 06 12 34 56 78, branding Le Fournil, en visio"
     assert engine._guess_name(phrase) == "Claire Martin"

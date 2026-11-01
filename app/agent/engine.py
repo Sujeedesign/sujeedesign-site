@@ -561,6 +561,10 @@ def _server_slot_turn(toolbox: ToolBox, row: Any, message: str) -> str:
     if not branding and name and email and phone:
         branding = _guess_branding(message)
 
+    # Le créneau vient-il d'être choisi dans ce message ? Sert à ne pas répéter
+    # « C'est noté pour … » à chaque tour de collecte.
+    chosen_now = choice is not None
+    lead_in = ""
     if choice is None:
         # Pas de créneau dans ce message : c'est la suite des coordonnées.
         if not pending:
@@ -568,6 +572,8 @@ def _server_slot_turn(toolbox: ToolBox, row: Any, message: str) -> str:
         choice = _choice_by_id(row, pending)
         if choice is None:
             return ""
+    else:
+        lead_in = f"C'est noté pour {choice['label']}. "
 
     store.set_chosen(toolbox.conn, toolbox.session_id, choice["id"])
     store.set_contact(toolbox.conn, toolbox.session_id, name=name, email=email)
@@ -596,17 +602,12 @@ def _server_slot_turn(toolbox: ToolBox, row: Any, message: str) -> str:
                 return "Ce créneau vient d'être pris. Choisissez-en un autre parmi ceux affichés."
     if not name or not email:
         if email and not name:
-            return f"C'est noté pour {choice['label']}. À quel nom dois-je réserver l'appel ?"
+            return "À quel nom dois-je réserver l'appel ?"
         if name and not email:
             prenom = name.split()[0]
-            return (
-                f"Merci {prenom}, c'est noté pour {choice['label']}. "
-                "Il me manque juste votre adresse email pour envoyer l'invitation."
-            )
-        return (
-            f"C'est noté pour {choice['label']}. "
-            "Votre prénom et nom, votre email, et un numéro de téléphone pour l'appel ?"
-        )
+            lead = f"Merci {prenom}, c'est noté pour {choice['label']}. " if chosen_now else f"Merci {prenom}. "
+            return lead + "Quelle est votre adresse email, pour l'invitation ?"
+        return f"{lead_in}Quel est votre prénom et nom ?"
     prenom = name.split()[0]
     if not phone:
         return f"Merci {prenom}. Votre numéro de téléphone, pour que Raj vous rappelle ?"
@@ -661,7 +662,7 @@ def _preflight(toolbox: ToolBox, row: Any, message: str) -> list[dict[str, Any]]
             details.append(f"Téléphone détecté : {phone.group(0)}.")
         details.append(
             "Si tu as son nom et son email, appelle book_meeting avec slot_start="
-            f"{choice['id']}. Sinon demande son nom et son email en une seule phrase."
+            f"{choice['id']}. Sinon demande uniquement son prénom et son nom, une seule question."
         )
         return [{"role": "system", "content": "[consigne serveur] " + " ".join(details)}]
     return []
