@@ -1060,47 +1060,21 @@
 }
 
 /* Formulaire de contact ------------------------------------------------ */
-/* Le cadre garde sa hauteur stable : quand le formulaire s'ouvre, c'est la
-   zone du formulaire qui défile (le fil est réduit), sinon overflow:hidden
-   rognait le bas du formulaire et le bouton d'envoi était inatteignable. */
+/* Quand le formulaire est déplié, le cadre prend sa hauteur naturelle (c'est
+   la page qui défile) : le formulaire n'est plus rogné et le bouton d'envoi
+   reste toujours atteignable, sur desktop comme sur mobile. */
+.frameForm {
+  height: auto;
+  max-height: none;
+}
+
 .frameForm .log {
-  flex: 0 1 auto;
-  max-height: 26%;
+  flex: 0 0 auto;
+  max-height: 140px;
   overflow-y: auto;
 }
 
 .frameForm .handoff {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(10, 10, 11, 0.18) transparent;
-  padding-bottom: 4px;
-}
-
-.frameForm .handoff::-webkit-scrollbar {
-  width: 6px;
-}
-
-.frameForm .handoff::-webkit-scrollbar-thumb {
-  background: rgba(10, 10, 11, 0.16);
-  border-radius: 3px;
-}
-
-/* Sur mobile et tablette la page défile déjà : le formulaire ouvert prend sa
-   hauteur naturelle, le cadre ne le rogne plus. */
-@media (max-width: 1024px) {
-  .frameForm {
-    height: auto;
-    max-height: none;
-  }
-
-  .frameForm .handoff {
-    overflow-y: visible;
-  }
-
-  .frameForm .log {
-    max-height: 220px;
-  }
+  flex: 0 0 auto;
+  overflow: visible;
 }
