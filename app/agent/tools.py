@@ -194,15 +194,6 @@ class ToolBox:
         previous = [start for start in previous if start is not None and start > slots.now_paris()]
         if str(row["step"] or "") == "creneaux" and previous:
             labels = [self._label(start) for start in previous]
-            self.events.append(
-                {
-                    "type": "slots",
-                    "slots": [
-                        {"id": slots.slot_id(start), "label": label}
-                        for start, label in zip(previous, labels)
-                    ],
-                }
-            )
             return {
                 "ok": True,
                 "deja_proposes": True,
@@ -261,6 +252,7 @@ class ToolBox:
 
         if not store.reserve_slot(self.conn, slot_start, self.session_id, email):
             store.set_proposals(self.conn, self.session_id, [])
+            self.slots_emitted = False
             fresh = self.request_slots({})
             return {
                 "ok": False,

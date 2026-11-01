@@ -358,3 +358,35 @@ def test_horaires_inventes_remplaces_par_la_question_utile(conn):
     message = "".join(e["text"] for e in events if e.get("type") == "delta")
     assert "septembre" not in message
     assert "secteur" in message
+
+
+def test_creneaux_deja_affiches_ne_sont_pas_rediffuses(conn):
+    google = FakeGoogle(available=[slots.candidates()[0]])
+    session_id = engine.prepare_session(conn)
+    store.merge_fields(
+        conn,
+        session_id,
+        {"project_type": "Identité de marque", "context": "Studio de yoga"},
+    )
+    store.touch(conn, session_id, step="qualification")
+    llm0 = FakeLLM(
+        [
+            [
+                TurnOutput(text="", tool_calls=[_call("request_slots", **{})]),
+                TurnOutput(text="Voici les créneaux."),
+            ]
+        ]
+    )
+    first = _collect(conn, session_id, "Studio de yoga à Paris", llm0, google)
+    assert "slots" in [e.get("type") for e in first]
+
+    llm = FakeLLM(
+        [
+            [
+                TurnOutput(text="", tool_calls=[_call("request_slots", **{})]),
+                TurnOutput(text="Choisissez un créneau affiché."),
+            ]
+        ]
+    )
+    second = _collect(conn, session_id, "merci", llm, google)
+    assert "slots" not in [e.get("type") for e in second]
