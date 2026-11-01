@@ -390,3 +390,95 @@ def test_creneaux_deja_affiches_ne_sont_pas_rediffuses(conn):
     )
     second = _collect(conn, session_id, "merci", llm, google)
     assert "slots" not in [e.get("type") for e in second]
+
+
+def _session_avec_creneaux(conn, google):
+    """Session arrivée à l'écran des créneaux, comme en production."""
+    session_id = engine.prepare_session(conn)
+    store.merge_fields(
+        conn,
+        session_id,
+        {"project_type": "Identité de marque", "context": "Alimentation générale"},
+    )
+    store.touch(conn, session_id, step="creneaux")
+    store.set_proposals(conn, session_id, [slots.slot_id(s) for s in google.available])
+    return session_id
+
+
+def _creneau_unique(starts):
+    """Un créneau dont le couple (jour du mois, heure) ne prête à confusion avec aucun autre."""
+    for start in starts:
+        same = [
+            other
+            for other in starts
+            if other is not start and (other.day, other.hour, other.minute) == (start.day, start.hour, start.minute)
+        ]
+        if not same:
+            return start
+    raise AssertionError("créneaux trop proches pour le test")
+
+
+def test_creneau_saisi_en_texte_est_reconnu_et_la_reservation_aboutit(conn):
+    """Le visiteur écrit « mercredi 4 novembre à 09h00 » au lieu de cliquer : ça doit réserver."""
+    google = FakeGoogle(available=slots.candidates()[:3])
+    session_id = _session_avec_creneaux(conn, google)
+    start = _creneau_unique(google.available)
+    jour = engine._WEEKDAYS[start.weekday()]
+    texte = (
+        f"{jour} {start.day} novembre à {start.hour:02d}h{start.minute:02d}, "
+        "Claire Martin, claire@example.com"
+    )
+
+    llm = FakeLLM([])
+    events = _collect(conn, session_id, texte, llm, google)
+
+    message = "".join(e["text"] for e in events if e.get("type") == "delta")
+    assert llm.calls == 0
+    assert "Choisissez l'un des créneaux affichés" not in message
+    assert "réservé" in message.lower()
+    assert any(e.get("type") == "booking" for e in events)
+    assert store.get_session(conn, session_id)["status"] == store.STATUS_BOOKED
+    assert google.events and google.events[0]["email"] == "claire@example.com"
+
+
+def test_creneau_saisi_puis_coordonnees_au_tour_suivant(conn):
+    """Texte seul d'abord, coordonnées ensuite : le créneau reste retenu."""
+    google = FakeGoogle(available=slots.candidates()[:3])
+    session_id = _session_avec_creneaux(conn, google)
+    start = _creneau_unique(google.available)
+
+    premier = _collect(
+        conn,
+        session_id,
+        f"le {start.day} à {start.hour:02d}h{start.minute:02d}",
+        FakeLLM([]),
+        google,
+    )
+    message = "".join(e["text"] for e in premier if e.get("type") == "delta")
+    assert "noté" in message.lower()
+    assert store.session_chosen(store.get_session(conn, session_id)) == slots.slot_id(start)
+    assert not google.events
+
+    second = _collect(conn, session_id, "Claire Martin, claire@example.com", FakeLLM([]), google)
+    assert any(e.get("type") == "booking" for e in second)
+    assert store.get_session(conn, session_id)["status"] == store.STATUS_BOOKED
+
+
+def test_heure_seule_suffit_quand_un_seul_creneau_correspond(conn):
+    """« 09h00 » sans le jour : on retient l'unique créneau de cette heure."""
+    google = FakeGoogle(available=slots.candidates()[:3])
+    session_id = _session_avec_creneaux(conn, google)
+    heures = [(s.hour, s.minute) for s in google.available]
+    start = next(
+        s for s in google.available if heures.count((s.hour, s.minute)) == 1
+    )
+
+    events = _collect(
+        conn,
+        session_id,
+        f"{start.hour:02d}h{start.minute:02d}",
+        FakeLLM([]),
+        google,
+    )
+    assert "Choisissez l'un des créneaux" not in "".join(e["text"] for e in events if e.get("type") == "delta")
+    assert store.session_chosen(store.get_session(conn, session_id)) == slots.slot_id(start)

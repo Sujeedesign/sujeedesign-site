@@ -63,6 +63,9 @@ def touch(conn: sqlite3.Connection, session_id: str, **values: Any) -> None:
         "recap",
         "recap_ok",
         "proposals",
+        "chosen_slot",
+        "contact_name",
+        "contact_email",
         "consent",
         "turns",
         "tokens",
@@ -102,6 +105,36 @@ def session_proposals(session: sqlite3.Row | dict[str, Any] | None) -> list[str]
 
 def set_proposals(conn: sqlite3.Connection, session_id: str, starts: list[str]) -> None:
     touch(conn, session_id, proposals=json.dumps(list(starts), ensure_ascii=False))
+
+
+def session_chosen(session: sqlite3.Row | dict[str, Any] | None) -> str:
+    """Créneau déjà retenu par le visiteur (identifiant `start`), ou chaîne vide."""
+    if session is None:
+        return ""
+    raw = session["chosen_slot"] if isinstance(session, sqlite3.Row) else session.get("chosen_slot", "")
+    return str(raw or "").strip()
+
+
+def set_chosen(conn: sqlite3.Connection, session_id: str, start: str) -> None:
+    touch(conn, session_id, chosen_slot=str(start or "").strip())
+
+
+def session_contact(session: sqlite3.Row | dict[str, Any] | None) -> tuple[str, str]:
+    """Nom et email déjà donnés par le visiteur pendant le choix du créneau."""
+    if session is None:
+        return "", ""
+    get = (lambda k: session[k]) if isinstance(session, sqlite3.Row) else session.get
+    return str(get("contact_name") or "").strip(), str(get("contact_email") or "").strip()
+
+
+def set_contact(conn: sqlite3.Connection, session_id: str, name: str = "", email: str = "") -> None:
+    values: dict[str, Any] = {}
+    if name:
+        values["contact_name"] = " ".join(name.split())[:120]
+    if email:
+        values["contact_email"] = email.strip()[:200]
+    if values:
+        touch(conn, session_id, **values)
 
 
 def merge_fields(conn: sqlite3.Connection, session_id: str, learned: dict[str, Any]) -> dict[str, str]:

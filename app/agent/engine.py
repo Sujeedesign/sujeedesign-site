@@ -11,6 +11,7 @@ import json
 import re
 import sqlite3
 import time
+from datetime import datetime
 from typing import Any, Iterator
 
 from . import slots, store
@@ -91,8 +92,15 @@ def turn(
     messages.extend(pre)
     answer = ""
     pending = ""
+    # Choix du créneau + coordonnées : chemin serveur déterministe.
+    answer = _server_slot_turn(toolbox, store.get_session(conn, session_id), message)
+    if answer:
+        for event in toolbox.events:
+            slots_shown = slots_shown or event.get("type") == "slots"
+            yield event
+        toolbox.events = []
 
-    for round_index in range(MAX_TOOL_ROUNDS):
+    for round_index in (() if answer else range(MAX_TOOL_ROUNDS)):
         output: TurnOutput | None = None
         turn_text = ""
         try:
@@ -208,13 +216,15 @@ def turn(
         row_now = store.get_session(conn, session_id)
         if slots_shown and not toolbox.booking and row_now and row_now["step"] == "creneaux":
             # Les boutons font le travail : une phrase suffit, jamais la liste.
-            if had_slots:
+            if store.session_chosen(row_now):
+                answer = _one_question(answer)
+            elif had_slots:
                 answer = "Choisissez l'un des créneaux affichés pour réserver l'appel de 30 minutes."
             else:
                 answer = "Les créneaux viennent de s'afficher. Lequel vous convient ?"
         else:
             fields = store.session_fields(row_now) if row_now else {}
-            if _fake_slots(answer):
+            if _fake_slots(answer) and not toolbox.booking:
                 # Le modèle invente parfois des horaires alors que rien n'est affiché.
                 answer = _question_for(store.missing_fields(fields))
             answer = _one_question(answer)
@@ -314,7 +324,139 @@ def _pick_slot(row: Any, message: str) -> dict[str, str] | None:
             )
             if index is not None and index < len(proposals):
                 return proposals[index]
+    # Texte libre approximatif (« mercredi 4 novembre à 09h00 ») : on compare
+    # jour de la semaine, quantième et heure du créneau.
+    scored: list[tuple[int, dict[str, str]]] = []
+    for proposal in proposals:
+        start = slots.parse_slot(proposal["id"])
+        if start is None:
+            continue
+        score = _slot_mention(start, said)
+        if score:
+            scored.append((score, proposal))
+    if scored:
+        scored.sort(key=lambda item: item[0], reverse=True)
+        best = scored[0][0]
+        winners = [item for item in scored if item[0] == best]
+        if best >= 3 and len(winners) == 1:
+            return winners[0][1]
     return None
+
+
+_WEEKDAYS = ("lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche")
+
+
+def _slot_mention(start: datetime, said: str) -> int:
+    """Score de correspondance entre un créneau et une phrase libre."""
+    score = 0
+    if _WEEKDAYS[start.weekday()] in said:
+        score += 2
+    if re.search(rf"\b0?{start.day}\b", said):
+        score += 2
+    if re.search(rf"\b0?{start.hour}\s*(?:h|:)\s*0?{start.minute}\b", said):
+        score += 3
+    elif re.search(rf"\b0?{start.hour}\s*h\b", said):
+        score += 1
+    return score
+
+
+def _choice_by_id(row: Any, slot_start: str) -> dict[str, str] | None:
+    for proposal in _proposal_slots(row):
+        if proposal["id"] == slot_start:
+            return proposal
+    start = slots.parse_slot(slot_start)
+    if start is None:
+        return None
+    return {"id": slots.slot_id(start), "label": ToolBox._label(start)}
+
+
+_NAME_NOISE = {
+    "oui", "ok", "okay", "voici", "mon", "ma", "le", "la", "mail", "email", "e", "adresse",
+    "merci", "bonjour", "salut", "c'est", "je", "suis", "nom", "prenom", "et", "pour",
+    "rendez", "vous", "creneau", "confirme", "parfait", "tres", "bien",
+}
+
+
+def _guess_name(message: str) -> str:
+    """Extrait un nom plausible d'un message libre."""
+    rest = _EMAIL.sub(" ", message or "")
+    rest = _PHONE.sub(" ", rest)
+    rest = re.sub(
+        r"(?i)\b(?:lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche|"
+        r"janvier|fevrier|février|mars|avril|mai|juin|juillet|aout|août|"
+        r"septembre|octobre|novembre|decembre|décembre)\b",
+        " ",
+        rest,
+    )
+    rest = re.sub(r"(?i)\b\d{1,2}\s*(?:h|:)\s*\d{0,2}\b", " ", rest)
+    rest = re.sub(r"(?i)\b\d{1,2}(?:er)?\b", " ", rest)
+    rest = re.sub(
+        r"(?i)\b(?:mon nom est|je m'appelle|je me nomme|nom\s*:|prenom\s*:|c'est|moi c'est|et)\b",
+        " ",
+        rest,
+    )
+    rest = re.sub(r"[^\w'\- ]+", " ", rest)
+    words = [word for word in rest.split() if word]
+    words = [word for word in words if _flat(word) not in _NAME_NOISE]
+    if not words or len(words) > 4:
+        return ""
+    if any(any(ch.isdigit() for ch in word) for word in words):
+        return ""
+    if not any(word[:1].isupper() for word in words):
+        return ""
+    if not any(len(word) >= 3 for word in words):
+        return ""
+    return " ".join(words)[:80]
+
+
+def _server_slot_turn(toolbox: ToolBox, row: Any, message: str) -> str:
+    """Choix du créneau et coordonnées : piloté par le serveur, sans le modèle.
+
+    Retourne la phrase à afficher (vide si le tour ne relève pas de ce chemin).
+    """
+    if row is None or str(row["step"] or "") != "creneaux":
+        return ""
+    choice = _pick_slot(row, message)
+    pending = store.session_chosen(row)
+    known_name, known_email = store.session_contact(row)
+    mail = _EMAIL.search(message)
+    tel = _PHONE.search(message)
+    email = (mail.group(0) if mail else "") or known_email
+    name = _guess_name(message) or known_name
+    phone = tel.group(0) if tel else ""
+    if choice is None:
+        # Pas de créneau dans ce message : c'est peut-être la suite des coordonnées.
+        if not pending or (name == known_name and email == known_email):
+            return ""
+        choice = _choice_by_id(row, pending)
+        if choice is None:
+            return ""
+
+    store.set_chosen(toolbox.conn, toolbox.session_id, choice["id"])
+    store.set_contact(toolbox.conn, toolbox.session_id, name=name, email=email)
+
+    if name and email:
+        result = toolbox.call(
+            "book_meeting",
+            {"slot_start": choice["id"], "name": name, "email": email, "phone": phone},
+        )
+        if result.get("ok") and toolbox.booking:
+            return (
+                f"C'est réservé : {toolbox.booking['label']}, appel de 30 minutes avec Raj. "
+                f"Une invitation vient de partir sur {email} (référence {toolbox.booking['reference']})."
+            )
+        if result.get("ok") is False:
+            erreur = str(result.get("erreur") or "")
+            if "pris" in erreur.lower():
+                store.set_chosen(toolbox.conn, toolbox.session_id, "")
+                store.set_contact(toolbox.conn, toolbox.session_id, name=name, email=email)
+                return "Ce créneau vient d'être pris. Choisissez-en un autre parmi ceux affichés."
+    if email:
+        return f"C'est noté pour {choice['label']}. À quel nom dois-je réserver l'appel ?"
+    return (
+        f"C'est noté pour {choice['label']}. "
+        "Votre nom et votre adresse email, pour envoyer l'invitation ?"
+    )
 
 
 def _preflight(toolbox: ToolBox, row: Any, message: str) -> list[dict[str, Any]]:
