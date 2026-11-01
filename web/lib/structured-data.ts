@@ -80,7 +80,7 @@ export function personNode() {
     "@type": "Person",
     "@id": SCHEMA_IDS.personne,
     name: site.founder,
-    jobTitle: "Designer, photographe et formateur",
+    jobTitle: "Directeur artistique",
     url: absoluteUrl(routes.aPropos),
     image: imageObject(ogImage("a-propos")),
     worksFor: { "@id": SCHEMA_IDS.studio },

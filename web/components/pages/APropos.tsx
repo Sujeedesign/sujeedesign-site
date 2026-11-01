@@ -3,8 +3,8 @@ import { pageHero, line, type PageDoc } from "@/content/pages";
 
 
 export const pageMeta = {
-  "title": "À propos — Sujeepan Sabesan, designer",
-  "description": "Sujeepan Sabesan, designer indépendant entre Cergy et Paris depuis 2013 : direction artistique, photo et vidéo, UX/UI, IA générative, web et formation."
+  "title": "À propos — Sujeepan Sabesan, directeur artistique",
+  "description": "Sujeepan Sabesan, directeur artistique indépendant entre Cergy et Paris depuis 2013 : direction artistique, identité visuelle, photo et vidéo, UX/UI, web et formation."
 };
 
 export function APropos({ doc }: { doc?: PageDoc }) {
