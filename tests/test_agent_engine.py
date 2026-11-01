@@ -464,6 +464,32 @@ def test_creneau_saisi_puis_coordonnees_au_tour_suivant(conn):
     assert store.get_session(conn, session_id)["status"] == store.STATUS_BOOKED
 
 
+def test_nom_seul_puis_email_ne_redemande_pas_le_nom(conn):
+    """Nom donné seul : on ne redemande que l'email, et la réservation aboutit ensuite."""
+    google = FakeGoogle(available=slots.candidates()[:3])
+    session_id = _session_avec_creneaux(conn, google)
+    start = _creneau_unique(google.available)
+    creneau = slots.slot_id(start)
+
+    _collect(conn, session_id, f"le {start.day} à {start.hour:02d}h{start.minute:02d}", FakeLLM([]), google)
+    assert store.session_chosen(store.get_session(conn, session_id)) == creneau
+
+    nom_events = _collect(conn, session_id, "Claire Martin", FakeLLM([]), google)
+    nom_message = "".join(e["text"] for e in nom_events if e.get("type") == "delta")
+    assert "Merci Claire" in nom_message
+    assert "email" in nom_message
+    row = store.get_session(conn, session_id)
+    assert store.session_chosen(row) == creneau
+    assert store.session_contact(row) == ("Claire Martin", "")
+    assert not google.events
+
+    events = _collect(conn, session_id, "claire@example.com", FakeLLM([]), google)
+    message = "".join(e["text"] for e in events if e.get("type") == "delta")
+    assert "réservé" in message.lower()
+    assert any(e.get("type") == "booking" for e in events)
+    assert store.get_session(conn, session_id)["status"] == store.STATUS_BOOKED
+
+
 def test_heure_seule_suffit_quand_un_seul_creneau_correspond(conn):
     """« 09h00 » sans le jour : on retient l'unique créneau de cette heure."""
     google = FakeGoogle(available=slots.candidates()[:3])

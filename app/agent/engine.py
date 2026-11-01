@@ -453,6 +453,12 @@ def _server_slot_turn(toolbox: ToolBox, row: Any, message: str) -> str:
                 return "Ce créneau vient d'être pris. Choisissez-en un autre parmi ceux affichés."
     if email:
         return f"C'est noté pour {choice['label']}. À quel nom dois-je réserver l'appel ?"
+    if name:
+        prenom = name.split()[0]
+        return (
+            f"Merci {prenom}, c'est noté pour {choice['label']}. "
+            "Il me manque juste votre adresse email pour envoyer l'invitation."
+        )
     return (
         f"C'est noté pour {choice['label']}. "
         "Votre nom et votre adresse email, pour envoyer l'invitation ?"
