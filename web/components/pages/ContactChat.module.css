@@ -33,6 +33,11 @@
   align-items: start;
   padding-block: clamp(8px, 1.5vw, 24px) clamp(56px, 7vw, 96px);
   overflow-x: clip;
+  /* Contenu recentré : la scène reste pleine largeur (fond animé), mais le
+     bloc éditorial + console se cale au centre du viewport sur grand écran. */
+  width: 100%;
+  max-width: 1240px;
+  margin-inline: auto;
 }
 
 /* Colonne éditoriale -------------------------------------------------- */
