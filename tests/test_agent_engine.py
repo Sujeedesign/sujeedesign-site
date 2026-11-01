@@ -314,3 +314,19 @@ def test_le_message_ne_recopie_pas_les_creneaux_affiches(conn):
     assert "14h" not in message
     assert len(message) < 120
     assert "créneaux" in message
+
+
+def test_reponse_activite_enregistree_meme_si_le_modele_oublie_l_outil(conn):
+    """Le petit modèle oublie parfois record_fields : le serveur enregistre."""
+    start = slots.candidates()[0]
+    google = FakeGoogle(available=[start])
+    session_id = engine.prepare_session(conn)
+    store.merge_fields(conn, session_id, {"project_type": "Identité de marque"})
+    store.touch(conn, session_id, step="qualification")
+
+    llm = FakeLLM([[TurnOutput(text="Très bien, noté.")]])
+    events = _collect(conn, session_id, "Studio de yoga à Paris 11e", llm, google)
+
+    row = store.get_session(conn, session_id)
+    assert store.session_fields(row)["context"] == "Studio de yoga à Paris 11e"
+    assert "slots" in [e.get("type") for e in events]

@@ -152,6 +152,31 @@ def turn(
             answer = _clean(final.text) or pending
             break
 
+    # Filet de sécurité : le petit modèle oublie parfois d'enregistrer une
+    # réponse évidente. Si un seul champ manque et que le message ressemble à
+    # une réponse courte, on l'enregistre côté serveur.
+    row_now = store.get_session(conn, session_id)
+    if row_now and not toolbox.booking and row_now["step"] == "qualification":
+        guess = message.strip()
+        missing = store.missing_fields(store.session_fields(row_now))
+        if missing and guess and "?" not in guess and len(guess) <= 200:
+            store.merge_fields(conn, session_id, {missing[0]: guess})
+            if not store.missing_fields(
+                store.session_fields(store.get_session(conn, session_id))
+            ):
+                toolbox.call("request_slots", {})
+                opened = False
+                for event in toolbox.events:
+                    slots_shown = slots_shown or event.get("type") == "slots"
+                    opened = opened or event.get("type") == "slots"
+                    yield event
+                toolbox.events = []
+                if not opened:
+                    answer = (
+                        "Je n'ai pas de créneau en ligne ces prochains jours. "
+                        "Écrivez à hello@sujeedesign.com et je vous propose un horaire."
+                    )
+
     if not answer.strip():
         # Le modèle a enchaîné des outils sans conclure : on force une dernière phrase.
         try:
