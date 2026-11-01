@@ -82,7 +82,7 @@ def turn(
     # Certaines transitions clés (validation du récap, choix d'un créneau) sont
     # pilotées côté serveur : un petit modèle les oublie trop souvent.
     pre = _preflight(toolbox, store.get_session(conn, session_id), message)
-    slots_shown = False
+    slots_shown = bool(store.session_proposals(store.get_session(conn, session_id)))
     for event in toolbox.events:
         slots_shown = slots_shown or event.get("type") == "slots"
         yield event
@@ -174,9 +174,12 @@ def turn(
             answer = _clean(final.text) or pending
 
     if answer.strip():
-        if slots_shown:
-            answer = _drop_slot_list(answer)
-        answer = _one_question(answer)
+        row_now = store.get_session(conn, session_id)
+        if slots_shown and not toolbox.booking and row_now and row_now["step"] == "creneaux":
+            # Les boutons font le travail : une phrase suffit, jamais la liste.
+            answer = "Les créneaux viennent de s'afficher. Lequel vous convient ?"
+        else:
+            answer = _one_question(answer)
         for chunk in _chunks(answer):
             yield {"type": "delta", "text": chunk}
             time.sleep(0.012)

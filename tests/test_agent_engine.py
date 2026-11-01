@@ -292,3 +292,23 @@ def test_liste_de_creneaux_retiree_quand_les_boutons_s_affichent():
     assert "Mardi 4 novembre" not in propre
     assert "Jeudi 6 novembre" not in propre
     assert "Lequel vous convient" in propre
+
+
+def test_le_message_ne_recopie_pas_les_creneaux_affiches(conn):
+    """Le modèle recopie parfois la liste : le serveur la retire du message."""
+    start = slots.candidates()[0]
+    google = FakeGoogle(available=[start])
+    session_id = engine.prepare_session(conn)
+    store.merge_fields(conn, session_id, FIELDS)
+
+    bavard = (
+        "Les créneaux viennent de s'afficher. Lequel vous convient ?\n"
+        "- Mardi 4 novembre à 14h\n"
+        "- Jeudi 6 novembre à 10h"
+    )
+    llm = FakeLLM([[TurnOutput(text=bavard)]])
+    events = _collect(conn, session_id, "Studio de yoga à Paris 11e", llm, google)
+
+    message = "".join(e["text"] for e in events if e.get("type") == "delta")
+    assert "novembre" not in message
+    assert "Lequel vous convient" in message
