@@ -495,6 +495,23 @@ def test_creneau_saisi_puis_coordonnees_au_tour_suivant(conn):
     assert store.get_session(conn, session_id)["status"] == store.STATUS_BOOKED
 
 
+def test_creneau_avec_heure_absente_n_est_pas_remplace_par_un_autre(conn):
+    from datetime import datetime, timedelta
+
+    class _Google:
+        def __init__(self):
+            base = datetime(2026, 11, 4, 9, 0)
+            self.available = [base, base + timedelta(days=1)]
+
+    session_id = _session_avec_creneaux(conn, _Google())
+    row = store.get_session(conn, session_id)
+    assert (engine._pick_slot(row, "mercredi 4 novembre à 09h00") or {}).get("id", "").endswith(
+        "09:00:00+01:00"
+    )
+    assert engine._pick_slot(row, "mercredi 4 novembre à 10h00") is None
+    assert engine._pick_slot(row, "jeudi 5 novembre à 15h00") is None
+
+
 def test_extraction_des_details_dans_une_phrase_condensee():
     phrase = "Claire Martin, claire@example.com, 06 12 34 56 78, branding Le Fournil, en visio"
     assert engine._guess_name(phrase) == "Claire Martin"

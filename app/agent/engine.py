@@ -336,10 +336,19 @@ def _pick_slot(row: Any, message: str) -> dict[str, str] | None:
                 return proposals[index]
     # Texte libre approximatif (« mercredi 4 novembre à 09h00 ») : on compare
     # jour de la semaine, quantième et heure du créneau.
+    wanted_hours = [
+        (int(match.group(1)), int(match.group(2)) if match.group(2) else None)
+        for match in re.finditer(r"\b(\d{1,2})\s*(?:h|:)\s*(\d{2})?\b", said)
+    ]
     scored: list[tuple[int, dict[str, str]]] = []
     for proposal in proposals:
         start = slots.parse_slot(proposal["id"])
         if start is None:
+            continue
+        if wanted_hours and not any(
+            hour == start.hour and (minute is None or minute == start.minute)
+            for hour, minute in wanted_hours
+        ):
             continue
         score = _slot_mention(start, said)
         if score:
