@@ -82,7 +82,9 @@ def turn(
     # Certaines transitions clés (validation du récap, choix d'un créneau) sont
     # pilotées côté serveur : un petit modèle les oublie trop souvent.
     pre = _preflight(toolbox, store.get_session(conn, session_id), message)
+    slots_shown = False
     for event in toolbox.events:
+        slots_shown = slots_shown or event.get("type") == "slots"
         yield event
     toolbox.events = []
     messages.extend(pre)
@@ -117,6 +119,7 @@ def turn(
 
         # Les outils du tour précédent ont pu mettre des nouvelles à jour.
         for event in toolbox.events:
+            slots_shown = slots_shown or event.get("type") == "slots"
             yield event
         toolbox.events = []
 
@@ -171,6 +174,8 @@ def turn(
             answer = _clean(final.text) or pending
 
     if answer.strip():
+        if slots_shown:
+            answer = _drop_slot_list(answer)
         answer = _one_question(answer)
         for chunk in _chunks(answer):
             yield {"type": "delta", "text": chunk}
@@ -324,6 +329,31 @@ def _clean(text: str) -> str:
     cleaned = re.sub(r"(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])", r"\1", cleaned)
     cleaned = re.sub(r"__(\S(?:.*?\S)?)__", r"\1", cleaned)
     return _AWAITING.sub("", cleaned).strip()
+
+
+_WEEKDAY = re.compile(
+    r"\b(?:lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\b", re.IGNORECASE
+)
+_BULLET = re.compile(r"^\s*(?:[-–—•*]|\d+[.)])\s+")
+_CLOCK = re.compile(r"\b\d{1,2}\s*[h:]\s*\d{2}\b|\b\d{1,2}h\b", re.IGNORECASE)
+
+
+def _drop_slot_list(text: str) -> str:
+    """Retire la liste des créneaux quand les boutons les affichent déjà.
+
+    Le prompt l'interdit, mais les modèles recopient volontiers les horaires.
+    On supprime les puces et les lignes de créneau, puis on garde la phrase.
+    """
+    kept: list[str] = []
+    for line in text.splitlines():
+        if not line.strip():
+            continue
+        if _BULLET.match(line) and (_WEEKDAY.search(line) or _CLOCK.search(line)):
+            continue
+        if _WEEKDAY.search(line) and _CLOCK.search(line) and len(line) < 90:
+            continue
+        kept.append(line.strip())
+    return " ".join(kept).strip() or text
 
 
 def _one_question(text: str, keep: int = 2) -> str:

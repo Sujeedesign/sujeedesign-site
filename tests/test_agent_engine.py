@@ -279,3 +279,16 @@ def test_une_seule_question_par_message():
         "logo, charte et packaging, livraison avant mars. Est-ce bien cela ?"
     )
     assert engine._one_question(recap) == recap
+
+
+def test_liste_de_creneaux_retiree_quand_les_boutons_s_affichent():
+    texte = (
+        "Les créneaux sont affichés.\n"
+        "Lequel vous convient :\n"
+        "- Mardi 4 novembre à 14h\n"
+        "- Jeudi 6 novembre à 10h ?"
+    )
+    propre = engine._drop_slot_list(texte)
+    assert "Mardi 4 novembre" not in propre
+    assert "Jeudi 6 novembre" not in propre
+    assert "Lequel vous convient" in propre
