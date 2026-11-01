@@ -323,6 +323,8 @@ def test_reponse_activite_enregistree_meme_si_le_modele_oublie_l_outil(conn):
     session_id = engine.prepare_session(conn)
     store.merge_fields(conn, session_id, {"project_type": "Identité de marque"})
     store.touch(conn, session_id, step="qualification")
+    store.add_message(conn, session_id, "user", "Je veux refaire mon identité de marque")
+    store.add_message(conn, session_id, "assistant", "Pour quelle activité ?")
 
     llm = FakeLLM([[TurnOutput(text="Très bien, noté.")]])
     events = _collect(conn, session_id, "Studio de yoga à Paris 11e", llm, google)
@@ -330,3 +332,29 @@ def test_reponse_activite_enregistree_meme_si_le_modele_oublie_l_outil(conn):
     row = store.get_session(conn, session_id)
     assert store.session_fields(row)["context"] == "Studio de yoga à Paris 11e"
     assert "slots" in [e.get("type") for e in events]
+
+
+def test_horaires_inventes_remplaces_par_la_question_utile(conn):
+    """Si aucun bouton n'est affiché, on ne laisse pas le modèle inventer des créneaux."""
+    google = FakeGoogle(available=[slots.candidates()[0]])
+    session_id = engine.prepare_session(conn)
+    store.merge_fields(conn, session_id, {"project_type": "Identité de marque"})
+    store.touch(conn, session_id, step="qualification")
+    store.add_message(conn, session_id, "user", "Je veux refaire mon identité")
+    store.add_message(conn, session_id, "assistant", "Pour quelle activité ?")
+
+    llm = FakeLLM(
+        [
+            [
+                TurnOutput(text="", tool_calls=[_call("request_slots", **{})]),
+                TurnOutput(
+                    text="Les créneaux sont mardi 10 septembre à 14h ou jeudi 12 à 10h."
+                ),
+            ]
+        ]
+    )
+    events = _collect(conn, session_id, "Vous faites aussi du motion design ?", llm, google)
+
+    message = "".join(e["text"] for e in events if e.get("type") == "delta")
+    assert "septembre" not in message
+    assert "secteur" in message

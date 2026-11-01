@@ -156,10 +156,15 @@ def turn(
     # réponse évidente. Si un seul champ manque et que le message ressemble à
     # une réponse courte, on l'enregistre côté serveur.
     row_now = store.get_session(conn, session_id)
-    if row_now and not toolbox.booking and row_now["step"] == "qualification":
+    if (
+        row_now
+        and not toolbox.booking
+        and row_now["step"] == "qualification"
+        and len(store.messages(conn, session_id)) > 2
+    ):
         guess = message.strip()
         missing = store.missing_fields(store.session_fields(row_now))
-        if missing and guess and "?" not in guess and len(guess) <= 200:
+        if len(missing) == 1 and guess and "?" not in guess and len(guess) <= 200:
             store.merge_fields(conn, session_id, {missing[0]: guess})
             if not store.missing_fields(
                 store.session_fields(store.get_session(conn, session_id))
@@ -208,6 +213,10 @@ def turn(
             else:
                 answer = "Les créneaux viennent de s'afficher. Lequel vous convient ?"
         else:
+            fields = store.session_fields(row_now) if row_now else {}
+            if _fake_slots(answer):
+                # Le modèle invente parfois des horaires alors que rien n'est affiché.
+                answer = _question_for(store.missing_fields(fields))
             answer = _one_question(answer)
         for chunk in _chunks(answer):
             yield {"type": "delta", "text": chunk}
@@ -235,6 +244,25 @@ def turn(
         "status": final["status"] if final else store.STATUS_OPEN,
         "reference": (final["reference"] if final else "") or "",
     }
+
+
+def _fake_slots(text: str) -> bool:
+    """Vrai si la réponse énumère des horaires alors qu'aucun bouton n'est affiché."""
+    return bool(
+        re.search(
+            r"(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)[^.!?]{0,40}?\d{1,2}\s*h",
+            text or "",
+            re.IGNORECASE,
+        )
+    )
+
+
+def _question_for(missing: list[str]) -> str:
+    if "context" in missing:
+        return "Pour quelle activité ou quel secteur est-ce ?"
+    if "project_type" in missing:
+        return "Quel type de projet avez-vous en tête ?"
+    return "Pouvez-vous préciser votre besoin en une phrase ?"
 
 
 def _chunks(text: str, size: int = 24) -> list[str]:

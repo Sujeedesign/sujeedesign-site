@@ -160,6 +160,9 @@ class ToolBox:
             "renseignes": [store.FIELD_LABELS[k] for k in fields],
             "manquants": [store.FIELD_LABELS[k] for k in missing],
         }
+        # Qualification : type de projet connu, activité à préciser.
+        if missing and "project_type" not in missing:
+            store.touch(self.conn, self.session_id, step="qualification")
         # Qualification complète : le serveur ouvre les créneaux sans attendre.
         # Pas de récapitulatif, pas de validation à demander : on va au rendez-vous.
         if not missing:
