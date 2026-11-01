@@ -20,7 +20,7 @@ export function APropos({ doc }: { doc?: PageDoc }) {
               <h1 className="ab-hero__title"><span data-field="hero.title.0">{line(hero.title, 0, "Je dessine,")}</span><br /><span data-field="hero.title.1">{line(hero.title, 1, "je cadre,")}</span><br /><em data-field="hero.title.2">{line(hero.title, 2, "j'enseigne.")}</em></h1>
               <div className="ab-hero__side">
                 <p className="ab-sig">Sujeepan Sabesan</p>
-                <p className="ab-sig__sub">Designer, photographe, formateur. Je signe ce que je livre.</p>
+                <p className="ab-sig__sub">Directeur artistique, photographe, formateur. Je signe ce que je livre.</p>
                 <p className="ab-hero__lead" data-field="hero.lead">{hero.lead}</p>
                 <p className="ab-hero__lead ab-hero__lead--2"><span data-field="hero.lead2">{hero.lead2}</span> <b>Un seul interlocuteur, du premier croquis à la mise en ligne.</b></p>
                 <div className="ab-stats-hero">
@@ -210,6 +210,7 @@ export function APropos({ doc }: { doc?: PageDoc }) {
               <div className="ab-frise__row"><b>2026</b><span>Studio, IA générative et agents</span></div>
             </div>
             <div className="ab-facts rv">
+              <div className="ab-fact"><b>Le nom</b><span>« Sujee », c'est la fin de Sujeepan. « Design », ce que je fais depuis 2013. Deux mots courts, faciles à retenir et à dicter au téléphone.</span></div>
               <div className="ab-fact"><b>Formé à</b><span>PAO, édition, image, passage en agence avant l'indépendance.</span></div>
               <div className="ab-fact"><b>Manière de travailler</b><span>Un brief, deux directions maximum, une seule personne du début à la fin.</span></div>
               <div className="ab-fact"><b>En dehors du studio</b><span>Photographie argentique, typographie de signalétique, systèmes simples qui tiennent dix ans.</span></div>
