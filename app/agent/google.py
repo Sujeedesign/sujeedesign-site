@@ -190,6 +190,7 @@ class CalendarClient:
         attendee_name: str,
         summary: str,
         description: str,
+        location: str = "",
     ) -> dict[str, Any]:
         end = start + timedelta(minutes=slots.SLOT_MINUTES)
         body = {
@@ -201,6 +202,8 @@ class CalendarClient:
             "guestsCanModify": False,
             "reminders": {"useDefault": True},
         }
+        if location:
+            body["location"] = location
         return self._request(
             "POST",
             f"{CALENDAR_API}/calendars/{self.config.calendar_id}/events",

@@ -227,6 +227,10 @@ def turn(
             if _fake_slots(answer) and not toolbox.booking:
                 # Le modèle invente parfois des horaires alors que rien n'est affiché.
                 answer = _question_for(store.missing_fields(fields))
+            if _asks_known_field(answer, fields) and not toolbox.booking:
+                # Le modèle redemande ce qu'il sait déjà (ex. « quel type de projet »
+                # après « identité de marque ») : on reprend la question utile.
+                answer = _question_for(store.missing_fields(fields))
             answer = _one_question(answer)
         for chunk in _chunks(answer):
             yield {"type": "delta", "text": chunk}
@@ -243,7 +247,7 @@ def turn(
         fields = store.session_fields(final)
         yield {
             "type": "progress",
-            "filled": len(fields),
+            "filled": len([key for key in store.FIELDS if fields.get(key)]),
             "total": len(store.FIELDS),
             "missing": store.missing_fields(fields),
         }
@@ -286,6 +290,12 @@ _VALIDATION = re.compile(
 )
 _EMAIL = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
 _PHONE = re.compile(r"(?:\+33|0)\s?[1-9](?:[\s.-]?\d{2}){4}")
+_MODE_VISIO = re.compile(r"\b(?:visio|visioconf\w*|zoom|teams|meet|video|en ligne|par ecran)\b")
+_MODE_PHONE_CALL = re.compile(r"\b(?:telephon\w*|tel|phone|appel|portable|mobile|rappel|par telephone)\b")
+_MODE_WORDS = {
+    "visio", "visioconference", "zoom", "teams", "meet", "video", "ligne", "ecran",
+    "telephonique", "telephone", "tel", "phone", "appel", "portable", "mobile", "rappel",
+}
 _ORDINAL = re.compile(r"\b(?:le\s+)?(premier|1er|deuxième|deuxieme|2e|troisième|troisieme|3e)\b", re.IGNORECASE)
 
 
@@ -377,16 +387,34 @@ _NAME_NOISE = {
 }
 
 
-def _guess_name(message: str) -> str:
-    """Extrait un nom plausible d'un message libre."""
-    rest = _EMAIL.sub(" ", message or "")
-    rest = _PHONE.sub(" ", rest)
+_SPLIT = re.compile(r"[,;\n]+|\s+(?:et|puis)\s+", re.IGNORECASE)
+
+
+def _segments(message: str) -> list[str]:
+    """Découpe un message en morceaux d'information (« nom, email, téléphone »)."""
+    parts = [part.strip(" .;!?:") for part in _SPLIT.split(message or "")]
+    return [part for part in parts if part]
+
+
+def _words(text: str) -> list[str]:
+    return [word for word in re.split(r"[^\w'’\-]+", text or "") if word]
+
+
+def _name_in_segment(segment: str) -> str:
+    """Nom plausible contenu dans un seul morceau de message."""
+    if _EMAIL.search(segment) or _PHONE.search(segment):
+        return ""
+    low = _flat(segment)
+    if "branding" in low or "marque" in low or "projet" in low:
+        return ""
+    if any(_flat(word) in _MODE_WORDS for word in _words(segment)):
+        return ""
     rest = re.sub(
         r"(?i)\b(?:lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche|"
         r"janvier|fevrier|février|mars|avril|mai|juin|juillet|aout|août|"
         r"septembre|octobre|novembre|decembre|décembre)\b",
         " ",
-        rest,
+        segment,
     )
     rest = re.sub(r"(?i)\b\d{1,2}\s*(?:h|:)\s*\d{0,2}\b", " ", rest)
     rest = re.sub(r"(?i)\b\d{1,2}(?:er)?\b", " ", rest)
@@ -395,18 +423,110 @@ def _guess_name(message: str) -> str:
         " ",
         rest,
     )
-    rest = re.sub(r"[^\w'\- ]+", " ", rest)
-    words = [word for word in rest.split() if word]
-    words = [word for word in words if _flat(word) not in _NAME_NOISE]
+    words = [word for word in _words(rest) if _flat(word) not in _NAME_NOISE]
     if not words or len(words) > 4:
         return ""
-    if any(any(ch.isdigit() for ch in word) for word in words):
+    if any(any(char.isdigit() for char in word) for word in words):
         return ""
     if not any(word[:1].isupper() for word in words):
         return ""
     if not any(len(word) >= 3 for word in words):
         return ""
     return " ".join(words)[:80]
+
+
+def _guess_name(message: str) -> str:
+    """Extrait un nom plausible d'un message libre."""
+    for segment in _segments(message) or [message or ""]:
+        name = _name_in_segment(segment)
+        if name:
+            return name
+    return ""
+
+
+_ASK_PROJECT = re.compile(r"(?i)quel type de projet|type de projet (?:avez|souhaitez|envisagez)|quel projet")
+_ASK_CONTEXT = re.compile(r"(?i)quel(?:le)? (?:type d'activité|activité|secteur)|secteur d'activité|quelle activité")
+
+
+def _asks_known_field(answer: str, fields: dict[str, str]) -> bool:
+    """Vrai si la réponse redemande un champ déjà renseigné."""
+    if "?" not in (answer or ""):
+        return False
+    if fields.get("project_type") and _ASK_PROJECT.search(answer):
+        return True
+    if fields.get("context") and _ASK_CONTEXT.search(answer):
+        return True
+    return False
+
+
+def _branding_words(text: str) -> str:
+    """Nettoie un morceau de message pour n'en garder que le nom du branding."""
+    rest = _EMAIL.sub(" ", text or "")
+    rest = _PHONE.sub(" ", rest)
+    rest = re.sub(
+        r"(?i)^\s*(?:le|la|les|mon|ma|notre|du|de|des|nom|branding|marque|projet|"
+        r"c'est|ces|s'appelle|sappelle|s'appellera|sera|est|pour|nomme|appele|appelle|et|sujet)\b\s*",
+        "",
+        rest,
+    )
+    for char in "«»\"“”()[],;:!?":
+        rest = rest.replace(char, " ")
+    words = [
+        word
+        for word in _words(rest)
+        if _flat(word) not in _NAME_NOISE and _flat(word) not in _MODE_WORDS
+    ]
+    words = [word for word in words if not any(char.isdigit() for char in word)]
+    while words and _flat(words[0]) in {"le", "la", "les", "mon", "ma", "notre", "du", "de", "des", "est", "sera", "pour", "nom", "sujet"}:
+        words.pop(0)
+    if not words or len(words) > 8:
+        return ""
+    if not any(len(word) >= 3 for word in words):
+        return ""
+    if len(words) > 1 and not any(word[:1].isupper() for word in words):
+        return ""
+    return " ".join(words)[:120]
+
+
+def _guess_branding(message: str) -> str:
+    """Extrait le nom du branding d'un message libre (« le branding Vaasam »)."""
+    segments = _segments(message) or [message or ""]
+    for index, segment in enumerate(segments):
+        marker = re.search(r"(?i)(?:branding|marque|projet)\b(?:\s*(?:à|a)\s*réaliser)?", segment)
+        if marker is None:
+            continue
+        found = _branding_words(segment[marker.end():])
+        if found:
+            return found
+        if index + 1 < len(segments):
+            found = _branding_words(segments[index + 1])
+            if found:
+                return found
+    name = _flat(_guess_name(message))
+    for segment in segments:
+        if _EMAIL.search(segment) or _PHONE.search(segment):
+            continue
+        low = _flat(segment)
+        if not low or (len(segments) > 1 and low == name):
+            continue
+        if any(_flat(word) in _MODE_WORDS for word in _words(segment)):
+            continue
+        found = _branding_words(segment)
+        if found:
+            return found
+    return ""
+
+
+def _guess_mode(message: str) -> str:
+    """Déduit le format souhaité : visio ou appel téléphonique."""
+    text = _flat(message)
+    visio = bool(_MODE_VISIO.search(text))
+    phone = bool(_MODE_PHONE_CALL.search(text))
+    if visio and not phone:
+        return store.CALL_MODES["visio"]
+    if phone and not visio:
+        return store.CALL_MODES["telephone"]
+    return ""
 
 
 def _server_slot_turn(toolbox: ToolBox, row: Any, message: str) -> str:
@@ -419,14 +539,20 @@ def _server_slot_turn(toolbox: ToolBox, row: Any, message: str) -> str:
     choice = _pick_slot(row, message)
     pending = store.session_chosen(row)
     known_name, known_email = store.session_contact(row)
+    details = store.session_details(row)
     mail = _EMAIL.search(message)
     tel = _PHONE.search(message)
     email = (mail.group(0) if mail else "") or known_email
-    name = _guess_name(message) or known_name
-    phone = tel.group(0) if tel else ""
+    phone = " ".join(tel.group(0).split()) if tel else details.get("phone", "")
+    name = known_name or _guess_name(message)
+    mode = details.get("call_mode", "") or _guess_mode(message)
+    branding = details.get("branding", "")
+    if not branding and name and email and phone:
+        branding = _guess_branding(message)
+
     if choice is None:
-        # Pas de créneau dans ce message : c'est peut-être la suite des coordonnées.
-        if not pending or (name == known_name and email == known_email):
+        # Pas de créneau dans ce message : c'est la suite des coordonnées.
+        if not pending:
             return ""
         choice = _choice_by_id(row, pending)
         if choice is None:
@@ -434,15 +560,21 @@ def _server_slot_turn(toolbox: ToolBox, row: Any, message: str) -> str:
 
     store.set_chosen(toolbox.conn, toolbox.session_id, choice["id"])
     store.set_contact(toolbox.conn, toolbox.session_id, name=name, email=email)
+    store.set_details(
+        toolbox.conn,
+        toolbox.session_id,
+        {"phone": phone, "branding": branding, "call_mode": mode},
+    )
 
-    if name and email:
+    if name and email and phone and branding and mode:
         result = toolbox.call(
             "book_meeting",
             {"slot_start": choice["id"], "name": name, "email": email, "phone": phone},
         )
         if result.get("ok") and toolbox.booking:
+            format_label = "point visio" if mode == store.CALL_MODES["visio"] else "appel téléphonique"
             return (
-                f"C'est réservé : {toolbox.booking['label']}, appel de 30 minutes avec Raj. "
+                f"C'est réservé : {toolbox.booking['label']}, {format_label} de 30 minutes avec Raj. "
                 f"Une invitation vient de partir sur {email} (référence {toolbox.booking['reference']})."
             )
         if result.get("ok") is False:
@@ -451,18 +583,25 @@ def _server_slot_turn(toolbox: ToolBox, row: Any, message: str) -> str:
                 store.set_chosen(toolbox.conn, toolbox.session_id, "")
                 store.set_contact(toolbox.conn, toolbox.session_id, name=name, email=email)
                 return "Ce créneau vient d'être pris. Choisissez-en un autre parmi ceux affichés."
-    if email:
-        return f"C'est noté pour {choice['label']}. À quel nom dois-je réserver l'appel ?"
-    if name:
-        prenom = name.split()[0]
+    if not name or not email:
+        if email and not name:
+            return f"C'est noté pour {choice['label']}. À quel nom dois-je réserver l'appel ?"
+        if name and not email:
+            prenom = name.split()[0]
+            return (
+                f"Merci {prenom}, c'est noté pour {choice['label']}. "
+                "Il me manque juste votre adresse email pour envoyer l'invitation."
+            )
         return (
-            f"Merci {prenom}, c'est noté pour {choice['label']}. "
-            "Il me manque juste votre adresse email pour envoyer l'invitation."
+            f"C'est noté pour {choice['label']}. "
+            "Votre prénom et nom, votre email, et un numéro de téléphone pour l'appel ?"
         )
-    return (
-        f"C'est noté pour {choice['label']}. "
-        "Votre nom et votre adresse email, pour envoyer l'invitation ?"
-    )
+    prenom = name.split()[0]
+    if not phone:
+        return f"Merci {prenom}. Votre numéro de téléphone, pour que Raj vous rappelle ?"
+    if not branding:
+        return "Quel est le nom du branding à réaliser (marque, produit ou projet) ?"
+    return "Vous préférez un point visio ou un appel téléphonique ?"
 
 
 def _preflight(toolbox: ToolBox, row: Any, message: str) -> list[dict[str, Any]]:

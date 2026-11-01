@@ -47,11 +47,18 @@ class FakeGoogle:
     def available_slots(self, count=3, booked_per_day=None, taken=None):
         return list(self.available)
 
-    def create_event(self, start, attendee_email, attendee_name, summary, description):
+    def create_event(self, start, attendee_email, attendee_name, summary, description, location=""):
         if self.fail_event:
             raise agent_tools.GoogleError("boom")
         self.events.append(
-            {"start": start, "email": attendee_email, "name": attendee_name, "summary": summary, "description": description}
+            {
+                "start": start,
+                "email": attendee_email,
+                "name": attendee_name,
+                "summary": summary,
+                "description": description,
+                "location": location,
+            }
         )
         return {"id": "evt_123"}
 
@@ -119,7 +126,17 @@ def test_parcours_complet_jusqu_au_rendez_vous(conn):
     assert any(event["type"] == "slots" for event in second)
     assert store.get_session(conn, session_id)["step"] == "creneaux"
 
-    events = _collect(conn, session_id, "Le premier me va, Claire Martin, claire@example.com", llm, google, notifications.append)
+    row = store.get_session(conn, session_id)
+    first_choice = engine._choice_by_id(row, store.session_proposals(row)[0])
+    label = first_choice["label"]
+    events = _collect(
+        conn,
+        session_id,
+        f"{label}, Claire Martin, claire@example.com, 06 12 34 56 78, branding Vaasam, en visio",
+        llm,
+        google,
+        notifications.append,
+    )
     assert any(event["type"] == "booking" for event in events)
 
     session = store.get_session(conn, session_id)
@@ -190,11 +207,19 @@ def test_echec_agenda_libere_le_creneau(conn):
     google.fail_event = True
     session_id = engine.prepare_session(conn)
     store.merge_fields(conn, session_id, FIELDS)
+    store.set_details(conn, session_id, {"branding": "Vaasam", "phone": "06 12 34 56 78", "call_mode": "visio"})
     store.touch(conn, session_id, recap="Reformulation suffisamment longue pour passer.", recap_ok=1)
 
     toolbox = agent_tools.ToolBox(conn, session_id, google)
     toolbox.request_slots({})
-    result = toolbox.book_meeting({"slot_start": slots.slot_id(start), "name": "Claire", "email": "claire@example.com"})
+    result = toolbox.book_meeting(
+        {
+            "slot_start": slots.slot_id(start),
+            "name": "Claire",
+            "email": "claire@example.com",
+            "phone": "06 12 34 56 78",
+        }
+    )
     assert result["ok"] is False
     assert conn.execute("SELECT COUNT(*) AS n FROM agent_bookings").fetchone()["n"] == 0
     assert store.list_leads(conn) == []
@@ -426,7 +451,7 @@ def test_creneau_saisi_en_texte_est_reconnu_et_la_reservation_aboutit(conn):
     jour = engine._WEEKDAYS[start.weekday()]
     texte = (
         f"{jour} {start.day} novembre à {start.hour:02d}h{start.minute:02d}, "
-        "Claire Martin, claire@example.com"
+        "Claire Martin, claire@example.com, 06 12 34 56 78, branding Vaasam, en visio"
     )
 
     llm = FakeLLM([])
@@ -459,13 +484,19 @@ def test_creneau_saisi_puis_coordonnees_au_tour_suivant(conn):
     assert store.session_chosen(store.get_session(conn, session_id)) == slots.slot_id(start)
     assert not google.events
 
-    second = _collect(conn, session_id, "Claire Martin, claire@example.com", FakeLLM([]), google)
+    second = _collect(
+        conn,
+        session_id,
+        "Claire Martin, claire@example.com, 06 12 34 56 78, branding Vaasam, en visio",
+        FakeLLM([]),
+        google,
+    )
     assert any(e.get("type") == "booking" for e in second)
     assert store.get_session(conn, session_id)["status"] == store.STATUS_BOOKED
 
 
-def test_nom_seul_puis_email_ne_redemande_pas_le_nom(conn):
-    """Nom donné seul : on ne redemande que l'email, et la réservation aboutit ensuite."""
+def test_parcours_detaille_nom_email_telephone_branding_et_format(conn):
+    """Chaque information est demandée une seule fois, puis la réservation aboutit."""
     google = FakeGoogle(available=slots.candidates()[:3])
     session_id = _session_avec_creneaux(conn, google)
     start = _creneau_unique(google.available)
@@ -483,11 +514,29 @@ def test_nom_seul_puis_email_ne_redemande_pas_le_nom(conn):
     assert store.session_contact(row) == ("Claire Martin", "")
     assert not google.events
 
-    events = _collect(conn, session_id, "claire@example.com", FakeLLM([]), google)
-    message = "".join(e["text"] for e in events if e.get("type") == "delta")
-    assert "réservé" in message.lower()
-    assert any(e.get("type") == "booking" for e in events)
+    mail_events = _collect(conn, session_id, "claire@example.com", FakeLLM([]), google)
+    mail_message = "".join(e["text"] for e in mail_events if e.get("type") == "delta")
+    assert "téléphone" in mail_message
+    assert not google.events
+
+    tel_events = _collect(conn, session_id, "06 12 34 56 78", FakeLLM([]), google)
+    tel_message = "".join(e["text"] for e in tel_events if e.get("type") == "delta")
+    assert "branding" in tel_message
+    assert not google.events
+
+    branding_events = _collect(conn, session_id, "Vaasam", FakeLLM([]), google)
+    branding_message = "".join(e["text"] for e in branding_events if e.get("type") == "delta")
+    assert "visio" in branding_message and "téléphonique" in branding_message
+    assert not google.events
+
+    mode_events = _collect(conn, session_id, "en visio, ce sera plus simple", FakeLLM([]), google)
+    mode_message = "".join(e["text"] for e in mode_events if e.get("type") == "delta")
+    assert "réservé" in mode_message.lower()
+    assert any(e.get("type") == "booking" for e in mode_events)
     assert store.get_session(conn, session_id)["status"] == store.STATUS_BOOKED
+    assert google.events[0]["location"] == "Visio"
+    assert "Vaasam" in google.events[0]["summary"]
+    assert "06 12 34 56 78" in google.events[0]["description"] or "06 12 34 56 78" in google.mails[0]["text"]
 
 
 def test_heure_seule_suffit_quand_un_seul_creneau_correspond(conn):

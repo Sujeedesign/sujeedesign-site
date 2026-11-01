@@ -10,7 +10,14 @@ type Message = { id: string; role: Role; text: string };
 
 type Slot = { id: string; label: string };
 
-type Booking = { reference: string; label: string; start: string; mail_sent?: boolean };
+type Booking = {
+  reference: string;
+  label: string;
+  start: string;
+  mail_sent?: boolean;
+  call_mode?: string;
+  branding?: string;
+};
 
 type Phase = "idle" | "streaming" | "done" | "offline";
 
@@ -460,9 +467,12 @@ export default function ContactChat() {
                 <span className={styles.confirmTag}>Créneau réservé</span>
                 <strong>{booking.label}</strong>
                 <span className={styles.ref}>Réf. {booking.reference}</span>
+                {booking.branding && <span className={styles.ref}>Projet : {booking.branding}</span>}
                 <p>
                   {booking.mail_sent
-                    ? "Une confirmation vient de partir par email. Sujee vous rappelle au numéro indiqué."
+                    ? booking.call_mode === "visio"
+                      ? "Une confirmation vient de partir par email. Le lien visio vous parvient avant l'appel."
+                      : "Une confirmation vient de partir par email. Sujee vous appelle au numéro indiqué."
                     : "Sujee vous confirme le créneau par email sous 24 h ouvrées."}
                 </p>
               </div>

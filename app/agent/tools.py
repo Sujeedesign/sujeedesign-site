@@ -150,7 +150,7 @@ class ToolBox:
         self.events.append(
             {
                 "type": "progress",
-                "filled": len(fields),
+                "filled": len([k for k in store.FIELDS if fields.get(k)]),
                 "total": len(store.FIELDS),
                 "missing": missing,
             }
@@ -244,11 +244,19 @@ class ToolBox:
 
         name = _slug(arguments.get("name", ""))[:120]
         email = _slug(arguments.get("email", "")).lower()[:180]
-        phone = _slug(arguments.get("phone", ""))[:40]
+        phone = _slug(arguments.get("phone", ""))[:40] or fields.get("phone", "")
+        branding = fields.get("branding", "")
+        mode = fields.get("call_mode", "")
         if len(name) < 2:
             return self._error("Nom manquant : demande le prénom et le nom.")
         if not EMAIL_RE.match(email):
             return self._error("Email invalide : demande une adresse correcte avant de réserver.")
+        if not phone:
+            return self._error("Téléphone manquant : demande le numéro avant de réserver.")
+        if not branding:
+            return self._error("Nom du branding manquant : demande la marque ou le projet à réaliser.")
+        if not mode:
+            return self._error("Format manquant : demande s'il préfère un point visio ou un appel téléphonique.")
 
         if not store.reserve_slot(self.conn, slot_start, self.session_id, email):
             store.set_proposals(self.conn, self.session_id, [])
@@ -263,13 +271,28 @@ class ToolBox:
 
         reference = store.next_reference(self.conn)
         summary = self._summary(fields)
+        titre = f"Appel découverte · {name}"
+        if branding:
+            titre += f" · {branding}"
+        elif fields.get("project_type"):
+            titre += f" · {fields['project_type']}"
+        if mode == "visio":
+            description = summary + "\n\nFormat : point visio (lien envoyé avant l'appel)."
+            location = "Visio"
+        elif mode:
+            description = summary + (f"\n\nFormat : appel téléphonique au {phone}." if phone else "\n\nFormat : appel téléphonique.")
+            location = phone or "Téléphone"
+        else:
+            description = summary
+            location = phone or ""
         try:
             event = self.google.create_event(
                 start=start,
                 attendee_email=email,
                 attendee_name=name,
-                summary=f"Appel découverte · {name} · {fields.get('project_type', 'projet')}",
-                description=summary,
+                summary=titre,
+                description=description,
+                location=location,
             )
         except GoogleError as error:
             store.release_slot(self.conn, slot_start)
@@ -308,7 +331,7 @@ class ToolBox:
             lead_id=lead["id"],
             recap_ok=1,
         )
-        mailed = self._send_confirmation(email, name, start, reference)
+        mailed = self._send_confirmation(email, name, start, reference, mode, phone)
         if self.notify:
             self.notify(self._notification(reference, name, email, phone, fields, start))
         self.booking = {
@@ -317,6 +340,9 @@ class ToolBox:
             "start": slot_start,
             "label": self._label(start),
             "email": email,
+            "phone": phone,
+            "branding": branding,
+            "call_mode": mode,
             "mail_sent": mailed,
         }
         self.events.append({"type": "booking", **self.booking})
@@ -324,8 +350,11 @@ class ToolBox:
             "ok": True,
             "reference": lead["reference"],
             "quand": self._label(start),
+            "format": mode,
+            "branding": branding,
+            "telephone": phone,
             "confirmation_envoyee": mailed,
-            "consigne": "Le rendez-vous est posé. Remercie, rappelle le créneau et la référence, et dis que la confirmation part par email.",
+            "consigne": "Le rendez-vous est posé. Remercie, rappelle le créneau, le format et la référence, et dis que la confirmation part par email.",
         }
 
     def save_lead(self, arguments: dict[str, Any]) -> dict[str, Any]:
@@ -383,27 +412,38 @@ class ToolBox:
     @staticmethod
     def _summary(fields: dict[str, str]) -> str:
         lines = ["Brief issu de la page contact", ""]
-        for key in store.FIELDS:
+        for key in (*store.FIELDS, *store.DETAILS):
             if fields.get(key):
                 lines.append(f"{store.FIELD_LABELS[key].capitalize()} : {fields[key]}")
         return "\n".join(lines)
 
-    def _confirmation_text(self, name: str, start: datetime, reference: str) -> str:
+    def _confirmation_text(
+        self, name: str, start: datetime, reference: str, mode: str = "", phone: str = ""
+    ) -> str:
+        if mode == "visio":
+            format_line = "Le point se fait en visio : le lien vous parvient avant l'appel."
+        elif mode:
+            format_line = "L'appel se fait au téléphone" + (f" au {phone}." if phone else ".")
+        else:
+            format_line = "L'appel se fait au téléphone."
         return (
             f"Bonjour {name},\n\n"
-            f"Votre rendez-vous est confirmé : {self._label(start)}, heure de Paris, pour 20 minutes.\n"
-            f"Référence : {reference}\n\n"
+            f"Votre rendez-vous est confirmé : {self._label(start)}, heure de Paris, pour 30 minutes.\n"
+            f"Référence : {reference}\n"
+            f"{format_line}\n\n"
             "L'appel sert à cadrer votre besoin. Si vous avez des références, un site existant ou un brief, "
             "vous pouvez répondre à cet email avec les éléments.\n\n"
             "À bientôt,\nSujee Design\nhttps://sujeedesign.com"
         )
 
-    def _send_confirmation(self, email: str, name: str, start: datetime, reference: str) -> bool:
+    def _send_confirmation(
+        self, email: str, name: str, start: datetime, reference: str, mode: str = "", phone: str = ""
+    ) -> bool:
         try:
             self.google.send_mail(
                 to=email,
                 subject=f"Votre rendez-vous avec Sujee Design · {start:%d/%m à %Hh%M}",
-                text=self._confirmation_text(name, start, reference),
+                text=self._confirmation_text(name, start, reference, mode, phone),
             )
             return True
         except GoogleError:
@@ -423,7 +463,7 @@ class ToolBox:
             f"{self._label(start)} · {name} · {email}" + (f" · {phone}" if phone else ""),
             "",
         ]
-        for key in store.FIELDS:
+        for key in (*store.FIELDS, *store.DETAILS):
             if fields.get(key):
                 lines.append(f"{store.FIELD_LABELS[key]} : {fields[key]}")
         return "\n".join(lines)

@@ -17,7 +17,13 @@ FIELDS: tuple[str, ...] = (
 FIELD_LABELS = {
     "project_type": "type de projet",
     "context": "activité / secteur",
+    "branding": "branding à réaliser",
+    "phone": "téléphone",
+    "call_mode": "point visio ou téléphonique",
 }
+# Détails demandés au moment de la réservation (jamais avant les créneaux).
+DETAILS: tuple[str, ...] = ("branding", "phone", "call_mode")
+CALL_MODES = {"visio": "visio", "telephone": "téléphonique"}
 # `recap` et `coordonnees` restent déclarés pour les sessions déjà ouvertes en base.
 STEPS = ("accueil", "qualification", "coordonnees", "creneaux", "confirme")
 STATUS_OPEN = "ouverte"
@@ -137,12 +143,26 @@ def set_contact(conn: sqlite3.Connection, session_id: str, name: str = "", email
         touch(conn, session_id, **values)
 
 
+def session_details(session: sqlite3.Row | dict[str, Any] | None) -> dict[str, str]:
+    """Branding, téléphone et mode d'appel déjà donnés au moment de réserver."""
+    fields = session_fields(session)
+    return {key: fields[key] for key in DETAILS if fields.get(key)}
+
+
+def set_details(
+    conn: sqlite3.Connection, session_id: str, learned: dict[str, Any]
+) -> dict[str, str]:
+    """Enregistre les détails de réservation sans les faire entrer dans la qualification."""
+    values = {key: value for key, value in (learned or {}).items() if key in DETAILS}
+    return merge_fields(conn, session_id, values)
+
+
 def merge_fields(conn: sqlite3.Connection, session_id: str, learned: dict[str, Any]) -> dict[str, str]:
     """Fusionne les champs appris. Les valeurs vides n'écrasent rien."""
     row = get_session(conn, session_id)
     current = session_fields(row) if row else {}
     for key, value in (learned or {}).items():
-        if key not in FIELDS:
+        if key not in FIELDS and key not in DETAILS:
             continue
         text = " ".join(str(value or "").split())[:600]
         if text:
