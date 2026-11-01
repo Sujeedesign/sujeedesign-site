@@ -30,14 +30,13 @@
   display: grid;
   grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
   gap: clamp(36px, 5vw, 76px);
-  align-items: start;
-  padding-block: clamp(8px, 1.5vw, 24px) clamp(56px, 7vw, 96px);
+  /* Pleine largeur (pas de conteneur borné) et contenu centré
+     verticalement dans la section : les deux colonnes se calent au milieu
+     de la hauteur disponible. */
+  align-items: center;
+  align-content: center;
+  padding-block: clamp(24px, 4vw, 56px);
   overflow-x: clip;
-  /* Contenu recentré : la scène reste pleine largeur (fond animé), mais le
-     bloc éditorial + console se cale au centre du viewport sur grand écran. */
-  width: 100%;
-  max-width: 1240px;
-  margin-inline: auto;
 }
 
 /* Colonne éditoriale -------------------------------------------------- */
@@ -944,7 +943,8 @@
    échanges : le fil défile à l'intérieur, le cadre garde sa taille. */
 @media (min-width: 1025px) {
   .shell {
-    align-items: start;
+    /* Colonnes centrées verticalement l'une par rapport à l'autre. */
+    align-items: center;
   }
 
   .panel {
@@ -1056,5 +1056,51 @@
 
   .meterFill {
     transition: none;
+  }
+}
+
+/* Formulaire de contact ------------------------------------------------ */
+/* Le cadre garde sa hauteur stable : quand le formulaire s'ouvre, c'est la
+   zone du formulaire qui défile (le fil est réduit), sinon overflow:hidden
+   rognait le bas du formulaire et le bouton d'envoi était inatteignable. */
+.frameForm .log {
+  flex: 0 1 auto;
+  max-height: 26%;
+  overflow-y: auto;
+}
+
+.frameForm .handoff {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(10, 10, 11, 0.18) transparent;
+  padding-bottom: 4px;
+}
+
+.frameForm .handoff::-webkit-scrollbar {
+  width: 6px;
+}
+
+.frameForm .handoff::-webkit-scrollbar-thumb {
+  background: rgba(10, 10, 11, 0.16);
+  border-radius: 3px;
+}
+
+/* Sur mobile et tablette la page défile déjà : le formulaire ouvert prend sa
+   hauteur naturelle, le cadre ne le rogne plus. */
+@media (max-width: 1024px) {
+  .frameForm {
+    height: auto;
+    max-height: none;
+  }
+
+  .frameForm .handoff {
+    overflow-y: visible;
+  }
+
+  .frameForm .log {
+    max-height: 220px;
   }
 }

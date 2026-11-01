@@ -399,7 +399,7 @@ export default function ContactChat() {
 
       <section className={styles.panel} aria-label="Conversation avec l'assistant">
         <div className={styles.halo} aria-hidden="true" />
-        <div className={styles.frame}>
+        <div className={`${styles.frame} ${showForm ? styles.frameForm : ""}`}>
           <header className={styles.panelHead}>
             <div className={styles.ident}>
               <span className={styles.pulse} aria-hidden="true" />
