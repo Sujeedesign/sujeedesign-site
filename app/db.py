@@ -10,7 +10,7 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-SCHEMA_VERSION = 8
+SCHEMA_VERSION = 9
 
 # Colonnes ajoutées après la première mise en production. Chaque entrée est
 # appliquée une seule fois, dans l'ordre, par `migrate` (idempotent).
@@ -152,6 +152,12 @@ CREATE INDEX IF NOT EXISTS idx_prestations_statut ON prestations(statut, positio
 -- Slugs déjà repris depuis le site statique : sert de pierre tombale pour ne
 -- jamais ressusciter une fiche supprimée volontairement dans l'admin.
 CREATE TABLE IF NOT EXISTS catalogue_seeded (
+  slug TEXT PRIMARY KEY,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Même pierre tombale pour les prestations reprises du site statique.
+CREATE TABLE IF NOT EXISTS prestations_seeded (
   slug TEXT PRIMARY KEY,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );

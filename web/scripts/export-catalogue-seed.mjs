@@ -46,6 +46,29 @@ const rows = projects.map((p, i) => {
 });
 
 const target = path.join(here, "app/data/catalogue_seed.json");
+
+// Les prestations aussi : /admin/prestations partait vide alors que le site
+// affiche déjà ces cinq offres en dur. Même règle, insertion seule.
+const services = JSON.parse(
+  fs.readFileSync(path.join(here, "web/content/services.json"), "utf8"),
+);
+const prestations = (services.prestations?.rows ?? []).map((r, i) => ({
+  slug: String(r.href ?? "").split("/").filter(Boolean).pop() ?? `prestation-${i + 1}`,
+  nom: r.title ?? "",
+  accroche: r.summary ?? "",
+  description: "",
+  prix: "",
+  duree: r.dur ?? "",
+  livrables: r.tags ?? [],
+  statut: "publie",
+  position: (i + 1) * 10,
+}));
+
 fs.mkdirSync(path.dirname(target), { recursive: true });
-fs.writeFileSync(target, JSON.stringify({ version: 1, projets: rows }, null, 2) + "\n");
-console.log(`${rows.length} projets écrits dans ${target}`);
+fs.writeFileSync(
+  target,
+  JSON.stringify({ version: 2, projets: rows, prestations }, null, 2) + "\n",
+);
+console.log(
+  `${rows.length} projets et ${prestations.length} prestations écrits dans ${target}`,
+);

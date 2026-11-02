@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "projets": [
     {
       "slug": "club-med",
@@ -727,6 +727,90 @@
       ],
       "results": [],
       "position": 80
+    }
+  ],
+  "prestations": [
+    {
+      "slug": "identite-de-marque",
+      "nom": "Identité de marque",
+      "accroche": "Nom, logotype, système typographique, couleurs, guide d'usage. Un système qui tient sur un menu, une carte de visite et une devanture.",
+      "description": "",
+      "prix": "",
+      "duree": "3 à 5 semaines",
+      "livrables": [
+        "Nom",
+        "Logotype",
+        "Typographie",
+        "Couleurs",
+        "Guide"
+      ],
+      "statut": "publie",
+      "position": 10
+    },
+    {
+      "slug": "direction-artistique",
+      "nom": "Direction artistique",
+      "accroche": "Print, éditions, campagnes, photographie. Je tiens le ton visuel sur la durée, pas seulement sur la première campagne.",
+      "description": "",
+      "prix": "",
+      "duree": "1 à 3 semaines",
+      "livrables": [
+        "Print",
+        "Photo",
+        "Campagne",
+        "Édition"
+      ],
+      "statut": "publie",
+      "position": 20
+    },
+    {
+      "slug": "site-ecommerce",
+      "nom": "Site & e-commerce",
+      "accroche": "Design, intégration WordPress ou Shopify, SEO technique, performance, formation. Vous gardez la main sur le contenu.",
+      "description": "",
+      "prix": "",
+      "duree": "3 à 6 semaines",
+      "livrables": [
+        "UX",
+        "Design",
+        "WordPress",
+        "Shopify",
+        "SEO"
+      ],
+      "statut": "publie",
+      "position": 30
+    },
+    {
+      "slug": "contenu-reseaux",
+      "nom": "Contenu & réseaux",
+      "accroche": "Ligne éditoriale, gabarits réutilisables, production régulière. Le but est que vous puissiez continuer sans moi.",
+      "description": "",
+      "prix": "",
+      "duree": "En continu",
+      "livrables": [
+        "Ligne édito",
+        "Gabarits",
+        "Photo",
+        "Rédaction"
+      ],
+      "statut": "publie",
+      "position": 40
+    },
+    {
+      "slug": "agents-ia",
+      "nom": "Agents IA",
+      "accroche": "Audit des tâches répétitives, automatisations, assistants internes, formation. On mesure le temps gagné, sinon on arrête.",
+      "description": "",
+      "prix": "",
+      "duree": "1 à 4 semaines",
+      "livrables": [
+        "Audit",
+        "Automatisation",
+        "Agents",
+        "Formation"
+      ],
+      "statut": "publie",
+      "position": 50
     }
   ]
 }

@@ -15,6 +15,10 @@ def _seed() -> list[dict]:
     return json.loads(Path(catalogue.SEED_PATH).read_text(encoding="utf-8"))["projets"]
 
 
+def _seed_prestations() -> list[dict]:
+    return json.loads(Path(catalogue.SEED_PATH).read_text(encoding="utf-8"))["prestations"]
+
+
 def _connect(tmp_path: Path) -> sqlite3.Connection:
     conn = sqlite3.connect(tmp_path / "catalogue.db")
     conn.row_factory = sqlite3.Row
@@ -24,11 +28,14 @@ def _connect(tmp_path: Path) -> sqlite3.Connection:
 
 def test_seed_reprend_les_fiches_du_site_une_seule_fois(tmp_path: Path) -> None:
     conn = _connect(tmp_path)
-    attendu = len(_seed())
+    attendu = len(_seed()) + len(_seed_prestations())
 
     assert catalogue.seed_from_file(conn) == attendu
     assert catalogue.seed_from_file(conn) == 0
-    assert conn.execute("SELECT COUNT(*) FROM projets").fetchone()[0] == attendu
+    assert conn.execute("SELECT COUNT(*) FROM projets").fetchone()[0] == len(_seed())
+    assert conn.execute("SELECT COUNT(*) FROM prestations").fetchone()[0] == len(
+        _seed_prestations()
+    )
 
 
 def test_seed_ne_ressuscite_pas_une_fiche_supprimee(tmp_path: Path) -> None:
@@ -39,6 +46,28 @@ def test_seed_ne_ressuscite_pas_une_fiche_supprimee(tmp_path: Path) -> None:
 
     assert catalogue.seed_from_file(conn) == 0
     assert conn.execute("SELECT 1 FROM projets WHERE slug = 'dekra'").fetchone() is None
+
+
+def test_seed_reprend_les_prestations_du_site(tmp_path: Path) -> None:
+    conn = _connect(tmp_path)
+    catalogue.seed_from_file(conn)
+
+    lignes = {
+        row["slug"]: row
+        for row in conn.execute("SELECT slug, nom, duree, livrables, statut FROM prestations")
+    }
+    source = {p["slug"]: p for p in _seed_prestations()}
+
+    assert set(lignes) == set(source)
+    assert lignes["identite-de-marque"]["nom"] == "Identité de marque"
+    assert lignes["identite-de-marque"]["statut"] == "publie"
+    assert json.loads(lignes["agents-ia"]["livrables"]) == source["agents-ia"]["livrables"]
+
+    # Même règle que les fiches : une prestation supprimée ne revient pas.
+    conn.execute("DELETE FROM prestations WHERE slug = 'agents-ia'")
+    conn.commit()
+    assert catalogue.seed_from_file(conn) == 0
+    assert conn.execute("SELECT 1 FROM prestations WHERE slug = 'agents-ia'").fetchone() is None
 
 
 def test_export_garde_la_couverture_separee_de_la_galerie(tmp_path: Path) -> None:

@@ -864,6 +864,15 @@ html { scrollbar-color: var(--line-strong) transparent; scrollbar-width: thin; }
   border-bottom: 1px solid var(--line-soft);
   position: relative;
 }
+/* Les visuels de couverture ne doivent jamais imposer leur taille intrinsèque
+   à la grille : sans ça une photo portrait écrase la carte et déborde. */
+.lib-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .lib-thumb i {
   position: absolute;
   left: 10px;

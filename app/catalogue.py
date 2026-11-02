@@ -441,6 +441,39 @@ def seed_from_file(conn: sqlite3.Connection, path: Path | None = None) -> int:
         )
         conn.execute("INSERT OR IGNORE INTO catalogue_seeded (slug) VALUES (?)", (slug,))
         added += 1
+
+    # Prestations : reprise des cinq offres affichées en dur sur le site. Même
+    # règle d'insertion seule, avec sa propre pierre tombale.
+    for row in payload.get("prestations") or []:
+        slug = _text(row.get("slug"))
+        if not slug:
+            continue
+        if conn.execute("SELECT 1 FROM prestations_seeded WHERE slug = ?", (slug,)).fetchone():
+            continue
+        if conn.execute("SELECT 1 FROM prestations WHERE slug = ?", (slug,)).fetchone():
+            conn.execute("INSERT OR IGNORE INTO prestations_seeded (slug) VALUES (?)", (slug,))
+            continue
+        conn.execute(
+            """
+            INSERT INTO prestations (
+              slug, nom, accroche, description, prix, duree, livrables,
+              statut, position
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, 'publie', ?)
+            """,
+            (
+                slug,
+                _text(row.get("nom")),
+                _text(row.get("accroche")),
+                _text(row.get("description")),
+                _text(row.get("prix")),
+                _text(row.get("duree")),
+                json.dumps(row.get("livrables") or [], ensure_ascii=False),
+                int(row.get("position") or 0),
+            ),
+        )
+        conn.execute("INSERT OR IGNORE INTO prestations_seeded (slug) VALUES (?)", (slug,))
+        added += 1
+
     if added:
         conn.commit()
     return added
