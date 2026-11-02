@@ -12,6 +12,7 @@ import {
 import { ServiceContenu, pageMeta as metaContenu } from "@/components/pages/ServiceContenu";
 import { JsonLd } from "@/components/site/JsonLd";
 import { PageShell } from "@/components/site/PageShell";
+import { getServiceContent, servicePageSlugs, type ServicePageSlug } from "@/lib/content/live";
 import { pageMetadata } from "@/lib/page-metadata";
 import { routes, serviceHref, servicePath, serviceSlugs, type ServiceSlug } from "@/lib/routes";
 import { breadcrumbNode, pageGraph, serviceCatalog, serviceNode, webPageNode } from "@/lib/structured-data";
@@ -22,7 +23,7 @@ import { breadcrumbNode, pageGraph, serviceCatalog, serviceNode, webPageNode } f
  * `agents-ia` n'a pas de page sous `/services` : l'offre vit à la racine, on redirige
  * définitivement pour ne pas dupliquer le contenu.
  */
-const services: Record<string, { Component: () => React.JSX.Element; meta: { title: string; description: string } }> = {
+const services: Record<string, { Component: (props: { doc: Record<string, any> }) => React.JSX.Element; meta: { title: string; description: string } }> = {
   "identite-de-marque": { Component: ServiceIdentite, meta: metaIdentite },
   "direction-artistique": { Component: ServiceDirectionArtistique, meta: metaDirection },
   "site-ecommerce": { Component: ServiceSiteEcommerce, meta: metaEcommerce },
@@ -38,6 +39,9 @@ export function generateStaticParams() {
 }
 
 export const dynamicParams = false;
+
+/** Les fiches service se rafraîchissent pour refléter les éditions du back office. */
+export const revalidate = 60;
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
@@ -59,6 +63,9 @@ export default async function Page({ params }: Params) {
   if (!entry) notFound();
 
   const { Component, meta } = entry;
+  const doc = servicePageSlugs.includes(slug as ServicePageSlug)
+    ? await getServiceContent(slug as ServicePageSlug)
+    : {};
 
   return (
     <PageShell current={serviceHref(slug as ServiceSlug)}>
@@ -74,7 +81,7 @@ export default async function Page({ params }: Params) {
         ])}
       />
       <main id="main">
-        <Component />
+        <Component doc={doc} />
       </main>
     </PageShell>
   );

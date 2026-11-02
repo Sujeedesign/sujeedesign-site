@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import html
 import json
 import re
 
@@ -250,7 +251,7 @@ def test_pages_screen_lists_editable_pages(client: TestClient) -> None:
     response = client.get("/admin/pages")
     assert response.status_code == 200
     for slug, label, path in admin.PAGES:
-        assert label in response.text
+        assert html.escape(label) in response.text
         assert f"/admin/contenu?page={slug}" in response.text
     # les présentations projet ne sont pas éditables en place
     assert "/realisations/" not in response.text

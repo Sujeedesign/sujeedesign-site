@@ -11,11 +11,11 @@ describe("pages éditables en place", () => {
     expect(editableSlug("/agents-ia")).toBe("agents-ia");
   });
 
-  it("ignore les fiches service, qui sont des gabarits statiques", () => {
-    // Régression : le premier segment suffisait, donc ces fiches affichaient
-    // « Modifier la page » alors qu'elles n'ont aucun data-field.
+  it("reconnaît les quatre fiches service, branchées sur leur propre document", () => {
+    // Régression : le premier segment renvoyait « services ». Chaque fiche a
+    // désormais son slug et ses data-field.
     for (const slug of ["identite-de-marque", "direction-artistique", "site-ecommerce", "contenu-reseaux"]) {
-      expect(editableSlug(`/services/${slug}`)).toBeNull();
+      expect(editableSlug(`/services/${slug}`)).toBe(slug);
     }
   });
 
@@ -34,7 +34,7 @@ describe("pages éditables en place", () => {
   });
 
   it("replie sur home pour la sonde de session", () => {
-    expect(pageSlug("/services/site-ecommerce")).toBe("home");
+    expect(pageSlug("/services/site-ecommerce")).toBe("site-ecommerce");
     expect(pageSlug("/services")).toBe("services");
   });
 });

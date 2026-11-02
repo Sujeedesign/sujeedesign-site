@@ -53,6 +53,10 @@ PAGES: tuple[tuple[str, str, str], ...] = (
     ("realisations", "Réalisations", "/realisations"),
     ("a-propos", "À propos", "/a-propos"),
     ("agents-ia", "Agents IA", "/agents-ia"),
+    ("identite-de-marque", "Fiche · Identité de marque", "/services/identite-de-marque"),
+    ("direction-artistique", "Fiche · Direction artistique", "/services/direction-artistique"),
+    ("site-ecommerce", "Fiche · Site & e-commerce", "/services/site-ecommerce"),
+    ("contenu-reseaux", "Fiche · Contenu & réseaux", "/services/contenu-reseaux"),
 )
 PAGE_LABELS = {slug: label for slug, label, _ in PAGES}
 PAGE_PATHS = {slug: path for slug, _, path in PAGES}

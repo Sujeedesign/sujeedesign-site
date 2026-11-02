@@ -1,0 +1,204 @@
+{
+  "hero": {
+    "kicker": "Service 01 · Identité de marque",
+    "title": [
+      "Une identité qui tient",
+      "dans la vraie vie."
+    ],
+    "lead": "Un logo seul ne fait pas une marque. Ce qui compte, c'est ce que le nom, la typo et les couleurs produisent sur un menu, une devanture, un colis, un écran de téléphone. Je construis le système, pas juste le signe.",
+    "meta": [
+      {
+        "label": "Durée",
+        "text": "Trois à cinq semaines, selon le nombre de déclinaisons."
+      },
+      {
+        "label": "Livrables",
+        "text": "Sources vectorielles, guide d'usage, palette, typographies."
+      },
+      {
+        "label": "Pour qui",
+        "text": "Commerces, studios, indépendants qui changent de nom ou se lancent."
+      }
+    ]
+  },
+  "scope": {
+    "num": "01",
+    "title": [
+      "Ce que ça",
+      "comprend."
+    ],
+    "lead": "Le détail du périmètre, écrit avant de commencer. Ce qui n'est pas là n'est pas inclus, et c'est dit dès le départ.",
+    "side": "Périmètre",
+    "items": [
+      {
+        "n": "01",
+        "title": "Nom et territoire",
+        "text": "Recherche, shortlist de trois pistes, vérification d'antériorité approximative. On choisit un nom qui se prononce au téléphone."
+      },
+      {
+        "n": "02",
+        "title": "Logotype et déclinaisons",
+        "text": "Version principale, version compacte, favicon, version monochrome, règles de respiration."
+      },
+      {
+        "n": "03",
+        "title": "Système typographique",
+        "text": "Deux familles maximum, hiérarchies, tailles, interlignes, cas d'usage print et écran."
+      },
+      {
+        "n": "04",
+        "title": "Couleurs et matières",
+        "text": "Palette principale et secondaire, contrastes vérifiés, papiers et finitions possibles."
+      },
+      {
+        "n": "05",
+        "title": "Guide d'usage",
+        "text": "Un PDF court et utilisable : ce qu'on fait, ce qu'on ne fait pas, avec des exemples réels."
+      },
+      {
+        "n": "06",
+        "title": "Déclinaisons",
+        "text": "Carte de visite, menu, devanture, gabarit de post, signature mail. Le test grandeur nature."
+      }
+    ]
+  },
+  "methode": {
+    "num": "02",
+    "title": [
+      "Le déroulé."
+    ],
+    "lead": "Un point de validation à chaque étape. Rien ne part en production sans votre accord écrit.",
+    "side": "Méthode",
+    "steps": [
+      {
+        "n": "01",
+        "title": "Cadrage",
+        "text": "Un appel, un questionnaire, trois références que vous aimez et trois que vous détestez.",
+        "dur": "1 semaine"
+      },
+      {
+        "n": "02",
+        "title": "Recherche",
+        "text": "Trois pistes de nom, univers visuels, planches de direction.",
+        "dur": "1 semaine"
+      },
+      {
+        "n": "03",
+        "title": "Design",
+        "text": "Logotype, typographie, couleurs, allers-retours inclus.",
+        "dur": "2 semaines"
+      },
+      {
+        "n": "04",
+        "title": "Livraison",
+        "text": "Déclinaisons, guide, sources, prise en main.",
+        "dur": "1 semaine"
+      }
+    ]
+  },
+  "livrables": {
+    "num": "03",
+    "title": [
+      "Ce que vous",
+      "gardez."
+    ],
+    "lead": "Tout ce qui est produit vous appartient. Aucun verrou, aucune dépendance à mon compte.",
+    "side": "Livrables",
+    "intro": "Sources, accès, documentation, prise en main. La liste complète est dans le périmètre.",
+    "items": [
+      {
+        "title": "Sources",
+        "text": "AI, SVG, EPS, PNG, PDF. Pas seulement des exports."
+      },
+      {
+        "title": "Guide",
+        "text": "PDF de 12 à 20 pages, exemples et interdits."
+      },
+      {
+        "title": "Palette",
+        "text": "Fichiers ASE et hexadécimaux, contrastes testés."
+      },
+      {
+        "title": "Typographies",
+        "text": "Choix libres de droits ou licences achetées à votre nom."
+      }
+    ]
+  },
+  "terrain": {
+    "num": "04",
+    "title": [
+      "Travailler l'identité",
+      "à Cergy et à Paris."
+    ],
+    "lead": "Le studio est à Cergy. Les ateliers de cadrage et les présentations se font sur place, dans le Val-d'Oise ou à Paris, et le reste avance à distance.",
+    "side": "Terrain",
+    "items": [
+      {
+        "n": "01",
+        "title": "Le contexte local change les supports",
+        "text": "Une devanture, un menu, un colis, une étiquette cousue, un écran de téléphone : les contraintes ne sont pas les mêmes selon qu'on vous croise en rue ou qu'on vous trouve en ligne. Le système est éprouvé sur vos supports réels, pas sur une maquette idéale."
+      },
+      {
+        "n": "02",
+        "title": "Elerya, identité et boutique",
+        "text": "Une marque de maroquinerie qui devait paraître installée dès le premier visuel, sans budget de campagne. Logotype, système typographique, direction photo produit et gabarits e-commerce.",
+        "link": {
+          "href": "/realisations/elerya",
+          "label": "Voir la fiche Elerya"
+        }
+      },
+      {
+        "n": "03",
+        "title": "Logofolio 2013 — 2017",
+        "text": "Onze logotypes présentés sans mise en scène, pour des clients de secteurs différents : maison d'hôtes, fruits, événementiel, automobile, conseil, média. La méthode se lit dans la série.",
+        "link": {
+          "href": "/realisations/logofolio",
+          "label": "Voir le logofolio"
+        }
+      },
+      {
+        "n": "04",
+        "title": "Quand l'identité continue ailleurs",
+        "text": "Une marque neuve a souvent besoin de deux choses de plus : un cadre pour les campagnes et les photographes, et un site qu'on modifie seul. Les deux sont décrits séparément.",
+        "link": {
+          "href": "/services/direction-artistique",
+          "label": "Direction artistique"
+        },
+        "link2": {
+          "href": "/services/site-ecommerce",
+          "label": "Site & e-commerce"
+        }
+      }
+    ]
+  },
+  "faq": {
+    "num": "05",
+    "title": [
+      "Les questions",
+      "qui reviennent."
+    ],
+    "side": "FAQ",
+    "items": [
+      {
+        "q": "Et si je n'ai pas encore de nom ?",
+        "a": "C'est le cas une fois sur deux. La recherche de nom fait partie du périmètre, avec une shortlist de trois pistes et une vérification d'usage."
+      },
+      {
+        "q": "Combien d'allers-retours ?",
+        "a": "Deux par étape, inclus. Au-delà, on en discute avant de continuer : je préfère le dire que facturer en surprise."
+      },
+      {
+        "q": "Je garde les fichiers ?",
+        "a": "Oui. Sources vectorielles, guide, palette, tout est à vous, sans compte à rebours ni licence cachée."
+      },
+      {
+        "q": "Vous travaillez seulement à Cergy ?",
+        "a": "Non. Le studio est à Cergy, les rendez-vous se font sur place dans le Val-d'Oise et à Paris, et le reste du projet se suit à distance, avec les mêmes points de validation."
+      }
+    ]
+  },
+  "cta": {
+    "text": "Votre marque ne vous ressemble plus ?",
+    "label": "Parler de mon identité"
+  }
+}

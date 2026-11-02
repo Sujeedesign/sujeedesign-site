@@ -1,0 +1,153 @@
+{
+  "hero": {
+    "kicker": "Service 03 · Site & e-commerce",
+    "title": [
+      "Un site rapide",
+      "que vous gérez seul."
+    ],
+    "lead": "Beaucoup de sites sont beaux et impossibles à modifier. Le mien est fait pour que vous puissiez changer un texte, une photo, un produit, sans appeler personne et sans casser la page.",
+    "meta": [
+      {
+        "label": "Durée",
+        "text": "Trois à six semaines, contenu inclus selon le forfait retenu."
+      },
+      {
+        "label": "Livrables",
+        "text": "Site en ligne, accès admin, documentation, formation."
+      },
+      {
+        "label": "Pour qui",
+        "text": "PME, commerces, marques qui vendent ou veulent être trouvées."
+      }
+    ]
+  },
+  "scope": {
+    "num": "01",
+    "title": [
+      "Ce que ça",
+      "comprend."
+    ],
+    "lead": "Le détail du périmètre, écrit avant de commencer. Ce qui n'est pas là n'est pas inclus, et c'est dit dès le départ.",
+    "side": "Périmètre",
+    "items": [
+      {
+        "n": "01",
+        "title": "Cadrage et arborescence",
+        "text": "Ce que le visiteur cherche, dans quel ordre, et où il doit cliquer. Avant le design."
+      },
+      {
+        "n": "02",
+        "title": "Design des pages",
+        "text": "Maquettes desktop et mobile, validées avant toute intégration."
+      },
+      {
+        "n": "03",
+        "title": "Intégration WordPress ou Shopify",
+        "text": "Thème sur mesure ou thème épuré, sans usine à plugins."
+      },
+      {
+        "n": "04",
+        "title": "SEO technique",
+        "text": "Structure, balises, données structurées, sitemap, redirections, vitesse."
+      },
+      {
+        "n": "05",
+        "title": "Performance",
+        "text": "Images compressées, cache, chargement sous deux secondes sur mobile."
+      },
+      {
+        "n": "06",
+        "title": "Formation et passation",
+        "text": "Deux heures pour que vous sachiez publier, modifier et sauvegarder."
+      }
+    ]
+  },
+  "methode": {
+    "num": "02",
+    "title": [
+      "Le déroulé."
+    ],
+    "lead": "Un point de validation à chaque étape. Rien ne part en production sans votre accord écrit.",
+    "side": "Méthode",
+    "steps": [
+      {
+        "n": "01",
+        "title": "Cadrage",
+        "text": "Objectifs, arborescence, contenus existants, contraintes techniques.",
+        "dur": "1 semaine"
+      },
+      {
+        "n": "02",
+        "title": "Design",
+        "text": "Maquettes des pages clés, deux allers-retours.",
+        "dur": "1 à 2 semaines"
+      },
+      {
+        "n": "03",
+        "title": "Intégration",
+        "text": "Développement, contenus, recette sur mobile et desktop.",
+        "dur": "2 à 3 semaines"
+      },
+      {
+        "n": "04",
+        "title": "Mise en ligne",
+        "text": "Nom de domaine, redirections, analytics, formation.",
+        "dur": "3 jours"
+      }
+    ]
+  },
+  "livrables": {
+    "num": "03",
+    "title": [
+      "Ce que vous",
+      "gardez."
+    ],
+    "lead": "Tout ce qui est produit vous appartient. Aucun verrou, aucune dépendance à mon compte.",
+    "side": "Livrables",
+    "intro": "Sources, accès, documentation, prise en main. La liste complète est dans le périmètre.",
+    "items": [
+      {
+        "title": "Le site",
+        "text": "En ligne, sauvegardé, avec certificat et redirections propres."
+      },
+      {
+        "title": "Les accès",
+        "text": "Hébergement, domaine et CMS à votre nom, pas au mien."
+      },
+      {
+        "title": "La doc",
+        "text": "Un PDF : publier, modifier, sauvegarder, que faire en cas de panne."
+      },
+      {
+        "title": "La formation",
+        "text": "Deux heures en visio, enregistrées si vous voulez."
+      }
+    ]
+  },
+  "faq": {
+    "num": "04",
+    "title": [
+      "Les questions",
+      "qui reviennent."
+    ],
+    "side": "FAQ",
+    "items": [
+      {
+        "q": "WordPress ou Shopify ?",
+        "a": "Shopify si vous vendez des produits physiques avec stock et paiement. WordPress si le site est surtout éditorial ou de présentation. Je vous dis lequel avant de commencer."
+      },
+      {
+        "q": "Qui écrit les textes ?",
+        "a": "Vous, ou moi en option. Dans les deux cas je fournis la structure et les niveaux de titre, c'est ce qui fait la différence."
+      },
+      {
+        "q": "Et la maintenance après ?",
+        "a": "Possible, jamais obligatoire. Vous avez la documentation pour vivre sans moi."
+      }
+    ]
+  },
+  "cta": {
+    "text": "Votre site vous coûte plus qu'il ne rapporte ?",
+    "label": "Auditer mon site"
+  }
+}

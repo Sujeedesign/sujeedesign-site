@@ -3,6 +3,10 @@ import agentsIaJson from "@/content/agents-ia.json";
 import homeJson from "@/content/home.json";
 import realisationsJson from "@/content/realisations.json";
 import servicesJson from "@/content/services.json";
+import identiteJson from "@/content/services/identite-de-marque.json";
+import directionJson from "@/content/services/direction-artistique.json";
+import ecommerceJson from "@/content/services/site-ecommerce.json";
+import contenuJson from "@/content/services/contenu-reseaux.json";
 import { contactLinks } from "@/lib/content/contact-links";
 import { homeSchema, type HomeContent } from "@/lib/content/schema";
 
@@ -39,6 +43,10 @@ const fallbackFor = (slug: string): unknown => {
   if (slug === "realisations") return realisationsJson;
   if (slug === "a-propos") return aProposJson;
   if (slug === "agents-ia") return agentsIaJson;
+  if (slug === "identite-de-marque") return identiteJson;
+  if (slug === "direction-artistique") return directionJson;
+  if (slug === "site-ecommerce") return ecommerceJson;
+  if (slug === "contenu-reseaux") return contenuJson;
   return null;
 };
 
@@ -86,4 +94,25 @@ export async function getPageContent(slug: PageSlug) {
   const base = fallbackFor(slug);
   const doc = (remote ? merge(base, remote) : base) as { hero?: Record<string, unknown> };
   return contactLinks(doc);
+}
+
+/** Fiches service : document complet `{ hero, scope, methode, livrables, faq, cta }`. */
+export type ServicePageSlug =
+  | "identite-de-marque"
+  | "direction-artistique"
+  | "site-ecommerce"
+  | "contenu-reseaux";
+
+export const servicePageSlugs: ServicePageSlug[] = [
+  "identite-de-marque",
+  "direction-artistique",
+  "site-ecommerce",
+  "contenu-reseaux",
+];
+
+export async function getServiceContent(slug: ServicePageSlug): Promise<Record<string, any>> {
+  const base = fallbackFor(slug);
+  if (!base) return {};
+  const remote = await fetchDocument(slug);
+  return contactLinks(merge(base, remote ?? {}) as Record<string, any>);
 }

@@ -1,23 +1,37 @@
 import { routes } from "@/lib/routes";
 
-/** Portage du v5 : service-site-ecommerce.html. Balisage d'origine, liens en urls propres. */
+/** Portage du v5 : service-site-ecommerce.html. Textes pilotés par /content/services. */
 export const pageMeta = {
-  "title": "Site web et e-commerce, Cergy et Paris — Sujee Design",
-  "description": "Des sites WordPress et Shopify rapides, que vous modifiez seul : changer un texte, une photo, un produit, sans développeur. Livrés avec la prise en main."
+  "title": 'Site web et e-commerce, Cergy et Paris — Sujee Design',
+  "description": 'Des sites WordPress et Shopify rapides, que vous modifiez seul : changer un texte, une photo, un produit, sans développeur. Livrés avec la prise en main.'
 };
 
-export function ServiceSiteEcommerce() {
+type Doc = Record<string, any>;
+
+export function ServiceSiteEcommerce({ doc }: { doc: Doc }) {
+  const hero = doc.hero ?? {};
+  const scope = doc.scope ?? {};
+  const methode = doc.methode ?? {};
+  const livrables = doc.livrables ?? {};
+  const faq = doc.faq ?? {};
+  const cta = doc.cta ?? {};
+  const title: string[] = hero.title ?? [];
+  const scopeItems: Doc[] = scope.items ?? [];
+  const steps: Doc[] = methode.steps ?? [];
+  const deliverItems: Doc[] = livrables.items ?? [];
+  const faqItems: Doc[] = faq.items ?? [];
+
   return (
     <>
 <div>
         <header className="sp-hero">
           <div className="ia-hero__mesh" aria-hidden="true" />
           <div className="wrap">
-            <p className="kick ia-kick"><span className="live-dot" aria-hidden="true" />Service 03 · Site &amp; e-commerce</p>
+            <p className="kick ia-kick" data-field="hero.kicker"><span className="live-dot" aria-hidden="true" />{hero.kicker}</p>
             <div className="sp-hero__grid">
               <div>
-                <h1 className="sp-hero__title">Un site rapide <span className="hl">que vous gérez seul.</span></h1>
-                <p className="sp-hero__lead">Beaucoup de sites sont beaux et impossibles à modifier. Le mien est fait pour que vous puissiez changer un texte, une photo, un produit, sans appeler personne et sans casser la page.</p>
+                <h1 className="sp-hero__title">{title[0]} <span className="hl" data-field="hero.title.1">{title[1]}</span></h1>
+                <p className="sp-hero__lead" data-field="hero.lead">{hero.lead}</p>
                 <div className="sp-hero__cta">
                   <a className="btn-fill" href={routes.contact}>Parler de mon projet <span aria-hidden="true">↗</span></a>
                   <a className="btn-line" href="/services">Tous les services</a>
@@ -27,66 +41,70 @@ export function ServiceSiteEcommerce() {
                 <img src="/assets/img/svc-site.jpg" alt="Maquettes imprimées d'une grille de page web et onglet vermillon." width={1400} height={933} />
               </div>
             </div>
-            <div className="sv-hero__meta"><div><span>Durée</span><p>Trois à six semaines, contenu inclus selon le forfait retenu.</p></div><div><span>Livrables</span><p>Site en ligne, accès admin, documentation, formation.</p></div><div><span>Pour qui</span><p>PME, commerces, marques qui vendent ou veulent être trouvées.</p></div></div>
+            <div className="sv-hero__meta">{hero.meta?.map((m: Doc, i: number) => <div key={i}><span data-field={`hero.meta.${i}.label`}>{m.label}</span><p data-field={`hero.meta.${i}.text`}>{m.text}</p></div>)}</div>
           </div>
         </header>
+
         <section className="section">
           <div className="wrap">
             <div className="sec-head rv">
-              <div className="sec-num">01</div>
-              <div><h2>Ce que ça<br />comprend.</h2><p>Le détail du périmètre, écrit avant de commencer. Ce qui n'est pas là n'est pas inclus, et c'est dit dès le départ.</p></div>
-              <div className="side">Périmètre</div>
+              <div className="sec-num">{scope.num}</div>
+              <div><h2>{scope.title?.[0]}<br />{scope.title?.[1]}</h2><p data-field="scope.lead">{scope.lead}</p></div>
+              <div className="side">{scope.side}</div>
             </div>
-            <div className="sp-items rv"><div className="sp-item"><b>01</b><div><h3>Cadrage et arborescence</h3><p>Ce que le visiteur cherche, dans quel ordre, et où il doit cliquer. Avant le design.</p></div></div><div className="sp-item"><b>02</b><div><h3>Design des pages</h3><p>Maquettes desktop et mobile, validées avant toute intégration.</p></div></div><div className="sp-item"><b>03</b><div><h3>Intégration WordPress ou Shopify</h3><p>Thème sur mesure ou thème épuré, sans usine à plugins.</p></div></div><div className="sp-item"><b>04</b><div><h3>SEO technique</h3><p>Structure, balises, données structurées, sitemap, redirections, vitesse.</p></div></div><div className="sp-item"><b>05</b><div><h3>Performance</h3><p>Images compressées, cache, chargement sous deux secondes sur mobile.</p></div></div><div className="sp-item"><b>06</b><div><h3>Formation et passation</h3><p>Deux heures pour que vous sachiez publier, modifier et sauvegarder.</p></div></div></div>
+            <div className="sp-items rv">{scopeItems.map((item, i) => <div className="sp-item" key={i}><b>{item.n}</b><div><h3 data-field={`scope.items.${i}.title`}>{item.title}</h3><p data-field={`scope.items.${i}.text`}>{item.text}</p></div></div>)}</div>
           </div>
         </section>
+
         <section className="section section--tint">
           <div className="wrap">
             <div className="sec-head rv">
-              <div className="sec-num">02</div>
-              <div><h2>Le déroulé.</h2><p>Un point de validation à chaque étape. Rien ne part en production sans votre accord écrit.</p></div>
-              <div className="side">Méthode</div>
+              <div className="sec-num">{methode.num}</div>
+              <div><h2>{methode.title?.[0]}</h2><p data-field="methode.lead">{methode.lead}</p></div>
+              <div className="side">{methode.side}</div>
             </div>
             <div className="method rv">
               <div className="method__rail" aria-hidden="true"><span /></div>
-              <div className="method__steps method__steps--4"><div className="method__step"><b>01</b><span>Cadrage</span><i>Objectifs, arborescence, contenus existants, contraintes techniques.</i><em>1 semaine</em></div><div className="method__step"><b>02</b><span>Design</span><i>Maquettes des pages clés, deux allers-retours.</i><em>1 à 2 semaines</em></div><div className="method__step"><b>03</b><span>Intégration</span><i>Développement, contenus, recette sur mobile et desktop.</i><em>2 à 3 semaines</em></div><div className="method__step"><b>04</b><span>Mise en ligne</span><i>Nom de domaine, redirections, analytics, formation.</i><em>3 jours</em></div></div>
+              <div className="method__steps method__steps--4">{steps.map((step, i) => <div className="method__step" key={i}><b>{step.n}</b><span data-field={`methode.steps.${i}.title`}>{step.title}</span><i data-field={`methode.steps.${i}.text`}>{step.text}</i><em>{step.dur}</em></div>)}</div>
             </div>
           </div>
         </section>
+
         <section className="section">
           <div className="wrap">
             <div className="sec-head rv">
-              <div className="sec-num">03</div>
-              <div><h2>Ce que vous<br />gardez.</h2><p>Tout ce qui est produit vous appartient. Aucun verrou, aucune dépendance à mon compte.</p></div>
-              <div className="side">Livrables</div>
+              <div className="sec-num">{livrables.num}</div>
+              <div><h2>{livrables.title?.[0]}<br />{livrables.title?.[1]}</h2><p data-field="livrables.lead">{livrables.lead}</p></div>
+              <div className="side">{livrables.side}</div>
             </div>
             <div className="deliver rv">
-              <div className="deliver__head"><span className="mono">Livrables</span><p>Sources, accès, documentation, prise en main. La liste complète est dans le périmètre.</p></div>
-              <div className="deliver__cols"><div><b>Le site</b><span>En ligne, sauvegardé, avec certificat et redirections propres.</span></div><div><b>Les accès</b><span>Hébergement, domaine et CMS à votre nom, pas au mien.</span></div><div><b>La doc</b><span>Un PDF : publier, modifier, sauvegarder, que faire en cas de panne.</span></div><div><b>La formation</b><span>Deux heures en visio, enregistrées si vous voulez.</span></div></div>
+              <div className="deliver__head"><span className="mono">{livrables.side}</span><p data-field="livrables.intro">{livrables.intro}</p></div>
+              <div className="deliver__cols">{deliverItems.map((item, i) => <div key={i}><b data-field={`livrables.items.${i}.title`}>{item.title}</b><span data-field={`livrables.items.${i}.text`}>{item.text}</span></div>)}</div>
             </div>
           </div>
         </section>
-        <section className="section section--tint">
+
+        <section className="section">
           <div className="wrap">
             <div className="sec-head rv">
-              <div className="sec-num">04</div>
-              <div><h2>Les questions<br />qui reviennent.</h2></div>
-              <div className="side">FAQ</div>
+              <div className="sec-num">{faq.num}</div>
+              <div><h2>{faq.title?.[0]}<br />{faq.title?.[1]}</h2></div>
+              <div className="side">{faq.side}</div>
             </div>
-            <div className="faq rv"><details><summary>WordPress ou Shopify ?</summary><p>Shopify si vous vendez des produits physiques avec stock et paiement. WordPress si le site est surtout éditorial ou de présentation. Je vous dis lequel avant de commencer.</p></details><details><summary>Qui écrit les textes ?</summary><p>Vous, ou moi en option. Dans les deux cas je fournis la structure et les niveaux de titre, c'est ce qui fait la différence.</p></details><details><summary>Et la maintenance après ?</summary><p>Possible, jamais obligatoire. Vous avez la documentation pour vivre sans moi.</p></details></div>
+            <div className="faq rv">{faqItems.map((item, i) => <details key={i}><summary data-field={`faq.items.${i}.q`}>{item.q}</summary><p data-field={`faq.items.${i}.a`}>{item.a}</p></details>)}</div>
           </div>
         </section>
+
         <section className="cta-section">
           <div className="wrap">
             <div className="bandcta bandcta--dark cta-glow">
               <div className="glow" aria-hidden="true" />
-              <p>Votre site vous coûte plus qu'il ne rapporte ?</p>
-              <a className="btn-fill btn-fill--light" href={routes.contact}>Auditer mon site <span aria-hidden="true">↗</span></a>
+              <p data-field="cta.text">{cta.text}</p>
+              <a className="btn-fill btn-fill--light" href={routes.contact}>{cta.label} <span aria-hidden="true">↗</span></a>
             </div>
           </div>
         </section>
       </div>
-
     </>
   );
 }

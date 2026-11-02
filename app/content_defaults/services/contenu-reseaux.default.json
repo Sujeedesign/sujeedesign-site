@@ -1,0 +1,153 @@
+{
+  "hero": {
+    "kicker": "Service 04 · Contenu & réseaux",
+    "title": [
+      "Publier régulièrement",
+      "sans y passer vos soirées."
+    ],
+    "lead": "Le contenu ne manque pas, c'est le rythme qui manque. On installe une ligne éditoriale et des gabarits assez simples pour que la publication tienne dans une heure par semaine.",
+    "meta": [
+      {
+        "label": "Durée",
+        "text": "Mise en place en deux semaines, puis au rythme choisi."
+      },
+      {
+        "label": "Livrables",
+        "text": "Ligne éditoriale, gabarits, calendrier, banque visuelle."
+      },
+      {
+        "label": "Pour qui",
+        "text": "Indépendants et petites structures qui publient par à-coups."
+      }
+    ]
+  },
+  "scope": {
+    "num": "01",
+    "title": [
+      "Ce que ça",
+      "comprend."
+    ],
+    "lead": "Le détail du périmètre, écrit avant de commencer. Ce qui n'est pas là n'est pas inclus, et c'est dit dès le départ.",
+    "side": "Périmètre",
+    "items": [
+      {
+        "n": "01",
+        "title": "Ligne éditoriale",
+        "text": "Trois piliers maximum, ce qu'on dit, ce qu'on ne dit pas, et avec quel ton."
+      },
+      {
+        "n": "02",
+        "title": "Gabarits de publication",
+        "text": "Post, carrousel, story, article. Modèles Figma que vous dupliquez en deux clics."
+      },
+      {
+        "n": "03",
+        "title": "Calendrier",
+        "text": "Trois mois de sujets datés, alignés sur votre actualité et vos temps forts."
+      },
+      {
+        "n": "04",
+        "title": "Production visuelle",
+        "text": "Photos, illustrations, montages. Une banque d'images réutilisable."
+      },
+      {
+        "n": "05",
+        "title": "Rédaction",
+        "text": "Textes courts ou longs, dans votre voix, relus avant publication."
+      },
+      {
+        "n": "06",
+        "title": "Mesure",
+        "text": "Ce qui est lu, ce qui convertit. On garde ce qui marche, on arrête le reste."
+      }
+    ]
+  },
+  "methode": {
+    "num": "02",
+    "title": [
+      "Le déroulé."
+    ],
+    "lead": "Un point de validation à chaque étape. Rien ne part en production sans votre accord écrit.",
+    "side": "Méthode",
+    "steps": [
+      {
+        "n": "01",
+        "title": "Audit",
+        "text": "Ce qui existe, ce qui fonctionne, ce que votre audience attend.",
+        "dur": "3 jours"
+      },
+      {
+        "n": "02",
+        "title": "Ligne édito",
+        "text": "Piliers, ton, formats, exemples concrets.",
+        "dur": "1 semaine"
+      },
+      {
+        "n": "03",
+        "title": "Gabarits",
+        "text": "Modèles éditables et banque visuelle.",
+        "dur": "1 semaine"
+      },
+      {
+        "n": "04",
+        "title": "Rythme",
+        "text": "Production au rythme choisi, avec point mensuel.",
+        "dur": "En continu"
+      }
+    ]
+  },
+  "livrables": {
+    "num": "03",
+    "title": [
+      "Ce que vous",
+      "gardez."
+    ],
+    "lead": "Tout ce qui est produit vous appartient. Aucun verrou, aucune dépendance à mon compte.",
+    "side": "Livrables",
+    "intro": "Sources, accès, documentation, prise en main. La liste complète est dans le périmètre.",
+    "items": [
+      {
+        "title": "Charte édito",
+        "text": "Un document d'une page : piliers, ton, formats, interdits."
+      },
+      {
+        "title": "Gabarits",
+        "text": "Modèles Figma prêts à dupliquer."
+      },
+      {
+        "title": "Calendrier",
+        "text": "Trois mois de sujets datés et priorisés."
+      },
+      {
+        "title": "Banque",
+        "text": "Photos et visuels libres de droits, à votre nom."
+      }
+    ]
+  },
+  "faq": {
+    "num": "04",
+    "title": [
+      "Les questions",
+      "qui reviennent."
+    ],
+    "side": "FAQ",
+    "items": [
+      {
+        "q": "Je dois publier tous les jours ?",
+        "a": "Non. Deux publications utiles par semaine valent mieux que sept posts vides. On choisit un rythme tenable."
+      },
+      {
+        "q": "Vous écrivez à ma place ?",
+        "a": "Oui, sur la base d'un entretien et de vos documents. Vous relisez et validez toujours avant publication."
+      },
+      {
+        "q": "Et si je n'ai rien à dire ?",
+        "a": "C'est le rôle des trois piliers : ils produisent des sujets à l'infini sans répéter la même chose."
+      }
+    ]
+  },
+  "cta": {
+    "text": "Vous publiez quand vous pouvez, pas quand il faut ?",
+    "label": "Tenir un rythme"
+  }
+}

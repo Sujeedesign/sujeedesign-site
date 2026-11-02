@@ -3,13 +3,11 @@
  *
  * Le miroir de cette liste vit dans `app/admin.py` (schémas de contenu par page) :
  * une page absente ici n'a aucun attribut `data-field` dans le DOM, donc l'éditeur
- * n'a rien à accrocher. C'est le cas des fiches service `/services/<slug>`, qui
- * sont des composants React statiques.
+ * n'a rien à accrocher.
  *
- * Correspondance exacte volontaire : `/services/identite-de-marque` partage le
- * premier segment avec `/services`, mais n'est pas éditable. Raisonner sur le
- * premier segment seul affichait « Modifier la page » sur ces fiches, bouton qui
- * ne produisait rien.
+ * Correspondance exacte volontaire : les fiches `/services/<slug>` partagent le
+ * premier segment avec `/services` mais ont chacune leur propre document. Raisonner
+ * sur le premier segment seul affichait « Modifier la page » sur la mauvaise page.
  */
 const EDITABLE_PAGES: Record<string, string> = {
   "/": "home",
@@ -17,6 +15,10 @@ const EDITABLE_PAGES: Record<string, string> = {
   "/realisations": "realisations",
   "/a-propos": "a-propos",
   "/agents-ia": "agents-ia",
+  "/services/identite-de-marque": "identite-de-marque",
+  "/services/direction-artistique": "direction-artistique",
+  "/services/site-ecommerce": "site-ecommerce",
+  "/services/contenu-reseaux": "contenu-reseaux",
 };
 
 /** Normalise une URL de navigation en chemin comparable (`/services/` → `/services`). */

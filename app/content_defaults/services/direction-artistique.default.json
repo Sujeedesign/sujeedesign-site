@@ -1,0 +1,153 @@
+{
+  "hero": {
+    "kicker": "Service 02 · Direction artistique",
+    "title": [
+      "Un ton visuel",
+      "qui ne se perd pas."
+    ],
+    "lead": "La première campagne est facile. La cinquième l'est moins. Je pose un cadre visuel assez précis pour que vos prestataires, vos imprimeurs et vos photographes produisent la même chose sans moi.",
+    "meta": [
+      {
+        "label": "Durée",
+        "text": "Une à trois semaines, hors production photo."
+      },
+      {
+        "label": "Livrables",
+        "text": "Charte visuelle, planches de style, fichiers prêts à imprimer."
+      },
+      {
+        "label": "Pour qui",
+        "text": "Marques qui publient souvent et perdent en cohérence."
+      }
+    ]
+  },
+  "scope": {
+    "num": "01",
+    "title": [
+      "Ce que ça",
+      "comprend."
+    ],
+    "lead": "Le détail du périmètre, écrit avant de commencer. Ce qui n'est pas là n'est pas inclus, et c'est dit dès le départ.",
+    "side": "Périmètre",
+    "items": [
+      {
+        "n": "01",
+        "title": "Charte visuelle",
+        "text": "Grille, cadrages, traitements, fonds autorisés. Les règles qui évitent les approximations."
+      },
+      {
+        "n": "02",
+        "title": "Direction photo",
+        "text": "Moodboard, plan de shoot, choix des lumières, retouche cohérente d'une série à l'autre."
+      },
+      {
+        "n": "03",
+        "title": "Print et édition",
+        "text": "Catalogues, affiches, cartes, packaging. Fichiers prêts à imprimer, avec les bons profils."
+      },
+      {
+        "n": "04",
+        "title": "Campagnes",
+        "text": "Concept, déclinaison print, réseaux et affichage, dans le même langage."
+      },
+      {
+        "n": "05",
+        "title": "Gabarits",
+        "text": "Fichiers Figma ou InDesign que votre équipe remplit sans casser la mise en page."
+      },
+      {
+        "n": "06",
+        "title": "Suivi de production",
+        "text": "Présence sur le shoot, contrôle des BAT, validation avant impression."
+      }
+    ]
+  },
+  "methode": {
+    "num": "02",
+    "title": [
+      "Le déroulé."
+    ],
+    "lead": "Un point de validation à chaque étape. Rien ne part en production sans votre accord écrit.",
+    "side": "Méthode",
+    "steps": [
+      {
+        "n": "01",
+        "title": "Brief",
+        "text": "Objectifs, cibles, historique visuel, contraintes d'impression.",
+        "dur": "3 jours"
+      },
+      {
+        "n": "02",
+        "title": "Direction",
+        "text": "Deux pistes maximum, planches, choix argumentés.",
+        "dur": "1 semaine"
+      },
+      {
+        "n": "03",
+        "title": "Production",
+        "text": "Shoot ou déclinaisons, retouche, mise en gabarit.",
+        "dur": "1 à 2 semaines"
+      },
+      {
+        "n": "04",
+        "title": "Charte",
+        "text": "Documentation des règles et passation à votre équipe.",
+        "dur": "3 jours"
+      }
+    ]
+  },
+  "livrables": {
+    "num": "03",
+    "title": [
+      "Ce que vous",
+      "gardez."
+    ],
+    "lead": "Tout ce qui est produit vous appartient. Aucun verrou, aucune dépendance à mon compte.",
+    "side": "Livrables",
+    "intro": "Sources, accès, documentation, prise en main. La liste complète est dans le périmètre.",
+    "items": [
+      {
+        "title": "Charte",
+        "text": "PDF de direction artistique, planches commentées."
+      },
+      {
+        "title": "Fichiers",
+        "text": "Sources InDesign, Figma, PSD, exports print et web."
+      },
+      {
+        "title": "Photos",
+        "text": "Sélection retouchée, formats recadrés par usage."
+      },
+      {
+        "title": "Gabarits",
+        "text": "Modèles éditables pour vos futures campagnes."
+      }
+    ]
+  },
+  "faq": {
+    "num": "04",
+    "title": [
+      "Les questions",
+      "qui reviennent."
+    ],
+    "side": "FAQ",
+    "items": [
+      {
+        "q": "Vous travaillez avec mon photographe ?",
+        "a": "Oui, ou je propose quelqu'un. Dans les deux cas je fournis le plan de shoot et je valide les images avant retouche."
+      },
+      {
+        "q": "C'est compatible avec mon identité existante ?",
+        "a": "Si l'identité tient la route, je pars d'elle. Si elle pose problème, je le dis avant de commencer."
+      },
+      {
+        "q": "Vous gérez l'impression ?",
+        "a": "Je prépare les fichiers et je contrôle les BAT. Le devis imprimeur reste chez vous, sans marge de ma part."
+      }
+    ]
+  },
+  "cta": {
+    "text": "Vos visuels ne suivent pas le rythme ?",
+    "label": "Cadrer une campagne"
+  }
+}

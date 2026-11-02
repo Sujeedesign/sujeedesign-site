@@ -430,17 +430,50 @@ PAGE_DEFAULTS: dict[str, dict[str, Any]] = {
 }
 
 
+SERVICE_SLUGS: tuple[str, ...] = (
+    "identite-de-marque",
+    "direction-artistique",
+    "site-ecommerce",
+    "contenu-reseaux",
+)
+
+
+def service_defaults_path(slug: str) -> Path:
+    """Référentiel d'une fiche service, dans le même esprit que `defaults_path`.
+
+    Le JSON de la vitrine fait foi ; l'image du back office embarque sa copie.
+    """
+    primary = ROOT / "web" / "content" / "services" / f"{slug}.json"
+    if primary.exists():
+        return primary
+    return Path(__file__).resolve().parent / "content_defaults" / "services" / f"{slug}.default.json"
+
+
+def load_service_defaults(slug: str) -> dict[str, Any]:
+    path = service_defaults_path(slug)
+    try:
+        with path.open(encoding="utf-8") as handle:
+            return json.load(handle)
+    except FileNotFoundError:
+        LOGGER.warning("valeurs par défaut absentes : %s", path)
+        return {}
+
+
 def defaults_for(slug: str) -> dict[str, Any]:
     if slug == "home":
         return load_defaults()
+    if slug in SERVICE_SLUGS:
+        return load_service_defaults(slug)
     return copy.deepcopy(PAGE_DEFAULTS.get(slug, {}))
 
 
 SECTION_LABELS: dict[str, str] = {
     "hero": "Bandeau de tête",
     "prestations": "Prestations",
+    "scope": "Périmètre",
     "methode": "Méthode",
     "livrables": "Ce que vous gardez",
+    "terrain": "Terrain et références",
     "faq": "Questions fréquentes",
     "cta": "Appel à l'action",
 }
@@ -535,6 +568,7 @@ def schema_defaults(slug: str) -> list[dict[str, Any]]:
 SCHEMAS: dict[str, list[dict[str, Any]]] = {
     "home": schema_home(),
     "services": schema_defaults("services"),
+    **{slug: schema_defaults(slug) for slug in SERVICE_SLUGS},
     "realisations": schema_page("realisations", 0, kicker="Sur-titre", lead="Chapô", extra="Phrase en gras"),
     "a-propos": schema_page("a-propos", 3, kicker="Sur-titre", lead="Chapô", extra="Deuxième paragraphe"),
     "agents-ia": schema_page("agents-ia", 2, kicker="Sur-titre", lead="Chapô"),
