@@ -46,11 +46,15 @@ export type Project = {
    */
   cover?: ProjectImage;
   /**
-   * Couverture dédiée au mobile, en portrait (viser 1080×1350, 4:5, 150 Ko max).
+   * Couverture dédiée au mobile, en portrait 9:16 (master 1080×1920, 200 Ko max).
    *
    * Elle remplace `cover` sous 720 px de large, là où un paysage recadré en
-   * `object-fit: cover` coupe le sujet. Optionnelle : sans elle, le rendu
-   * mobile garde la couverture paysage. Le fichier vit dans
+   * `object-fit: cover` coupe le sujet : le hero d'accueil et le film de
+   * /realisations occupent tout l'écran (≈0,46 de ratio en 390×844), donc un
+   * master 9:16 y garde ~82 % de sa largeur contre ~58 % pour un 4:5.
+   * Les cartes de l'accueil (2:3) et la vignette « projet suivant » se dérivent
+   * du même fichier par recadrage centré : un seul master par projet.
+   * Optionnelle : sans elle, le rendu mobile garde la couverture paysage. Le
    * `/assets/img/projet/<slug>/cover-portrait.jpg` (voir la convention de nom
    * `projet-<slug>-cover-portrait.jpg` pour l'import médiathèque).
    * L'image de partage Open Graph reste `public/assets/img/og/<slug>.jpg`,

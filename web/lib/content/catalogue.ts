@@ -59,7 +59,7 @@ const results = (value: unknown): Project["results"] =>
     : undefined;
 
 /** Fiche normalisée depuis la réponse publique. `null` si elle est inexploitable. */
-function toProject(value: unknown): Project | null {
+export function toProject(value: unknown): Project | null {
   if (!isObject(value)) return null;
   const slug = text(value.slug);
   const name = text(value.name);
@@ -67,6 +67,8 @@ function toProject(value: unknown): Project | null {
 
   const tone = value.tone;
   const cover = image(value.cover) ?? undefined;
+  // Le back office peut envoyer le portrait en camelCase ou en snake_case.
+  const coverPortrait = image(value.coverPortrait ?? value.cover_portrait) ?? undefined;
   const list = images(value.images);
   const res = results(value.results);
 
@@ -84,6 +86,7 @@ function toProject(value: unknown): Project | null {
     sections: sections(value.sections),
     ...(res && res.length ? { results: res } : {}),
     ...(cover ? { cover } : {}),
+    ...(coverPortrait ? { coverPortrait } : {}),
     images: list,
     tags: Array.isArray(value.tags) ? value.tags.map(text).filter(Boolean) : [],
     tone: tone === "tint" || tone === "dark" ? tone : "paper",

@@ -22,7 +22,7 @@ const portrait = {
   src: "/assets/img/projet-exemple/cover-portrait.jpg",
   alt: "Couverture portrait",
   width: 1080,
-  height: 1350,
+  height: 1920,
 };
 
 describe("CoverPicture", () => {
