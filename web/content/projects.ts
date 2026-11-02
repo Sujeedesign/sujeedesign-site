@@ -148,7 +148,7 @@ export const projects: Project[] = [
     year: "2017",
     disciplines: ["Jeu web", "Interface", "Illustration"],
     pitch:
-      "Rendre ludique un sujet industriel : le stockage d’énergie. Un jeu web de salon, jouable debout, sur un écran d’événement, pour tenir un stand toute la journée.",
+      "Rendre ludique un sujet industriel : le stockage d’énergie. Un jeu web de salon, jouable debout, pour tenir un stand toute la journée.",
     scope: "Concept de jeu, écran d’accueil, parcours de partie, habillage graphique",
     sections: [
       {
@@ -546,7 +546,7 @@ export const projects: Project[] = [
     year: "2024",
     disciplines: ["Identité", "Direction photo", "E-commerce"],
     pitch:
-      "Une marque de maroquinerie qui devait paraître installée dès le premier visuel, sans budget de campagne. Tout repose sur le cadrage et la matière : un logotype qui tient sur une étiquette cousue.",
+      "Une marque de maroquinerie qui devait paraître installée dès le premier visuel, sans budget de campagne. Tout tient au cadrage et à la matière.",
     scope: "Logotype, système typographique, direction photo produit, gabarits e-commerce",
     sections: [
       {
