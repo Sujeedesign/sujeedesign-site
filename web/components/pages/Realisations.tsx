@@ -66,6 +66,10 @@ export function Realisations({ doc }: { doc?: PageDoc }) {
             </div>
           </div>
         </div>
+        <div className="scrollcue scrollcue--right">
+          <span className="bar" aria-hidden="true"></span>
+          Défiler
+        </div>
       </header>
 
       <nav className="rl-index" aria-label="Sommaire des projets">
@@ -85,49 +89,62 @@ export function Realisations({ doc }: { doc?: PageDoc }) {
       </nav>
 
       <div className="rl-film">
-        {projects.map((project, i) => (
-          <article
-            className={toneClass[project.tone] ?? toneClass.paper}
-            id={`p${project.index}`}
-            key={project.slug}
-            style={{ zIndex: i + 1 }}
-          >
-            <div className="rl-p__media">
-              <img
-                className="rl-p__img"
-                src={coverOf(project)?.src}
-                alt={coverOf(project)?.alt ?? project.name}
-                width={coverOf(project)?.width}
-                height={coverOf(project)?.height}
-                loading={i < 2 ? "eager" : "lazy"}
-                decoding="async"
-              />
-              <span className="rl-scene__word" aria-hidden="true">
-                {project.index}
-              </span>
-              <span className="rl-p__count" aria-hidden="true">
-                {project.index} / {String(count).padStart(2, "0")}
-              </span>
-              <div className="rl-p__info">
-                <p className="rl-p__kicker">
-                  {project.client}
-                  {project.year ? ` · ${project.year}` : ""}
-                  {project.disciplines[0] ? ` · ${project.disciplines[0]}` : ""}
-                </p>
-                <h2>{project.name}</h2>
-                <p className="rl-p__desc">{project.pitch}</p>
-                <ul className="rl-p__tags">
-                  {project.disciplines.map((tag) => (
-                    <li key={tag}>{tag}</li>
-                  ))}
-                </ul>
-                <a className="rl-p__link" href={realisationPath(project.slug)}>
-                  Voir l’étude de cas <span aria-hidden="true">↗</span>
-                </a>
+        {projects.map((project, i) => {
+          const cover = coverOf(project);
+          const href = realisationPath(project.slug);
+          return (
+            /* Toute la surface de l'image est cliquable : la carte est le lien. */
+            <a
+              className={`${toneClass[project.tone] ?? toneClass.paper} rl-p--link`}
+              href={href}
+              id={`p${project.index}`}
+              key={project.slug}
+              style={{ zIndex: i + 1 }}
+              aria-label={`${project.name}, voir l’étude de cas`}
+            >
+              <div className="rl-p__media">
+                <img
+                  className="rl-p__img"
+                  src={cover?.src}
+                  alt={cover?.alt ?? project.name}
+                  width={cover?.width}
+                  height={cover?.height}
+                  loading={i < 2 ? "eager" : "lazy"}
+                  decoding="async"
+                />
+                <span className="rl-scene__word" aria-hidden="true">
+                  {project.index}
+                </span>
+                {/* haut : type de projet à gauche, client et année à droite */}
+                <div className="rl-p__top">
+                  <p className="rl-p__type">
+                    <span className="rl-p__n">{project.index}</span>
+                    {" / "}
+                    {project.disciplines.join(" · ")}
+                  </p>
+                  <p className="rl-p__client">
+                    {project.client}
+                    {project.year ? ` ${project.year}` : ""}
+                  </p>
+                </div>
+                {/* bas : titre et mots clés à gauche, étude de cas à droite */}
+                <div className="rl-p__foot">
+                  <div className="rl-p__text">
+                    <h2 className="rl-p__name">{project.name}</h2>
+                    <ul className="rl-p__tags">
+                      {project.tags.map((tag) => (
+                        <li key={tag}>{tag}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <span className="rl-p__link">
+                    Voir l’étude de cas <span aria-hidden="true">↗</span>
+                  </span>
+                </div>
               </div>
-            </div>
-          </article>
-        ))}
+            </a>
+          );
+        })}
       </div>
 
       <section className="rl-svc">

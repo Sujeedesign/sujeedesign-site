@@ -566,8 +566,7 @@ body.has-dark-hero .nav:not(.scrolled) .nav-cta:hover{
    ============================================================ */
 @media (max-width: 900px){
   .bandcta p{ text-wrap: pretty; }
-  .rl-p__kicker{ margin-bottom: 12px; }
-  .rl-p__info h2{ margin-bottom: 16px; }
+  .rl-p__name{ margin-bottom: 14px; }
 }
 
 /* ============================================================
