@@ -873,19 +873,18 @@ html { scrollbar-color: var(--line-strong) transparent; scrollbar-width: thin; }
   object-fit: cover;
 }
 
+/* Fiche sans visuel : les initiales servent de placeholder, centrées. */
 .lib-thumb i {
   position: absolute;
-  left: 10px;
-  top: 10px;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-style: normal;
-  font-family: var(--mono);
-  font-size: 8.5px;
-  letter-spacing: 0.1em;
+  font-family: var(--display);
+  font-size: 34px;
+  letter-spacing: -0.02em;
   text-transform: uppercase;
-  background: rgba(10, 10, 11, 0.82);
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  padding: 3px 7px;
   color: var(--muted);
 }
 .lib-body { padding: 14px 15px; display: flex; flex-direction: column; gap: 7px; flex: 1; }

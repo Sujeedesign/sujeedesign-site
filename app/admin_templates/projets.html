@@ -30,7 +30,7 @@
       <article class="lib-card">
         <div class="lib-thumb">
           {% if p.cover %}
-            <img src="{{ p.cover.src }}" alt="{{ p.cover.alt }}">
+            <img src="{{ p.cover.src | asset }}" alt="{{ p.cover.alt }}" loading="lazy">
           {% else %}
             <i>{{ p.nom[:2]|upper }}</i>
           {% endif %}

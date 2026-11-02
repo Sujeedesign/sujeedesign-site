@@ -10,6 +10,8 @@ from typing import Any
 
 from fastapi.templating import Jinja2Templates
 
+from app import settings
+
 TEMPLATES_DIR = Path(__file__).resolve().parent / "admin_templates"
 
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
@@ -111,6 +113,21 @@ def human_size(size: Any) -> str:
     return f"{value:.1f} Go"
 
 
+def asset(value: Any) -> str:
+    """Chemin d'image du site public utilisable depuis le back office.
+
+    Les couvertures viennent du catalogue et sont enregistrées en chemin relatif
+    (« /assets/img/... »). Dans l'admin, qui vit sur son propre domaine, il faut
+    les préfixer par l'URL publique, sinon elles cassent.
+    """
+    src = str(value or "").strip()
+    if not src:
+        return ""
+    if src.startswith(("http://", "https://", "//", "data:")):
+        return src
+    return settings.public_base_url() + ("" if src.startswith("/") else "/") + src
+
+
 def tojson(value: Any, indent: int = 2) -> str:
     return json.dumps(value, ensure_ascii=False, indent=indent, default=str)
 
@@ -124,6 +141,7 @@ templates.env.filters.update(
         "initials": initials,
         "excerpt": excerpt,
         "human_size": human_size,
+        "asset": asset,
     }
 )
 templates.env.globals.update(
