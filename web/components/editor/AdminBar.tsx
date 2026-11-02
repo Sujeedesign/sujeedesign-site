@@ -13,6 +13,7 @@ import {
   readCookie,
   subscribe,
 } from "./adminbar-state";
+import { editableSlug, pageSlug } from "@/lib/editor-pages";
 
 /**
  * Bandeau admin unique de la vitrine, affiché au-dessus du header.
@@ -37,18 +38,8 @@ function hasAdminMarker(): boolean {
   return readCookie("sjd_admin_ui") === "1" || readCookie("sjd_edit") === "1";
 }
 
-/** Pages dont le contenu est éditable en place (miroir de app/admin.py). */
-const EDITABLE = ["services", "realisations", "a-propos", "agents-ia"];
-
-function slugOf(pathname: string): string | null {
-  const first = pathname.replace(/^\/+|\/+$/g, "").split("/")[0] ?? "";
-  if (EDITABLE.includes(first)) return first;
-  return pathname === "/" ? "home" : null;
-}
-
-function pageSlug(pathname: string): string {
-  return slugOf(pathname) ?? "home";
-}
+/** Vrai si la page courante est branchée sur l'éditeur (cf. lib/editor-pages). */
+const isEditable = (pathname: string) => editableSlug(pathname) !== null;
 
 const CSS = `
 #sjd-adminbar{
@@ -98,6 +89,13 @@ const CSS = `
 #sjd-adminbar button.ghost{ border-color:transparent; opacity:.7; }
 #sjd-adminbar button.ghost:hover{ opacity:1; background:rgba(255,255,255,.08); }
 #sjd-adminbar .sep{ width:1px; height:16px; background:rgba(255,255,255,.14); }
+/* Page non branchée sur l'éditeur : on remplace le bouton par une mention
+   discrète, plutôt qu'un bouton qui ne produit rien au clic. */
+#sjd-adminbar .locked{
+  font-size:10.5px; letter-spacing:.02em; color:rgba(244,241,232,.5);
+  border:1px dashed rgba(255,255,255,.18); border-radius:3px;
+  padding:6px 9px; white-space:nowrap; cursor:default;
+}
 /* Bandeau présent : le header est en position fixe, il faut donc le décaler
    explicitement, puis décaler le flux de la page de la même hauteur. */
 body.sjd-adminbar-on{ padding-top:var(--sjd-admin-h, 38px); }
@@ -105,7 +103,7 @@ body.sjd-adminbar-on .nav{ top:var(--sjd-admin-h, 38px); }
 @media (max-width:900px){
   #sjd-adminbar{ height:auto; min-height:38px; flex-wrap:wrap; padding:7px 10px; gap:8px; }
   #sjd-adminbar .who, #sjd-adminbar .hint, #sjd-adminbar .state, #sjd-adminbar .tag,
-  #sjd-adminbar .dot, #sjd-adminbar .sep{ display:none; }
+  #sjd-adminbar .dot, #sjd-adminbar .sep, #sjd-adminbar .locked{ display:none; }
   /* L'élément « push » (margin-left:auto) consomme toute la largeur libre et
      provoque un retour à la ligne des boutons : on l'écarte sur petit écran. */
   #sjd-adminbar .push{ display:none; }
@@ -162,7 +160,7 @@ export default function AdminBar() {
   useEffect(() => {
     if (!mounted) return;
     const slug = pageSlug(pathname);
-    if (slugOf(pathname)) patchState({ slug });
+    if (isEditable(pathname)) patchState({ slug });
     // Sans marqueur, un refus précédent ne doit pas coller : la session a pu
     // être ouverte entre-temps dans un autre onglet.
     if (!marker) setDenied(false);
@@ -218,7 +216,7 @@ export default function AdminBar() {
 
   const editing = bar.editing;
   const canPublish = bar.pending && bar.publishReady && !bar.publishing;
-  const editable = slugOf(pathname) !== null;
+  const editable = isEditable(pathname);
 
   return (
     <>
@@ -274,7 +272,14 @@ export default function AdminBar() {
               <button type="button" className="primary" onClick={demanderEdition}>
                 Modifier la page
               </button>
-            ) : null}
+            ) : (
+              <span
+                className="locked"
+                title="Cette page n'est pas encore branchée sur l'éditeur : son contenu est écrit dans le gabarit. Les fiches catalogue s'éditent dans le tableau de bord."
+              >
+                Page non éditable en ligne
+              </span>
+            )}
           </>
         )}
       </div>

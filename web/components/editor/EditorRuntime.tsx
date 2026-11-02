@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { clearCookie, getState, patchState, readCookie, subscribe } from "./adminbar-state";
+import { editableSlug, pageSlug } from "@/lib/editor-pages";
 
 /**
  * Runtime d'édition visuelle de la vitrine.
@@ -39,12 +40,10 @@ type Section = {
 const EDIT_COOKIE = "sjd_edit";
 const SESSION_MARKER = "sjd_admin_ui";
 const MULTILINE_TYPES = new Set(["long", "lines", "tags", "list"]);
-const PAGE_SLUGS = new Set(["services", "realisations", "a-propos", "agents-ia"]);
 
 /** Page éditée d'après l'URL : seules les pages du modèle sont reconnues. */
 function currentSlug(): string {
-  const first = window.location.pathname.replace(/^\/+|\/+$/g, "").split("/")[0] ?? "";
-  return PAGE_SLUGS.has(first) ? first : "home";
+  return pageSlug(window.location.pathname);
 }
 
 function hasEditCookie(): boolean {
@@ -527,9 +526,15 @@ export default function EditorRuntime() {
   }, [bar.quitSeq]);
 
   // /admin/editer pose `sjd_edit=1` : demande d'édition consommée une seule fois.
+  // Ignorée sur une page non branchée, sinon le corps passerait en édition sans
+  // le moindre champ à cliquer.
   useEffect(() => {
     if (!hasEditCookie()) return;
     clearCookie(EDIT_COOKIE);
+    if (editableSlug(window.location.pathname) === null) {
+      flash("Cette page n'est pas éditable en ligne", true);
+      return;
+    }
     patchState({ editing: true });
   }, []);
 
