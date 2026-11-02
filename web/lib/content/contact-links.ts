@@ -10,6 +10,8 @@ import { routes } from "@/lib/routes";
  * Seuls les liens de type `href` sont réécrits : l'adresse affichée en clair
  * (pied de page, mentions légales, page contact) garde son `mailto:`.
  */
+const UNSAFE = /^(javascript|data|vbscript|file):/i;
+
 export function contactLinks<T>(value: T): T {
   if (Array.isArray(value)) {
     return value.map((item) => contactLinks(item)) as unknown as T;
@@ -18,9 +20,17 @@ export function contactLinks<T>(value: T): T {
 
   const out: Record<string, unknown> = {};
   for (const [key, item] of Object.entries(value as Record<string, unknown>)) {
-    if (key === "href" && typeof item === "string" && item.trim().toLowerCase().startsWith("mailto:")) {
-      out[key] = routes.contact;
-      continue;
+    if (key === "href" && typeof item === "string") {
+      const href = item.trim();
+      if (UNSAFE.test(href)) {
+        // Un href piloté par la base ne doit jamais exécuter de script.
+        out[key] = routes.contact;
+        continue;
+      }
+      if (href.toLowerCase().startsWith("mailto:")) {
+        out[key] = routes.contact;
+        continue;
+      }
     }
     out[key] = contactLinks(item);
   }
