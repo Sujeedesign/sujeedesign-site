@@ -2,8 +2,8 @@ import { routes } from "@/lib/routes";
 
 /** Portage du v5 : service-direction-artistique.html. Balisage d'origine, liens en urls propres. */
 export const pageMeta = {
-  "title": "Service 02 · Direction artistique — Sujee Design",
-  "description": "La première campagne est facile, la cinquième moins. Je pose un cadre assez précis pour que prestataires et photographes produisent la même chose."
+  "title": "Direction artistique, Cergy et Paris — Sujee Design",
+  "description": "Direction artistique de campagnes et de marques : un cadre écrit pour que photographes, prestataires et imprimeurs produisent la même chose, du brief au BAT."
 };
 
 export function ServiceDirectionArtistique() {

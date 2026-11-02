@@ -2,8 +2,8 @@ import { routes } from "@/lib/routes";
 
 /** Portage du v5 : service-site-ecommerce.html. Balisage d'origine, liens en urls propres. */
 export const pageMeta = {
-  "title": "Service 03 · Site & e-commerce — Sujee Design",
-  "description": "Un site beau mais impossible à modifier ne sert à rien. Je livre des sites rapides que vous gérez seul : un texte, une photo, un produit."
+  "title": "Site web et e-commerce, Cergy et Paris — Sujee Design",
+  "description": "Des sites WordPress et Shopify rapides, que vous modifiez seul : changer un texte, une photo, un produit, sans développeur. Livrés avec la prise en main."
 };
 
 export function ServiceSiteEcommerce() {

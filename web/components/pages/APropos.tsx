@@ -4,8 +4,8 @@ import { routes } from "@/lib/routes";
 
 
 export const pageMeta = {
-  "title": "À propos — Sujeepan Sabesan, directeur artistique",
-  "description": "Sujeepan Sabesan, directeur artistique indépendant entre Cergy et Paris depuis 2013 : direction artistique, identité visuelle, photo et vidéo, UX/UI, web et formation."
+  "title": "Sujeepan Sabesan, directeur artistique",
+  "description": "Directeur artistique indépendant entre Cergy et Paris depuis 2013. Identité visuelle, photo, vidéo, UX/UI, sites web et formation : le parcours en images."
 };
 
 export function APropos({ doc }: { doc?: PageDoc }) {

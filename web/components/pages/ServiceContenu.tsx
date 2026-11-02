@@ -2,8 +2,8 @@ import { routes } from "@/lib/routes";
 
 /** Portage du v5 : service-contenu.html. Balisage d'origine, liens en urls propres. */
 export const pageMeta = {
-  "title": "Service 04 · Contenu & réseaux — Sujee Design",
-  "description": "Le contenu ne manque pas, c'est le rythme qui manque. J'installe une ligne éditoriale et des gabarits simples pour publier sans y passer vos soirées."
+  "title": "Contenu et réseaux sociaux, Cergy et Paris — Sujee Design",
+  "description": "Une ligne éditoriale, un calendrier et des gabarits simples pour publier chaque semaine sans y passer vos soirées. Photos, textes et posts prêts à l'emploi."
 };
 
 export function ServiceContenu() {
