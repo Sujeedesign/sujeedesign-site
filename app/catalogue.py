@@ -109,6 +109,12 @@ def get_projet(conn: sqlite3.Connection, projet_id: int) -> dict[str, Any] | Non
     return projet_from_row(row) if row else None
 
 
+def get_projet_by_slug(conn: sqlite3.Connection, slug: str) -> dict[str, Any] | None:
+    """Fiche par slug : l'identifiant stable utilisé par l'API et la vitrine."""
+    row = conn.execute("SELECT * FROM projets WHERE slug = ?", (slug,)).fetchone()
+    return projet_from_row(row) if row else None
+
+
 def next_position(conn: sqlite3.Connection, table: str) -> int:
     row = conn.execute(f"SELECT COALESCE(MAX(position), 0) + 10 AS p FROM {table}").fetchone()
     return int(row["p"])

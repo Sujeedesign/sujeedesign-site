@@ -50,6 +50,48 @@ curl -s -X PUT \
 * `422` : validation refusée, rien n'est enregistré, le détail nomme le champ.
 * `404` : slug inconnu (seul `home` est éditable pour l'instant).
 
+## Catalogue des réalisations
+
+Écrire une fiche sans passer par le formulaire HTML ni par le seed (qui
+n'insère que les slugs absents) :
+
+```bash
+curl -s -X PUT \
+  -H "Authorization: Bearer ***" -H "X-Author: sujee" \
+  -H "Content-Type: application/json" \
+  -d @fiche.json \
+  https://admin-sujeedesign.145.241.167.66.sslip.io/api/v1/admin/projets/american-steak-house
+```
+
+Le corps reprend la forme d'une entrée de `app/data/catalogue_seed.json` :
+`nom`, `client`, `annee`, `ville`, `pitch`, `scope`, `duree`, `ton`, `statut`,
+`disciplines`, `tags`, `images[]`, `cover`, `coverPortrait`, `sections[]`,
+`results[]`, `position`. Les clés absentes gardent leur valeur en base, donc une
+mise à jour de la seule galerie ne touche ni au pitch ni aux sections ;
+`"cover": null` retire la couverture, `"slug": "…"` renomme le slug.
+
+Chaque image (`images[]`, `cover`, `coverPortrait`) exige `src` **et**
+`width`/`height` : la vitrine réserve la place du visuel, une image en 0 × 0 est
+refusée. Réponses : `200` avec `{ok, author, projet, slug_changed, revalidated}`,
+`404` slug inconnu, `422` image incomplète ou valeur hors référentiel
+(`detail` nomme le champ fautif), `401` sans jeton.
+
+Créer une fiche de zéro :
+
+```bash
+curl -s -X POST -H "Authorization: Bearer ***" \
+  -H "Content-Type: application/json" \
+  -d '{"nom": "Nouveau projet", "statut": "publie", "images": [...]}' \
+  https://admin-sujeedesign.145.241.167.66.sslip.io/api/v1/admin/projets
+```
+
+`nom` obligatoire, slug dérivé du nom (dédoublonné : `-2`, `-3`…) et fiche en
+`brouillon` par défaut. `201` en cas de succès.
+
+Les deux points d'écriture terminent par `content_store.notify_site("catalogue")`
+pour revalider le cache du site ; `revalidated: false` signifie simplement que
+la revalidation n'est pas configurée sur cette instance (pas d'erreur).
+
 ## Publier
 
 ```bash
