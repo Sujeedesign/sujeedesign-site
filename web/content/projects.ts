@@ -809,7 +809,7 @@ export const projects: Project[] = [
     images: [
       {
         src: "/assets/img/projet/american-steak-house/01.jpg",
-        alt: "Logotype American Steak House, taureau rouge et étoile sur fond blanc",
+        alt: "Bannière American Steak House, logo sur une photo de ranch",
         width: 1920,
         height: 1080,
       },
@@ -833,19 +833,25 @@ export const projects: Project[] = [
       },
       {
         src: "/assets/img/projet/american-steak-house/05.jpg",
-        alt: "Visuel de marque, cow-boy et titre STEAKHOUSE",
+        alt: "Réglage du crénage du logotype dans Illustrator",
         width: 1920,
         height: 1080,
       },
       {
         src: "/assets/img/projet/american-steak-house/06.jpg",
-        alt: "Post d'annonce, côte de bœuf au barbecue, ouverture à Saint-Brice",
+        alt: "Visuel de marque, cow-boy et titre STEAKHOUSE",
         width: 1920,
         height: 1080,
       },
       {
         src: "/assets/img/projet/american-steak-house/07.jpg",
-        alt: "Bannière American Steak House, logo sur une photo de ranch",
+        alt: "Logotype American Steak House, taureau rouge et étoile sur fond blanc",
+        width: 1920,
+        height: 1080,
+      },
+      {
+        src: "/assets/img/projet/american-steak-house/08.jpg",
+        alt: "Post d'annonce, côte de bœuf au barbecue, ouverture à Saint-Brice",
         width: 1920,
         height: 1080,
       },
