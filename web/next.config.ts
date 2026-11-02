@@ -121,6 +121,17 @@ const nextConfig: NextConfig = {
         headers: [
           { key: "Strict-Transport-Security", value: "max-age=15552000" },
           { key: "X-Content-Type-Options", value: "nosniff" },
+          // Le back office affiche le site en aperçu : on autorise ce seul
+          // ancêtre au lieu de bloquer tout iframe (ce que ferait XFO).
+          {
+            key: "Content-Security-Policy",
+            value: "frame-ancestors 'self' https://admin-sujeedesign.145.241.167.66.sslip.io https://sujeedesign.com",
+          },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=(), payment=()",
+          },
         ],
       },
       // Pages HTML : toujours revalidées, pour qu'un déploiement soit visible
