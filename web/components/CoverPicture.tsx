@@ -1,4 +1,5 @@
 import { COVER_PORTRAIT_MEDIA, coverFor, type Project } from "@/content/projects";
+import { webpSrcSet } from "@/lib/images";
 
 type CoverPictureProps = {
   project: Project;
@@ -18,12 +19,15 @@ type CoverPictureProps = {
 /**
  * Couverture de projet servie en `<picture>`.
  *
- * Sous 720 px de large, le navigateur prend la couverture portrait ; au-dessus,
- * la paysage. Le choix est fait par le navigateur sur `media` : une seule des
- * deux images est téléchargée, et le rendu reste correct sans JavaScript.
+ * Deux décisions indépendantes y sont prises par le navigateur :
  *
- * Un projet sans `coverPortrait` n'émet aucune `<source>` : il retombe sur la
- * couverture paysage, exactement comme avant. `coverOf()` n'est pas modifiée.
+ * 1. Le format : les sources WebP passent en premier, le JPEG reste le repli.
+ *    Chaque format est décliné en 480, 960 et 1600 px, donc le mobile ne
+ *    télécharge plus l'image pleine largeur.
+ * 2. Le cadrage : sous 720 px, la couverture portrait ; au-dessus, la paysage.
+ *
+ * Un projet sans `coverPortrait` n'émet aucune `<source>` mobile : il retombe
+ * sur la couverture paysage, exactement comme avant.
  */
 export function CoverPicture({
   project,
@@ -41,9 +45,23 @@ export function CoverPicture({
   // n'apporterait rien et forcerait un second téléchargement.
   const hasPortrait = portrait !== undefined && portrait.src !== landscape.src;
 
+  const landscapeWebp = webpSrcSet(landscape.src);
+  const portraitWebp = portrait ? webpSrcSet(portrait.src) : undefined;
+
   return (
     <picture data-cover-portrait={hasPortrait ? "" : undefined}>
-      {hasPortrait ? <source media={COVER_PORTRAIT_MEDIA} srcSet={portrait.src} /> : null}
+      {hasPortrait && portraitWebp ? (
+        <source
+          media={COVER_PORTRAIT_MEDIA}
+          type="image/webp"
+          srcSet={portraitWebp}
+          sizes={sizes}
+        />
+      ) : null}
+      {hasPortrait && portrait ? (
+        <source media={COVER_PORTRAIT_MEDIA} srcSet={portrait.src} />
+      ) : null}
+      {landscapeWebp ? <source type="image/webp" srcSet={landscapeWebp} sizes={sizes} /> : null}
       <img
         src={landscape.src}
         alt={alt ?? landscape.alt}

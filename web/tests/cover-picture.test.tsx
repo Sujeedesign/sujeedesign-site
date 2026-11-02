@@ -26,22 +26,32 @@ const portrait = {
 };
 
 describe("CoverPicture", () => {
-  it("émet un <source> mobile quand le projet a une couverture portrait", () => {
+  it("émet un <source> mobile WebP quand le projet a une couverture portrait", () => {
     const { container } = render(<CoverPicture project={{ ...base, coverPortrait: portrait }} />);
 
-    const source = container.querySelector("picture > source");
-    expect(source?.getAttribute("media")).toBe("(max-width: 720px)");
-    expect(source?.getAttribute("srcset")).toBe(portrait.src);
+    const mobile = container.querySelector("picture > source[media]");
+    expect(mobile?.getAttribute("media")).toBe("(max-width: 720px)");
+    expect(mobile?.getAttribute("type")).toBe("image/webp");
+    expect(mobile?.getAttribute("srcset")).toContain("/cover-portrait-960.webp 960w");
 
     const img = container.querySelector("picture > img");
     expect(img?.getAttribute("src")).toBe(base.cover?.src);
     expect(img?.getAttribute("width")).toBe("1920");
   });
 
-  it("n'émet aucune <source> sans visuel portrait, pour ne rien télécharger en plus", () => {
+  it("sert le paysage en WebP avec trois largeurs et garde le JPEG en repli", () => {
     const { container } = render(<CoverPicture project={base} />);
 
-    expect(container.querySelector("picture > source")).toBeNull();
+    const webp = container.querySelector('picture > source[type="image/webp"]');
+    expect(webp?.getAttribute("srcset")).toContain("/cover-480.webp 480w");
+    expect(webp?.getAttribute("srcset")).toContain("/cover-1600.webp 1600w");
+    expect(container.querySelector("picture > img")?.getAttribute("src")).toBe(base.cover?.src);
+  });
+
+  it("n'émet aucune <source> mobile sans visuel portrait, pour ne rien télécharger en plus", () => {
+    const { container } = render(<CoverPicture project={base} />);
+
+    expect(container.querySelector("picture > source[media]")).toBeNull();
     expect(container.querySelector("picture")?.hasAttribute("data-cover-portrait")).toBe(false);
     expect(container.querySelector("picture > img")?.getAttribute("src")).toBe(base.cover?.src);
   });
@@ -51,7 +61,7 @@ describe("CoverPicture", () => {
       <CoverPicture project={{ ...base, coverPortrait: { ...portrait, src: base.cover!.src } }} />,
     );
 
-    expect(container.querySelector("picture > source")).toBeNull();
+    expect(container.querySelector("picture > source[media]")).toBeNull();
   });
 
   it("reprend l'alt de la couverture et respecte un alt vide", () => {

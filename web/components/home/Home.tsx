@@ -2,6 +2,7 @@ import type { HomeContent } from "@/lib/content/schema";
 import { coverOf, getProject, type Project } from "@/content/projects";
 import { CoverPicture } from "@/components/CoverPicture";
 import { findProject } from "@/lib/content/catalogue";
+import { webpSrcSet } from "@/lib/images";
 
 const arrow = (
   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -39,15 +40,19 @@ export function Hero({ doc, projects }: { doc: HomeContent; projects: Project[] 
         {heroPhoto ? (
           // LCP : chargée en priorité, sans décalage de mise en page (dimensions
           // déclarées), et lue dès l'arrivée sans attendre le lazy loading.
-          <img
-            className="hero__photo"
-            src={heroPhoto.src}
-            alt=""
-            width={heroPhoto.width}
-            height={heroPhoto.height}
-            fetchPriority="high"
-            decoding="async"
-          />
+          // WebP en premier (3 largeurs), JPEG en repli.
+          <picture>
+            <source type="image/webp" srcSet={webpSrcSet(heroPhoto.src)} sizes="100vw" />
+            <img
+              className="hero__photo"
+              src={heroPhoto.src}
+              alt=""
+              width={heroPhoto.width}
+              height={heroPhoto.height}
+              fetchPriority="high"
+              decoding="async"
+            />
+          </picture>
         ) : null}
         <span className="hero__word">{featured?.name ?? ""}</span>
       </div>
