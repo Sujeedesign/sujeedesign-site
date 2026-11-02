@@ -44,17 +44,7 @@
       frame();
     }
 
-    /* Sommaire : saut doux vers le projet visé, sans casser l'ancrage. */
-    document.querySelectorAll('[data-rl-jump]').forEach((a) => {
-      a.addEventListener('click', (e) => {
-        const id = a.getAttribute('href');
-        const target = id && document.querySelector(id);
-        if (!target) return;
-        e.preventDefault();
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        history.replaceState(null, '', id);
-      });
-    });
+    /* Sommaire : les liens mènent directement à la fiche projet, plus d'ancrage. */
 
     /* M3 : les cartes de prestations sont révélées en CSS par anim.js
        (.rv + [data-stagger].is-in). On ne double PLUS l'animation en GSAP :

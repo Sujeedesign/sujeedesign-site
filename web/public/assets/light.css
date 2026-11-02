@@ -1356,7 +1356,7 @@ body.has-dark-hero .nav.nav--open .brand__logo--light{display:none!important}
 }
 @media (max-width:860px){
   .rl-hero__foot{grid-template-columns:1fr;gap:20px}
-  .rl-row{grid-template-columns:34px minmax(0,1fr) 44px;gap:12px}
+  .rl-row{grid-template-columns:34px minmax(0,1fr) auto 22px;gap:12px}
   .rl-row__tags{display:none}
   .rl-scene__word{font-size:clamp(64px,22vw,140px)}
   .art{height:100%;width:100%}

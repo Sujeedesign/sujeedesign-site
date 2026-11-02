@@ -71,13 +71,13 @@ export function Realisations({ doc }: { doc?: PageDoc }) {
       <nav className="rl-index" aria-label="Sommaire des projets">
         <div className="wrap">
           {projects.map((project) => (
-            <a className="rl-row" href={`#p${project.index}`} key={project.slug} data-rl-jump>
+            <a className="rl-row" href={realisationPath(project.slug)} key={project.slug}>
               <span className="rl-row__n">{project.index}</span>
               <span className="rl-row__name">{project.name}</span>
               <span className="rl-row__tags">{project.disciplines.join(" · ")}</span>
               <span className="rl-row__y">{project.year ?? ""}</span>
               <span className="rl-row__a" aria-hidden="true">
-                ↓
+                ↗
               </span>
             </a>
           ))}
