@@ -35,9 +35,12 @@ export function MentionsLegales() {
               <div className="prose">
                 <h2 id="editeur">Éditeur du site</h2>
                 <p>Le site <strong>sujeedesign.com</strong> est édité par <strong>Sujeepan Sabesan</strong>, entrepreneur individuel exerçant sous le nom commercial Sujee Design.</p>
-                <p>Adresse de l'établissement : 29 allée des Moulins, 95650 Boissy-l&apos;Aillerie, France.<br />
+                <p>Forme juridique : entrepreneur individuel, exerçant en libéral non réglementé.<br />
+                  Activité principale déclarée : activités spécialisées de design.<br />
+                  Domaine d&apos;activité : autres activités spécialisées, scientifiques et techniques.<br />
+                  Code APE : 74.10Z, activités spécialisées de design.</p>
+                <p>Adresse de l&apos;établissement : 29 allée des Moulins, 95650 Boissy-l&apos;Aillerie, France.<br />
                   SIREN : 789 152 337 · SIRET : 789 152 337 00018<br />
-                  Code APE : 74.10Z, activités spécialisées de design<br />
                   Contact : hello@sujeedesign.com · 06 51 51 74 63</p>
                 <p>Directeur de la publication : Sujeepan Sabesan.</p>
                 <h2 id="hebergement">Hébergement</h2>
