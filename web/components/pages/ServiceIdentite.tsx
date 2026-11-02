@@ -1,3 +1,5 @@
+import { routes } from "@/lib/routes";
+
 /** Portage du v5 : service-identite.html. Balisage d'origine, liens en urls propres. */
 export const pageMeta = {
   "title": "Identité visuelle et logo, Cergy et Paris — Sujee Design",
@@ -17,7 +19,7 @@ export function ServiceIdentite() {
                 <h1 className="sp-hero__title">Une identité qui tient <span className="hl">dans la vraie vie.</span></h1>
                 <p className="sp-hero__lead">Un logo seul ne fait pas une marque. Ce qui compte, c'est ce que le nom, la typo et les couleurs produisent sur un menu, une devanture, un colis, un écran de téléphone. Je construis le système, pas juste le signe.</p>
                 <div className="sp-hero__cta">
-                  <a className="btn-fill" href="mailto:s.sujeepan.pro@gmail.com?subject=Service 01 · Identité de marque">Parler de mon projet <span aria-hidden="true">↗</span></a>
+                  <a className="btn-fill" href={routes.contact}>Parler de mon projet <span aria-hidden="true">↗</span></a>
                   <a className="btn-line" href="/services">Tous les services</a>
                 </div>
               </div>
@@ -94,7 +96,7 @@ export function ServiceIdentite() {
             <div className="bandcta bandcta--dark cta-glow">
               <div className="glow" aria-hidden="true" />
               <p>Votre marque ne vous ressemble plus ?</p>
-              <a className="btn-fill btn-fill--light" href="mailto:s.sujeepan.pro@gmail.com?subject=Identité%20de%20marque">Parler de mon identité <span aria-hidden="true">↗</span></a>
+              <a className="btn-fill btn-fill--light" href={routes.contact}>Parler de mon identité <span aria-hidden="true">↗</span></a>
             </div>
           </div>
         </section>

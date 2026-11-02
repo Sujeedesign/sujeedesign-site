@@ -9,7 +9,7 @@
  */
 import { coverOf, projects } from "@/content/projects";
 import { pageHero, type PageDoc } from "@/content/pages";
-import { realisationPath } from "@/lib/routes";
+import { realisationPath, routes } from "@/lib/routes";
 
 
 const count = projects.length;
@@ -214,7 +214,7 @@ export function Realisations({ doc }: { doc?: PageDoc }) {
           <div className="bandcta bandcta--dark cta-glow">
             <div className="glow" aria-hidden="true" />
             <p>Le prochain projet, c’est le vôtre ?</p>
-            <a className="btn-fill btn-fill--light" href="mailto:s.sujeepan.pro@gmail.com?subject=Un%20projet">
+            <a className="btn-fill btn-fill--light" href={routes.contact}>
               Prendre contact <span aria-hidden="true">↗</span>
             </a>
           </div>

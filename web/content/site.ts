@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CONTACT_EMAIL, routes } from "@/lib/routes";
+import { CONTACT_EMAIL, CONTACT_PHONE_HREF, routes } from "@/lib/routes";
 
 /**
  * Identité du studio.
@@ -11,6 +11,8 @@ const siteSchema = z.object({
   legalName: z.string().min(1),
   url: z.string().url(),
   email: z.string().email(),
+  /** Numéro E.164, tel qu'attendu par schema.org. */
+  phone: z.string().min(10),
   tagline: z.string().min(1),
   founder: z.string().min(1),
   areaServed: z.array(z.string()).min(1),
@@ -33,6 +35,7 @@ export const site = siteSchema.parse({
   legalName: "Sujeepan Sabesan",
   url: "https://sujeedesign.com",
   email: CONTACT_EMAIL,
+  phone: CONTACT_PHONE_HREF.replace("tel:", ""),
   tagline: "Votre marque, de A à Z",
   founder: "Sujeepan Sabesan",
   areaServed: ["Cergy", "Paris", "Île-de-France"],
@@ -55,6 +58,7 @@ export function professionalServiceJsonLd() {
     name: site.name,
     url: site.url,
     email: site.email,
+    telephone: site.phone,
     slogan: site.tagline,
     founder: { "@type": "Person", name: site.founder },
     areaServed: site.areaServed,

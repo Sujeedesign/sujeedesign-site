@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ReadRail, SiteFooter, SiteNav, SkipLink, SocialRail } from "@/components/site/Chrome";
-import { mailto, routes } from "@/lib/routes";
+import { routes } from "@/lib/routes";
 
 export const metadata: Metadata = {
   title: "Page introuvable",
@@ -36,7 +36,7 @@ export default function NotFound() {
               <a className="btn-line" href={routes.realisations}>
                 Voir les réalisations
               </a>
-              <a className="btn-line" href={mailto("Un projet")}>
+              <a className="btn-line" href={routes.contact}>
                 Écrire un message
               </a>
             </div>

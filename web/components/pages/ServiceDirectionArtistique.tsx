@@ -1,3 +1,5 @@
+import { routes } from "@/lib/routes";
+
 /** Portage du v5 : service-direction-artistique.html. Balisage d'origine, liens en urls propres. */
 export const pageMeta = {
   "title": "Service 02 · Direction artistique — Sujee Design",
@@ -17,7 +19,7 @@ export function ServiceDirectionArtistique() {
                 <h1 className="sp-hero__title">Un ton visuel <span className="hl">qui ne se perd pas.</span></h1>
                 <p className="sp-hero__lead">La première campagne est facile. La cinquième l'est moins. Je pose un cadre visuel assez précis pour que vos prestataires, vos imprimeurs et vos photographes produisent la même chose sans moi.</p>
                 <div className="sp-hero__cta">
-                  <a className="btn-fill" href="mailto:s.sujeepan.pro@gmail.com?subject=Service 02 · Direction artistique">Parler de mon projet <span aria-hidden="true">↗</span></a>
+                  <a className="btn-fill" href={routes.contact}>Parler de mon projet <span aria-hidden="true">↗</span></a>
                   <a className="btn-line" href="/services">Tous les services</a>
                 </div>
               </div>
@@ -79,7 +81,7 @@ export function ServiceDirectionArtistique() {
             <div className="bandcta bandcta--dark cta-glow">
               <div className="glow" aria-hidden="true" />
               <p>Vos visuels ne suivent pas le rythme ?</p>
-              <a className="btn-fill btn-fill--light" href="mailto:s.sujeepan.pro@gmail.com?subject=Direction%20artistique">Cadrer une campagne <span aria-hidden="true">↗</span></a>
+              <a className="btn-fill btn-fill--light" href={routes.contact}>Cadrer une campagne <span aria-hidden="true">↗</span></a>
             </div>
           </div>
         </section>

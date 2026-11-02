@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent, KeyboardEvent } from "react";
 import { LiquidBackdrop } from "@/components/site/LiquidBackdrop";
+import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_PHONE_HREF, mailto } from "@/lib/routes";
 import styles from "./ContactChat.module.css";
 
 type Role = "agent" | "user";
@@ -338,7 +339,7 @@ export default function ContactChat() {
       setLeadState("sent");
     } catch {
       setLeadState("idle");
-      setError("L'envoi a échoué. Réessayez ou écrivez directement à s.sujeepan.pro@gmail.com.");
+      setError(`L'envoi a échoué. Réessayez ou écrivez directement à ${CONTACT_EMAIL}.`);
     }
   };
 
@@ -410,8 +411,8 @@ export default function ContactChat() {
 
         <div className={styles.direct}>
           <p>Vous préférez le direct ?</p>
-          <a href="mailto:s.sujeepan.pro@gmail.com?subject=Un%20projet">s.sujeepan.pro@gmail.com</a>
-          <a href="tel:+33612345678">06 12 34 56 78</a>
+          <a href={mailto("Un projet")}>{CONTACT_EMAIL}</a>
+          <a href={CONTACT_PHONE_HREF}>{CONTACT_PHONE}</a>
         </div>
       </section>
 

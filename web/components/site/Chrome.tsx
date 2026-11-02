@@ -1,4 +1,12 @@
-import { mailto, routes, serviceHref, serviceSlugs } from "@/lib/routes";
+import {
+  CONTACT_EMAIL,
+  CONTACT_PHONE,
+  CONTACT_PHONE_HREF,
+  mailto,
+  routes,
+  serviceHref,
+  serviceSlugs,
+} from "@/lib/routes";
 
 const serviceLabels: Record<(typeof serviceSlugs)[number], string> = {
   "identite-de-marque": "Identité de marque",
@@ -162,7 +170,7 @@ export function SiteNav({ solid = false, current }: { solid?: boolean; current?:
           {arrow}
         </a>
         <a className="navpanel__mail" href={mailto()}>
-          s.sujeepan.pro@gmail.com
+          {CONTACT_EMAIL}
         </a>
       </div>
     </nav>
@@ -204,7 +212,8 @@ export function SiteFooter({ variant = "home" }: { variant?: "home" | "inner" })
       <div className="wrap foot">
         <span>© {year} Sujee Design · Sujeepan Sabesan</span>
         <span>
-          <a href={mailto()}>s.sujeepan.pro@gmail.com</a> · Cergy · Paris
+          <a href={mailto()}>{CONTACT_EMAIL}</a> ·{" "}
+          <a href={CONTACT_PHONE_HREF}>{CONTACT_PHONE}</a> · Cergy · Paris
         </span>
         {variant === "home" ? (
           <span>

@@ -1,5 +1,6 @@
 /** Portage du v5 : a-propos.html. Balisage d'origine, liens en urls propres. */
 import { pageHero, line, type PageDoc } from "@/content/pages";
+import { routes } from "@/lib/routes";
 
 
 export const pageMeta = {
@@ -31,7 +32,7 @@ export function APropos({ doc }: { doc?: PageDoc }) {
                 </div>
                 <div className="ab-hero__cta">
                   <a className="btn-fill" href="/realisations">Voir les projets <span aria-hidden="true">↗</span></a>
-                  <a className="btn-line" href="mailto:s.sujeepan.pro@gmail.com?subject=Un%20projet">Écrire un message</a>
+                  <a className="btn-line" href={routes.contact}>Écrire un message</a>
                 </div>
               </div>
             </div>
@@ -222,7 +223,7 @@ export function APropos({ doc }: { doc?: PageDoc }) {
             <div className="bandcta bandcta--dark cta-glow">
               <div className="glow" aria-hidden="true" />
               <p>Un projet, une formation, un avis ?</p>
-              <a className="btn-fill btn-fill--light" href="mailto:s.sujeepan.pro@gmail.com?subject=Un%20projet">Prendre contact <span aria-hidden="true">↗</span></a>
+              <a className="btn-fill btn-fill--light" href={routes.contact}>Prendre contact <span aria-hidden="true">↗</span></a>
             </div>
           </div>
         </section>

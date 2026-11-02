@@ -1,5 +1,6 @@
 /** Portage du v5 : agents-ia.html. Balisage d'origine, liens en urls propres. */
 import { pageHero, line, type PageDoc } from "@/content/pages";
+import { routes } from "@/lib/routes";
 
 
 export const pageMeta = {
@@ -22,7 +23,7 @@ export function AgentsIa({ doc }: { doc?: PageDoc }) {
                 <h1 className="ia-hero__title"><span data-field="hero.title.0">{line(hero.title, 0, "Un agent qui fait le travail.")}</span> <br className="br-d" /><em data-field="hero.title.1">{line(hero.title, 1, "Pas une démo.")}</em></h1>
                 <p className="ia-hero__lead" data-field="hero.lead">{hero.lead}</p>
                 <div className="ia-hero__cta">
-                  <a className="btn-fill" href="mailto:s.sujeepan.pro@gmail.com?subject=Agent%20IA">Décrire ma tâche <span aria-hidden="true">↗</span></a>
+                  <a className="btn-fill" href={routes.contact}>Décrire ma tâche <span aria-hidden="true">↗</span></a>
                   <a className="btn-line" href="#process">Voir la méthode</a>
                 </div>
               </div>

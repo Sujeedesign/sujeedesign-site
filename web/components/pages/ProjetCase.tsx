@@ -153,7 +153,7 @@ export function ProjetCase({ project }: { project: Project }) {
           <div className="bandcta bandcta--dark cta-glow">
             <div className="glow" aria-hidden="true" />
             <p>Un projet, une formation, un avis ?</p>
-            <a className="btn-fill btn-fill--light" href="mailto:s.sujeepan.pro@gmail.com?subject=Un%20projet">
+            <a className="btn-fill btn-fill--light" href={routes.contact}>
               Prendre contact <span aria-hidden="true">↗</span>
             </a>
           </div>

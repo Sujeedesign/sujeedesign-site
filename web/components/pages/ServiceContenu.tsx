@@ -1,3 +1,5 @@
+import { routes } from "@/lib/routes";
+
 /** Portage du v5 : service-contenu.html. Balisage d'origine, liens en urls propres. */
 export const pageMeta = {
   "title": "Service 04 · Contenu & réseaux — Sujee Design",
@@ -17,7 +19,7 @@ export function ServiceContenu() {
                 <h1 className="sp-hero__title">Publier régulièrement <span className="hl">sans y passer vos soirées.</span></h1>
                 <p className="sp-hero__lead">Le contenu ne manque pas, c'est le rythme qui manque. On installe une ligne éditoriale et des gabarits assez simples pour que la publication tienne dans une heure par semaine.</p>
                 <div className="sp-hero__cta">
-                  <a className="btn-fill" href="mailto:s.sujeepan.pro@gmail.com?subject=Service 04 · Contenu & réseaux">Parler de mon projet <span aria-hidden="true">↗</span></a>
+                  <a className="btn-fill" href={routes.contact}>Parler de mon projet <span aria-hidden="true">↗</span></a>
                   <a className="btn-line" href="/services">Tous les services</a>
                 </div>
               </div>
@@ -79,7 +81,7 @@ export function ServiceContenu() {
             <div className="bandcta bandcta--dark cta-glow">
               <div className="glow" aria-hidden="true" />
               <p>Vous publiez quand vous pouvez, pas quand il faut ?</p>
-              <a className="btn-fill btn-fill--light" href="mailto:s.sujeepan.pro@gmail.com?subject=Contenu%20et%20réseaux">Tenir un rythme <span aria-hidden="true">↗</span></a>
+              <a className="btn-fill btn-fill--light" href={routes.contact}>Tenir un rythme <span aria-hidden="true">↗</span></a>
             </div>
           </div>
         </section>

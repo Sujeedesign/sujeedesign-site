@@ -1,5 +1,6 @@
 /** Portage du v5 : services.html. Contenu piloté par `content/services.json`. */
 import type servicesJson from "@/content/services.json";
+import { routes } from "@/lib/routes";
 
 type Dict = Record<string, any>;
 export type ServicesDoc = typeof servicesJson;
@@ -54,7 +55,7 @@ function read(D: Dict) {
   const cta = {
     text: v("cta.text", ""),
     label: v("cta.label", "Décrire mon besoin"),
-    href: v("cta.href", "mailto:s.sujeepan.pro@gmail.com?subject=Un%20projet"),
+    href: v("cta.href", routes.contact),
   };
 
   return { hero, prestations, methode, livrables, faq, cta };

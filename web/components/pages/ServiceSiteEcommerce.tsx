@@ -1,3 +1,5 @@
+import { routes } from "@/lib/routes";
+
 /** Portage du v5 : service-site-ecommerce.html. Balisage d'origine, liens en urls propres. */
 export const pageMeta = {
   "title": "Service 03 · Site & e-commerce — Sujee Design",
@@ -17,7 +19,7 @@ export function ServiceSiteEcommerce() {
                 <h1 className="sp-hero__title">Un site rapide <span className="hl">que vous gérez seul.</span></h1>
                 <p className="sp-hero__lead">Beaucoup de sites sont beaux et impossibles à modifier. Le mien est fait pour que vous puissiez changer un texte, une photo, un produit, sans appeler personne et sans casser la page.</p>
                 <div className="sp-hero__cta">
-                  <a className="btn-fill" href="mailto:s.sujeepan.pro@gmail.com?subject=Service 03 · Site & e-commerce">Parler de mon projet <span aria-hidden="true">↗</span></a>
+                  <a className="btn-fill" href={routes.contact}>Parler de mon projet <span aria-hidden="true">↗</span></a>
                   <a className="btn-line" href="/services">Tous les services</a>
                 </div>
               </div>
@@ -79,7 +81,7 @@ export function ServiceSiteEcommerce() {
             <div className="bandcta bandcta--dark cta-glow">
               <div className="glow" aria-hidden="true" />
               <p>Votre site vous coûte plus qu'il ne rapporte ?</p>
-              <a className="btn-fill btn-fill--light" href="mailto:s.sujeepan.pro@gmail.com?subject=Site%20et%20e-commerce">Auditer mon site <span aria-hidden="true">↗</span></a>
+              <a className="btn-fill btn-fill--light" href={routes.contact}>Auditer mon site <span aria-hidden="true">↗</span></a>
             </div>
           </div>
         </section>

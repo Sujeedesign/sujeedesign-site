@@ -1,4 +1,6 @@
 /** Portage du v5 : mentions-legales.html. Balisage d'origine, liens en urls propres. */
+import { routes } from "@/lib/routes";
+
 export const pageMeta = {
   "title": "Mentions légales — Sujee Design",
   "description": "Éditeur, hébergement, propriété intellectuelle, données personnelles et cookies du site Sujee Design."
@@ -35,7 +37,7 @@ export function MentionsLegales() {
                 <p>Adresse : [adresse de l'établissement], Paris.<br />
                   SIRET : [à compléter] · Code APE : [à compléter]<br />
                   TVA intracommunautaire : [à compléter]<br />
-                  Contact : s.sujeepan.pro@gmail.com</p>
+                  Contact : hello@sujeedesign.com · 06 51 51 74 63</p>
                 <h2 id="hebergement">Hébergement</h2>
                 <p>Le site est hébergé par [nom de l'hébergeur], [adresse du siège], [pays]. Les coordonnées complètes de l'hébergeur sont disponibles sur demande.</p>
                 <h2 id="propriete">Propriété intellectuelle</h2>
@@ -46,13 +48,13 @@ export function MentionsLegales() {
                 <h3>Base légale et durée</h3>
                 <p>Le traitement repose sur votre consentement et sur l'intérêt légitime à répondre à une demande commerciale. Les échanges sont conservés trois ans après le dernier contact, puis supprimés.</p>
                 <h3>Vos droits</h3>
-                <p>Vous pouvez demander l'accès, la rectification, l'effacement ou la portabilité de vos données, ainsi que la limitation du traitement, en écrivant à s.sujeepan.pro@gmail.com. Une réponse est apportée sous un mois. En cas de désaccord, vous pouvez saisir la CNIL.</p>
+                <p>Vous pouvez demander l'accès, la rectification, l'effacement ou la portabilité de vos données, ainsi que la limitation du traitement, en écrivant à hello@sujeedesign.com. Une réponse est apportée sous un mois. En cas de désaccord, vous pouvez saisir la CNIL.</p>
                 <h2 id="cookies">Cookies et mesure d'audience</h2>
                 <p>Le site ne dépose aucun cookie publicitaire. Seule une mesure d'audience peut être activée, avec des adresses IP anonymisées et sans transfert hors de l'Union européenne. Un bandeau permet de refuser cette mesure sans perdre l'accès au site.</p>
                 <h2 id="responsabilite">Responsabilité</h2>
                 <p>Les informations publiées sont données à titre indicatif. Les liens vers des sites tiers ne sauraient engager la responsabilité de l'éditeur quant à leur contenu.</p>
                 <h2 id="contact-legal">Contact</h2>
-                <p>Pour toute question relative à ces mentions : s.sujeepan.pro@gmail.com.</p>
+                <p>Pour toute question relative à ces mentions : hello@sujeedesign.com.</p>
               </div>
             </div>
           </div>
@@ -62,7 +64,7 @@ export function MentionsLegales() {
             <div className="bandcta bandcta--dark cta-glow">
               <div className="glow" aria-hidden="true" />
               <p>Un projet, une formation, un avis ?</p>
-              <a className="btn-fill btn-fill--light" href="mailto:s.sujeepan.pro@gmail.com?subject=Un%20projet">Prendre contact <span aria-hidden="true">↗</span></a>
+              <a className="btn-fill btn-fill--light" href={routes.contact}>Prendre contact <span aria-hidden="true">↗</span></a>
             </div>
           </div>
         </section>
