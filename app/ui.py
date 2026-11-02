@@ -14,6 +14,13 @@ TEMPLATES_DIR = Path(__file__).resolve().parent / "admin_templates"
 
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
+# Version du CSS admin pour forcer le rafraîchissement après un déploiement.
+_CSS = Path(__file__).resolve().parent / "admin_static" / "admin.css"
+try:
+    STATIC_V = str(int(_CSS.stat().st_mtime))
+except OSError:  # CSS absent (tests) : pas de version, le cache fera son travail
+    STATIC_V = "0"
+
 MOIS = (
     "janv.", "févr.", "mars", "avr.", "mai", "juin",
     "juil.", "août", "sept.", "oct.", "nov.", "déc.",
@@ -119,4 +126,6 @@ templates.env.filters.update(
         "human_size": human_size,
     }
 )
-templates.env.globals.update({"tojson": tojson, "slugify": slugify})
+templates.env.globals.update(
+    {"tojson": tojson, "slugify": slugify, "static_v": STATIC_V}
+)
