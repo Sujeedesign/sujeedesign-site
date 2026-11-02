@@ -7,6 +7,7 @@ import sqlite3
 from pathlib import Path
 
 from fastapi.testclient import TestClient
+import pytest
 
 from app import catalogue, db
 
@@ -87,6 +88,86 @@ def test_export_garde_la_couverture_separee_de_la_galerie(tmp_path: Path) -> Non
     assert logofolio["cover"] == logofolio["images"][0]
 
 
+def test_portrait_mobile_optionnel_dans_le_catalogue(tmp_path: Path) -> None:
+    """Sans portrait, la fiche reste paysage ; avec, la vitrine reçoit la clé."""
+    conn = _connect(tmp_path)
+    catalogue.seed_from_file(conn)
+    projets = {p["slug"]: p for p in catalogue.export_site(conn)["projects"]}
+
+    # Le catalogue historique n'a aucun portrait : aucune clé émise.
+    assert "coverPortrait" not in projets["club-med"]
+
+    projet_id = catalogue.save_projet(
+        conn,
+        {
+            "nom": "Projet portrait",
+            "slug": "projet-portrait",
+            "statut": "publie",
+            "ton": "paper",
+            "cover_portrait_src": "/medias/projet-portrait-cover-portrait.jpg",
+            "cover_portrait_alt": "Affiche verticale du projet",
+            "cover_portrait_w": "1080",
+            "cover_portrait_h": "1920",
+        },
+    )
+
+    attendu = {
+        "src": "/medias/projet-portrait-cover-portrait.jpg",
+        "alt": "Affiche verticale du projet",
+        "width": 1080,
+        "height": 1920,
+    }
+    fiche = catalogue.get_projet(conn, projet_id)
+    assert fiche is not None and fiche["coverPortrait"] == attendu
+    servis = {p["slug"]: p for p in catalogue.export_site(conn)["projects"]}
+    assert servis["projet-portrait"]["coverPortrait"] == attendu
+    # La couverture paysage n'est pas inventée pour autant.
+    assert "cover" not in servis["projet-portrait"]
+
+
+def test_portrait_incomplet_est_refuse(tmp_path: Path) -> None:
+    conn = _connect(tmp_path)
+
+    for extra in (
+        {},
+        {"cover_portrait_w": "1080"},
+        {"cover_portrait_h": "1920"},
+    ):
+        form = {
+            "nom": "Portrait incomplet",
+            "slug": "portrait-incomplet",
+            "cover_portrait_src": "/medias/portrait.jpg",
+        }
+        form.update(extra)
+        with pytest.raises(ValueError, match="largeur et hauteur"):
+            catalogue.save_projet(conn, form)
+
+    assert conn.execute("SELECT COUNT(*) FROM projets").fetchone()[0] == 0
+
+
+def test_mise_a_jour_sans_champ_portrait_conserve_le_portrait(tmp_path: Path) -> None:
+    conn = _connect(tmp_path)
+    projet_id = catalogue.save_projet(
+        conn,
+        {
+            "nom": "Projet portrait",
+            "slug": "projet-portrait",
+            "cover_portrait_src": "/medias/portrait.jpg",
+            "cover_portrait_w": "1080",
+            "cover_portrait_h": "1920",
+        },
+    )
+
+    # Le formulaire d'édition sans les champs portrait ne doit pas l'effacer.
+    catalogue.save_projet(conn, {"nom": "Projet renommé"}, projet_id)
+
+    fiche = catalogue.get_projet(conn, projet_id)
+    assert fiche is not None
+    portrait = fiche["coverPortrait"]
+    assert portrait and portrait["src"] == "/medias/portrait.jpg"
+    assert portrait["width"] == 1080 and portrait["height"] == 1920
+
+
 def test_route_catalogue_sert_le_catalogue_publie(client: TestClient) -> None:
     response = client.get("/api/v1/catalogue")
 
@@ -125,3 +206,39 @@ def test_route_catalogue_ignore_les_brouillons(client: TestClient, db_file: Path
     slugs = [p["slug"] for p in client.get("/api/v1/catalogue").json()["projects"]]
 
     assert "projet-cache" not in slugs
+
+
+def test_route_catalogue_sert_le_portrait_et_replie_sur_le_paysage(
+    client: TestClient, db_file: Path
+) -> None:
+    """La vitrine reçoit `coverPortrait` s'il existe, rien sinon (repli paysage)."""
+    conn = sqlite3.connect(db_file)
+    conn.row_factory = sqlite3.Row
+    catalogue.save_projet(
+        conn,
+        {
+            "nom": "Projet portrait publié",
+            "slug": "projet-portrait-publie",
+            "statut": "publie",
+            "ton": "paper",
+            "cover_portrait_src": "/medias/projet-portrait-publie-cover-portrait.jpg",
+            "cover_portrait_alt": "Affiche verticale du projet",
+            "cover_portrait_w": "1080",
+            "cover_portrait_h": "1920",
+        },
+    )
+    conn.commit()
+    conn.close()
+
+    projets = {p["slug"]: p for p in client.get("/api/v1/catalogue").json()["projects"]}
+
+    assert projets["projet-portrait-publie"]["coverPortrait"] == {
+        "src": "/medias/projet-portrait-publie-cover-portrait.jpg",
+        "alt": "Affiche verticale du projet",
+        "width": 1080,
+        "height": 1920,
+    }
+    # Fiche sans portrait (American Steak House) : aucune clé, donc repli paysage.
+    assert "american-steak-house" in projets
+    assert "coverPortrait" not in projets["american-steak-house"]
+    assert projets["american-steak-house"]["cover"]["src"].endswith("cover.jpg")

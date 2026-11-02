@@ -863,6 +863,15 @@ def _catalogue_counts(request: Request, table: str) -> dict[str, int]:
     return counts
 
 
+def _media_picker(request: Request, limit: int = 400) -> list[sqlite3.Row]:
+    """Visuels de la médiathèque proposés dans les sélecteurs de l'éditeur."""
+    conn = get_conn(request)
+    try:
+        return [m for m in repo.list_medias(conn, limit) if str(m["mime"] or "").startswith("image/")]
+    finally:
+        conn.close()
+
+
 @router.get("/admin/projets/nouveau", response_class=HTMLResponse)
 def projet_nouveau(request: Request, user: str = Depends(require_admin)) -> Response:
     return render(
@@ -870,7 +879,9 @@ def projet_nouveau(request: Request, user: str = Depends(require_admin)) -> Resp
         "projet_form.html",
         projet={"id": None, "slug": "", "nom": "", "client": "", "annee": "", "ville": "",
                 "pitch": "", "scope": "", "duree": "", "ton": "paper", "statut": "brouillon",
-                "disciplines": [], "tags": [], "images": [], "sections": [], "results": []},
+                "disciplines": [], "tags": [], "images": [], "sections": [], "results": [],
+                "cover": None, "coverPortrait": None},
+        medias=_media_picker(request),
         counts=_catalogue_counts(request, "projets"),
         mode="new",
     )
@@ -889,6 +900,7 @@ def projet_editer(request: Request, projet_id: int, user: str = Depends(require_
         request,
         "projet_form.html",
         projet=projet,
+        medias=_media_picker(request),
         counts=_catalogue_counts(request, "projets"),
         mode="edit",
     )
@@ -906,6 +918,9 @@ async def projet_save(request: Request, user: str = Depends(require_admin)) -> R
     conn = get_conn(request)
     try:
         projet_id = catalogue.save_projet(conn, payload, int(raw_id) if raw_id.isdigit() else None)
+    except ValueError as exc:
+        target = f"/admin/projets/{raw_id}" if raw_id.isdigit() else "/admin/projets/nouveau"
+        return back(target, str(exc), "error")
     finally:
         conn.close()
     content_store.notify_site("catalogue")

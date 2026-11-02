@@ -14,6 +14,35 @@
   </div>
 {% endmacro %}
 
+{% macro cover_fields(prefix, cover=None, medias=[], placeholder='', ratio='') %}
+  <div class="form-grid">
+    <label class="field"><span>Chemin de l'image</span>
+      <input type="text" name="{{ prefix }}_src" value="{{ cover.src if cover else '' }}" placeholder="{{ placeholder }}" data-cover-src>
+    </label>
+    <label class="field"><span>Texte alternatif</span>
+      <input type="text" name="{{ prefix }}_alt" value="{{ cover.alt if cover else '' }}" data-cover-alt>
+    </label>
+    <label class="field"><span>Largeur (px)</span>
+      <input type="number" name="{{ prefix }}_w" min="0" value="{{ (cover.width or '') if cover else '' }}" data-cover-w>
+    </label>
+    <label class="field"><span>Hauteur (px)</span>
+      <input type="number" name="{{ prefix }}_h" min="0" value="{{ (cover.height or '') if cover else '' }}" data-cover-h>
+    </label>
+  </div>
+  <div class="media-pick" data-media-pick>
+    <label class="field"><span>Choisir dans la médiathèque{% if ratio %} <em class="hint">{{ ratio }}</em>{% endif %}</span>
+      <select data-media-select>
+        <option value="">— Sélectionner un visuel —</option>
+        {% for m in medias %}
+        <option value="/medias/{{ m.filename }}" data-w="{{ m.width or '' }}" data-h="{{ m.height or '' }}" data-alt="{{ m.alt or m.original_filename or m.filename }}">{{ m.original_filename or m.filename }}{% if m.width %} · {{ m.width }}×{{ m.height }}{% endif %}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button class="btn btn-sm" type="button" data-media-apply>Utiliser ce visuel</button>
+    <a class="btn btn-ghost btn-sm" href="/admin/medias" target="_blank" rel="noopener">Importer</a>
+  </div>
+{% endmacro %}
+
 {% macro section_row(s={}) %}
   <div class="repeat-row">
     <div class="r-fields" style="grid-template-columns:64px 150px minmax(0,1fr)">
@@ -76,13 +105,14 @@
       </section>
 
       <section class="card">
-        <div class="card-head"><h2>Couverture</h2><span class="spacer"></span><em class="hint">facultatif, sinon la première image de la galerie</em></div>
-        <div class="form-grid">
-          <label class="field"><span>Chemin de l'image</span><input type="text" name="cover_src" value="{{ projet.cover.src if projet.cover else '' }}" placeholder="/assets/img/projet/mon-projet/cover.jpg"></label>
-          <label class="field"><span>Texte alternatif</span><input type="text" name="cover_alt" value="{{ projet.cover.alt if projet.cover else '' }}"></label>
-          <label class="field"><span>Largeur (px)</span><input type="number" name="cover_w" min="0" value="{{ (projet.cover.width or '') if projet.cover else '' }}"></label>
-          <label class="field"><span>Hauteur (px)</span><input type="number" name="cover_h" min="0" value="{{ (projet.cover.height or '') if projet.cover else '' }}"></label>
-        </div>
+        <div class="card-head"><h2>Couverture paysage</h2><span class="spacer"></span><em class="hint">facultatif, sinon la première image de la galerie</em></div>
+        {{ cover_fields('cover', projet.cover, medias, '/assets/img/projet/mon-projet/cover.jpg') }}
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h2>Couverture portrait (mobile)</h2><span class="spacer"></span><em class="hint">facultatif, sinon la couverture paysage est utilisée</em></div>
+        <p class="tiny muted">Visuel vertical servi sous 720 px : <b>1080 × 1920</b> (2:3), 200 Ko max. Laisse vide pour garder un rendu paysage sur mobile.</p>
+        {{ cover_fields('cover_portrait', projet.coverPortrait, medias, '/assets/img/projet/mon-projet/cover-portrait.jpg', '1080 × 1920') }}
       </section>
 
       <section class="card">

@@ -194,3 +194,75 @@ def test_formulaires_vierges(logged: TestClient) -> None:
     prestation = logged.get("/admin/prestations/nouveau")
     assert prestation.status_code == 200
     assert 'name="livrables"' in prestation.text
+
+
+def test_editeur_couverture_portrait(logged: TestClient) -> None:
+    """Le portrait se choisit dans l'éditeur, se publie, et se refuse incomplet."""
+    form = logged.get("/admin/projets/nouveau")
+    assert form.status_code == 200
+    assert "Couverture portrait (mobile)" in form.text
+    assert 'name="cover_portrait_src"' in form.text
+    assert 'name="cover_portrait_w"' in form.text
+    assert "data-media-pick" in form.text
+
+    create = logged.post(
+        "/admin/projets",
+        data=_form(
+            "Portrait mobile",
+            cover_portrait_src="/medias/portrait.jpg",
+            cover_portrait_alt="Affiche verticale",
+            cover_portrait_w="1080",
+            cover_portrait_h="1920",
+        ),
+        follow_redirects=False,
+    )
+    assert create.status_code == 303, create.text[:400]
+    projet_id = int(urlparse(create.headers["location"]).path.rstrip("/").split("/")[-1])
+    logged.post(
+        f"/admin/projets/{projet_id}/statut",
+        data={"csrf": _TOKEN[0], "statut": "publie"},
+        follow_redirects=False,
+    )
+
+    export = logged.get("/admin/catalogue/export.json").json()
+    cree = next(item for item in export["projects"] if item["name"] == "Portrait mobile")
+    assert cree["coverPortrait"] == {
+        "src": "/medias/portrait.jpg",
+        "alt": "Affiche verticale",
+        "width": 1080,
+        "height": 1920,
+    }
+
+    # Édition : le portrait est prérempli et survit à une sauvegarde.
+    detail = logged.get(f"/admin/projets/{projet_id}")
+    assert 'value="/medias/portrait.jpg"' in detail.text
+    assert 'value="1080"' in detail.text
+
+    update = logged.post(
+        "/admin/projets",
+        data=_form(
+            "Portrait mobile",
+            id=str(projet_id),
+            statut="publie",
+            cover_portrait_src="/medias/portrait.jpg",
+            cover_portrait_w="1080",
+            cover_portrait_h="1920",
+        ),
+        follow_redirects=False,
+    )
+    assert update.status_code == 303
+    export = logged.get("/admin/catalogue/export.json").json()
+    encore = next(item for item in export["projects"] if item["name"] == "Portrait mobile")
+    assert encore["coverPortrait"]["src"] == "/medias/portrait.jpg"
+
+    # Portrait sans dimensions : refusé, message affiché, rien n'est enregistré.
+    incomplet = logged.post(
+        "/admin/projets",
+        data=_form("Portrait casse", cover_portrait_src="/medias/casse.jpg"),
+        follow_redirects=False,
+    )
+    assert incomplet.status_code == 303
+    flash = logged.get(incomplet.headers["location"])
+    assert "largeur et hauteur" in flash.text
+    noms = [item["name"] for item in logged.get("/admin/catalogue/export.json").json()["projects"]]
+    assert "Portrait casse" not in noms

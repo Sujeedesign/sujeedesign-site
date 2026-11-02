@@ -10,7 +10,7 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-SCHEMA_VERSION = 9
+SCHEMA_VERSION = 10
 
 # Colonnes ajoutées après la première mise en production. Chaque entrée est
 # appliquée une seule fois, dans l'ordre, par `migrate` (idempotent).
@@ -19,6 +19,9 @@ MIGRATIONS: tuple[tuple[str, str, str], ...] = (
     # Visuel de couverture distinct de la galerie (2 novembre 2026) : la vitrine
     # garde exactement le même rendu qu'avec les fiches statiques historiques.
     ("projets", "cover", "TEXT NOT NULL DEFAULT ''"),
+    # Couverture portrait (mobile), même format que `cover` (2 novembre 2026) :
+    # optionnelle, une fiche sans portrait garde son rendu paysage.
+    ("projets", "cover_portrait", "TEXT NOT NULL DEFAULT ''"),
 )
 
 REQUIRED_TABLES = (
@@ -124,6 +127,7 @@ CREATE TABLE IF NOT EXISTS projets (
   tags TEXT NOT NULL DEFAULT '[]',
   images TEXT NOT NULL DEFAULT '[]',
   cover TEXT NOT NULL DEFAULT '',
+  cover_portrait TEXT NOT NULL DEFAULT '',
   sections TEXT NOT NULL DEFAULT '[]',
   results TEXT NOT NULL DEFAULT '[]',
   statut TEXT NOT NULL DEFAULT 'brouillon',

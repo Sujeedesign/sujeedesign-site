@@ -87,6 +87,10 @@ def projet_from_row(row: sqlite3.Row) -> dict[str, Any]:
     item["results"] = _loads(item.get("results"), [])
     cover = _loads(item.get("cover"), {})
     item["cover"] = cover if isinstance(cover, dict) and cover.get("src") else None
+    # Portrait mobile : même forme que `cover`, exposé en camelCase pour la
+    # vitrine (`coverPortrait`) et laissé à None s'il est absent.
+    portrait = _loads(item.get("cover_portrait"), {})
+    item["coverPortrait"] = portrait if isinstance(portrait, dict) and portrait.get("src") else None
     return item
 
 
@@ -172,6 +176,32 @@ def save_projet(conn: sqlite3.Connection, form: dict[str, Any], projet_id: int |
         if isinstance(saved, dict) and saved.get("src"):
             cover = saved
 
+    # Couverture portrait (mobile) : même contrat que `cover`, plus un refus
+    # explicite d'un visuel sans dimensions. Sans portrait, la fiche reste
+    # paysage : le champ est optionnel.
+    cover_portrait: dict[str, Any] = {}
+    if "cover_portrait_src" in form:
+        portrait_src = _text(form.get("cover_portrait_src"))
+        if portrait_src:
+            portrait_w = _int_or_zero(form.get("cover_portrait_w"))
+            portrait_h = _int_or_zero(form.get("cover_portrait_h"))
+            if not portrait_w or not portrait_h:
+                raise ValueError(
+                    "Couverture portrait : largeur et hauteur sont obligatoires "
+                    "(visuel 1080 × 1920)."
+                )
+            cover_portrait = {
+                "src": portrait_src,
+                "alt": _text(form.get("cover_portrait_alt")),
+                "width": portrait_w,
+                "height": portrait_h,
+            }
+    elif projet_id:
+        row = conn.execute("SELECT cover_portrait FROM projets WHERE id = ?", (projet_id,)).fetchone()
+        saved_portrait = _loads(row["cover_portrait"] if row else "", {})
+        if isinstance(saved_portrait, dict) and saved_portrait.get("src"):
+            cover_portrait = saved_portrait
+
     results: list[dict[str, str]] = []
     for value, label in form.get("results", []):
         if _text(value) or _text(label):
@@ -192,6 +222,7 @@ def save_projet(conn: sqlite3.Connection, form: dict[str, Any], projet_id: int |
         "tags": json.dumps(_lines(form.get("tags", "")), ensure_ascii=False),
         "images": json.dumps(images, ensure_ascii=False),
         "cover": json.dumps(cover, ensure_ascii=False),
+        "cover_portrait": json.dumps(cover_portrait, ensure_ascii=False),
         "sections": json.dumps(sections, ensure_ascii=False),
         "results": json.dumps(results, ensure_ascii=False),
     }
@@ -358,6 +389,10 @@ def export_site(conn: sqlite3.Connection) -> dict[str, Any]:
             projet["cover"] = item["cover"]
         elif item["images"]:
             projet["cover"] = item["images"][0]
+        # Portrait mobile : la vitrine le sert sous 720 px. Absent, aucune clé
+        # n'est émise et le rendu paysage reste inchangé.
+        if item.get("coverPortrait"):
+            projet["coverPortrait"] = item["coverPortrait"]
         projets.append(projet)
 
     services = []
@@ -417,8 +452,8 @@ def seed_from_file(conn: sqlite3.Connection, path: Path | None = None) -> int:
             """
             INSERT INTO projets (
               slug, nom, client, annee, ville, pitch, scope, duree, ton,
-              disciplines, tags, images, cover, sections, results, statut, position
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'publie', ?)
+              disciplines, tags, images, cover, cover_portrait, sections, results, statut, position
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'publie', ?)
             """,
             (
                 slug,
@@ -434,6 +469,7 @@ def seed_from_file(conn: sqlite3.Connection, path: Path | None = None) -> int:
                 json.dumps(row.get("tags") or [], ensure_ascii=False),
                 json.dumps(row.get("images") or [], ensure_ascii=False),
                 json.dumps(row.get("cover") or {}, ensure_ascii=False),
+                json.dumps(row.get("coverPortrait") or {}, ensure_ascii=False),
                 json.dumps(row.get("sections") or [], ensure_ascii=False),
                 json.dumps(row.get("results") or [], ensure_ascii=False),
                 int(row.get("position") or 0),

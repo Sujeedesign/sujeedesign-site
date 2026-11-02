@@ -86,4 +86,28 @@
       event.returnValue = "";
     });
   }
+
+  // Médiathèque : un sélecteur par couverture (paysage et portrait). Le choix
+  // remplit chemin, alt et dimensions, donc le portrait n'est jamais incomplet.
+  document.querySelectorAll("[data-media-pick]").forEach(function (box) {
+    var card = box.closest("section") || document;
+    var select = box.querySelector("[data-media-select]");
+    var apply = box.querySelector("[data-media-apply]");
+    if (!select || !apply) return;
+    apply.addEventListener("click", function () {
+      var opt = select.options[select.selectedIndex];
+      if (!opt || !opt.value) return;
+      var src = card.querySelector("[data-cover-src]");
+      var alt = card.querySelector("[data-cover-alt]");
+      var w = card.querySelector("[data-cover-w]");
+      var h = card.querySelector("[data-cover-h]");
+      if (src) src.value = opt.value;
+      if (alt && !alt.value.trim()) alt.value = opt.getAttribute("data-alt") || "";
+      if (w && opt.getAttribute("data-w")) w.value = opt.getAttribute("data-w");
+      if (h && opt.getAttribute("data-h")) h.value = opt.getAttribute("data-h");
+      var label = apply.textContent;
+      apply.textContent = "Visuel appliqué ✓";
+      window.setTimeout(function () { apply.textContent = label; }, 1800);
+    });
+  });
 })();
