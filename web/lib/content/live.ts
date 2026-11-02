@@ -3,6 +3,7 @@ import agentsIaJson from "@/content/agents-ia.json";
 import homeJson from "@/content/home.json";
 import realisationsJson from "@/content/realisations.json";
 import servicesJson from "@/content/services.json";
+import { contactLinks } from "@/lib/content/contact-links";
 import { homeSchema, type HomeContent } from "@/lib/content/schema";
 
 /**
@@ -69,19 +70,20 @@ async function fetchDocument(slug: string): Promise<unknown | null> {
 export async function getHomeContent(): Promise<HomeContent> {
   const remote = await fetchDocument("home");
   const merged = remote ? merge(fallbackFor("home"), remote) : fallbackFor("home");
-  return homeSchema.parse(merged);
+  return homeSchema.parse(contactLinks(merged));
 }
 
 /** Document des services. Aucun schéma zod exporté pour cette page : le JSON sert de type. */
 export async function getServicesContent(): Promise<typeof servicesJson> {
   const remote = await fetchDocument("services");
   const merged = remote ? merge(fallbackFor("services"), remote) : fallbackFor("services");
-  return merged as typeof servicesJson;
+  return contactLinks(merged) as typeof servicesJson;
 }
 
 /** Document d'une page secondaire (bannière), servi depuis la base si possible. */
 export async function getPageContent(slug: PageSlug) {
   const remote = await fetchDocument(slug);
   const base = fallbackFor(slug);
-  return (remote ? merge(base, remote) : base) as { hero?: Record<string, unknown> };
+  const doc = (remote ? merge(base, remote) : base) as { hero?: Record<string, unknown> };
+  return contactLinks(doc);
 }
