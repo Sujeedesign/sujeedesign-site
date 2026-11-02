@@ -64,11 +64,31 @@ def create_app(db_file: Path | None = None) -> FastAPI:
     app.mount("/medias", StaticFiles(directory=str(media_dir)), name="medias")
 
     @app.middleware("http")
+    async def body_limit(request: Request, call_next):
+        # Garde-fou anti-saturation : les formulaires texte n'ont aucune raison
+        # de dépasser 1 Mo, seuls les imports de médias montent à 16 Mo.
+        raw = request.headers.get("content-length")
+        if raw and raw.isdigit():
+            path = request.url.path
+            limit = 16 * 1024 * 1024 if path in ("/admin/medias", "/api/v1/admin/media") else 1024 * 1024
+            if int(raw) > limit:
+                return JSONResponse({"detail": "requête trop volumineuse"}, status_code=413)
+        return await call_next(request)
+
+    @app.middleware("http")
     async def headers(request: Request, call_next):
         response = await call_next(request)
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
         response.headers.setdefault("Referrer-Policy", "same-origin")
         response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("Strict-Transport-Security", "max-age=15552000")
+        response.headers.setdefault(
+            "Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()"
+        )
+        if request.url.path.startswith("/medias/"):
+            # Fichiers déposés par l'admin : jamais interprétés comme du document,
+            # même si un SVG ou un HTML se glissait dans le dossier.
+            response.headers.setdefault("Content-Security-Policy", "default-src 'none'; sandbox")
         if request.url.path.startswith("/admin") or request.url.path.startswith("/api/"):
             response.headers.setdefault("Cache-Control", "no-store")
             # Tout ce conteneur est un back office : on interdit l'indexation au

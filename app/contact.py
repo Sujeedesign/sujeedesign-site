@@ -32,10 +32,8 @@ URL_RE = re.compile(r"https?://|www\.", re.IGNORECASE)
 
 
 def client_ip(request: Request) -> str:
-    forwarded = request.headers.get("x-forwarded-for", "")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
-    return request.client.host if request.client else "0.0.0.0"
+    peer = request.client.host if request.client else ""
+    return security.client_ip_from(peer, request.headers.get("x-forwarded-for", ""))
 
 
 def _limiter(request: Request) -> security.RateLimiter:
@@ -164,7 +162,9 @@ async def submit(request: Request) -> JSONResponse:
 
 def require_sync(request: Request) -> None:
     expected = settings_module.env("SYNC_TOKEN")
-    supplied = str(request.headers.get("x-sync-token") or request.query_params.get("token") or "")
+    # Jeton en en-tête uniquement : une valeur en query finit dans les journaux
+    # d'accès et dans l'historique du proxy.
+    supplied = str(request.headers.get("x-sync-token") or "")
     if not expected or not hmac.compare_digest(supplied, expected):
         raise HTTPException(status_code=401, detail="jeton de synchronisation invalide")
 

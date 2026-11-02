@@ -155,8 +155,21 @@ def current_user(request: Request) -> str | None:
     return "admin" if token and security.verify_session(token) else None
 
 
-def csrf_token() -> str:
-    return security.make_token(CSRF_PURPOSE, CSRF_TTL)
+def csrf_token(request: Request | None = None) -> str:
+    """Jeton anti-CSRF, lié à la session admin en cours.
+
+    Sans session (page de connexion), le jeton est signé avec la clé publique :
+    il ne peut rien déclencher, `check_csrf` exige une session.
+    """
+    key = _csrf_key(request) if request is not None else None
+    return security.make_token(CSRF_PURPOSE, CSRF_TTL, key=key)
+
+
+def _csrf_key(request: Request) -> str | None:
+    session = request.cookies.get(security.SESSION_COOKIE, "")
+    if session and security.verify_session(session):
+        return "sess:" + session
+    return None
 
 
 def _allowed_hosts(request: Request) -> set[str]:
@@ -178,13 +191,17 @@ def _allowed_hosts(request: Request) -> set[str]:
 
 
 def check_csrf(request: Request, token: str) -> None:
+    # Le jeton ne remplace pas la session : sans cookie admin valide, aucune
+    # écriture, même avec un jeton parfaitement signé.
+    if current_user(request) is None:
+        raise HTTPException(status_code=403, detail="session requise")
     supplied_origin = request.headers.get("origin") or request.headers.get("referer") or ""
     if supplied_origin:
         hosts = _allowed_hosts(request)
         origin_host = urlparse(supplied_origin).netloc.lower()
         if hosts and origin_host and origin_host not in hosts:
             raise HTTPException(status_code=403, detail="origine refusée")
-    if not security.verify_token(CSRF_PURPOSE, token or "", CSRF_TTL):
+    if not security.verify_token(CSRF_PURPOSE, token or "", CSRF_TTL, key=_csrf_key(request)):
         raise HTTPException(status_code=403, detail="formulaire expiré, recharge la page")
 
 
@@ -236,7 +253,7 @@ def render(request: Request, template: str, **context: Any) -> HTMLResponse:
         "user": user,
         "nav": nav_groups(active, _nav_badges(request)),
         "active": active,
-        "csrf": csrf_token(),
+        "csrf": csrf_token(request),
         "flash": request.query_params.get("flash", ""),
         "flash_kind": request.query_params.get("kind", "ok"),
         "public_url": settings_module.public_base_url(),
@@ -259,7 +276,10 @@ def connexion_form(request: Request) -> Response:
 @router.post("/admin/connexion")
 def connexion(request: Request, password: str = Form("")) -> Response:
     limiter = _limiter(request)
-    ip = request.client.host if request.client else "0.0.0.0"
+    ip = security.client_ip_from(
+        request.client.host if request.client else "",
+        request.headers.get("x-forwarded-for", ""),
+    )
     if not limiter.allow("login:" + security.hash_ip(ip), limit=8, window=900):
         return render(request, "connexion.html", error="Trop de tentatives. Réessaie dans 15 minutes.")
     try:
@@ -297,7 +317,12 @@ def connexion(request: Request, password: str = Form("")) -> Response:
 
 @router.post("/admin/deconnexion")
 def deconnexion(request: Request, csrf: str = Form("")) -> Response:
-    check_csrf(request, csrf)
+    # Déconnecter ne doit jamais échouer sur une session déjà expirée : on tente
+    # la vérification CSRF, mais on efface les cookies dans tous les cas.
+    try:
+        check_csrf(request, csrf)
+    except HTTPException:
+        pass
     response = RedirectResponse("/admin/connexion", status_code=303)
     response.delete_cookie(security.SESSION_COOKIE, path="/")
     response.delete_cookie(security.UI_MARKER_COOKIE, path="/")
@@ -691,6 +716,8 @@ async def medias_upload(
         return back("/admin/medias", "Fichier vide.", "error")
     if len(payload) > MAX_UPLOAD:
         return back("/admin/medias", "Fichier trop lourd (15 Mo maximum).", "error")
+    if not security.sniff_matches(payload, extension):
+        return back("/admin/medias", "Le contenu du fichier ne correspond pas au format annoncé.", "error")
 
     folder = Path(request.app.state.media_dir)
     folder.mkdir(parents=True, exist_ok=True)

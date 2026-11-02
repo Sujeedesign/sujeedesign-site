@@ -12,7 +12,14 @@ from urllib.parse import parse_qs, urlparse
 import pytest
 from fastapi.testclient import TestClient
 
-from app.admin import csrf_token
+from app import security
+from app.admin import CSRF_PURPOSE, CSRF_TTL
+
+
+def _session_csrf(client: TestClient) -> str:
+    """Jeton lié à la session connectée, comme celui rendu dans les formulaires."""
+    session = client.cookies.get(security.SESSION_COOKIE, "")
+    return security.make_token(CSRF_PURPOSE, CSRF_TTL, key="sess:" + session)
 
 
 @pytest.fixture()
@@ -23,11 +30,16 @@ def logged(client: TestClient) -> TestClient:
         follow_redirects=False,
     )
     assert response.status_code == 303, response.text
+    _TOKEN.clear()
+    _TOKEN.append(_session_csrf(client))
     return client
 
 
+_TOKEN: list[str] = []
+
+
 def _form(nom: str, **extra: object) -> dict[str, object]:
-    data: dict[str, object] = {"csrf": csrf_token(), "nom": nom, "statut": "brouillon", "ton": "paper"}
+    data: dict[str, object] = {"csrf": _TOKEN[0], "nom": nom, "statut": "brouillon", "ton": "paper"}
     data.update(extra)
     return data
 
@@ -101,7 +113,7 @@ def test_cycle_projet(logged: TestClient) -> None:
 
     publish = logged.post(
         f"/admin/projets/{projet_id}/statut",
-        data={"csrf": csrf_token(), "statut": "publie"},
+        data={"csrf": _TOKEN[0], "statut": "publie"},
         follow_redirects=False,
     )
     assert publish.status_code == 303
@@ -118,14 +130,14 @@ def test_cycle_projet(logged: TestClient) -> None:
 
     move = logged.post(
         f"/admin/projets/{projet_id}/position",
-        data={"csrf": csrf_token(), "dir": "down"},
+        data={"csrf": _TOKEN[0], "dir": "down"},
         follow_redirects=False,
     )
     assert move.status_code == 303
 
     delete = logged.post(
         f"/admin/projets/{projet_id}/supprimer",
-        data={"csrf": csrf_token()},
+        data={"csrf": _TOKEN[0]},
         follow_redirects=False,
     )
     assert delete.status_code == 303
@@ -158,7 +170,7 @@ def test_cycle_prestation(logged: TestClient) -> None:
 
     logged.post(
         f"/admin/prestations/{prestation_id}/statut",
-        data={"csrf": csrf_token(), "statut": "publie"},
+        data={"csrf": _TOKEN[0], "statut": "publie"},
         follow_redirects=False,
     )
     export = logged.get("/admin/catalogue/export.json").json()
@@ -166,7 +178,7 @@ def test_cycle_prestation(logged: TestClient) -> None:
 
     deleted = logged.post(
         f"/admin/prestations/{prestation_id}/supprimer",
-        data={"csrf": csrf_token()},
+        data={"csrf": _TOKEN[0]},
         follow_redirects=False,
     )
     assert deleted.status_code == 303

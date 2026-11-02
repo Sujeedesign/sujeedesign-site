@@ -23,7 +23,8 @@ from fastapi.responses import JSONResponse
 from . import content as content_store
 from . import content_model
 from . import repo
-from .admin import ALLOWED_TYPES, MAX_UPLOAD
+from . import security
+from .admin import ALLOWED_TYPES, MAX_UPLOAD, _limiter
 from .settings import env
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin-api"])
@@ -44,6 +45,13 @@ def require_token(request: Request) -> str:
     expected = _token()
     if not expected:
         raise HTTPException(status_code=503, detail="API désactivée : SITE_API_TOKEN absent")
+    ip = security.client_ip_from(
+        request.client.host if request.client else "",
+        request.headers.get("x-forwarded-for", ""),
+    )
+    # Le jeton est long, mais autant couper court au bourrage : 40 essais / 15 min.
+    if not _limiter(request).allow("api:" + security.hash_ip(ip), limit=40, window=900):
+        raise HTTPException(status_code=429, detail="trop de requêtes, réessaie plus tard")
     header = request.headers.get("authorization", "")
     scheme, _, given = header.partition(" ")
     if scheme.lower() != "bearer" or not hmac.compare_digest(given.strip(), expected):
@@ -52,7 +60,10 @@ def require_token(request: Request) -> str:
             detail="jeton absent ou invalide",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    author = (request.headers.get("x-author") or "api").strip()[:60]
+    # L'auteur est déclaratif (le jeton est partagé) : on le nettoie des
+    # caractères de contrôle pour qu'il ne casse ni les journaux ni l'affichage.
+    author = "".join(ch for ch in (request.headers.get("x-author") or "api") if ch.isprintable())
+    author = " ".join(author.split())[:60]
     return author or "api"
 
 
@@ -242,6 +253,8 @@ async def import_media(
         raise HTTPException(status_code=400, detail="fichier vide")
     if len(payload) > MAX_UPLOAD:
         raise HTTPException(status_code=413, detail="fichier trop lourd (15 Mo maximum)")
+    if not security.sniff_matches(payload, extension):
+        raise HTTPException(status_code=415, detail="le contenu du fichier ne correspond pas au format annoncé")
 
     requested = (filename or fichier.filename or "media").rsplit(".", 1)[0]
     target = _slug_filename(requested, extension)

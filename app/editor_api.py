@@ -115,7 +115,7 @@ def session(request: Request, page: str | None = None) -> JSONResponse:
             "ok": True,
             "user": user,
             "slug": slug,
-            "csrf": csrf_token(),
+            "csrf": csrf_token(request),
             "doc": doc["data"],
             "updated_at": doc["updated_at"],
             "sections": model.form_sections(slug, doc["data"]),

@@ -5,6 +5,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import hmac
+import ipaddress
 import os
 import secrets
 import struct
@@ -45,13 +46,25 @@ def _sign(payload: str, secret: str | None = None) -> str:
     return hmac.new(key, payload.encode("utf-8"), hashlib.sha256).hexdigest()
 
 
-def make_token(purpose: str, ttl: int = FORM_TTL, now: int | None = None) -> str:
+def make_token(purpose: str, ttl: int = FORM_TTL, now: int | None = None, key: str | None = None) -> str:
+    """Jeton signé, optionnellement lié à une clé (une session, par exemple).
+
+    `key` mélange la clé de signature : un jeton émis pour une session donnée ne
+    vaut rien dans une autre, ni après déconnexion (le cookie de session change).
+    """
     issued = int(time.time() if now is None else now)
+    secret = f"{session_secret()}:{key}" if key else None
     payload = f"{purpose}.{issued}.{secrets.token_urlsafe(9)}"
-    return f"{payload}.{_sign(payload)}"
+    return f"{payload}.{_sign(payload, secret)}"
 
 
-def verify_token(purpose: str, token: str, ttl: int = FORM_TTL, now: int | None = None) -> bool:
+def verify_token(
+    purpose: str,
+    token: str,
+    ttl: int = FORM_TTL,
+    now: int | None = None,
+    key: str | None = None,
+) -> bool:
     if not token:
         return False
     parts = token.split(".")
@@ -64,7 +77,8 @@ def verify_token(purpose: str, token: str, ttl: int = FORM_TTL, now: int | None 
         issued = int(issued_text)
     except ValueError:
         return False
-    if not hmac.compare_digest(signature, _sign(".".join(parts[:3]))):
+    secret = f"{session_secret()}:{key}" if key else None
+    if not hmac.compare_digest(signature, _sign(".".join(parts[:3]), secret)):
         return False
     current = int(time.time() if now is None else now)
     return 0 <= current - issued <= ttl
@@ -99,6 +113,69 @@ def check_password(candidate: str) -> bool:
 
 def hash_ip(ip: str) -> str:
     return hashlib.sha256(f"{session_secret()}:{ip}".encode("utf-8")).hexdigest()[:32]
+
+
+def _parse_ip(value: str) -> ipaddress.IPv4Address | ipaddress.IPv6Address | None:
+    value = (value or "").strip().strip('"')
+    if not value:
+        return None
+    if value.startswith("["):  # [2001:db8::1]:443
+        end = value.find("]")
+        value = value[1:end] if end > 0 else value[1:]
+    try:
+        return ipaddress.ip_address(value)
+    except ValueError:
+        pass
+    if value.count(":") == 1:  # 203.0.113.7:51234
+        try:
+            return ipaddress.ip_address(value.split(":", 1)[0])
+        except ValueError:
+            return None
+    return None
+
+
+def client_ip_from(peer: str, forwarded: str) -> str:
+    """IP du client, en partant de la droite de `X-Forwarded-For`.
+
+    La valeur la plus à gauche est écrite par le client : la prendre en compte
+    revient à le laisser choisir son identité et contourner les limites de débit.
+    Seul le dernier saut non privé (ajouté par notre proxy) est retenu.
+    """
+    for entry in reversed([part for part in (forwarded or "").split(",") if part.strip()]):
+        addr = _parse_ip(entry)
+        if addr is not None and addr.is_global:
+            return str(addr)
+    fallback = _parse_ip(peer or "")
+    return str(fallback) if fallback is not None else "0.0.0.0"
+
+
+# Signatures binaires des formats acceptés par la médiathèque. Le type annoncé
+# par le client (`Content-Type`) n'est qu'une déclaration : on vérifie les octets.
+_MAGIC_PREFIXES = {
+    "jpg": (b"\xff\xd8\xff",),
+    "png": (b"\x89PNG\r\n\x1a\n",),
+    "gif": (b"GIF87a", b"GIF89a"),
+    "pdf": (b"%PDF-",),
+}
+
+_MAGIC_CONTAINERS = {
+    # WebP et AVIF sont des conteneurs RIFF/ISO-BMFF : on lit l'étiquette interne.
+    "webp": (b"WEBP",),
+    "avif": (b"avif", b"avis"),
+}
+
+
+def sniff_matches(payload: bytes, extension: str) -> bool:
+    """Vrai si les premiers octets du fichier correspondent au format annoncé."""
+    ext = (extension or "").lower().lstrip(".")
+    head = payload[:64]
+    if ext in _MAGIC_PREFIXES:
+        return any(head.startswith(prefix) for prefix in _MAGIC_PREFIXES[ext])
+    if ext in _MAGIC_CONTAINERS:
+        if ext == "webp":
+            return head[:4] == b"RIFF" and head[8:12] == b"WEBP"
+        return head[4:8] == b"ftyp" and any(tag in head[8:32] for tag in _MAGIC_CONTAINERS[ext])
+    return False
 
 
 def random_filename(extension: str) -> str:
