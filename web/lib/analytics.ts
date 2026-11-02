@@ -14,3 +14,21 @@ export const GOOGLE_SITE_VERIFICATION =
 
 /** Clé publique de consentement stockée côté navigateur. */
 export const CONSENT_KEY = "sd-consent";
+
+type GtagWindow = Window & {
+  gtag?: (...args: unknown[]) => void;
+};
+
+/**
+ * Envoie un événement GA4 depuis le client.
+ *
+ * Le chargeur de `components/site/analytics.tsx` n'installe `window.gtag` qu'après
+ * consentement : sans consentement (ou avant hydratation), l'appel est un no-op.
+ * Aucun script tiers n'est ajouté ici.
+ */
+export function trackEvent(name: string, params: Record<string, string | number | boolean> = {}): void {
+  if (typeof window === "undefined") return;
+  const gtag = (window as GtagWindow).gtag;
+  if (typeof gtag !== "function") return;
+  gtag("event", name, params);
+}

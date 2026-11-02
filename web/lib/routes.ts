@@ -13,6 +13,8 @@ export const routes = {
   agentsIa: "/agents-ia",
   contact: "/contact",
   mentionsLegales: "/mentions-legales",
+  /** Calculateur de budget identité : seule page publique sous /ressources pour l'instant. */
+  calculateurBudgetIdentite: "/ressources/calculateur-budget-identite",
 } as const;
 
 /** Slugs des cinq services, dans l'ordre éditorial 01 → 05. */

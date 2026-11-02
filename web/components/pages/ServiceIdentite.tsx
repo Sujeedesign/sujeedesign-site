@@ -126,6 +126,11 @@ export function ServiceIdentite({ doc }: { doc: Doc }) {
               <div className="glow" aria-hidden="true" />
               <p data-field="cta.text">{cta.text}</p>
               <a className="btn-fill btn-fill--light" href={routes.contact}>{cta.label} <span aria-hidden="true">↗</span></a>
+              <div className="sp-cta__calc">
+                <a href={routes.calculateurBudgetIdentite}>
+                  Estimer le budget d&apos;une identité visuelle en 30 secondes
+                </a>
+              </div>
             </div>
           </div>
         </section>

@@ -218,11 +218,13 @@ export function SiteFooter({ variant = "home" }: { variant?: "home" | "inner" })
         {variant === "home" ? (
           <span>
             <a href={routes.realisations}>Réalisations</a> · <a href={routes.services}>Services</a>{" "}
-            · <a href={routes.mentionsLegales}>Mentions légales</a> · <a href="#top">Haut de page</a>
+            · <a href={routes.calculateurBudgetIdentite}>Calculateur de budget identité</a> ·{" "}
+            <a href={routes.mentionsLegales}>Mentions légales</a> · <a href="#top">Haut de page</a>
           </span>
         ) : (
           <span>
             <a href={routes.realisations}>Réalisations</a> ·{" "}
+            <a href={routes.calculateurBudgetIdentite}>Calculateur de budget identité</a> ·{" "}
             <a href={routes.mentionsLegales}>Mentions légales</a> ·{" "}
             <a href={routes.home}>Accueil</a>
           </span>

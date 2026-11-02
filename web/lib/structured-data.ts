@@ -195,3 +195,53 @@ export function webPageNode(path: string, name: string, description?: string) {
     about: { "@id": SCHEMA_IDS.studio },
   };
 }
+
+/**
+ * Outil gratuit rendu dans une page (calculateur) : un `WebApplication`.
+ *
+ * Pas d'`aggregateRating` ni d'`offers` : rien n'est vendu et aucun avis n'existe.
+ * Les fourchettes affichées ne sont pas exposées non plus, pour ne pas laisser croire
+ * à un prix ferme indexable.
+ */
+export function webApplicationNode(
+  path: string,
+  name: string,
+  description: string,
+  applicationCategory = "BusinessApplication",
+) {
+  const url = absoluteUrl(path);
+  return {
+    "@type": "WebApplication",
+    "@id": `${url}#application`,
+    name,
+    description,
+    url,
+    applicationCategory,
+    browserRequirements: "JavaScript activé pour le calcul ; le contenu reste lisible sans.",
+    inLanguage: IN_LANGUAGE,
+    isAccessibleForFree: true,
+    // Outil gratuit : le brief exige `offers` avec un prix à 0.
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "EUR",
+    },
+    isPartOf: { "@id": `${url}#page` },
+    author: { "@id": SCHEMA_IDS.studio },
+  };
+}
+
+export type FaqEntry = { question: string; answer: string };
+
+/** FAQ d'une page : `FAQPage` avec une `Question` par entrée. */
+export function faqNode(path: string, entries: readonly FaqEntry[]) {
+  return {
+    "@type": "FAQPage",
+    "@id": `${absoluteUrl(path)}#faq`,
+    mainEntity: entries.map((entry) => ({
+      "@type": "Question",
+      name: entry.question,
+      acceptedAnswer: { "@type": "Answer", text: entry.answer },
+    })),
+  };
+}

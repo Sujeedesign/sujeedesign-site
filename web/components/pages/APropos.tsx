@@ -224,6 +224,11 @@ export function APropos({ doc }: { doc?: PageDoc }) {
               <div className="glow" aria-hidden="true" />
               <p>Un projet, une formation, un avis ?</p>
               <a className="btn-fill btn-fill--light" href={routes.contact}>Prendre contact <span aria-hidden="true">↗</span></a>
+              <div className="sp-cta__calc">
+                <a href={routes.calculateurBudgetIdentite}>
+                  Ou estimez d&apos;abord le budget d&apos;une identité visuelle
+                </a>
+              </div>
             </div>
           </div>
         </section>

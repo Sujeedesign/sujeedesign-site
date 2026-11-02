@@ -948,3 +948,8 @@ box-shadow:0 50px 90px -50px #000, 0 0 0 1px rgba(255,75,31,.25)}
   .meta-grid:has(> div:nth-child(2):last-child){grid-template-columns:repeat(2,1fr)}
   .meta-grid:has(> div:nth-child(3):last-child){grid-template-columns:repeat(3,1fr)}
 }
+
+/* Lien secondaire vers le calculateur de budget identite (bandcta). Cible 44 px. */
+.sp-cta__calc{margin:12px 0 0;position:relative;z-index:2}
+.sp-cta__calc a{display:inline-flex;align-items:center;min-height:44px;color:inherit;font-size:13px;letter-spacing:.04em;text-decoration:underline;text-underline-offset:3px;opacity:.85}
+.sp-cta__calc a:hover{opacity:1}
