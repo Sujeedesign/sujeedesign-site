@@ -630,7 +630,7 @@ export const projects: Project[] = [
     year: "2013 — 2017",
     disciplines: ["Identité", "Logotypes"],
     pitch:
-      "Des logotypes réalisés entre 2013 et 2017, présentés sans mise en scène. La contrainte d’un logofolio, c’est de montrer une méthode sans noyer les signes dans un décor.",
+      "Des logotypes réalisés entre 2013 et 2017, présentés sans mise en scène : un logofolio doit montrer une méthode, pas un décor.",
     scope: "Création de logotypes et déclinaisons",
     sections: [
       {
