@@ -64,7 +64,7 @@ export function APropos({ doc }: { doc?: PageDoc }) {
             <div className="sec-head rv">
               <div className="sec-num">01</div>
               <div>
-                <h2>Six métiers,<br />une même main.</h2>
+                <h2>Six savoir-faire,<br />une même main.</h2>
                 <p>Une identité ne vit pas seule. Elle se juge sur la photo qui l'accompagne, le site qui la porte et l'outil qui la fait tourner. C'est pour ça que je couvre toute la chaîne.</p>
               </div>
               <div className="side">De la direction artistique au code</div>

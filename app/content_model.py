@@ -395,7 +395,7 @@ PAGE_DEFAULTS: dict[str, dict[str, Any]] = {
                 },
                 {
                     "q": "Et après la livraison ?",
-                    "a": "Vous partez avec les sources, les accès et une documentation. Une maintenance est possible, jamais obligatoire. Je réponds sous 48 h ouvrées, même après la fin du projet.",
+                    "a": "Vous partez avec les sources, les accès et une documentation. Une maintenance est possible, jamais obligatoire. Je réponds sous 24 h ouvrées, même après la fin du projet.",
                 },
             ],
         },
