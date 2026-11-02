@@ -865,6 +865,7 @@ export const projects: Project[] = [
     name: "Le Kolam",
     client: "Le Kolam",
     year: "2017",
+    city: "Val d’Europe",
     disciplines: ["Direction artistique", "Identité", "Édition"],
     pitch:
       "Une identité indienne complète, du plan de salle au site : un motif kolam décliné sur la carte, la vitrine et les murs.",
@@ -932,7 +933,43 @@ export const projects: Project[] = [
       },
       {
         src: "/assets/img/projet/le-kolam/04.jpg",
-        alt: "Carte illustrée des régions et photo de curry",
+        alt: "Le site Le Kolam, photo de curry et carte illustrée de l’Inde",
+        width: 1920,
+        height: 1080,
+      },
+      {
+        src: "/assets/img/projet/le-kolam/05.jpg",
+        alt: "Page d’annonce du site, ouverture au Clos du Chêne, Val d’Europe",
+        width: 1920,
+        height: 1080,
+      },
+      {
+        src: "/assets/img/projet/le-kolam/06.jpg",
+        alt: "Six plats de la carte présentés sur fond noir",
+        width: 1920,
+        height: 1080,
+      },
+      {
+        src: "/assets/img/projet/le-kolam/07.jpg",
+        alt: "Fiches épices, curcuma, cardamome et cumin",
+        width: 1920,
+        height: 1080,
+      },
+      {
+        src: "/assets/img/projet/le-kolam/08.jpg",
+        alt: "Perspectives 3D de l’aménagement de la salle",
+        width: 1920,
+        height: 1080,
+      },
+      {
+        src: "/assets/img/projet/le-kolam/09.jpg",
+        alt: "Double page de la carte consacrée aux pains indiens",
+        width: 1920,
+        height: 1080,
+      },
+      {
+        src: "/assets/img/projet/le-kolam/10.jpg",
+        alt: "Affiche d’annonce du buffet indien sur un mur",
         width: 1920,
         height: 1080,
       },
