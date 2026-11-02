@@ -1,7 +1,7 @@
 .venv/
 __pycache__/
 *.pyc
-data/
+/data/
 .data/
 .superpowers/
 .pytest_cache/
@@ -12,3 +12,7 @@ data/
 
 # Worktrees locaux de développement
 .worktrees/
+
+# le catalogue de départ doit voyager avec le code
+!app/data/
+!app/data/catalogue_seed.json

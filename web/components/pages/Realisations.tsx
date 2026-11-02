@@ -4,19 +4,17 @@
  * Composition : les liens rapides des projets en haut, puis chaque projet en
  * plein écran, empilé au défilement (une image glisse par-dessus la précédente).
  *
- * La liste vient de `content/projects.ts` : ajouter un projet le publie ici,
+ * La liste vient du catalogue du back office (base), avec repli sur
+ * `content/projects.ts` : publier une fiche dans l'admin la fait apparaître ici,
  * sur sa fiche et dans le plan du site.
  */
-import { coverOf, projects } from "@/content/projects";
+import { coverOf, type Project } from "@/content/projects";
 import { pageHero, type PageDoc } from "@/content/pages";
 import { realisationPath, routes } from "@/lib/routes";
 
 
-const count = projects.length;
 const firstYear = 2013;
 const countWords = ["zéro", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix"];
-const countWord = countWords[count] ?? String(count);
-const countTitle = countWord.charAt(0).toUpperCase() + countWord.slice(1);
 
 export const pageMeta = {
   title: "Réalisations — identité, web, packaging",
@@ -30,8 +28,11 @@ const toneClass: Record<string, string> = {
   dark: "rl-p rl-p--dark",
 };
 
-export function Realisations({ doc }: { doc?: PageDoc }) {
+export function Realisations({ doc, projects }: { doc?: PageDoc; projects: Project[] }) {
   const hero = pageHero(doc);
+  const count = projects.length;
+  const countWord = countWords[count] ?? String(count);
+  const countTitle = countWord.charAt(0).toUpperCase() + countWord.slice(1);
   return (
     <div>
       <header className="rl-hero">

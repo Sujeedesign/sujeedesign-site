@@ -18,6 +18,7 @@ from fastapi.staticfiles import StaticFiles
 
 from . import admin, api_admin, contact, content_routes, editor_api
 from . import agent as agent_module
+from . import catalogue
 from . import content as content_store
 from . import settings as settings_module
 from .db import connect, init_db
@@ -37,6 +38,10 @@ async def lifespan(app: FastAPI):
     try:
         init_db(conn)
         conn.commit()
+        # Fiches historiques du site, insérées une seule fois (slugs absents).
+        added = catalogue.seed_from_file(conn)
+        if added:
+            log.info("catalogue amorcé : %s fiche(s) reprise(s) du site", added)
     finally:
         conn.close()
     Path(app.state.media_dir).mkdir(parents=True, exist_ok=True)

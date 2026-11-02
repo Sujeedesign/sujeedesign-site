@@ -1,5 +1,6 @@
 import type { HomeContent } from "@/lib/content/schema";
-import { coverOf, getProject } from "@/content/projects";
+import { coverOf, getProject, type Project } from "@/content/projects";
+import { findProject } from "@/lib/content/catalogue";
 
 const arrow = (
   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -20,17 +21,17 @@ const arrow = (
  * sans session admin, ils restent inertes et n'alourdissent rien d'autre.
  */
 
-/** Projet mis en avant dans l'ouverture : premier cas du portfolio. */
-const featured = getProject("elerya");
+/** Projet mis en avant dans l'ouverture : `elerya`, ou le premier du catalogue. */
+const staticFeatured = getProject("elerya");
 
 /** Image du LCP de l'accueil : le fond du hero. Ses dimensions sont celles du fichier. */
 /* L'ouverture suit le visuel de couverture du projet mis en avant : Sujee a
    retravaillé ces images pour qu'elles tiennent aussi en plein écran. Repli
    sur la première image de la galerie si aucune couverture n'est définie. */
-export const heroPhoto = featured?.cover ?? featured?.images[0];
-
-export function Hero({ doc }: { doc: HomeContent }) {
+export function Hero({ doc, projects }: { doc: HomeContent; projects: Project[] }) {
   const { hero } = doc;
+  const featured = findProject(projects, "elerya") ?? projects[0] ?? staticFeatured;
+  const heroPhoto = featured?.cover ?? featured?.images[0];
   return (
     <header className="hero hero--proj" id="top">
       <div className="hero__bg" aria-hidden="true">
@@ -231,15 +232,14 @@ function projectSlug(href: string) {
 }
 
 /** Photo de couverture du projet, posée en fond de carte quand elle existe. */
-function photoSrc(href: string) {
-  const project = getProject(projectSlug(href));
+function photoSrc(href: string, projects: Project[]) {
+  const project = findProject(projects, projectSlug(href));
   return project ? coverOf(project)?.src ?? null : null;
 }
 
 /** Visuel réel du projet quand il existe, sinon l'illustration d'origine. */
-function CaseMedia({ href, kind }: { href: string; kind: "pack" | "sign" | "ui" }) {
-  const slug = projectSlug(href);
-  const project = getProject(slug);
+function CaseMedia({ href, kind, projects }: { href: string; kind: "pack" | "sign" | "ui"; projects: Project[] }) {
+  const project = findProject(projects, projectSlug(href));
   const image = project ? coverOf(project) : undefined;
   if (!image) return <CaseVisual kind={kind} />;
   return (
@@ -262,7 +262,7 @@ const caseClass: Record<string, string> = {
   ui: "case case--ui",
 };
 
-export function Cases({ doc }: { doc: HomeContent }) {
+export function Cases({ doc, projects }: { doc: HomeContent; projects: Project[] }) {
   const { cases } = doc;
   return (
     <section className="section section--tint" id="travaux">
@@ -292,15 +292,15 @@ export function Cases({ doc }: { doc: HomeContent }) {
             <a
               key={item.id}
               href={item.href}
-              className={`${caseClass[item.tone]}${photoSrc(item.href) ? " case--photo" : ""}`}
+              className={`${caseClass[item.tone]}${photoSrc(item.href, projects) ? " case--photo" : ""}`}
               style={item.tone === "ui" ? { background: "#080807" } : undefined}
               aria-labelledby={item.id}
             >
-              {photoSrc(item.href) ? (
+              {photoSrc(item.href, projects) ? (
                 <span
                   className="case__bg"
                   aria-hidden="true"
-                  style={{ backgroundImage: `url(${photoSrc(item.href)})` }}
+                  style={{ backgroundImage: `url(${photoSrc(item.href, projects)})` }}
                 />
               ) : null}
               <div className="case__top">
@@ -318,7 +318,7 @@ export function Cases({ doc }: { doc: HomeContent }) {
                 </span>
               </div>
               <div className="case__body">
-                <CaseMedia href={item.href} kind={item.visual} />
+                <CaseMedia href={item.href} kind={item.visual} projects={projects} />
               </div>
               <div className="case__foot">
                 <div className="case__text">

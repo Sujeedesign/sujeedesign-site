@@ -76,6 +76,16 @@
       </section>
 
       <section class="card">
+        <div class="card-head"><h2>Couverture</h2><span class="spacer"></span><em class="hint">facultatif, sinon la première image de la galerie</em></div>
+        <div class="form-grid">
+          <label class="field"><span>Chemin de l'image</span><input type="text" name="cover_src" value="{{ projet.cover.src if projet.cover else '' }}" placeholder="/assets/img/projet/mon-projet/cover.jpg"></label>
+          <label class="field"><span>Texte alternatif</span><input type="text" name="cover_alt" value="{{ projet.cover.alt if projet.cover else '' }}"></label>
+          <label class="field"><span>Largeur (px)</span><input type="number" name="cover_w" min="0" value="{{ (projet.cover.width or '') if projet.cover else '' }}"></label>
+          <label class="field"><span>Hauteur (px)</span><input type="number" name="cover_h" min="0" value="{{ (projet.cover.height or '') if projet.cover else '' }}"></label>
+        </div>
+      </section>
+
+      <section class="card">
         <div class="card-head"><h2>Visuels</h2><span class="spacer"></span><button class="btn btn-sm" type="button" data-add>+ Image</button></div>
         <div class="repeat" data-repeat>
           <div data-rows>

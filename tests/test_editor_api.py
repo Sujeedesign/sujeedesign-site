@@ -306,7 +306,16 @@ def test_revalidation_appelle_la_route_avec_le_secret(monkeypatch) -> None:
     from app import content as content_store
 
     content_store._revalidate()
-    assert seen == [("https://sujeedesign.com/api/revalidate", "secret-de-test", b"")]
+    assert seen == [
+        ("https://sujeedesign.com/api/revalidate", "secret-de-test", b'{"tag": "content"}')
+    ]
+
+    content_store._revalidate("catalogue")
+    assert seen[-1] == (
+        "https://sujeedesign.com/api/revalidate",
+        "secret-de-test",
+        b'{"tag": "catalogue"}',
+    )
 
 
 def test_health_expose_le_mode_de_publication(client: TestClient) -> None:

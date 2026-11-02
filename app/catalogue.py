@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from pathlib import Path
 from typing import Any
 
 from .ui import slugify
@@ -67,6 +68,13 @@ def _loads(value: Any, default: Any) -> Any:
     return parsed if parsed else default
 
 
+def _int_or_zero(value: Any) -> int:
+    try:
+        return int(str(value or "0").strip() or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
 # ------------------------------------------------------------------ projets
 
 
@@ -77,7 +85,8 @@ def projet_from_row(row: sqlite3.Row) -> dict[str, Any]:
     item["images"] = _loads(item.get("images"), [])
     item["sections"] = _loads(item.get("sections"), [])
     item["results"] = _loads(item.get("results"), [])
-    item["cover"] = item["images"][0] if item["images"] else None
+    cover = _loads(item.get("cover"), {})
+    item["cover"] = cover if isinstance(cover, dict) and cover.get("src") else None
     return item
 
 
@@ -147,6 +156,22 @@ def save_projet(conn: sqlite3.Connection, form: dict[str, Any], projet_id: int |
         if item["title"] or item["paragraphs"]:
             sections.append(item)
 
+    cover: dict[str, Any] = {}
+    if "cover_src" in form:
+        cover_src = _text(form.get("cover_src"))
+        if cover_src:
+            cover = {
+                "src": cover_src,
+                "alt": _text(form.get("cover_alt")),
+                "width": _int_or_zero(form.get("cover_w")),
+                "height": _int_or_zero(form.get("cover_h")),
+            }
+    elif projet_id:
+        row = conn.execute("SELECT cover FROM projets WHERE id = ?", (projet_id,)).fetchone()
+        saved = _loads(row["cover"] if row else "", {})
+        if isinstance(saved, dict) and saved.get("src"):
+            cover = saved
+
     results: list[dict[str, str]] = []
     for value, label in form.get("results", []):
         if _text(value) or _text(label):
@@ -166,6 +191,7 @@ def save_projet(conn: sqlite3.Connection, form: dict[str, Any], projet_id: int |
         "disciplines": json.dumps(_lines(form.get("disciplines", "")), ensure_ascii=False),
         "tags": json.dumps(_lines(form.get("tags", "")), ensure_ascii=False),
         "images": json.dumps(images, ensure_ascii=False),
+        "cover": json.dumps(cover, ensure_ascii=False),
         "sections": json.dumps(sections, ensure_ascii=False),
         "results": json.dumps(results, ensure_ascii=False),
     }
@@ -328,7 +354,9 @@ def export_site(conn: sqlite3.Connection) -> dict[str, Any]:
                 projet[target] = item[source]
         if item["results"]:
             projet["results"] = item["results"]
-        if item["images"]:
+        if item.get("cover"):
+            projet["cover"] = item["cover"]
+        elif item["images"]:
             projet["cover"] = item["images"][0]
         projets.append(projet)
 
@@ -351,3 +379,68 @@ def export_site(conn: sqlite3.Connection) -> dict[str, Any]:
 
 def export_json(conn: sqlite3.Connection) -> str:
     return json.dumps(export_site(conn), ensure_ascii=False, indent=2)
+
+
+# ------------------------------------------------------------------ amorçage
+#
+# Bascule du 2 novembre 2026 : le site lisait `web/content/projects.ts`, la base
+# devient la source de vérité. Pour ne rien perdre, les fiches historiques sont
+# livrées dans `data/catalogue_seed.json` et insérées au démarrage **si et
+# seulement si** leur slug n'existe pas déjà. Une fiche créée ou modifiée dans
+# l'admin n'est donc jamais écrasée, et supprimer une fiche la fait disparaître
+# pour de bon (le seed ne la ressuscite pas).
+SEED_PATH = Path(__file__).resolve().parent / "data" / "catalogue_seed.json"
+
+
+def seed_from_file(conn: sqlite3.Connection, path: Path | None = None) -> int:
+    """Reprend les fiches historiques du site, une seule fois par slug.
+
+    Chaque slug repris est noté dans `catalogue_seeded` : si Sujee supprime une
+    fiche dans l'admin, elle ne réapparaît pas au redémarrage suivant.
+    """
+    source = path or SEED_PATH
+    if not source.exists():
+        return 0
+    payload = json.loads(source.read_text(encoding="utf-8"))
+    rows = payload.get("projets") or []
+    added = 0
+    for row in rows:
+        slug = _text(row.get("slug"))
+        if not slug:
+            continue
+        if conn.execute("SELECT 1 FROM catalogue_seeded WHERE slug = ?", (slug,)).fetchone():
+            continue
+        if conn.execute("SELECT 1 FROM projets WHERE slug = ?", (slug,)).fetchone():
+            conn.execute("INSERT OR IGNORE INTO catalogue_seeded (slug) VALUES (?)", (slug,))
+            continue
+        conn.execute(
+            """
+            INSERT INTO projets (
+              slug, nom, client, annee, ville, pitch, scope, duree, ton,
+              disciplines, tags, images, cover, sections, results, statut, position
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'publie', ?)
+            """,
+            (
+                slug,
+                _text(row.get("nom")),
+                _text(row.get("client")),
+                _text(row.get("annee")),
+                _text(row.get("ville")),
+                _text(row.get("pitch")),
+                _text(row.get("scope")),
+                _text(row.get("duree")),
+                _text(row.get("ton")) or "paper",
+                json.dumps(row.get("disciplines") or [], ensure_ascii=False),
+                json.dumps(row.get("tags") or [], ensure_ascii=False),
+                json.dumps(row.get("images") or [], ensure_ascii=False),
+                json.dumps(row.get("cover") or {}, ensure_ascii=False),
+                json.dumps(row.get("sections") or [], ensure_ascii=False),
+                json.dumps(row.get("results") or [], ensure_ascii=False),
+                int(row.get("position") or 0),
+            ),
+        )
+        conn.execute("INSERT OR IGNORE INTO catalogue_seeded (slug) VALUES (?)", (slug,))
+        added += 1
+    if added:
+        conn.commit()
+    return added

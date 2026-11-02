@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import sqlite3
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi.responses import JSONResponse
 
+from . import catalogue
 from . import content as content_store
 from . import content_model
 
@@ -36,3 +40,29 @@ def read_content(slug: str, request: Request) -> dict:
         conn.close()
     document["schema"] = content_model.SCHEMAS.get(slug, [])
     return document
+
+
+@router.get("/api/v1/catalogue")
+def read_catalogue(request: Request) -> Response:
+    """Catalogue publié, à la forme exacte attendue par la vitrine.
+
+    Lecture ouverte : ce sont les fiches que le site affiche déjà. Seul le statut
+    `publie` sort d'ici ; un brouillon ou une fiche supprimée n'existe pas pour
+    le site. `ETag` évite de retransférer un catalogue inchangé, et le cache
+    court laisse le temps à l'invalidation (`revalidateTag("catalogue")`) de
+    suivre une publication.
+    """
+    conn = _conn(request)
+    try:
+        payload = catalogue.export_site(conn)
+    finally:
+        conn.close()
+    body = json.dumps(payload, ensure_ascii=False, sort_keys=True)
+    etag = '"' + hashlib.sha256(body.encode("utf-8")).hexdigest()[:32] + '"'
+    headers = {
+        "ETag": etag,
+        "Cache-Control": "public, max-age=60, stale-while-revalidate=300",
+    }
+    if request.headers.get("if-none-match") == etag:
+        return Response(status_code=304, headers=headers)
+    return Response(content=body, media_type="application/json", headers=headers)

@@ -10,12 +10,15 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-SCHEMA_VERSION = 7
+SCHEMA_VERSION = 8
 
 # Colonnes ajoutées après la première mise en production. Chaque entrée est
 # appliquée une seule fois, dans l'ordre, par `migrate` (idempotent).
 MIGRATIONS: tuple[tuple[str, str, str], ...] = (
     ("medias", "original_filename", "TEXT NOT NULL DEFAULT ''"),
+    # Visuel de couverture distinct de la galerie (2 novembre 2026) : la vitrine
+    # garde exactement le même rendu qu'avec les fiches statiques historiques.
+    ("projets", "cover", "TEXT NOT NULL DEFAULT ''"),
 )
 
 REQUIRED_TABLES = (
@@ -120,6 +123,7 @@ CREATE TABLE IF NOT EXISTS projets (
   disciplines TEXT NOT NULL DEFAULT '[]',
   tags TEXT NOT NULL DEFAULT '[]',
   images TEXT NOT NULL DEFAULT '[]',
+  cover TEXT NOT NULL DEFAULT '',
   sections TEXT NOT NULL DEFAULT '[]',
   results TEXT NOT NULL DEFAULT '[]',
   statut TEXT NOT NULL DEFAULT 'brouillon',
@@ -144,6 +148,13 @@ CREATE TABLE IF NOT EXISTS prestations (
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_prestations_statut ON prestations(statut, position);
+
+-- Slugs déjà repris depuis le site statique : sert de pierre tombale pour ne
+-- jamais ressusciter une fiche supprimée volontairement dans l'admin.
+CREATE TABLE IF NOT EXISTS catalogue_seeded (
+  slug TEXT PRIMARY KEY,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 
 CREATE TABLE IF NOT EXISTS _meta (
   key TEXT PRIMARY KEY,

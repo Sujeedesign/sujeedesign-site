@@ -8,6 +8,7 @@ Le back office édite ce document, puis déclenche un déploiement Coolify.
 from __future__ import annotations
 
 import json
+import logging
 import os
 import sqlite3
 import time
@@ -17,6 +18,8 @@ from datetime import datetime, timezone
 from typing import Any
 
 from . import content_model as model
+
+log = logging.getLogger("sujee.content")
 
 
 def _now() -> str:
@@ -150,8 +153,8 @@ def fast_publish_ready() -> bool:
     return bool(config["url"] and config["secret"])
 
 
-def _revalidate() -> None:
-    """Demande au site Next de jeter son cache de contenu (tag `content`).
+def _revalidate(tag: str = "content") -> None:
+    """Demande au site Next de jeter un cache (tag `content` ou `catalogue`).
 
     Le HTML est ensuite régénéré en tâche de fond depuis la base : quelques
     secondes, sans build Docker ni rolling update.
@@ -160,12 +163,28 @@ def _revalidate() -> None:
     request = urllib.request.Request(
         f"{config['url']}/api/revalidate",
         method="POST",
-        headers={"x-revalidate-secret": config["secret"]},
-        data=b"",
+        headers={"x-revalidate-secret": config["secret"], "content-type": "application/json"},
+        data=json.dumps({"tag": tag}).encode("utf-8"),
     )
     with urllib.request.urlopen(request, timeout=15) as response:
         if response.status >= 300:
             raise RuntimeError(f"revalidation refusée ({response.status})")
+
+
+def notify_site(tag: str = "content") -> bool:
+    """Invalide le cache du site sans jamais faire échouer l'enregistrement admin.
+
+    Le site retombe de lui-même sur la revalidation périodique (60 s pour le
+    catalogue) : une invalidation ratée n'est donc pas bloquante, on la trace.
+    """
+    if not fast_publish_ready():
+        return False
+    try:
+        _revalidate(tag)
+    except (urllib.error.HTTPError, urllib.error.URLError, RuntimeError, ValueError) as exc:
+        log.warning("invalidation %s impossible : %s", tag, exc)
+        return False
+    return True
 
 
 def request_publish(conn: sqlite3.Connection, slug: str = "home") -> dict[str, Any]:

@@ -125,8 +125,8 @@ def test_cycle_projet(logged: TestClient) -> None:
     assert export.status_code == 200
     payload = export.json()
     assert any(item["slug"] for item in payload["projects"])
-    assert payload["projects"][0]["name"] == "Identité Vaasam"
-    assert payload["projects"][0]["tone"] == "paper"
+    cree = next(item for item in payload["projects"] if item["name"] == "Identité Vaasam")
+    assert cree["tone"] == "paper"
 
     move = logged.post(
         f"/admin/projets/{projet_id}/position",

@@ -13,6 +13,11 @@
   </div>
 </div>
 
+<p class="note" style="margin-bottom:14px">
+  <span class="note-k">À savoir</span>
+  Ces fiches sont éditées ici, dans <strong>Catalogue</strong>, et publiées sur le site dès que leur statut passe en <strong>publié</strong>. Le bouton « Éditer » du site ne concerne que les textes des pages, pas les projets.
+</p>
+
 <div class="filters" style="margin-bottom:14px">
   <a class="chip{% if not statut %} is-active{% endif %}" href="/admin/projets">Tous <span>{{ counts.tous }}</span></a>
   <a class="chip{% if statut == 'brouillon' %} is-active{% endif %}" href="/admin/projets?statut=brouillon">Brouillons <span>{{ counts.brouillon }}</span></a>

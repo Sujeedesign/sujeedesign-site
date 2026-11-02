@@ -1151,3 +1151,26 @@ input[type=date]:focus, input[type=search]:focus, textarea:focus, select:focus {
   .list-row .mono-num { max-width: 58%; font-size: 10.5px; }
   .auth-card { padding: 22px 18px; }
 }
+
+/* Bandeau explicatif (ex. /admin/projets : catalogue vs éditeur visuel) */
+.note {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  margin: 0 0 18px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--accent);
+  background: var(--panel);
+  color: var(--ink-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.note-k {
+  color: var(--ink);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}

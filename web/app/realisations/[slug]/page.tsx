@@ -7,7 +7,8 @@ import { pageMetadata } from "@/lib/page-metadata";
 import { linkedServices } from "@/lib/project-links";
 import { realisationPath, routes } from "@/lib/routes";
 import { breadcrumbNode, creativeWorkNode, pageGraph, webPageNode } from "@/lib/structured-data";
-import { getProject, projectSlugs } from "@/content/projects";
+import { projectSlugs } from "@/content/projects";
+import { findProject, getProjects } from "@/lib/content/catalogue";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -15,11 +16,14 @@ export function generateStaticParams() {
   return projectSlugs.map((slug) => ({ slug }));
 }
 
-export const dynamicParams = false;
+// Les fiches publiées depuis l'admin après le build sont rendues à la demande,
+// puis mises en cache sous le tag `catalogue`.
+export const dynamicParams = true;
+export const revalidate = 3600;
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
-  const project = getProject(slug);
+  const project = findProject(await getProjects(), slug);
   if (!project) return {};
   return pageMetadata(
     projectMeta(project),
@@ -30,7 +34,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default async function Page({ params }: Params) {
   const { slug } = await params;
-  const project = getProject(slug);
+  const projects = await getProjects();
+  const project = findProject(projects, slug);
   if (!project) notFound();
 
   return (
@@ -50,7 +55,7 @@ export default async function Page({ params }: Params) {
         ])}
       />
       <main id="main">
-        <ProjetCase project={project} />
+        <ProjetCase project={project} projects={projects} />
       </main>
     </PageShell>
   );

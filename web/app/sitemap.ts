@@ -1,16 +1,18 @@
 import type { MetadataRoute } from "next";
 import { routes, realisationPath, serviceHref, serviceSlugs } from "@/lib/routes";
-import { projectSlugs } from "@/content/projects";
+import { getProjects } from "@/lib/content/catalogue";
 
 const SITE_URL = "https://sujeedesign.com";
 
 /**
  * Plan du site.
  *
- * Les routes dynamiques (services) sont générées depuis la même source que les pages :
- * ajouter un slug dans `serviceSlugs` le publie et l'indexe d'un coup.
+ * Les routes dynamiques sont générées depuis la même source que les pages : les
+ * services depuis `serviceSlugs`, les réalisations depuis le catalogue publié
+ * dans l'admin (repli sur les fiches du dépôt).
  */
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const projects = await getProjects();
   const now = new Date();
 
   const staticPages: MetadataRoute.Sitemap = [
@@ -40,8 +42,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  const projectPages: MetadataRoute.Sitemap = projectSlugs.map((slug) => ({
-    url: `${SITE_URL}${realisationPath(slug)}`,
+  const projectPages: MetadataRoute.Sitemap = projects.map((project) => ({
+    url: `${SITE_URL}${realisationPath(project.slug)}`,
     lastModified: now,
     changeFrequency: "yearly",
     priority: 0.7,

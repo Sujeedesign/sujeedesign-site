@@ -1,5 +1,5 @@
-import type { Project } from "@/content/projects";
-import { coverOf, nextProject } from "@/content/projects";
+import { coverOf, type Project } from "@/content/projects";
+import { nextProjectIn } from "@/lib/content/catalogue";
 import { linkedServices, relatedProjects } from "@/lib/project-links";
 import { realisationPath, routes } from "@/lib/routes";
 
@@ -12,11 +12,11 @@ export function projectMeta(project: Project): { title: string; description: str
   };
 }
 
-export function ProjetCase({ project }: { project: Project }) {
-  const next = nextProject(project.slug);
+export function ProjetCase({ project, projects }: { project: Project; projects: Project[] }) {
+  const next = nextProjectIn(projects, project.slug) ?? project;
   // Maillage interne : services déduits des disciplines, puis deux fiches voisines.
   const services = linkedServices(project);
-  const related = relatedProjects(project);
+  const related = relatedProjects(project, 2, projects);
   const meta = [
     { label: "Client", value: project.client },
     { label: "Année", value: project.year },

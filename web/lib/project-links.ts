@@ -1,5 +1,5 @@
 import type { Project } from "@/content/projects";
-import { projects } from "@/content/projects";
+import { projects as staticProjects } from "@/content/projects";
 import { serviceCatalog, serviceNode, type SchemaNode } from "@/lib/structured-data";
 import type { ServiceSlug } from "@/lib/routes";
 import { serviceHref } from "@/lib/routes";
@@ -64,11 +64,15 @@ export function linkedServices(project: Project, limit = 2): LinkedService[] {
  * (disciplines communes d'abord, puis services communs), complétées par l'ordre
  * courant pour ne jamais laisser le bloc vide.
  */
-export function relatedProjects(project: Project, limit = 2): Project[] {
+export function relatedProjects(
+  project: Project,
+  limit = 2,
+  catalogue: Project[] = staticProjects,
+): Project[] {
   const disciplines = new Set(project.disciplines);
   const services = new Set(projectServices(project));
 
-  const ranked = projects
+  const ranked = catalogue
     .filter((candidate) => candidate.slug !== project.slug)
     .map((candidate, index) => {
       const sharedDisciplines = candidate.disciplines.filter((d) => disciplines.has(d)).length;

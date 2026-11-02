@@ -2,6 +2,7 @@ import { CallToAction, Cases, Hero, Method, Services, Studio } from "@/component
 import { JsonLd } from "@/components/site/JsonLd";
 import { ReadRail, SiteFooter, SiteNav, SkipLink, SocialRail } from "@/components/site/Chrome";
 import { site } from "@/content/site";
+import { getProjects } from "@/lib/content/catalogue";
 import { getHomeContent } from "@/lib/content/live";
 import { routes } from "@/lib/routes";
 import { pageGraph, webPageNode } from "@/lib/structured-data";
@@ -11,7 +12,7 @@ import { pageGraph, webPageNode } from "@/lib/structured-data";
 export const revalidate = 3600;
 
 export default async function HomePage() {
-  const doc = await getHomeContent();
+  const [doc, projects] = await Promise.all([getHomeContent(), getProjects()]);
   return (
     <>
       {/* L'image du hero est le LCP. Pas de <link rel="preload"> ici : la balise
@@ -23,9 +24,9 @@ export default async function HomePage() {
       <SiteNav />
       <ReadRail />
       <main id="main">
-        <Hero doc={doc} />
+        <Hero doc={doc} projects={projects} />
         <Studio doc={doc} />
-        <Cases doc={doc} />
+        <Cases doc={doc} projects={projects} />
         <Method doc={doc} />
         <Services doc={doc} />
         <CallToAction doc={doc} />

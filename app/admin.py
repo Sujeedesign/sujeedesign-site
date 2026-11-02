@@ -908,6 +908,7 @@ async def projet_save(request: Request, user: str = Depends(require_admin)) -> R
         projet_id = catalogue.save_projet(conn, payload, int(raw_id) if raw_id.isdigit() else None)
     finally:
         conn.close()
+    content_store.notify_site("catalogue")
     return back(f"/admin/projets/{projet_id}", "Projet enregistré.")
 
 
@@ -920,6 +921,7 @@ async def projet_statut(request: Request, projet_id: int, user: str = Depends(re
         catalogue.set_projet_statut(conn, projet_id, str(form.get("statut") or ""))
     finally:
         conn.close()
+    content_store.notify_site("catalogue")
     return back("/admin/projets", "Statut mis à jour.")
 
 
@@ -933,6 +935,7 @@ async def projet_position(request: Request, projet_id: int, user: str = Depends(
         catalogue.move_projet(conn, projet_id, direction)
     finally:
         conn.close()
+    content_store.notify_site("catalogue")
     return back("/admin/projets")
 
 
@@ -945,6 +948,7 @@ async def projet_supprimer(request: Request, projet_id: int, user: str = Depends
         catalogue.delete_projet(conn, projet_id)
     finally:
         conn.close()
+    content_store.notify_site("catalogue")
     return back("/admin/projets", "Projet supprimé.")
 
 
@@ -1000,6 +1004,7 @@ async def prestation_save(request: Request, user: str = Depends(require_admin)) 
         prestation_id = catalogue.save_prestation(conn, payload, int(raw_id) if raw_id.isdigit() else None)
     finally:
         conn.close()
+    content_store.notify_site("catalogue")
     return back(f"/admin/prestations/{prestation_id}", "Prestation enregistrée.")
 
 
@@ -1012,6 +1017,7 @@ async def prestation_statut(request: Request, prestation_id: int, user: str = De
         catalogue.set_prestation_statut(conn, prestation_id, str(form.get("statut") or ""))
     finally:
         conn.close()
+    content_store.notify_site("catalogue")
     return back("/admin/prestations", "Statut mis à jour.")
 
 
@@ -1025,6 +1031,7 @@ async def prestation_position(request: Request, prestation_id: int, user: str = 
         catalogue.move_prestation(conn, prestation_id, direction)
     finally:
         conn.close()
+    content_store.notify_site("catalogue")
     return back("/admin/prestations")
 
 
@@ -1037,6 +1044,7 @@ async def prestation_supprimer(request: Request, prestation_id: int, user: str =
         catalogue.delete_prestation(conn, prestation_id)
     finally:
         conn.close()
+    content_store.notify_site("catalogue")
     return back("/admin/prestations", "Prestation supprimée.")
 
 
