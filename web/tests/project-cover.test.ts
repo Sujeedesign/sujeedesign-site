@@ -76,8 +76,8 @@ describe("couverture portrait", () => {
     expect(coverFor(project)).toEqual(coverOf(project));
   });
 
-  it("couvre les 8 projets publiés, avec ou sans visuel mobile", () => {
-    expect(projects).toHaveLength(8);
+  it("couvre les projets publiés, avec ou sans visuel mobile", () => {
+    expect(projects).toHaveLength(9);
     for (const project of projects) {
       const mobile = coverFor(project, "portrait");
       expect(mobile?.src).toBeTruthy();
