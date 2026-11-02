@@ -859,6 +859,87 @@ export const projects: Project[] = [
     tags: ["Identité", "Édition", "Social"],
     tone: "dark",
   },
+  {
+    slug: "le-kolam",
+    index: "10",
+    name: "Le Kolam",
+    client: "Le Kolam",
+    year: "2017",
+    disciplines: ["Direction artistique", "Identité", "Édition"],
+    pitch:
+      "Une identité indienne complète, du plan de salle au site : un motif kolam décliné sur la carte, la vitrine et les murs.",
+    scope:
+      "Direction artistique, plans d’aménagement de la salle, communication d’ouverture, carte, affichage boutique, design mural, réseaux sociaux, site internet",
+    sections: [
+      {
+        k: "01",
+        label: "Contexte",
+        title: "Tout à faire avant l’ouverture",
+        paragraphs: [
+          "Le Kolam ouvre en 2017 avec une cuisine indienne et une salle encore vide. Il n’y a ni identité, ni carte, ni vitrine, ni site, et l’ouverture impose de traiter les quatre en même temps.",
+          "La direction artistique couvre donc le projet de bout en bout : le nom et son motif, l’aménagement de la salle, les supports imprimés, l’affichage, le mur et la communication.",
+        ],
+      },
+      {
+        k: "02",
+        label: "Décision",
+        title: "Un motif qui tient partout",
+        paragraphs: [
+          "Le kolam, dessin traditionnel au sol, devient la colonne vertébrale de la marque : un signe simple, répétable à toutes les échelles, du logotype au mur peint.",
+        ],
+        bullets: [
+          "Un logotype construit sur un motif à quatre boucles et points, lisible en petit",
+          "Le motif décliné en fond de carte, d’affichage boutique et de design mural",
+          "Une carte illustrée qui rattache chaque plat à sa région, du Pendjab au Népal",
+          "Des plans d’aménagement de la salle : circulation, zones de service, place du bar",
+          "Une communication d’ouverture et des publications régulières sur les réseaux",
+          "Un site internet posé en même temps que l’ouverture, pour exister dès le premier service",
+        ],
+      },
+      {
+        k: "03",
+        label: "Résultat",
+        title: "Une seule direction, du plan de salle au menu",
+        paragraphs: [
+          "Le motif, la typographie et la photographie se répondent de la façade au menu. La salle, la carte et les publications racontent la même cuisine, sans rupture entre le lieu et sa communication.",
+        ],
+      },
+    ],
+    cover: {
+      src: "/assets/img/projet/le-kolam/cover.jpg",
+      alt: "Plat Le Kolam, curry et riz dans une poêle en fonte sur fond noir",
+      width: 1920,
+      height: 1280,
+    },
+    images: [
+      {
+        src: "/assets/img/projet/le-kolam/01.jpg",
+        alt: "Logotype Le Kolam sur un fond de motifs kolam",
+        width: 1920,
+        height: 1080,
+      },
+      {
+        src: "/assets/img/projet/le-kolam/02.jpg",
+        alt: "Couverture de carte Le Kolam, motif kolam et titre",
+        width: 1920,
+        height: 1080,
+      },
+      {
+        src: "/assets/img/projet/le-kolam/03.jpg",
+        alt: "Planche de références, motifs traditionnels, Pakistan et Chine",
+        width: 1920,
+        height: 1080,
+      },
+      {
+        src: "/assets/img/projet/le-kolam/04.jpg",
+        alt: "Carte illustrée des régions et photo de curry",
+        width: 1920,
+        height: 1080,
+      },
+    ],
+    tags: ["Direction artistique", "Identité", "Web"],
+    tone: "dark",
+  },
 ];
 
 export const projectSlugs = projects.map((project) => project.slug);

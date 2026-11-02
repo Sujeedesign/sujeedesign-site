@@ -77,7 +77,9 @@ describe("couverture portrait", () => {
   });
 
   it("couvre les projets publiés, avec ou sans visuel mobile", () => {
-    expect(projects).toHaveLength(9);
+    // Le nombre de fiches publiées bouge à chaque nouveau projet : on vérifie
+    // le comportement sur toutes les fiches, pas un compte figé.
+    expect(projects.length).toBeGreaterThanOrEqual(9);
     for (const project of projects) {
       const mobile = coverFor(project, "portrait");
       expect(mobile?.src).toBeTruthy();
