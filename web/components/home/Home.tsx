@@ -1,5 +1,6 @@
 import type { HomeContent } from "@/lib/content/schema";
 import { coverOf, getProject, type Project } from "@/content/projects";
+import { CoverPicture } from "@/components/CoverPicture";
 import { findProject } from "@/lib/content/catalogue";
 
 const arrow = (
@@ -231,27 +232,19 @@ function projectSlug(href: string) {
   return href.split("/").filter(Boolean).pop() ?? "";
 }
 
-/** Photo de couverture du projet, posée en fond de carte quand elle existe. */
-function photoSrc(href: string, projects: Project[]) {
-  const project = findProject(projects, projectSlug(href));
-  return project ? coverOf(project)?.src ?? null : null;
+/** Projet visé par le lien d'une carte, quand il est connu. */
+function caseProject(href: string, projects: Project[]) {
+  return findProject(projects, projectSlug(href));
 }
 
 /** Visuel réel du projet quand il existe, sinon l'illustration d'origine. */
 function CaseMedia({ href, kind, projects }: { href: string; kind: "pack" | "sign" | "ui"; projects: Project[] }) {
-  const project = findProject(projects, projectSlug(href));
+  const project = caseProject(href, projects);
   const image = project ? coverOf(project) : undefined;
-  if (!image) return <CaseVisual kind={kind} />;
+  if (!project || !image) return <CaseVisual kind={kind} />;
   return (
     <div className="case__visual case__visual--photo">
-      <img
-        src={image.src}
-        alt={image.alt}
-        width={image.width}
-        height={image.height}
-        loading="lazy"
-        decoding="async"
-      />
+      <CoverPicture project={project} alt={image.alt} loading="lazy" />
     </div>
   );
 }
@@ -288,21 +281,22 @@ export function Cases({ doc, projects }: { doc: HomeContent; projects: Project[]
         </div>
 
         <div className="stack">
-          {cases.items.map((item, index) => (
-            <a
-              key={item.id}
-              href={item.href}
-              className={`${caseClass[item.tone]}${photoSrc(item.href, projects) ? " case--photo" : ""}`}
-              style={item.tone === "ui" ? { background: "#080807" } : undefined}
-              aria-labelledby={item.id}
-            >
-              {photoSrc(item.href, projects) ? (
-                <span
-                  className="case__bg"
-                  aria-hidden="true"
-                  style={{ backgroundImage: `url(${photoSrc(item.href, projects)})` }}
-                />
-              ) : null}
+          {cases.items.map((item, index) => {
+            const project = caseProject(item.href, projects);
+            const hasCover = Boolean(project && coverOf(project));
+            return (
+              <a
+                key={item.id}
+                href={item.href}
+                className={`${caseClass[item.tone]}${hasCover ? " case--photo" : ""}`}
+                style={item.tone === "ui" ? { background: "#080807" } : undefined}
+                aria-labelledby={item.id}
+              >
+                {project && hasCover ? (
+                  <span className="case__bg" aria-hidden="true">
+                    <CoverPicture project={project} alt="" loading="lazy" />
+                  </span>
+                ) : null}
               <div className="case__top">
                 <span className="case__idx" data-field={`cases.items.${index}.index`}>
                   {item.index}
@@ -351,7 +345,8 @@ export function Cases({ doc, projects }: { doc: HomeContent; projects: Project[]
                 {item.ghost}
               </span>
             </a>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

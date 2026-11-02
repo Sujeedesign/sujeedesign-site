@@ -1,4 +1,5 @@
 import { coverOf, type Project } from "@/content/projects";
+import { CoverPicture } from "@/components/CoverPicture";
 import { nextProjectIn } from "@/lib/content/catalogue";
 import { linkedServices, relatedProjects } from "@/lib/project-links";
 import { realisationPath, routes } from "@/lib/routes";
@@ -121,14 +122,7 @@ export function ProjetCase({ project, projects }: { project: Project; projects: 
                 {related.map((entry) => (
                   <a className="pjx__card" href={realisationPath(entry.slug)} key={entry.slug}>
                     {coverOf(entry) ? (
-                      <img
-                        src={coverOf(entry)?.src}
-                        alt=""
-                        width={coverOf(entry)?.width}
-                        height={coverOf(entry)?.height}
-                        loading="lazy"
-                        decoding="async"
-                      />
+                      <CoverPicture project={entry} alt="" loading="lazy" />
                     ) : null}
                     <span>{entry.disciplines.join(" · ")}</span>
                     <b>{entry.name}</b>

@@ -1524,6 +1524,13 @@ body.has-dark-hero .nav.nav--open .brand__logo--light{display:none!important}
   text-decoration:none;color:inherit;transition:transform .5s cubic-bezier(.22,.61,.36,1),border-color .4s}
 .pjx__card:hover{transform:translateY(-3px);border-color:var(--line)}
 .pjx__card img{width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;display:block}
+.pjx__card picture{display:block}
+/* Sous 720 px, une couverture portrait (visuel mobile dédié) est mieux servie
+   en 4:5 que rognée dans un cadre 16/10. Les projets sans `coverPortrait`
+   n'ont pas l'attribut et gardent leur cadrage d'origine. */
+@media (max-width:720px){
+  .pjx__card picture[data-cover-portrait] img{aspect-ratio:4/5}
+}
 .pjx__card span{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-2)}
 .pjx__card b{font-family:var(--display);font-weight:600;font-size:clamp(17px,1.6vw,22px);line-height:1.02;letter-spacing:-.03em}
 @media (max-width:860px){

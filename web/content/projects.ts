@@ -45,6 +45,18 @@ export type Project = {
    * `public/assets/img/og/<slug>.jpg`, au format 1200×630.
    */
   cover?: ProjectImage;
+  /**
+   * Couverture dédiée au mobile, en portrait (viser 1080×1350, 4:5, 150 Ko max).
+   *
+   * Elle remplace `cover` sous 720 px de large, là où un paysage recadré en
+   * `object-fit: cover` coupe le sujet. Optionnelle : sans elle, le rendu
+   * mobile garde la couverture paysage. Le fichier vit dans
+   * `/assets/img/projet/<slug>/cover-portrait.jpg` (voir la convention de nom
+   * `projet-<slug>-cover-portrait.jpg` pour l'import médiathèque).
+   * L'image de partage Open Graph reste `public/assets/img/og/<slug>.jpg`,
+   * en 1200×630, et ignore ce champ.
+   */
+  coverPortrait?: ProjectImage;
   images: ProjectImage[];
   tags: string[];
   tone: "paper" | "tint" | "dark";
@@ -53,6 +65,33 @@ export type Project = {
 /** Couverture d'un projet : visuel dédié s'il existe, sinon la première image de la galerie. */
 export function coverOf(project: Project): ProjectImage | undefined {
   return project.cover ?? project.images[0];
+}
+
+/**
+ * Point de rupture sous lequel la couverture portrait remplace la paysage.
+ *
+ * Il est déclaré ici pour que le rendu (`<source media=…>`) et les tests
+ * lisent la même valeur. 720 px couvre les téléphones en portrait et laisse
+ * les tablettes en paysage sur la couverture d'origine.
+ */
+export const COVER_PORTRAIT_MEDIA = "(max-width: 720px)";
+
+export type CoverOrientation = "landscape" | "portrait";
+
+/**
+ * Couverture à servir selon l'orientation de l'écran.
+ *
+ * `portrait` privilégie `coverPortrait`, puis retombe sur `cover`, puis sur la
+ * première image de la galerie : un projet qui n'a pas encore reçu son visuel
+ * mobile continue de s'afficher normalement. `landscape` suit `coverOf` à
+ * l'identique, donc les appelants existants ne changent pas de comportement.
+ */
+export function coverFor(
+  project: Project,
+  orientation: CoverOrientation = "landscape",
+): ProjectImage | undefined {
+  if (orientation === "portrait") return project.coverPortrait ?? coverOf(project);
+  return coverOf(project);
 }
 
 export const projects: Project[] = [

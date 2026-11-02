@@ -8,7 +8,8 @@
  * `content/projects.ts` : publier une fiche dans l'admin la fait apparaître ici,
  * sur sa fiche et dans le plan du site.
  */
-import { coverOf, type Project } from "@/content/projects";
+import type { Project } from "@/content/projects";
+import { CoverPicture } from "@/components/CoverPicture";
 import { pageHero, type PageDoc } from "@/content/pages";
 import { realisationPath, routes } from "@/lib/routes";
 
@@ -91,7 +92,6 @@ export function Realisations({ doc, projects }: { doc?: PageDoc; projects: Proje
 
       <div className="rl-film">
         {projects.map((project, i) => {
-          const cover = coverOf(project);
           const href = realisationPath(project.slug);
           return (
             /* Toute la surface de l'image est cliquable : la carte est le lien. */
@@ -104,14 +104,10 @@ export function Realisations({ doc, projects }: { doc?: PageDoc; projects: Proje
               aria-label={`${project.name}, voir l’étude de cas`}
             >
               <div className="rl-p__media">
-                <img
+                <CoverPicture
+                  project={project}
                   className="rl-p__img"
-                  src={cover?.src}
-                  alt={cover?.alt ?? project.name}
-                  width={cover?.width}
-                  height={cover?.height}
                   loading={i < 2 ? "eager" : "lazy"}
-                  decoding="async"
                 />
                 <span className="rl-scene__word" aria-hidden="true">
                   {project.index}

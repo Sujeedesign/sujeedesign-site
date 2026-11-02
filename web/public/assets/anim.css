@@ -131,6 +131,20 @@ html.no-anim [data-stagger] > *{ opacity: 1 !important; transform: none !importa
   border-radius:inherit;
   pointer-events:none;
 }
+/* Couverture en <picture> : le portrait remplace le paysage sous 720 px (cf.
+   COVER_PORTRAIT_MEDIA dans content/projects.ts). Le fond n'est plus une
+   background-image, donc le navigateur ne télécharge qu'une des deux
+   couvertures. overflow:hidden garde les angles de la carte nets. */
+.case--photo .case__bg{overflow:hidden}
+.case--photo .case__bg img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+  display:block;
+}
 /* Voile : une seule nappe régulière sur TOUTE la carte (aucune zone laissée
    vive, sinon l'image paraît à moitié traitée). La nappe de base est
    volontairement très légère : la photo doit garder sa luminosité naturelle

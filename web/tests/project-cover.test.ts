@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { coverOf, projects, type Project } from "@/content/projects";
+import {
+  COVER_PORTRAIT_MEDIA,
+  coverFor,
+  coverOf,
+  projects,
+  type Project,
+} from "@/content/projects";
 
 const first: Project = {
   slug: "exemple",
@@ -38,6 +44,45 @@ describe("couverture de projet", () => {
   it("chaque projet publié a une couverture", () => {
     for (const project of projects) {
       expect(coverOf(project)?.src).toBeTruthy();
+    }
+  });
+});
+
+describe("couverture portrait", () => {
+  const portrait = {
+    src: "/assets/img/projet-exemple/cover-portrait.jpg",
+    alt: "Portrait",
+    width: 1080,
+    height: 1350,
+  };
+
+  it("sert la couverture portrait avec le point de rupture mobile", () => {
+    expect(coverFor({ ...first, coverPortrait: portrait }, "portrait")).toEqual(portrait);
+    expect(COVER_PORTRAIT_MEDIA).toBe("(max-width: 720px)");
+  });
+
+  it("replie le portrait sur la couverture paysage puis sur la galerie", () => {
+    const cover = { src: "/assets/img/couverture.jpg", alt: "Couverture", width: 2000, height: 1125 };
+
+    expect(coverFor({ ...first, cover }, "portrait")).toEqual(cover);
+    expect(coverFor(first, "portrait")).toEqual(first.images[0]);
+    expect(coverFor({ ...first, images: [] }, "portrait")).toBeUndefined();
+  });
+
+  it("ne change rien à la couverture paysage", () => {
+    const project: Project = { ...first, coverPortrait: portrait };
+
+    expect(coverFor(project, "landscape")).toEqual(coverOf(project));
+    expect(coverFor(project)).toEqual(coverOf(project));
+  });
+
+  it("couvre les 8 projets publiés, avec ou sans visuel mobile", () => {
+    expect(projects).toHaveLength(8);
+    for (const project of projects) {
+      const mobile = coverFor(project, "portrait");
+      expect(mobile?.src).toBeTruthy();
+      // Sans fichier mobile livré, le repli doit rester la couverture paysage.
+      if (!project.coverPortrait) expect(mobile).toEqual(coverOf(project));
     }
   });
 });
