@@ -727,6 +727,113 @@
       ],
       "results": [],
       "position": 80
+    },
+    {
+      "slug": "american-steak-house",
+      "nom": "American Steak House",
+      "client": "American Steak House",
+      "annee": "2017",
+      "ville": "Saint-Brice-sous-Forêt",
+      "pitch": "Un steakhouse qui ouvre à Saint-Brice avec un univers western assumé. Une identité qui tient sur une carte noire, une façade et un post.",
+      "scope": "Logotype, charte typographique, carte et menu bilingue, affichage en restaurant, posts réseaux sociaux",
+      "duree": "",
+      "ton": "dark",
+      "disciplines": [
+        "Identité",
+        "Édition",
+        "Réseaux sociaux"
+      ],
+      "tags": [
+        "Identité",
+        "Édition",
+        "Social"
+      ],
+      "images": [
+        {
+          "src": "/assets/img/projet/american-steak-house/01.jpg",
+          "alt": "Logotype American Steak House, taureau rouge et étoile sur fond blanc",
+          "width": 1920,
+          "height": 1080
+        },
+        {
+          "src": "/assets/img/projet/american-steak-house/02.jpg",
+          "alt": "Planche typographique Indiana Regular appliquée au logotype",
+          "width": 1920,
+          "height": 1080
+        },
+        {
+          "src": "/assets/img/projet/american-steak-house/03.jpg",
+          "alt": "Couverture de carte American Steak House, côte de bœuf sur le grill",
+          "width": 1920,
+          "height": 1080
+        },
+        {
+          "src": "/assets/img/projet/american-steak-house/04.jpg",
+          "alt": "Double page de la carte, viandes, burgers et bières",
+          "width": 1920,
+          "height": 1080
+        },
+        {
+          "src": "/assets/img/projet/american-steak-house/05.jpg",
+          "alt": "Visuel de marque, cow-boy et titre STEAKHOUSE",
+          "width": 1920,
+          "height": 1080
+        },
+        {
+          "src": "/assets/img/projet/american-steak-house/06.jpg",
+          "alt": "Post d'annonce, côte de bœuf au barbecue, ouverture à Saint-Brice",
+          "width": 1920,
+          "height": 1080
+        },
+        {
+          "src": "/assets/img/projet/american-steak-house/07.jpg",
+          "alt": "Bannière American Steak House, logo sur une photo de ranch",
+          "width": 1920,
+          "height": 1080
+        }
+      ],
+      "cover": {
+        "src": "/assets/img/projet/american-steak-house/cover.jpg",
+        "alt": "Logo American Steak House sur une photo de bétail Highland au ranch",
+        "width": 1920,
+        "height": 1280
+      },
+      "sections": [
+        {
+          "k": "01",
+          "label": "Contexte",
+          "title": "La marque avant la première table",
+          "paragraphs": [
+            "American Steak House arrive à Saint-Brice-sous-Forêt avec une carte de viandes d’exception : Wagyu, Black Angus USA, Argentine, Salers, charcuteries fines, vins et bières.",
+            "Tout est à construire avant l’ouverture : le nom est long, la carte doit être bilingue, et la façade doit exister avant la première réservation."
+          ]
+        },
+        {
+          "k": "02",
+          "label": "Décision",
+          "title": "Trois couleurs, un seul accent",
+          "paragraphs": [
+            "Un univers western tenu par un principe simple : noir et blanc pour l’image, le rouge réservé au signe."
+          ],
+          "bullets": [
+            "Un logotype au taureau et à l’étoile, lisible du premier coup d’œil",
+            "Indiana, une display western, pour toute la hiérarchie du nom",
+            "Photo noir et blanc pour l’univers, rouge unique pour le repère de marque",
+            "Une carte noire bilingue, avec un bloc rouge par famille de plats",
+            "Les mêmes règles reportées sur l’affichage restaurant et les posts d’annonce"
+          ]
+        },
+        {
+          "k": "03",
+          "label": "Résultat",
+          "title": "La marque tient dans la salle",
+          "paragraphs": [
+            "Le logotype, la carte, l’affichage et les posts partagent la même typographie et le même rouge. La marque est lisible sur une carte posée sur une table comme sur une annonce d’ouverture."
+          ]
+        }
+      ],
+      "results": [],
+      "position": 90
     }
   ],
   "prestations": [
