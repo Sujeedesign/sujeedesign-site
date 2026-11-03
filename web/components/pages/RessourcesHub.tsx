@@ -33,6 +33,14 @@ const ENTREES = [
       "Dix questions pour écrire un brief propre, avec ce qui bloque un projet. Export en PDF, rien n'est envoyé.",
     more: "Rédiger un brief",
   },
+  {
+    href: routes.testerSonLogo,
+    kind: "Outil",
+    title: "Tester son logo",
+    text:
+      "Déposez votre logo : 16 pixels, niveaux de gris, un seul ton, fond clair et fond sombre. Cinq mesures, un verdict par critère.",
+    more: "Tester le logo",
+  },
 ];
 
 export function RessourcesHub() {

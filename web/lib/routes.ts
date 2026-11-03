@@ -21,6 +21,8 @@ export const routes = {
   guidePrixLogo: "/guides/prix-logo",
   /** Générateur de brief identité, avec export PDF. */
   generateurBriefIdentite: "/ressources/generateur-brief-identite",
+  /** Test de logo : lisibilité, contraste, un seul ton. */
+  testerSonLogo: "/ressources/tester-son-logo",
 } as const;
 
 /** Slugs des cinq services, dans l'ordre éditorial 01 → 05. */

@@ -1,0 +1,119 @@
+/* Test de logo — gabarit « page ressource ». */
+
+.page {
+  padding-bottom: clamp(40px, 6vw, 80px);
+}
+
+.conteneur {
+  display: grid;
+  gap: clamp(26px, 4vw, 44px);
+  width: 100%;
+  margin: 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--paper);
+  padding: clamp(18px, 3.4vw, 46px);
+}
+
+.conteneur > * {
+  min-width: 0;
+}
+
+.titre {
+  letter-spacing: var(--ds-track);
+}
+
+.accent {
+  color: var(--accent);
+}
+
+.introOutils {
+  margin: 0 0 6px;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--muted);
+}
+
+.legalInner > * {
+  min-width: 0;
+}
+
+.legalInner :global(.toc) a {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  transition: color 0.2s ease;
+}
+
+.legalInner :global(.toc) a::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.55;
+}
+
+.legalInner :global(.toc) a:hover::before,
+.legalInner :global(.toc) a:focus-visible::before {
+  opacity: 1;
+}
+
+.conteneur :global(.prose) p,
+.conteneur :global(.prose) li {
+  max-width: none;
+  font-size: 15.5px;
+  line-height: 1.72;
+  hyphens: auto;
+  text-wrap: pretty;
+}
+
+.conteneur :global(.prose) h2 {
+  margin-top: clamp(30px, 4vw, 44px);
+}
+
+.conteneur :global(.prose) h2::before {
+  content: "";
+  display: block;
+  width: 32px;
+  height: 2px;
+  margin-bottom: 14px;
+  background: var(--accent);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+.ctaCopy {
+  display: grid;
+  gap: 10px;
+  max-width: 46ch;
+}
+
+:global(.bandcta) p.ctaText {
+  margin: 0;
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 14.5px !important;
+  line-height: 1.55;
+  letter-spacing: 0;
+  color: rgba(247, 247, 245, 0.72);
+}
+
+.ctaLinks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+
