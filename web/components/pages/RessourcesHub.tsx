@@ -1,45 +1,59 @@
 import Link from "next/link";
 import { routes } from "@/lib/routes";
+import {
+  BriefPreview,
+  CalculateurPreview,
+  GuidePreview,
+  LogoPreview,
+} from "./RessourcesPreviews";
 import styles from "./RessourcesHub.module.css";
 
 export const pageMeta = {
   title: "Ressources : outils et guides de prix",
   description:
-    "Un calculateur de budget, un guide des prix du logo, et les repères de temps pour situer un projet d'identité visuelle avant de demander un devis.",
+    "Un calculateur de budget, un guide des prix du logo, un test de logo et un générateur de brief. Quatre pages pour situer un projet avant de demander un devis.",
 };
 
-const ENTREES = [
-  {
-    href: routes.calculateurBudgetIdentite,
-    kind: "Outil",
-    title: "Calculateur de budget identité visuelle",
-    text:
-      "Six points de départ, six options, une fourchette en trente secondes. Le détail du calcul s'affiche ligne par ligne, sans email à laisser.",
-    more: "Estimer un budget",
-  },
+const PRINCIPAL = {
+  href: routes.calculateurBudgetIdentite,
+  num: "01",
+  kind: "Outil",
+  title: "Calculateur de budget identité visuelle",
+  text:
+    "Six points de départ, six options, une fourchette en trente secondes. Le détail du calcul s'affiche ligne par ligne, sans email à laisser.",
+  more: "Estimer un budget",
+};
+
+const AUTRES = [
   {
     href: routes.guidePrixLogo,
+    num: "02",
     kind: "Guide",
     title: "Combien coûte un logo en 2026 ?",
     text:
-      "Les quatre paliers de prix, ce qu'on obtient à chacun, le temps de travail réel, et ce qui manque dans un devis à 200 €.",
+      "Les quatre paliers de prix, le temps de travail réel, et ce qui manque dans un devis à 200 €.",
     more: "Lire le guide",
-  },
-  {
-    href: routes.generateurBriefIdentite,
-    kind: "Outil",
-    title: "Générateur de brief identité",
-    text:
-      "Dix questions pour écrire un brief propre, avec ce qui bloque un projet. Export en PDF, rien n'est envoyé.",
-    more: "Rédiger un brief",
+    preview: <GuidePreview />,
   },
   {
     href: routes.testerSonLogo,
-    kind: "Outil",
+    num: "03",
+    kind: "Diagnostic",
     title: "Tester son logo",
     text:
-      "Déposez votre logo : 16 pixels, niveaux de gris, un seul ton, fond clair et fond sombre. Cinq mesures, un verdict par critère.",
+      "Votre logo à 16 pixels, en gris, en un seul ton. Le fichier reste dans votre navigateur.",
     more: "Tester le logo",
+    preview: <LogoPreview />,
+  },
+  {
+    href: routes.generateurBriefIdentite,
+    num: "04",
+    kind: "Outil",
+    title: "Générateur de brief identité",
+    text:
+      "Dix questions pour écrire un brief propre, avec ce qui bloque un projet. Export en PDF.",
+    more: "Rédiger un brief",
+    preview: <BriefPreview />,
   },
 ];
 
@@ -56,8 +70,13 @@ export function RessourcesHub() {
               pour un <span style={{ color: "var(--accent)" }}>projet</span>
             </h1>
             <p className="intro">
-              Deux entrées pour situer un budget et comprendre ce qu&apos;on achète. Rien à
+              Quatre pages pour situer un budget, tester un logo et écrire un brief. Rien à
               laisser en échange, aucun formulaire avant le devis.
+            </p>
+            <p className={styles.meta}>
+              <span>4 pages</span>
+              <span>Gratuit</span>
+              <span>Sans inscription</span>
             </p>
           </div>
         </div>
@@ -65,13 +84,36 @@ export function RessourcesHub() {
 
       <section className="section">
         <div className="wrap">
+          <Link href={PRINCIPAL.href} className={styles.featured}>
+            <div className={styles.featuredBody}>
+              <div className={styles.featuredTop}>
+                <span className={styles.num}>{PRINCIPAL.num}</span>
+                <span className={styles.kind}>{PRINCIPAL.kind}</span>
+              </div>
+              <h2 className={styles.featuredTitle}>{PRINCIPAL.title}</h2>
+              <p className={styles.text}>{PRINCIPAL.text}</p>
+              <span className={styles.cta}>
+                {PRINCIPAL.more} <span aria-hidden="true">↗</span>
+              </span>
+            </div>
+            <div className={styles.previewSlot}>
+              <CalculateurPreview />
+            </div>
+          </Link>
+
           <div className={styles.grid}>
-            {ENTREES.map((entree) => (
+            {AUTRES.map((entree) => (
               <Link key={entree.href} href={entree.href} className={styles.card}>
-                <span className={styles.kind}>{entree.kind}</span>
-                <h2 className={styles.title}>{entree.title}</h2>
-                <p className={styles.text}>{entree.text}</p>
-                <span className={styles.more}>{entree.more} ↗</span>
+                <div className={styles.previewSlot}>{entree.preview}</div>
+                <div className={styles.cardHead}>
+                  <span className={styles.num}>{entree.num}</span>
+                  <span className={styles.kind}>{entree.kind}</span>
+                </div>
+                <h2 className={styles.cardTitle}>{entree.title}</h2>
+                <p className={styles.cardText}>{entree.text}</p>
+                <span className={styles.cta}>
+                  {entree.more} <span aria-hidden="true">↗</span>
+                </span>
               </Link>
             ))}
           </div>
