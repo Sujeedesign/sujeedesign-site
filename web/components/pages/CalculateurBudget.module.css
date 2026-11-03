@@ -159,3 +159,34 @@
   line-height: 1.7;
   color: var(--muted-2);
 }
+
+/* Conteneur unique : la page entière tient dans un cadre centré, sur fond papier.
+   Il porte la respiration (padding) à la place des marges de section. */
+.conteneur {
+  /* Aligné sur la largeur du hero (.wrap) : les bords du cadre tombent
+     exactement sous le titre, au lieu de flotter 50 px à l'intérieur. */
+  width: 100%;
+  margin: 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--paper);
+  padding: clamp(18px, 3.4vw, 46px);
+}
+
+/* `.legal` apporte son propre padding vertical : dans le cadre, il ferait doublon. */
+.conteneur > .legalInner {
+  padding-block: 0;
+}
+
+/* Sans min-width:0, la largeur mini du tableau (480px) impose sa taille à la colonne
+   de grille et la page déborde sur mobile. */
+.legalInner > * {
+  min-width: 0;
+}
+
+@media (max-width: 720px) {
+  .conteneur {
+    padding: 16px 14px 20px;
+    border-radius: 2px;
+  }
+}

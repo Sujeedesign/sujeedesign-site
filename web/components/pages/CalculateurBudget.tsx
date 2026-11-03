@@ -138,7 +138,8 @@ export function CalculateurBudget() {
 
       <section className="section">
         <div className="wrap">
-          <div className="legal">
+          <div className={styles.conteneur}>
+          <div className={`legal ${styles.legalInner}`}>
             <nav className="toc" aria-label="Sommaire de la page">
               {SOMMAIRE.map((item) => (
                 <a key={item.href} href={item.href}>
@@ -409,6 +410,7 @@ export function CalculateurBudget() {
                 ))}
               </div>
             </div>
+          </div>
           </div>
         </div>
       </section>
