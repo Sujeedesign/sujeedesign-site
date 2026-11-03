@@ -3,8 +3,8 @@
  *
  * Source unique : la grille du brief P2 (`/opt/data/shared/briefs/P2-calculateur-budget-identite.md`).
  * Aucun prix n'est inventé ici : les fourchettes sont recopiées telles quelles, version publique
- * de la grille CRM. Les bornes basses s'additionnent entre elles, les bornes hautes aussi, puis
- * le total est arrondi à la centaine.
+ * de la grille CRM. Les bornes basses s'additionnent entre elles, les bornes hautes aussi, sans
+ * arrondi : un visiteur qui recompte à la main retrouve exactement le même total.
  */
 
 export type Range = { low: number; high: number };
@@ -136,7 +136,7 @@ export type BudgetLine = {
 export type BudgetResult = {
   base: BaseId;
   options: OptionId[];
-  /** Total arrondi à la centaine. */
+  /** Somme exacte des bornes, sans arrondi. */
   range: Range;
   /** Un poste par ligne, bornes non arrondies. */
   lines: BudgetLine[];
@@ -155,11 +155,6 @@ export function formatEuro(value: number): string {
 
 export function formatRange(range: Range): string {
   return `${formatEuro(range.low)} à ${formatEuro(range.high)}`;
-}
-
-/** Arrondi à la centaine la plus proche. */
-export function roundToHundred(value: number): number {
-  return Math.round(value / 100) * 100;
 }
 
 /**
@@ -181,8 +176,8 @@ export function computeBudget(base: BaseId | null, options: readonly OptionId[])
     ...chosen.map((option) => ({ id: option.id, label: option.shortLabel, range: option.range })),
   ];
 
-  const low = roundToHundred(lines.reduce((total, line) => total + line.range.low, 0));
-  const high = roundToHundred(lines.reduce((total, line) => total + line.range.high, 0));
+  const low = lines.reduce((total, line) => total + line.range.low, 0);
+  const high = lines.reduce((total, line) => total + line.range.high, 0);
 
   const top = [...lines]
     .sort((a, b) => b.range.high - a.range.high)

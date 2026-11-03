@@ -11,7 +11,7 @@ vi.mock("next/link", () => ({
 
 import { BudgetIdentityCalculator } from "@/components/BudgetIdentityCalculator";
 import { CalculateurBudget, faqItems } from "@/components/pages/CalculateurBudget";
-import { BASES, OPTIONS, computeBudget, isOptionAvailable, roundToHundred } from "@/lib/budget-identity";
+import { BASES, OPTIONS, computeBudget, isOptionAvailable } from "@/lib/budget-identity";
 import { routes } from "@/lib/routes";
 import sitemap from "@/app/sitemap";
 
@@ -20,11 +20,10 @@ describe("règles de calcul du budget identité", () => {
     vi.clearAllMocks();
   });
 
-  it("arrondit à la centaine", () => {
-    expect(roundToHundred(1650)).toBe(1700);
-    expect(roundToHundred(1600)).toBe(1600);
-    expect(roundToHundred(4549)).toBe(4500);
-    expect(roundToHundred(4550)).toBe(4600);
+  it("additionne les bornes sans les arrondir", () => {
+    // 1 500 + 150 = 1 650 exactement ; 4 000 + 500 = 4 500.
+    const result = computeBudget("complete", ["papeterie"]);
+    expect(result?.range).toEqual({ low: 1650, high: 4500 });
   });
 
   it("ne renvoie aucun résultat tant qu'aucun point de départ n'est choisi", () => {
@@ -35,16 +34,16 @@ describe("règles de calcul du budget identité", () => {
   it("additionne les bornes basses entre elles et les bornes hautes entre elles", () => {
     const result = computeBudget("complete", ["papeterie"]);
     expect(result).not.toBeNull();
-    // 1 500 + 150 = 1 650 arrondi à 1 700 ; 4 000 + 500 = 4 500.
-    expect(result?.range).toEqual({ low: 1700, high: 4500 });
+    // 1 500 + 150 = 1 650 ; 4 000 + 500 = 4 500.
+    expect(result?.range).toEqual({ low: 1650, high: 4500 });
     expect(result?.lines.map((line) => line.id)).toEqual(["complete", "papeterie"]);
   });
 
   it("cumule toutes les options disponibles", () => {
     const result = computeBudget("logo", OPTIONS.map((option) => option.id));
-    // 600 + 900 + 150 + 400 + 80 + 350 = 2 480 -> 2 500
+    // 600 + 900 + 150 + 400 + 80 + 350 = 2 480
     // 1 500 + 2 500 + 500 + 1 500 + 300 + 900 = 7 200
-    expect(result?.range).toEqual({ low: 2500, high: 7200 });
+    expect(result?.range).toEqual({ low: 2480, high: 7200 });
     expect(result?.options).toHaveLength(OPTIONS.length);
   });
 
@@ -111,9 +110,25 @@ describe("composant calculateur", () => {
     if (!papeterie) throw new Error("case « papeterie » absente");
     fireEvent.click(papeterie);
 
-    expect(screen.getByRole("status")).toHaveTextContent("1 700 €");
+    expect(screen.getByRole("status")).toHaveTextContent("1 650 €");
     expect(screen.getByRole("status")).toHaveTextContent("4 500 €");
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Les deux postes qui pèsent le plus dans ce budget : Identité complète et papeterie.",
+    );
     expect(screen.getByText("Copier le récapitulatif")).toBeInTheDocument();
+  });
+
+  it("adapte la phrase du résumé quand un seul poste est retenu", () => {
+    const { container } = render(<BudgetIdentityCalculator />);
+
+    const complete = container.querySelector<HTMLInputElement>('input[value="complete"]');
+    if (!complete) throw new Error("radio « identité complète » absente");
+    fireEvent.click(complete);
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Le poste qui pèse le plus dans ce budget : Identité complète.",
+    );
+    expect(screen.getByRole("status")).not.toHaveTextContent("trois postes");
   });
 });
 

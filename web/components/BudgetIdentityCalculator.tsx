@@ -203,9 +203,7 @@ export function BudgetIdentityCalculator() {
                   ))}
                 </ul>
 
-                <p className={styles.top}>
-                  Les trois postes qui pèsent le plus dans ce budget : {formatList(result.top)}.
-                </p>
+                <p className={styles.top}>{topSentence(result.top)}</p>
                 <p className={styles.context}>
                   Le devis final dépend des contenus que vous fournissez et du nombre
                   d&apos;allers-retours : cette fourchette situe le budget, elle ne l&apos;engage
@@ -265,6 +263,19 @@ export function BudgetIdentityCalculator() {
       </section>
     </div>
   );
+}
+
+const NUMBER_WORDS: Record<number, string> = { 1: "un", 2: "deux", 3: "trois" };
+
+/** Phrase du résumé, accordée au nombre de postes retenus. */
+function topSentence(items: string[]): string {
+  const list = formatList(items);
+  if (items.length === 0 || !list) return "";
+  if (items.length === 1) {
+    return `Le poste qui pèse le plus dans ce budget : ${list}.`;
+  }
+  const count = NUMBER_WORDS[items.length] ?? String(items.length);
+  return `Les ${count} postes qui pèsent le plus dans ce budget : ${list}.`;
 }
 
 /** « A, B et C » : énumération française, sans virgule avant « et ». */
