@@ -710,7 +710,8 @@ footer.sf{
   font-size: 9.5px;
   font-weight: 400;
   letter-spacing: .16em;
-  color: rgba(255, 255, 255, .42);
+  /* 9,5 px sur fond #0A0A09 : .55 donne 6,2:1, au-dessus du seuil AA (4,5:1). */
+  color: rgba(255, 255, 255, .55);
 }
 footer.sf .sf__col > a{
   display: inline-block;
@@ -809,12 +810,16 @@ footer.sf .sf__legal a:hover{ color: #F4F1E8; }
   .sf__grid{ grid-template-columns: 1fr 1fr; gap: 32px 40px; }
   .sf__brand{ grid-column: 1 / -1; max-width: 46ch; }
   .sf__col--contact{ grid-column: 1 / -1; }
+  /* le bandeau cookies est déjà centré en bas dès 641 px : on libère sa hauteur
+     (108 à 129 px + 24 px de marge) pour qu'il ne masque jamais Suivre ni la ligne légale */
+  body:has(#cookie-banner) footer.sf{ padding-bottom: 170px; }
 }
 @media (max-width: 640px){
   .sf__grid{ grid-template-columns: 1fr 1fr; gap: 26px 18px; }
   .sf__brand{ grid-column: 1 / -1; }
   .sf__col--contact{ grid-column: 1 / -1; }
-  footer.sf .sf__col > a{ padding: 9px 0; }
+  /* 20 px de ligne + 24 px de padding = 44 px de cible tactile */
+  footer.sf .sf__col > a{ padding: 12px 0; }
   footer.sf .sf__social a{ min-height: 44px; }
   .sf__base{ font-size: 10.5px; }
   /* le bandeau cookies occupe le bas de l'écran : on libère la place */

@@ -79,7 +79,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="stylesheet" href={assetHref("ds.css")} />
         <link rel="stylesheet" href={assetHref("anim.css")} />
       </head>
-      <body suppressHydrationWarning>
+      <body id="top" suppressHydrationWarning>
         <script dangerouslySetInnerHTML={{ __html: bodyClassScript }} />
         <BodyClass />
         <AdminBar />

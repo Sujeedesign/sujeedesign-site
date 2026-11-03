@@ -13,7 +13,7 @@ export function PageShell({ current, children }: { current?: string; children: R
       <SocialRail />
       <SiteNav solid current={current} />
       {children}
-      <SiteFooter variant="inner" />
+      <SiteFooter />
     </>
   );
 }

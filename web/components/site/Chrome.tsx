@@ -197,9 +197,9 @@ export function ReadRail() {
  * Version unique pour tout le site : même structure, mêmes liens et mêmes
  * réseaux sociaux sur l'accueil, les pages service et les pages ressources.
  * Les colonnes sont explicites pour rester lisibles sur grand écran, et
- * s'empilent sous 900 px.
+ * s'empilent sous 1024 px (deux colonnes) puis sous 640 px.
  */
-export function SiteFooter({ variant: _variant = "home" }: { variant?: "home" | "inner" }) {
+export function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (

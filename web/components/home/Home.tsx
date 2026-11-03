@@ -35,7 +35,7 @@ export function Hero({ doc, projects }: { doc: HomeContent; projects: Project[] 
   const featured = findProject(projects, "elerya") ?? projects[0] ?? staticFeatured;
   const heroPhoto = featured?.cover ?? featured?.images[0];
   return (
-    <header className="hero hero--proj" id="top">
+    <header className="hero hero--proj">
       <div className="hero__bg" aria-hidden="true">
         {heroPhoto ? (
           // LCP : chargée en priorité, sans décalage de mise en page (dimensions
