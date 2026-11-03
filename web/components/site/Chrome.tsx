@@ -194,43 +194,78 @@ export function ReadRail() {
 /**
  * Pied de page.
  *
- * Le v5 n'a pas le même jeu de liens sur l'accueil et sur les pages intérieures :
- * `variant="inner"` reproduit la version des pages secondaires.
+ * Version unique pour tout le site : même structure, mêmes liens et mêmes
+ * réseaux sociaux sur l'accueil, les pages service et les pages ressources.
+ * Les colonnes sont explicites pour rester lisibles sur grand écran, et
+ * s'empilent sous 900 px.
  */
-export function SiteFooter({ variant = "home" }: { variant?: "home" | "inner" }) {
-  const year = variant === "home" ? "2026" : <span data-year>2026</span>;
+export function SiteFooter({ variant: _variant = "home" }: { variant?: "home" | "inner" }) {
+  const year = new Date().getFullYear();
+
   return (
-    <footer>
-      <div className="wrap foot">
-        <span>© {year} Sujee Design · Sujeepan Sabesan</span>
-        <span>
-          <a href={mailto()}>{CONTACT_EMAIL}</a> ·{" "}
-          <a href={CONTACT_PHONE_HREF}>{CONTACT_PHONE}</a> · Cergy · Paris
-        </span>
-        {variant === "home" ? (
-          <span>
-            <a href={routes.realisations}>Réalisations</a> · <a href={routes.services}>Services</a>{" "}
-            · <a href={routes.ressources}>Ressources</a> ·{" "}
-            <a href={routes.calculateurBudgetIdentite}>Calculateur de budget identité</a> ·{" "}
-            <a href={routes.mentionsLegales}>Mentions légales</a> · <a href="#top">Haut de page</a>
-          </span>
-        ) : (
-          <span>
-            <a href={routes.realisations}>Réalisations</a> ·{" "}
-            <a href={routes.ressources}>Ressources</a> ·{" "}
-            <a href={routes.calculateurBudgetIdentite}>Calculateur de budget identité</a> ·{" "}
-            <a href={routes.mentionsLegales}>Mentions légales</a> ·{" "}
-            <a href={routes.home}>Accueil</a>
-          </span>
-        )}
-      </div>
-      <div className="wrap foot-social">
-        <span className="foot-social__lbl">Suivre</span>
-        {socials.map((social) => (
-          <a key={social.href} href={social.href} target="_blank" rel="noopener">
-            {social.label}
+    <footer className="sf">
+      <div className="wrap sf__grid">
+        <div className="sf__brand">
+          <a className="sf__logo" href={routes.home} aria-label="Sujee Design, accueil">
+            <span className="sf__dot" aria-hidden="true" />
+            Sujee Design
           </a>
-        ))}
+          <p className="sf__tagline">
+            Votre marque, de A à Z.
+            <br />
+            Studio de design entre Cergy et Paris.
+          </p>
+          <p className="sf__avail">
+            <span className="sf__pulse" aria-hidden="true" />
+            Disponible pour de nouveaux projets
+          </p>
+        </div>
+
+        <nav className="sf__col" aria-label="Pages du site">
+          <p className="sf__lbl">Pages</p>
+          <a href={routes.home}>Accueil</a>
+          <a href={routes.realisations}>Réalisations</a>
+          <a href={routes.services}>Services</a>
+          <a href={routes.agentsIa}>Agents IA</a>
+          <a href={routes.aPropos}>À propos</a>
+          <a href={routes.contact}>Contact</a>
+        </nav>
+
+        <nav className="sf__col" aria-label="Ressources">
+          <p className="sf__lbl">Ressources</p>
+          <a href={routes.ressources}>Toutes les ressources</a>
+          <a href={routes.calculateurBudgetIdentite}>Calculateur de budget</a>
+          <a href={routes.guidePrixLogo}>Combien coûte un logo</a>
+          <a href={routes.generateurBriefIdentite}>Générateur de brief</a>
+          <a href={routes.testerSonLogo}>Tester son logo</a>
+        </nav>
+
+        <div className="sf__col sf__col--contact">
+          <p className="sf__lbl">Contact</p>
+          <a href={mailto()}>{CONTACT_EMAIL}</a>
+          <a href={CONTACT_PHONE_HREF}>{CONTACT_PHONE}</a>
+          <p className="sf__city">Cergy · Paris</p>
+        </div>
+      </div>
+
+      <div className="wrap sf__social-band">
+        <p className="sf__lbl">Suivre</p>
+        <div className="sf__social">
+          {socials.map((social) => (
+            <a key={social.href} href={social.href} target="_blank" rel="noopener">
+              {social.label}
+              <span aria-hidden="true">↗</span>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <div className="wrap sf__base">
+        <p>© {year} Sujee Design · Sujeepan Sabesan</p>
+        <div className="sf__legal">
+          <a href={routes.mentionsLegales}>Mentions légales</a>
+          <a href="#top">Haut de page ↑</a>
+        </div>
       </div>
     </footer>
   );
