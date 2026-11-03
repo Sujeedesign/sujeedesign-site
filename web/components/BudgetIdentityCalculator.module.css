@@ -245,3 +245,48 @@
     white-space: normal;
   }
 }
+
+/* Mobile : un seul cadre à l'écran. Le conteneur de page encadre déjà le
+   calculateur, les cartes d'option et le bloc résultat n'ajoutent plus de boîtes. */
+@media (max-width: 700px) {
+  .calculator {
+    gap: 26px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .optionsList {
+    gap: 0;
+  }
+
+  .option {
+    padding: 13px 0;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .option:first-child {
+    border-top: 1px solid var(--line);
+  }
+
+  .option:hover {
+    border-color: var(--line);
+  }
+
+  .option:has(.input:checked) {
+    border-bottom-color: var(--accent);
+    background: transparent;
+  }
+
+  .result {
+    padding: 16px 0 0;
+    border: 0;
+    border-top: 1px solid var(--ink);
+    border-radius: 0;
+    background: transparent;
+  }
+}
