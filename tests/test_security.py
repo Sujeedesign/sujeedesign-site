@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+import time
 
 import pytest
 from fastapi.testclient import TestClient
@@ -56,7 +57,8 @@ def logged(client: TestClient) -> TestClient:
 
 def _session_token(client: TestClient) -> str:
     session = client.cookies.get(security.SESSION_COOKIE, "")
-    return security.make_token(CSRF_PURPOSE, CSRF_TTL, key="sess:" + session)
+    nonce = security.session_nonce(session) or ""
+    return security.make_token(CSRF_PURPOSE, CSRF_TTL, key="sess:" + nonce)
 
 
 def test_csrf_refuse_sans_session(logged: TestClient) -> None:
@@ -123,3 +125,60 @@ def test_corps_trop_volumineux_refuse(client: TestClient) -> None:
         headers={"Content-Type": "application/json"},
     )
     assert response.status_code == 413
+
+
+# ------------------------------------------------- sessions longue durée
+
+
+def test_session_ouverte_sept_jours() -> None:
+    assert security.SESSION_TTL == 7 * 24 * 60 * 60
+    assert 0 < security.SESSION_RENEW_AFTER < security.SESSION_TTL
+    assert CSRF_TTL == security.SESSION_TTL
+
+
+def test_session_d_un_jour_est_prolongee(client: TestClient) -> None:
+    old = security.make_session(now=int(time.time()) - 2 * 24 * 60 * 60)
+    client.cookies.set(security.SESSION_COOKIE, old)
+    response = client.get("/admin", follow_redirects=False)
+    assert response.status_code == 200
+    renewed = response.cookies.get(security.SESSION_COOKIE)
+    assert renewed and renewed != old
+    # Même session (nonce conservé), échéance repoussée.
+    assert security.session_nonce(renewed) == security.session_nonce(old)
+    assert security.token_issued_at(renewed) > security.token_issued_at(old)
+    assert security.verify_session(renewed)
+    # Le cookie posé porte bien la durée de sept jours.
+    assert "Max-Age=604800" in response.headers["set-cookie"]
+
+
+def test_session_recente_non_prolongee(logged: TestClient) -> None:
+    response = logged.get("/admin", follow_redirects=False)
+    assert response.status_code == 200
+    assert security.SESSION_COOKIE not in response.cookies
+
+
+def test_session_de_plus_de_sept_jours_refusee(client: TestClient) -> None:
+    vieux = security.make_session(now=int(time.time()) - 8 * 24 * 60 * 60)
+    client.cookies.set(security.SESSION_COOKIE, vieux)
+    response = client.get("/admin", follow_redirects=False)
+    assert response.status_code in (303, 403)
+    assert security.SESSION_COOKIE not in response.cookies
+
+
+def test_formulaire_ouvert_survit_au_renouvellement() -> None:
+    session = security.make_session(now=int(time.time()) - 2 * 24 * 60 * 60)
+    cle = "sess:" + security.session_nonce(session)
+    jeton = security.make_token(CSRF_PURPOSE, CSRF_TTL, key=cle)
+    renewee = security.renew_session(session)
+    assert renewee is not None
+    nouvelle_cle = "sess:" + security.session_nonce(renewee)
+    assert security.verify_token(CSRF_PURPOSE, jeton, CSRF_TTL, key=nouvelle_cle)
+
+
+def test_deconnexion_revoque_la_session(logged: TestClient) -> None:
+    token = _session_token(logged)
+    response = logged.post("/admin/deconnexion", data={"csrf": token}, follow_redirects=False)
+    assert response.status_code == 303
+    assert not logged.cookies.get(security.SESSION_COOKIE)
+    suite = logged.get("/admin", follow_redirects=False)
+    assert suite.status_code in (303, 403)

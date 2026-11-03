@@ -19,7 +19,7 @@ from app.admin import CSRF_PURPOSE, CSRF_TTL
 def _session_csrf(client: TestClient) -> str:
     """Jeton lié à la session connectée, comme celui rendu dans les formulaires."""
     session = client.cookies.get(security.SESSION_COOKIE, "")
-    return security.make_token(CSRF_PURPOSE, CSRF_TTL, key="sess:" + session)
+    return security.make_token(CSRF_PURPOSE, CSRF_TTL, key="sess:" + security.session_nonce(session))
 
 
 @pytest.fixture()

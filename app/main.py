@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -20,6 +21,7 @@ from . import admin, api_admin, contact, content_routes, editor_api
 from . import agent as agent_module
 from . import catalogue
 from . import content as content_store
+from . import security
 from . import settings as settings_module
 from .db import connect, init_db
 from .ui import templates  # noqa: F401  (initialise les filtres Jinja)
@@ -107,6 +109,50 @@ def create_app(db_file: Path | None = None) -> FastAPI:
                 "frame-src https://sujeedesign.com https://www.sujeedesign.com; "
                 "form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
             )
+        return response
+
+    @app.middleware("http")
+    async def session_glissante(request: Request, call_next):
+        """Prolonge la session admin tant qu'elle sert.
+
+        Une session de plus d'un jour est réémise à chaque requête de lecture :
+        même nonce, nouvelle échéance. L'écran de connexion ne revient donc que
+        si l'utilisateur s'est déconnecté, ou après sept jours sans visite.
+        """
+        response = await call_next(request)
+        if request.method not in ("GET", "HEAD"):
+            return response
+        # Une réponse qui pose déjà un cookie (connexion, déconnexion) fait foi.
+        if response.status_code >= 400 or "set-cookie" in response.headers:
+            return response
+        token = request.cookies.get(security.SESSION_COOKIE, "")
+        if not token:
+            return response
+        issued = security.token_issued_at(token)
+        if issued is None or int(time.time()) - issued < security.SESSION_RENEW_AFTER:
+            return response
+        renewed = security.renew_session(token)
+        if renewed is None:
+            return response
+        secure = settings_module.cookie_secure()
+        response.set_cookie(
+            security.SESSION_COOKIE,
+            renewed,
+            max_age=security.SESSION_TTL,
+            httponly=True,
+            samesite="lax",
+            secure=secure,
+            path="/",
+        )
+        response.set_cookie(
+            security.UI_MARKER_COOKIE,
+            "1",
+            max_age=security.SESSION_TTL,
+            httponly=False,
+            samesite="lax",
+            secure=secure,
+            path="/",
+        )
         return response
 
     @app.get("/")

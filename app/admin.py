@@ -32,7 +32,7 @@ from .ui import templates
 router = APIRouter()
 
 CSRF_PURPOSE = "admin-csrf"
-CSRF_TTL = 8 * 60 * 60
+CSRF_TTL = security.SESSION_TTL
 MAX_UPLOAD = 15 * 1024 * 1024
 ALLOWED_TYPES = {
     "image/jpeg": ".jpg",
@@ -172,7 +172,10 @@ def csrf_token(request: Request | None = None) -> str:
 def _csrf_key(request: Request) -> str | None:
     session = request.cookies.get(security.SESSION_COOKIE, "")
     if session and security.verify_session(session):
-        return "sess:" + session
+        # On lie le jeton au nonce de la session, pas au jeton complet : une
+        # session renouvelée garde ses formulaires ouverts valides.
+        nonce = security.session_nonce(session)
+        return "sess:" + nonce if nonce else None
     return None
 
 

@@ -19,7 +19,12 @@ UI_MARKER_COOKIE = "sjd_admin_ui"
 # Cookie non HttpOnly posé uniquement par /admin/editer : demande explicite
 # d'ouverture de l'édition en place. Consommé une seule fois par la vitrine.
 EDIT_MARKER_COOKIE = "sjd_edit"
-SESSION_TTL = 12 * 60 * 60
+# Session ouverte 7 jours : on ne redemande un mot de passe que si
+# l'utilisateur s'est déconnecté lui-même. Chaque requête authentifiée
+# repousse l'échéance (fenêtre glissante) dès que le jeton a plus d'un jour,
+# donc une utilisation régulière ne demande jamais de reconnexion.
+SESSION_TTL = 7 * 24 * 60 * 60
+SESSION_RENEW_AFTER = 24 * 60 * 60
 FORM_TTL = 2 * 60 * 60
 
 
@@ -104,6 +109,31 @@ def make_session(now: int | None = None) -> str:
 
 def verify_session(token: str, now: int | None = None) -> bool:
     return verify_token("session", token, SESSION_TTL, now)
+
+
+def session_nonce(token: str | None) -> str | None:
+    """Identité stable d'une session : son nonce, sans l'horodatage.
+
+    Le nonce ne change pas quand la session est renouvelée, ce qui permet de
+    lier les jetons CSRF à la session sans les casser à chaque prolongation.
+    """
+    parts = (token or "").split(".")
+    if len(parts) != 4 or parts[0] != "session":
+        return None
+    return parts[2]
+
+
+def renew_session(token: str, now: int | None = None) -> str | None:
+    """Réémet la même session avec une échéance repoussée.
+
+    Le nonce est conservé : la session garde son identité (donc les jetons
+    CSRF en cours restent valides), seule la date d'émission change.
+    """
+    if not verify_session(token, now):
+        return None
+    issued = int(time.time() if now is None else now)
+    payload = f"session.{issued}.{session_nonce(token)}"
+    return f"{payload}.{_sign(payload)}"
 
 
 def check_password(candidate: str) -> bool:
