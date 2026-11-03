@@ -207,6 +207,17 @@
   cursor: pointer;
 }
 
+/* `.prose a` (spécificité 0,1,1) repeint les liens du corps en encre, y compris
+   ce bouton : sans cette règle, le CTA principal est encre sur encre. */
+.actions a.action {
+  color: #f7f7f5;
+}
+
+.actions a.action:hover,
+.actions a.action:focus-visible {
+  color: #ffffff;
+}
+
 .secondary {
   font-family: inherit;
 }
