@@ -19,6 +19,8 @@ export const routes = {
   calculateurBudgetIdentite: "/ressources/calculateur-budget-identite",
   /** Guide de prix du logo. */
   guidePrixLogo: "/guides/prix-logo",
+  /** Guide des tendances web design 2027. */
+  guideTendances2027: "/guides/tendances-web-design-2027",
   /** Générateur de brief identité, avec export PDF. */
   generateurBriefIdentite: "/ressources/generateur-brief-identite",
   /** Test de logo : lisibilité, contraste, un seul ton. */

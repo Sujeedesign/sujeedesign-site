@@ -1,0 +1,216 @@
+/* Guide tendances 2027 — même gabarit « page ressource » que le guide prix du logo. */
+
+.page {
+  padding-bottom: clamp(40px, 6vw, 80px);
+}
+
+.conteneur {
+  width: 100%;
+  margin: 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--paper);
+  padding: clamp(18px, 3.4vw, 46px);
+}
+
+.conteneur > * {
+  min-width: 0;
+}
+
+.titre {
+  letter-spacing: var(--ds-track);
+}
+
+.accent {
+  color: var(--accent);
+}
+
+.conteneur > .legalInner {
+  padding-block: 0;
+}
+
+.legalInner > * {
+  min-width: 0;
+}
+
+.conteneur .legalInner :global(.toc) a {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  transition: color 0.2s ease;
+}
+
+.legalInner :global(.toc) a::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.55;
+}
+
+.legalInner :global(.toc) a:hover::before,
+.legalInner :global(.toc) a:focus-visible::before {
+  opacity: 1;
+}
+
+.conteneur :global(.prose) p,
+.conteneur :global(.prose) li {
+  max-width: none;
+  font-size: 15.5px;
+  line-height: 1.72;
+  hyphens: auto;
+  text-wrap: pretty;
+}
+
+.conteneur :global(.prose) h2 {
+  margin-top: clamp(30px, 4vw, 44px);
+}
+
+.conteneur :global(.prose) h2::before {
+  content: "";
+  display: block;
+  width: 32px;
+  height: 2px;
+  margin-bottom: 14px;
+  background: var(--accent);
+}
+
+.conteneur :global(.prose) h2:first-child {
+  margin-top: 0;
+}
+
+.figure {
+  margin: 26px 0 30px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--paper-2, #f8f5ef);
+  overflow: hidden;
+}
+
+.figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.figure figcaption {
+  padding: 10px 14px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  line-height: 1.6;
+  color: var(--muted-2);
+  border-top: 1px solid var(--line);
+}
+
+.lead {
+  font-size: clamp(17px, 2.2vw, 21px) !important;
+  line-height: 1.5 !important;
+  color: var(--ink);
+}
+
+.note {
+  font-size: 13px !important;
+  color: var(--muted);
+}
+
+.sources {
+  margin-top: 34px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.sources li {
+  font-size: 13px !important;
+  color: var(--muted);
+  word-break: break-word;
+}
+
+.ctaCopy {
+  display: grid;
+  gap: 8px;
+}
+
+.ctaText {
+  font-size: 13.5px !important;
+  opacity: 0.78;
+  max-width: 44ch;
+}
+
+.ctaLinks {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 720px) {
+  .figure {
+    margin-left: -6px;
+    margin-right: -6px;
+  }
+
+  .ctaLinks {
+    width: 100%;
+  }
+
+  .ctaLinks :global(.btn-fill),
+  .ctaLinks :global(.btn-line) {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}
+
+.tocLabel {
+  margin: 0 0 8px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.conteneur .legalInner :global(.toc) {
+  font-size: 10.5px;
+  line-height: 2.05;
+  letter-spacing: 0.04em;
+}
+
+.conteneur .legalInner :global(.toc) a {
+  color: var(--muted-2);
+}
+
+@media (max-width: 1024px) {
+  .conteneur .legalInner :global(.toc) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 20px;
+    margin: 4px 0 28px;
+    padding: 14px 16px 6px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: #f8f5ef;
+  }
+
+  .conteneur .legalInner :global(.toc) a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--line-2, rgba(18, 17, 15, 0.08));
+    font-size: 9.5px;
+    line-height: 1.45;
+  }
+
+  .tocLabel {
+    grid-column: 1 / -1;
+    margin-bottom: 4px;
+  }
+}
+
+@media (max-width: 560px) {
+  .conteneur .legalInner :global(.toc) {
+    grid-template-columns: 1fr;
+  }
+}
