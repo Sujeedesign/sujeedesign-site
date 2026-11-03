@@ -38,7 +38,7 @@ export function ServiceSiteEcommerce({ doc }: { doc: Doc }) {
                 </div>
               </div>
               <div className="sp-hero__fig">
-                <img src="/assets/img/svc-site.jpg" alt="Maquettes imprimées d'une grille de page web et onglet vermillon." width={1400} height={933} />
+                <img src="/assets/img/svc-site-2026.jpg" alt="Page d’accueil du site My Prestige Transport : chauffeur privé devant une Porsche Panamera." width={1400} height={933} />
               </div>
             </div>
             <div className="sv-hero__meta">{hero.meta?.map((m: Doc, i: number) => <div key={i}><span data-field={`hero.meta.${i}.label`}>{m.label}</span><p data-field={`hero.meta.${i}.text`}>{m.text}</p></div>)}</div>

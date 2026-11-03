@@ -40,7 +40,7 @@ export function ServiceIdentite({ doc }: { doc: Doc }) {
                 </div>
               </div>
               <div className="sp-hero__fig">
-                <img src="/assets/img/svc-identite.jpg" alt="Papeterie de marque : cartes, monogramme embossé et nuancier, sur fond papier." width={1400} height={933} />
+                <img src="/assets/img/svc-identite-2026.jpg" alt="Planche d’identité visuelle Mathuraa Manokaran : logo en losange, palette bordeaux, typographies et applications papeterie." width={1400} height={933} />
               </div>
             </div>
             <div className="sv-hero__meta">{hero.meta?.map((m: Doc, i: number) => <div key={i}><span data-field={`hero.meta.${i}.label`}>{m.label}</span><p data-field={`hero.meta.${i}.text`}>{m.text}</p></div>)}</div>

@@ -62,11 +62,11 @@ function read(D: Dict) {
 }
 
 const MEDIA = [
-  { src: "/assets/img/svc-identite.jpg", alt: "Papeterie de marque : cartes, monogramme embossé et nuancier, sur fond papier." },
-  { src: "/assets/img/svc-da.jpg", alt: "Tirages photo, planches contact et repères de cadrage sur papier." },
-  { src: "/assets/img/svc-site.jpg", alt: "Maquettes imprimées d'une grille de page web et onglet vermillon." },
-  { src: "/assets/img/svc-contenu.jpg", alt: "Revue ouverte, appareil photo et notes adhésives vermillon." },
-  { src: "/assets/img/svc-agents.jpg", alt: "Bloc mat anthracite à diode vermillon, câble fin sur papier clair." },
+  { src: "/assets/img/svc-identite-2026.jpg", alt: "Planche d’identité visuelle Mathuraa Manokaran : logo en losange, palette bordeaux, typographies et applications papeterie." },
+  { src: "/assets/img/svc-da-2026.jpg", alt: "Campagne parfum Mkanidjian : mannequin en robe blanche dans une serre, flacon et roses blanches." },
+  { src: "/assets/img/svc-site-2026.jpg", alt: "Page d’accueil du site My Prestige Transport : chauffeur privé devant une Porsche Panamera." },
+  { src: "/assets/img/svc-contenu-2026.jpg", alt: "Publications Steezo pour Instagram : portraits d’étudiants, textes de mission et palette magenta." },
+  { src: "/assets/img/svc-agents-2026.jpg", alt: "Session Hermes sur ordinateur portable : conversation de stratégie de marque avec l’agent." },
 ];
 
 export const pageMeta = {
@@ -146,7 +146,7 @@ export function Services({ doc }: { doc: ServicesDoc }) {
             </div>
             <div className="sv-rows">
               {prestations.rows.map((row, i) => {
-                const media = MEDIA[i] ?? { src: "/assets/img/svc-identite.jpg", alt: "" };
+                const media = MEDIA[i] ?? { src: "/assets/img/svc-identite-2026.jpg", alt: "" };
                 return (
                   <a className="sv-row rv" href={row.href} key={i}>
                     <div className="sv-row__body">
