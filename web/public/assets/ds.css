@@ -69,12 +69,12 @@ p{ line-height: 1.62; }
 }
 
 /* ---------- 4. Boutons : un seul modèle ---------- */
-.nav-cta, .btn, .btn-fill, .btn-line, .btn-fill--light,
+.nav-cta, .btn, .btn-fill, .btn-line, .btn-fill--light, .btn-line--light,
 .ab-hero__cta, .rate, .rl-svc__card{
   border-radius: var(--ds-radius) !important;
 }
 
-.nav-cta, .btn, .btn-fill, .btn-line, .btn-fill--light{
+.nav-cta, .btn, .btn-fill, .btn-line, .btn-fill--light, .btn-line--light{
   display: inline-flex;
   align-items: center;
   gap: 10px;
