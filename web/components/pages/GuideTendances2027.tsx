@@ -45,6 +45,7 @@ const SOMMAIRE = [
   { href: "#couleurs", label: "Couleurs franches" },
   { href: "#ignorer", label: "Ce qu’on ignore" },
   { href: "#decider", label: "Comment décider" },
+  { href: "#garder", label: "Ce qu’on garde" },
   { href: "#faq", label: "Questions" },
 ];
 

@@ -30,8 +30,8 @@ export default function Page() {
             PATH,
             pageMeta.title,
             pageMeta.description,
-            "2026-12-12T09:00:00+01:00",
-            "2026-12-12T09:00:00+01:00",
+            "2026-11-03T09:00:00+01:00",
+            "2026-11-03T09:00:00+01:00",
           ),
           faqNode(PATH, faqItems),
           breadcrumbNode([
