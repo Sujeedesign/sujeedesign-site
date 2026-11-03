@@ -120,6 +120,60 @@ export function ServiceIdentite({ doc }: { doc: Doc }) {
           </div>
         </section>
 
+        <section className="section">
+          <div className="wrap">
+            <div className="sec-head rv">
+              <div className="sec-num">05</div>
+              <div>
+                <h2>Pour aller plus loin</h2>
+                <p>
+                  Quatre outils pour situer votre projet avant d&apos;en parler : diagnostic du
+                  logo actuel, prix réels, budget en trente secondes et brief à remplir.
+                </p>
+              </div>
+            </div>
+            <ul className="res-links rv">
+              <li>
+                <a href={routes.testerSonLogo}>
+                  <span className="res-links__kind">Diagnostic</span>
+                  <span className="res-links__title">Tester son logo</span>
+                  <span className="res-links__text">
+                    Lisibilité à 16 px, contraste, tenue en un seul ton. Le fichier reste dans
+                    votre navigateur.
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href={routes.guidePrixLogo}>
+                  <span className="res-links__kind">Guide</span>
+                  <span className="res-links__title">Combien coûte un logo en 2026</span>
+                  <span className="res-links__text">
+                    Les quatre paliers de prix, le temps de travail réel, ce qui manque à 200 €.
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href={routes.calculateurBudgetIdentite}>
+                  <span className="res-links__kind">Outil</span>
+                  <span className="res-links__title">Calculateur de budget identité</span>
+                  <span className="res-links__text">
+                    Une fourchette en trente secondes, poste par poste, sans email à laisser.
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href={routes.generateurBriefIdentite}>
+                  <span className="res-links__kind">Outil</span>
+                  <span className="res-links__title">Générateur de brief identité</span>
+                  <span className="res-links__text">
+                    Dix questions pour écrire un brief propre, exportable en PDF.
+                  </span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </section>
+
         <section className="cta-section">
           <div className="wrap">
             <div className="bandcta bandcta--dark cta-glow">

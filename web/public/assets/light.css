@@ -1538,3 +1538,13 @@ body.has-dark-hero .nav.nav--open .brand__logo--light{display:none!important}
 @media (max-width:860px){
   .pjx__cards{grid-template-columns:minmax(0,1fr)}
 }
+
+/* --- Ressources liées sur les pages service --- */
+.res-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 clamp(20px,3vw,40px);margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}
+.res-links li{border-bottom:1px solid var(--line)}
+.res-links a{display:grid;gap:6px;padding:clamp(16px,2vw,22px) 0;text-decoration:none;color:inherit}
+.res-links__kind{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.res-links__title{font-family:var(--display);font-size:clamp(16px,1.6vw,19px);font-weight:600;letter-spacing:-.01em;color:var(--ink)}
+.res-links__text{font-size:13.5px;line-height:1.6;color:var(--muted)}
+.res-links a:hover .res-links__title,.res-links a:focus-visible .res-links__title{text-decoration:underline;text-underline-offset:3px}
+@media (max-width:700px){.res-links{grid-template-columns:minmax(0,1fr)}}
