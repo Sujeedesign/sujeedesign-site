@@ -288,10 +288,10 @@ export function CalculateurBudget() {
               </p>
               <figure className={styles.photo}>
                 <img
-                  src="/assets/img/svc-identite-960.webp"
-                  alt="Papeterie de marque imprimée : cartes de visite, monogramme embossé et nuancier posés sur un fond papier."
+                  src="/assets/img/papeterie-identite-960.webp"
+                  alt="Papeterie de marque déclinée : papier à en-tête, carnet, enveloppe, carte de visite, écran de téléphone et clé USB."
                   width={960}
-                  height={640}
+                  height={960}
                   loading="lazy"
                   decoding="async"
                 />
