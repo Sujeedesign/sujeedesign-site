@@ -419,16 +419,17 @@ export function CalculateurBudget() {
         <div className="wrap">
           <div className="bandcta bandcta--dark cta-glow">
             <div className="glow" aria-hidden="true" />
-            <p>Une fourchette, puis un devis.</p>
-            <p className={styles.ctaText}>
-              Le calcul situe le budget, le devis se construit sur votre périmètre. Deux façons de
-              continuer :
-            </p>
+            <div className={styles.ctaCopy}>
+              <p>Une fourchette, puis un devis.</p>
+              <p className={styles.ctaText}>
+                Le calcul situe le budget, le devis se construit sur votre périmètre.
+              </p>
+            </div>
             <div className={styles.ctaLinks}>
               <Link className="btn-fill btn-fill--light" href={routes.contact}>
                 Parler de votre projet <span aria-hidden="true">↗</span>
               </Link>
-              <Link className="btn-line" href={serviceHref("identite-de-marque")}>
+              <Link className="btn-line btn-line--light" href={serviceHref("identite-de-marque")}>
                 Voir l&apos;offre identité de marque
               </Link>
             </div>

@@ -277,3 +277,28 @@
     border-radius: 2px;
   }
 }
+
+/* Bande CTA : le texte d'appui reprend la petite taille, sinon `.bandcta p`
+   lui applique l'échelle display et la bande devient illisible. */
+.ctaCopy {
+  display: grid;
+  gap: 8px;
+  max-width: 38ch;
+}
+
+:global(.bandcta) p.ctaText {
+  margin: 0;
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 11px;
+  line-height: 1.7;
+  letter-spacing: 0.04em;
+  color: rgba(247, 247, 245, 0.66);
+}
+
+.ctaLinks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
