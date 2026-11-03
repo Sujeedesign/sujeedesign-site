@@ -139,15 +139,16 @@ export function CalculateurBudget() {
       <section className="section">
         <div className="wrap">
           <div className={styles.conteneur}>
-            <nav className={styles.sommaire} aria-label="Sommaire de la page">
-              {SOMMAIRE.map((item) => (
-                <a key={item.href} href={item.href}>
-                  {item.label}
-                </a>
-              ))}
-            </nav>
+            <div className={`legal ${styles.legalInner}`}>
+              <nav className="toc" aria-label="Sommaire de la page">
+                {SOMMAIRE.map((item) => (
+                  <a key={item.href} href={item.href}>
+                    {item.label}
+                  </a>
+                ))}
+              </nav>
 
-            <div className="prose">
+              <div className="prose">
               <h2 id="principe">Ce que calcule cet outil</h2>
               <p>
                 Trois minutes suffisent pour comprendre l&apos;essentiel : un logo seul ne coûte
@@ -407,6 +408,7 @@ export function CalculateurBudget() {
                     <p>{item.answer}</p>
                   </details>
                 ))}
+              </div>
               </div>
             </div>
           </div>

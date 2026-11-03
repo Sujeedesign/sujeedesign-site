@@ -192,40 +192,39 @@
   color: var(--accent);
 }
 
-/* Sommaire horizontal : le contenu occupe toute la largeur du cadre. */
-.sommaire {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 20px;
-  margin: 0 0 clamp(26px, 3vw, 40px);
-  padding: 0 0 16px;
-  border-bottom: 1px solid var(--line);
-  font-family: var(--mono);
-  font-size: 9.5px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+/* Grille éditoriale du site : sommaire fixe à gauche, contenu à droite.
+   `.legal` apporte son padding vertical, redondant avec celui du cadre. */
+.conteneur > .legalInner {
+  padding-block: 0;
 }
 
-.sommaire a {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  color: var(--muted);
-  text-decoration: none;
+/* Sans min-width:0, la largeur mini des tableaux impose sa taille à la colonne
+   et la page déborde sur mobile. */
+.legalInner > * {
+  min-width: 0;
+}
+
+/* Le sommaire garde le style `.toc` du site, avec une puce d'accent en plus. */
+.legalInner :global(.toc) a {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
   transition: color 0.2s ease;
 }
 
-.sommaire a::before {
+.legalInner :global(.toc) a::before {
   content: "";
-  width: 5px;
-  height: 5px;
+  flex: 0 0 auto;
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
   background: var(--accent);
+  opacity: 0.55;
 }
 
-.sommaire a:hover,
-.sommaire a:focus-visible {
-  color: var(--ink);
+.legalInner :global(.toc) a:hover::before,
+.legalInner :global(.toc) a:focus-visible::before {
+  opacity: 1;
 }
 
 /* ---------- Typographie éditoriale dans le cadre ---------- */
