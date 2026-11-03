@@ -13,6 +13,11 @@
  */
 import Link from "next/link";
 import { BudgetIdentityCalculator } from "@/components/BudgetIdentityCalculator";
+import {
+  ComparaisonParcours,
+  IaVsDesigner,
+  RepartitionTemps,
+} from "@/components/pages/CalculateurFigures";
 import { BASES, OPTIONS, formatRange } from "@/lib/budget-identity";
 import { routes, serviceHref } from "@/lib/routes";
 import styles from "./CalculateurBudget.module.css";
@@ -232,7 +237,10 @@ export function CalculateurBudget() {
                 temps que vous payez.
               </p>
 
+              <ComparaisonParcours />
+
               <h3 id="temps">Le temps réel d&apos;un projet</h3>
+              <RepartitionTemps />
               <div className={styles.tableWrap}>
                 <table className={styles.table}>
                   <caption className={styles.caption}>
@@ -278,6 +286,20 @@ export function CalculateurBudget() {
                 il casse sur une carte de visite, sur un roll-up, en une seule couleur, en favicon.
                 Chaque support refait coûte plus cher que le logo lui-même.
               </p>
+              <figure className={styles.photo}>
+                <img
+                  src="/assets/img/svc-identite-960.webp"
+                  alt="Papeterie de marque imprimée : cartes de visite, monogramme embossé et nuancier posés sur un fond papier."
+                  width={960}
+                  height={640}
+                  loading="lazy"
+                  decoding="async"
+                />
+                <figcaption>
+                  Papeterie de marque. C&apos;est ici qu&apos;un logo mal construit casse : petites
+                  tailles, une seule couleur, contraintes d&apos;impression.
+                </figcaption>
+              </figure>
               <ul>
                 <li>
                   <strong>Il tient partout.</strong> Testé en petit, en une couleur, sur fond clair
@@ -324,6 +346,8 @@ export function CalculateurBudget() {
                 fond sombre ou sur un roll-up. Il faut donc redessiner. Ce temps de reconstruction,
                 c&apos;est précisément le travail du designer.
               </p>
+
+              <IaVsDesigner />
 
               <h3>Ce qu&apos;une IA ne fait pas</h3>
               <ul>

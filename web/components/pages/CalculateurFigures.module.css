@@ -1,0 +1,267 @@
+/* Figures éditoriales du calculateur : traits fins, mono, accent, rayons 3 px. */
+
+.figure {
+  margin: 30px 0 6px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--paper);
+  padding: 18px clamp(14px, 2vw, 22px) 16px;
+}
+
+.caption {
+  margin: 14px 0 0;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  line-height: 1.7;
+  color: var(--muted-2);
+}
+
+/* ---------- Figure 1 : parcours ---------- */
+
+.compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.panel {
+  border: 1px solid var(--line-2);
+  border-radius: 3px;
+  padding: 14px 16px 16px;
+  background: var(--bg);
+}
+
+.panelAccent {
+  border-color: var(--accent);
+}
+
+.panelHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 0 14px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.panelTag {
+  color: var(--muted-2);
+  white-space: nowrap;
+}
+
+.single {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 7px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.single li {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--muted-2);
+}
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 7px;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.steps li {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+}
+
+.num {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  min-width: 16px;
+}
+
+.panelNote {
+  margin: 14px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted-2);
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+/* ---------- Figure 2 : barres ---------- */
+
+.bars {
+  display: grid;
+  gap: 16px;
+}
+
+.barRow {
+  display: grid;
+  gap: 7px;
+}
+
+/* Les paragraphes héritent de `.prose p` (68ch) : sur ces deux lignes, la largeur
+   doit suivre la figure, sinon l'étiquette de droite s'arrête au milieu de la barre. */
+/* `.prose p` impose 68ch : on repasse au-dessus en ciblant `.figure p.<classe>`
+   (spécificité supérieure), sinon ces lignes s'arrêtent au milieu de la figure. */
+.figure p.barLabel,
+.figure p.iaHead {
+  max-width: none;
+  width: 100%;
+}
+
+.barLabel {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.barLabel span {
+  color: var(--muted-2);
+  white-space: nowrap;
+}
+
+.bar {
+  display: flex;
+  height: 22px;
+  border-radius: 2px;
+  overflow: hidden;
+  /* Cadre en pointillé : il matérialise l'échelle maximale (identité complète),
+     pour que la barre « logo seul » se lise vraiment comme un tiers. */
+  border: 1px dashed var(--line-2);
+  background: transparent;
+}
+
+.segment {
+  display: block;
+  height: 100%;
+  background: var(--ink);
+  border-right: 1px solid var(--paper);
+}
+
+.legend {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px 16px;
+  margin: 16px 0 0;
+  padding: 0;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.swatch {
+  width: 9px;
+  height: 9px;
+  background: var(--ink);
+  border-radius: 1px;
+}
+
+/* ---------- Figure 3 : IA ---------- */
+
+.iaGrid {
+  display: grid;
+  gap: 2px;
+}
+
+.iaHead {
+  display: grid;
+  grid-template-columns: 1fr 32px 1fr;
+  gap: 10px;
+  margin: 0 0 10px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+
+.iaHead span:last-child {
+  grid-column: 3;
+}
+
+.iaRow {
+  display: grid;
+  grid-template-columns: 1fr 32px 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 0;
+  border-top: 1px solid var(--line);
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+
+.iaCell {
+  color: var(--muted-2);
+}
+
+.iaAfter {
+  color: var(--ink);
+}
+
+.arrow {
+  width: 26px;
+  height: 9px;
+  color: var(--accent);
+  justify-self: center;
+}
+
+@media (max-width: 720px) {
+  .compare {
+    grid-template-columns: 1fr;
+  }
+
+  .iaHead {
+    display: none;
+  }
+
+  .legend {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .iaRow {
+    grid-template-columns: 1fr 24px 1fr;
+    font-size: 12.5px;
+  }
+}

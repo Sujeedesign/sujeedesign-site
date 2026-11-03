@@ -136,3 +136,26 @@
     padding: 10px 12px;
   }
 }
+
+/* Photo de papeterie : pleine largeur de la colonne, légende en mono. */
+.photo {
+  margin: 26px 0 10px;
+}
+
+.photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+}
+
+.photo figcaption {
+  margin-top: 9px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.7;
+  color: var(--muted-2);
+}
