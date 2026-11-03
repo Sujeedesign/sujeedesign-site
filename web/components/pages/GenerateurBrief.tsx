@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Faq from "@/components/Faq";
 import { IdentiteBriefGenerator } from "@/components/IdentiteBriefGenerator";
 import { routes, serviceHref } from "@/lib/routes";
 import { STEPS } from "@/lib/logo-brief";
@@ -159,15 +160,7 @@ export function GenerateurBrief() {
                   chaque palier contient.
                 </p>
 
-                <h2 id="faq">Questions fréquentes</h2>
-                <div>
-                  {faqItems.map((item) => (
-                    <details key={item.question}>
-                      <summary>{item.question}</summary>
-                      <p>{item.answer}</p>
-                    </details>
-                  ))}
-                </div>
+                <Faq items={faqItems} />
               </div>
             </div>
           </div>

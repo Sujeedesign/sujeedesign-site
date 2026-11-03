@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Faq from "@/components/Faq";
 import { routes, serviceHref } from "@/lib/routes";
 import styles from "./GuidePrixLogo.module.css";
 
@@ -355,13 +356,7 @@ export function GuidePrixLogo() {
                   périmètre : nombre de déclinaisons, supports, délais et contenus fournis.
                 </p>
 
-                <h2 id="faq">Questions fréquentes</h2>
-                {faqItems.map((item) => (
-                  <details key={item.question}>
-                    <summary>{item.question}</summary>
-                    <p>{item.answer}</p>
-                  </details>
-                ))}
+                <Faq items={faqItems} />
               </div>
             </div>
           </div>

@@ -12,6 +12,7 @@
  * grammaire visuelle.
  */
 import Link from "next/link";
+import Faq from "@/components/Faq";
 import { BudgetIdentityCalculator } from "@/components/BudgetIdentityCalculator";
 import {
   ComparaisonParcours,
@@ -404,15 +405,7 @@ export function CalculateurBudget() {
                 ce qui ne tiendra pas. <Link href={routes.contact}>Envoyer une piste</Link>
               </p>
 
-              <h2 id="faq">Questions fréquentes</h2>
-              <div className="faq">
-                {faqItems.map((item) => (
-                  <details key={item.question}>
-                    <summary>{item.question}</summary>
-                    <p>{item.answer}</p>
-                  </details>
-                ))}
-              </div>
+              <Faq items={faqItems} />
               </div>
             </div>
           </div>

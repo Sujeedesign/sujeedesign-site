@@ -687,14 +687,16 @@ body.has-dark-hero .nav:not(.scrolled) .brand__logo--light{display:block}
 .limits b{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;font-weight:400}
 .limits p{margin:0;font-size:13.5px;line-height:1.55;color:var(--muted-2);max-width:52ch}
 
-.faq{border-top:1px solid var(--ink)}
+.faq{border-top:0}
 .faq details{border-bottom:1px solid var(--line-2)}
-.faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:20px;
-  padding:clamp(16px,2vw,24px) 0;font-family:var(--display);font-weight:600;font-size:clamp(16px,1.5vw,21px);letter-spacing:-.02em}
+.faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:24px;
+  padding:clamp(18px,2.2vw,28px) 0;font-family:var(--display);font-weight:600;font-size:clamp(15px,1.65vw,19px);
+  line-height:1.3;letter-spacing:-.015em}
 .faq summary::-webkit-details-marker{display:none}
-.faq summary::after{content:"+";font-family:var(--mono);font-weight:400;font-size:18px;color:var(--muted);transition:transform .3s}
-.faq details[open] summary::after{content:"−";color:var(--accent)}
-.faq p{margin:0 0 clamp(18px,2vw,24px);font-size:14px;line-height:1.6;color:var(--muted-2);max-width:68ch}
+.faq summary::after{content:"+";font-family:var(--mono);font-weight:400;font-size:16px;line-height:1;color:var(--muted);flex:0 0 auto}
+.faq details[open] summary::after{content:"+";color:var(--accent)}
+.faq .faqanswer{padding:0 0 clamp(20px,2.4vw,28px)}
+.faq .faqanswer p{margin:0;font-size:14.5px;line-height:1.7;color:var(--muted-2);max-width:100%}
 @media (max-width:900px){
   .ia-hero{padding-top:104px}
   .ia-hero__grid{grid-template-columns:1fr;gap:26px}

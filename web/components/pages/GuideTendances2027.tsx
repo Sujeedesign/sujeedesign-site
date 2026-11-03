@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Faq from "@/components/Faq";
 import { routes, serviceHref } from "@/lib/routes";
 import styles from "./GuideTendances2027.module.css";
 
@@ -477,14 +478,7 @@ export function GuideTendances2027() {
                   qui bloque, ce qui convertit, ce qu&apos;on peut corriger en une semaine.
                 </p>
 
-                <h2 id="faq">Questions fréquentes</h2>
-                {faqItems.map((item) => (
-                  <details key={item.question}>
-                    <summary>{item.question}</summary>
-                    <p>{item.answer}</p>
-                  </details>
-                ))}
-
+                <Faq items={faqItems} />
                 <div className={styles.sources}>
                   <h2 id="sources">Sources</h2>
                   <ul>

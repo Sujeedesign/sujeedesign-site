@@ -437,13 +437,12 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 .svc-row ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
 .svc-row li{font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted-2);border:1px solid var(--line);border-radius:2px;padding:6px 9px}
 
-.faq{border-top:1px solid var(--line)}
-.faq details{border-bottom:1px solid var(--line-2);padding:16px 0}
-.faq summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:16px;font-family:var(--display);font-weight:500;font-size:clamp(15px,1.6vw,19px);letter-spacing:-.01em;color:var(--bone)}
-.faq summary::-webkit-details-marker{display:none}
-.faq summary::after{content:"+";font-family:var(--mono);color:var(--accent);transition:transform .25s}
-.faq details[open] summary::after{transform:rotate(45deg)}
-.faq p{margin:12px 0 0;font-size:13.5px;line-height:1.65;color:var(--muted-2);max-width:64ch}
+/* Questions fréquentes : titre display plein cadre, lignes aérées */
+.faqblock{margin:clamp(40px,6vw,72px) 0 0}
+.faqhead{padding-bottom:clamp(14px,1.6vw,20px);border-bottom:1px solid var(--ink)}
+.faqblock .faqhead h2{margin:0;font-family:var(--display);font-weight:600;line-height:1.04;text-transform:none;color:var(--ink)}
+.faqeyebrow{margin:0 0 10px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+
 
 /* À propos */
 .about-grid{display:grid;grid-template-columns:0.9fr 1.1fr;gap:clamp(20px,4vw,60px);align-items:start}

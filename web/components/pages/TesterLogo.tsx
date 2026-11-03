@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Faq from "@/components/Faq";
 import { LogoTester } from "@/components/LogoTester";
 import { routes, serviceHref } from "@/lib/routes";
 import styles from "./TesterLogo.module.css";
@@ -167,15 +168,7 @@ export function TesterLogo() {
                   options.
                 </p>
 
-                <h2 id="faq">Questions fréquentes</h2>
-                <div>
-                  {faqItems.map((item) => (
-                    <details key={item.question}>
-                      <summary>{item.question}</summary>
-                      <p>{item.answer}</p>
-                    </details>
-                  ))}
-                </div>
+                <Faq items={faqItems} />
               </div>
             </div>
           </div>
