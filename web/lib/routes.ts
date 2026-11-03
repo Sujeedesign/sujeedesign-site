@@ -19,6 +19,8 @@ export const routes = {
   calculateurBudgetIdentite: "/ressources/calculateur-budget-identite",
   /** Guide de prix du logo. */
   guidePrixLogo: "/guides/prix-logo",
+  /** Générateur de brief identité, avec export PDF. */
+  generateurBriefIdentite: "/ressources/generateur-brief-identite",
 } as const;
 
 /** Slugs des cinq services, dans l'ordre éditorial 01 → 05. */

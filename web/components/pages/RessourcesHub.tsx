@@ -25,6 +25,14 @@ const ENTREES = [
       "Les quatre paliers de prix, ce qu'on obtient à chacun, le temps de travail réel, et ce qui manque dans un devis à 200 €.",
     more: "Lire le guide",
   },
+  {
+    href: routes.generateurBriefIdentite,
+    kind: "Outil",
+    title: "Générateur de brief identité",
+    text:
+      "Dix questions pour écrire un brief propre, avec ce qui bloque un projet. Export en PDF, rien n'est envoyé.",
+    more: "Rédiger un brief",
+  },
 ];
 
 export function RessourcesHub() {
