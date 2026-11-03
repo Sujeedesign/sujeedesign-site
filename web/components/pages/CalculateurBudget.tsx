@@ -120,10 +120,10 @@ export function CalculateurBudget() {
         <div className="wrap">
           <div className="page-head">
             <p className="kick">Ressources</p>
-            <h1>
+            <h1 className={styles.titre}>
               Combien coûte
               <br />
-              une identité visuelle ?
+              une <span className={styles.accent}>identité visuelle</span> ?
             </h1>
             <p className="intro">
               Le prix d&apos;une identité visuelle dépend de trois choses : ce que vous avez déjà,
@@ -139,8 +139,7 @@ export function CalculateurBudget() {
       <section className="section">
         <div className="wrap">
           <div className={styles.conteneur}>
-          <div className={`legal ${styles.legalInner}`}>
-            <nav className="toc" aria-label="Sommaire de la page">
+            <nav className={styles.sommaire} aria-label="Sommaire de la page">
               {SOMMAIRE.map((item) => (
                 <a key={item.href} href={item.href}>
                   {item.label}
@@ -178,7 +177,7 @@ export function CalculateurBudget() {
                   <thead>
                     <tr>
                       <th scope="col">Niveau</th>
-                      <th scope="col">Fourchette</th>
+                      <th scope="col" className={styles.price}>Fourchette</th>
                       <th scope="col">Ce qui est inclus</th>
                     </tr>
                   </thead>
@@ -203,7 +202,7 @@ export function CalculateurBudget() {
                   <thead>
                     <tr>
                       <th scope="col">Option</th>
-                      <th scope="col">Fourchette</th>
+                      <th scope="col" className={styles.price}>Fourchette</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -250,8 +249,8 @@ export function CalculateurBudget() {
                   <thead>
                     <tr>
                       <th scope="col">Étape</th>
-                      <th scope="col">Logo seul</th>
-                      <th scope="col">Identité complète</th>
+                      <th scope="col" className={styles.price}>Logo seul</th>
+                      <th scope="col" className={styles.price}>Identité complète</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -410,7 +409,6 @@ export function CalculateurBudget() {
                 ))}
               </div>
             </div>
-          </div>
           </div>
         </div>
       </section>

@@ -97,7 +97,8 @@
   border-bottom: 0;
 }
 
-.table td.price {
+.table td.price,
+.table th.price {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   color: var(--ink);
@@ -173,15 +174,102 @@
   padding: clamp(18px, 3.4vw, 46px);
 }
 
-/* `.legal` apporte son propre padding vertical : dans le cadre, il ferait doublon. */
-.conteneur > .legalInner {
-  padding-block: 0;
+/* Sans min-width:0, la largeur mini du tableau (480px) impose sa taille et la page
+   déborde sur mobile. */
+.conteneur > * {
+  min-width: 0;
 }
 
-/* Sans min-width:0, la largeur mini du tableau (480px) impose sa taille à la colonne
-   de grille et la page déborde sur mobile. */
-.legalInner > * {
-  min-width: 0;
+/* ---------- Titre et sommaire ---------- */
+
+/* Le design system du site impose une seule casse (bas de casse) : on ne met
+   rien en capitales ici, on joue le titre à l'échelle --ds-h1 et sur l'accent. */
+.titre {
+  letter-spacing: var(--ds-track);
+}
+
+.accent {
+  color: var(--accent);
+}
+
+/* Sommaire horizontal : le contenu occupe toute la largeur du cadre. */
+.sommaire {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 0 0 clamp(26px, 3vw, 40px);
+  padding: 0 0 16px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sommaire a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.sommaire a::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.sommaire a:hover,
+.sommaire a:focus-visible {
+  color: var(--ink);
+}
+
+/* ---------- Typographie éditoriale dans le cadre ---------- */
+
+/* Les paragraphes remplissent la colonne : la limite de 68 caractères de `.prose`
+   ne vaut pas ici, où le cadre donne la mesure. */
+.conteneur :global(.prose) p,
+.conteneur :global(.prose) li {
+  max-width: none;
+  font-size: 15.5px;
+  line-height: 1.72;
+  /* Césure et équilibrage : sur des lignes larges, sans ça le texte se casse mal. */
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  text-wrap: pretty;
+}
+
+/* H2 : échelle du design system, filet d'accent au-dessus, casse du site. */
+.conteneur :global(.prose) h2 {
+  position: relative;
+  padding-top: 18px;
+  font-size: var(--ds-h2);
+  line-height: 1.04;
+  letter-spacing: var(--ds-track);
+}
+
+.conteneur :global(.prose) h2::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 32px;
+  height: 2px;
+  background: var(--accent);
+}
+
+/* H3 : mono, accent sur le numéro de section. */
+.conteneur :global(.prose) h3 {
+  color: var(--muted);
+}
+
+/* En-têtes de tableau : filet d'accent sous la ligne de titres. */
+.conteneur :global(.prose) thead th {
+  border-bottom: 1px solid var(--accent);
 }
 
 @media (max-width: 720px) {
