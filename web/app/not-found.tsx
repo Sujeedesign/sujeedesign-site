@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ReadRail, SiteFooter, SiteNav, SkipLink, SocialRail } from "@/components/site/Chrome";
+import { ReadRail, SiteFooter, SiteNav, SocialRail } from "@/components/site/Chrome";
 import { routes } from "@/lib/routes";
 
 export const metadata: Metadata = {
@@ -17,7 +17,6 @@ export default function NotFound() {
   return (
     <>
       <SocialRail />
-      <SkipLink />
       <SiteNav />
       <ReadRail />
       <main id="main">

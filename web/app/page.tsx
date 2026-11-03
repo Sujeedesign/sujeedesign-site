@@ -1,6 +1,6 @@
 import { CallToAction, Cases, Hero, Method, Services, Studio } from "@/components/home/Home";
 import { JsonLd } from "@/components/site/JsonLd";
-import { ReadRail, SiteFooter, SiteNav, SkipLink, SocialRail } from "@/components/site/Chrome";
+import { ReadRail, SiteFooter, SiteNav, SocialRail } from "@/components/site/Chrome";
 import { site } from "@/content/site";
 import { getProjects } from "@/lib/content/catalogue";
 import { getHomeContent } from "@/lib/content/live";
@@ -20,7 +20,6 @@ export default async function HomePage() {
           dans le <head>. En ajouter un second duplique la demande. */}
       <JsonLd data={pageGraph([webPageNode(routes.home, site.name, site.tagline)])} />
       <SocialRail />
-      <SkipLink />
       <SiteNav />
       <ReadRail />
       <main id="main">

@@ -54,14 +54,6 @@ export function SocialRail() {
   );
 }
 
-export function SkipLink() {
-  return (
-    <a className="skip" href="#main">
-      Aller au contenu
-    </a>
-  );
-}
-
 /**
  * Barre de navigation.
  *
