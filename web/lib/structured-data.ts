@@ -182,6 +182,35 @@ export function serviceNode(slug: ServiceSlug, description?: string) {
 }
 
 /** Page simple (sommaire, à propos, mentions) : un `WebPage` relié au site. */
+/**
+ * Guide éditorial : un `Article` signé par le studio.
+ *
+ * Pas de `datePublished` inventée ailleurs que le jour de mise en ligne réel, et pas
+ * d'`aggregateRating` : aucun avis vérifiable n'existe sur cette page.
+ */
+export function articleNode(
+  path: string,
+  headline: string,
+  description: string,
+  datePublished: string,
+  dateModified = datePublished,
+) {
+  const url = absoluteUrl(path);
+  return {
+    "@type": "Article",
+    "@id": `${url}#article`,
+    headline,
+    description,
+    url,
+    inLanguage: IN_LANGUAGE,
+    mainEntityOfPage: { "@id": `${url}#page` },
+    author: { "@id": SCHEMA_IDS.personne },
+    publisher: { "@id": SCHEMA_IDS.studio },
+    datePublished,
+    dateModified,
+  };
+}
+
 export function webPageNode(path: string, name: string, description?: string) {
   const url = absoluteUrl(path);
   return {

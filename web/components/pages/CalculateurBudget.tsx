@@ -273,6 +273,11 @@ export function CalculateurBudget() {
                   </tbody>
                 </table>
               </div>
+              <p>
+                Le détail palier par palier, avec ce qui manque dans un devis à 200 €, est
+                détaillé dans le guide{" "}
+                <Link href={routes.guidePrixLogo}>combien coûte un logo en 2026</Link>.
+              </p>
               <p className={styles.note}>
                 Ordre de grandeur sur nos projets. À un taux horaire de 60 à 80 €, on retrouve
                 exactement les fourchettes affichées plus haut : 650 à 1 800 € pour un logo, 1 500

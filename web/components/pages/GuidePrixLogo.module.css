@@ -1,0 +1,171 @@
+/* Guide prix du logo — reprend le gabarit « page ressource » du calculateur. */
+
+.page {
+  padding-bottom: clamp(40px, 6vw, 80px);
+}
+
+.conteneur {
+  width: 100%;
+  margin: 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--paper);
+  padding: clamp(18px, 3.4vw, 46px);
+}
+
+.conteneur > * {
+  min-width: 0;
+}
+
+.titre {
+  letter-spacing: var(--ds-track);
+}
+
+.accent {
+  color: var(--accent);
+}
+
+.conteneur > .legalInner {
+  padding-block: 0;
+}
+
+.legalInner > * {
+  min-width: 0;
+}
+
+.legalInner :global(.toc) a {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  transition: color 0.2s ease;
+}
+
+.legalInner :global(.toc) a::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.55;
+}
+
+.legalInner :global(.toc) a:hover::before,
+.legalInner :global(.toc) a:focus-visible::before {
+  opacity: 1;
+}
+
+.conteneur :global(.prose) p,
+.conteneur :global(.prose) li {
+  max-width: none;
+  font-size: 15.5px;
+  line-height: 1.72;
+  hyphens: auto;
+  text-wrap: pretty;
+}
+
+.conteneur :global(.prose) h2 {
+  margin-top: clamp(30px, 4vw, 44px);
+}
+
+.conteneur :global(.prose) h2::before {
+  content: "";
+  display: block;
+  width: 32px;
+  height: 2px;
+  margin-bottom: 14px;
+  background: var(--accent);
+}
+
+.tableWrap {
+  margin: 18px 0 8px;
+  overflow-x: auto;
+  min-width: 0;
+}
+
+.table {
+  width: 100%;
+  min-width: 480px;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th,
+.table td {
+  padding: 11px 12px 11px 0;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--line);
+}
+
+.table thead th {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+  border-bottom: 1px solid var(--ink);
+}
+
+.table td.price,
+.table th.price {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.table tbody th {
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.caption {
+  caption-side: bottom;
+  padding-top: 10px;
+  text-align: left;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  line-height: 1.7;
+  color: var(--muted-2);
+}
+
+.note {
+  font-size: 13px !important;
+  color: var(--muted);
+}
+
+.ctaCopy {
+  display: grid;
+  gap: 10px;
+  max-width: 46ch;
+}
+
+:global(.bandcta) p.ctaText {
+  margin: 0;
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 14.5px !important;
+  line-height: 1.55;
+  letter-spacing: 0;
+  color: rgba(247, 247, 245, 0.72);
+}
+
+.ctaLinks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+@media (max-width: 700px) {
+  .table {
+    min-width: 0;
+  }
+
+  .table th,
+  .table td {
+    padding: 10px 8px 10px 0;
+  }
+}

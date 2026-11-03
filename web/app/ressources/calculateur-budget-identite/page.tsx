@@ -24,9 +24,9 @@ export default function Page() {
           webPageNode(PATH, pageMeta.title, pageMeta.description),
           webApplicationNode(PATH, "Calculateur de budget identité visuelle", pageMeta.description),
           faqNode(PATH, faqItems),
-          // Deux niveaux seulement : le hub /ressources n'existe pas encore.
           breadcrumbNode([
             { name: "Accueil", path: routes.home },
+            { name: "Ressources", path: routes.ressources },
             { name: "Calculateur de budget identité", path: PATH },
           ]),
         ])}
