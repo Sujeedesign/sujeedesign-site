@@ -136,13 +136,22 @@ describe("page calculateur", () => {
   it("rend les tableaux et la FAQ côté serveur", () => {
     const { container } = render(<CalculateurBudget />);
 
-    const rows = container.querySelectorAll("table tbody tr");
-    expect(rows).toHaveLength(BASES.length + OPTIONS.length);
+    // Trois tableaux : niveaux, options, puis temps de travail par étape.
+    const tables = container.querySelectorAll("table");
+    expect(tables).toHaveLength(3);
+    const [tableNiveaux, tableOptions, tableTemps] = Array.from(tables);
+    if (!tableNiveaux || !tableOptions || !tableTemps) throw new Error("tableaux manquants");
+    expect(tableNiveaux.querySelectorAll("tbody tr")).toHaveLength(BASES.length);
+    expect(tableOptions.querySelectorAll("tbody tr")).toHaveLength(OPTIONS.length);
+    expect(tableTemps.querySelectorAll("tbody tr")).toHaveLength(7);
 
     const details = container.querySelectorAll("details");
     expect(details).toHaveLength(faqItems.length);
+    expect(faqItems).toHaveLength(8);
     expect(container).toHaveTextContent("Combien coûte");
     expect(container).toHaveTextContent("Ce qui est inclus dans chaque niveau");
+    expect(container).toHaveTextContent("Un logo à 200 € ou un logo de designer ?");
+    expect(container).toHaveTextContent("Et un logo généré par une IA ?");
   });
 
   it("pointe vers le service identité et vers le contact", () => {
