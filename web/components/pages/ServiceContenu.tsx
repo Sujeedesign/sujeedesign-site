@@ -38,7 +38,7 @@ export function ServiceContenu({ doc }: { doc: Doc }) {
                 </div>
               </div>
               <div className="sp-hero__fig">
-                <img src="/assets/img/svc-contenu.jpg" alt="Revue ouverte, appareil photo et notes adhésives vermillon." width={1400} height={933} />
+                <img src="/assets/img/svc-contenu-2026.jpg" alt="Publications Steezo pour Instagram : portraits d’étudiants, textes de mission et palette magenta." width={1400} height={933} />
               </div>
             </div>
             <div className="sv-hero__meta">{hero.meta?.map((m: Doc, i: number) => <div key={i}><span data-field={`hero.meta.${i}.label`}>{m.label}</span><p data-field={`hero.meta.${i}.text`}>{m.text}</p></div>)}</div>
