@@ -37,13 +37,13 @@ html.js .rv{
   filter: blur(7px);
   transition: opacity .85s var(--ease), transform .95s var(--ease), filter .9s var(--ease);
 }
-html.js .rv.in{
+/* `site.js` pose `.in`, `anim.js` pose `.is-in` : les deux doivent révéler. */
+html.js .rv.in,
+html.js .rv.is-in{
   opacity: 1;
   transform: none;
   filter: none;
 }
-/* filet de sécurité : si site.js ajoute .in avant anim.js */
-html.js .rv.in{ opacity: 1; transform: none; filter: none; }
 
 
 /* ---------- Enfants en cascade ---------- */

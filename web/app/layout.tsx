@@ -4,6 +4,7 @@ import { Analytics } from "@/components/site/analytics";
 import { SiteScripts } from "@/components/site/scripts";
 import EditorRuntime from "@/components/editor/EditorRuntime";
 import AdminBar from "@/components/editor/AdminBar";
+import { RevealOnRoute } from "@/components/site/RevealOnRoute";
 import { GOOGLE_SITE_VERIFICATION } from "@/lib/analytics";
 import { assetHref } from "@/lib/asset-version";
 
@@ -84,6 +85,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AdminBar />
         {children}
         <EditorRuntime />
+        <RevealOnRoute />
         <SiteScripts />
         <Analytics />
       </body>
