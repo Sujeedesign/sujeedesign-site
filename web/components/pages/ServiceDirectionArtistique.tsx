@@ -38,7 +38,7 @@ export function ServiceDirectionArtistique({ doc }: { doc: Doc }) {
                 </div>
               </div>
               <div className="sp-hero__fig">
-                <img src="/assets/img/svc-da-2026.jpg" alt="Campagne parfum Mkanidjian : mannequin en robe blanche dans une serre, flacon et roses blanches." width={1400} height={933} />
+                <img src="/assets/img/svc-da-2026.jpg" alt="Campagne parfum Mkandjian Paris : mannequin en robe blanche dans une serre, flacon et roses blanches." width={1400} height={933} />
               </div>
             </div>
             <div className="sv-hero__meta">{hero.meta?.map((m: Doc, i: number) => <div key={i}><span data-field={`hero.meta.${i}.label`}>{m.label}</span><p data-field={`hero.meta.${i}.text`}>{m.text}</p></div>)}</div>
