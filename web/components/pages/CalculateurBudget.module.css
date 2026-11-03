@@ -9,8 +9,9 @@
 }
 
 .note {
-  font-size: 13px;
-  color: var(--muted-2);
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--muted);
   border-left: 2px solid var(--line-2);
   padding-left: 12px;
 }
@@ -50,9 +51,7 @@
 .tableWrap {
   overflow-x: auto;
   margin: 18px 0 8px;
-  border: 1px solid var(--line);
-  border-radius: var(--r);
-  background: var(--paper);
+  min-width: 0;
 }
 
 .table {
@@ -73,17 +72,19 @@
 .table td {
   text-align: left;
   vertical-align: top;
-  padding: 12px 14px;
+  padding: 11px 12px 11px 0;
   border-bottom: 1px solid var(--line);
   line-height: 1.55;
 }
 
 .table thead th {
-  font-size: 12px;
+  font-family: var(--mono);
+  font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted-2);
   font-weight: 600;
+  border-bottom: 1px solid var(--line-2);
 }
 
 .table tbody th {
@@ -161,17 +162,11 @@
   color: var(--muted-2);
 }
 
-/* Conteneur unique : la page entière tient dans un cadre centré, sur fond papier.
-   Il porte la respiration (padding) à la place des marges de section. */
+/* Conteneur : plus de cadre. La page suit la grille éditoriale du site
+   (`.wrap` + `.legal`) comme les guides et les mentions légales. */
 .conteneur {
-  /* Aligné sur la largeur du hero (.wrap) : les bords du cadre tombent
-     exactement sous le titre, au lieu de flotter 50 px à l'intérieur. */
   width: 100%;
   margin: 0 auto;
-  border: 1px solid var(--line);
-  border-radius: 3px;
-  background: var(--paper);
-  padding: clamp(18px, 3.4vw, 46px);
 }
 
 /* Sans min-width:0, la largeur mini du tableau (480px) impose sa taille et la page
@@ -179,8 +174,6 @@
 .conteneur > * {
   min-width: 0;
 }
-
-/* ---------- Titre et sommaire ---------- */
 
 /* Le design system du site impose une seule casse (bas de casse) : on ne met
    rien en capitales ici, on joue le titre à l'échelle --ds-h1 et sur l'accent. */
@@ -192,60 +185,18 @@
   color: var(--accent);
 }
 
-/* Grille éditoriale du site : sommaire fixe à gauche, contenu à droite.
-   `.legal` apporte son padding vertical, redondant avec celui du cadre. */
-.conteneur > .legalInner {
-  padding-block: 0;
-}
-
 /* Sans min-width:0, la largeur mini des tableaux impose sa taille à la colonne
    et la page déborde sur mobile. */
 .legalInner > * {
   min-width: 0;
 }
 
-/* Le sommaire garde le style `.toc` du site, avec une puce d'accent en plus. */
-.legalInner :global(.toc) a {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  transition: color 0.2s ease;
-}
-
-.legalInner :global(.toc) a::before {
-  content: "";
-  flex: 0 0 auto;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--accent);
-  opacity: 0.55;
-}
-
-.legalInner :global(.toc) a:hover::before,
-.legalInner :global(.toc) a:focus-visible::before {
-  opacity: 1;
-}
-
 /* ---------- Typographie éditoriale dans le cadre ---------- */
 
-/* Les paragraphes remplissent la colonne : la limite de 68 caractères de `.prose`
-   ne vaut pas ici, où le cadre donne la mesure. */
-.conteneur :global(.prose) p,
-.conteneur :global(.prose) li {
-  max-width: none;
-  font-size: 15.5px;
-  line-height: 1.72;
-  /* Césure et équilibrage : sur des lignes larges, sans ça le texte se casse mal. */
-  hyphens: auto;
-  -webkit-hyphens: auto;
-  text-wrap: pretty;
-}
-
-/* H2 : échelle du design system, filet d'accent au-dessus, casse du site. */
+/* H2 : échelle du design system, filet d'accent au-dessus, même rythme
+   vertical que les guides et les outils. */
 .conteneur :global(.prose) h2 {
-  position: relative;
-  padding-top: 18px;
+  margin-top: clamp(30px, 4vw, 44px);
   font-size: var(--ds-h2);
   line-height: 1.04;
   letter-spacing: var(--ds-track);
@@ -253,11 +204,10 @@
 
 .conteneur :global(.prose) h2::before {
   content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
+  display: block;
   width: 32px;
   height: 2px;
+  margin-bottom: 14px;
   background: var(--accent);
 }
 
@@ -267,14 +217,12 @@
 }
 
 /* En-têtes de tableau : filet d'accent sous la ligne de titres. */
-.conteneur :global(.prose) thead th {
-  border-bottom: 1px solid var(--accent);
-}
+.conteneur :global(.prose) thead th {}
 
 @media (max-width: 720px) {
-  .conteneur {
-    padding: 16px 14px 20px;
-    border-radius: 2px;
+  .table th,
+  .table td {
+    padding: 10px 8px 10px 0;
   }
 }
 

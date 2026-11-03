@@ -7,10 +7,6 @@
 .conteneur {
   width: 100%;
   margin: 0 auto;
-  border: 1px solid var(--line);
-  border-radius: 3px;
-  background: var(--paper);
-  padding: clamp(18px, 3.4vw, 46px);
 }
 
 .conteneur > * {
@@ -25,43 +21,8 @@
   color: var(--accent);
 }
 
-.conteneur > .legalInner {
-  padding-block: 0;
-}
-
 .legalInner > * {
   min-width: 0;
-}
-
-.conteneur .legalInner :global(.toc) a {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  transition: color 0.2s ease;
-}
-
-.legalInner :global(.toc) a::before {
-  content: "";
-  flex: 0 0 auto;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--accent);
-  opacity: 0.55;
-}
-
-.legalInner :global(.toc) a:hover::before,
-.legalInner :global(.toc) a:focus-visible::before {
-  opacity: 1;
-}
-
-.conteneur :global(.prose) p,
-.conteneur :global(.prose) li {
-  max-width: none;
-  font-size: 15.5px;
-  line-height: 1.72;
-  hyphens: auto;
-  text-wrap: pretty;
 }
 
 .conteneur :global(.prose) h2 {
@@ -84,7 +45,7 @@
 .figure {
   margin: 26px 0 30px;
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: var(--ds-radius);
   background: var(--paper-2, #f8f5ef);
   overflow: hidden;
 }
@@ -112,8 +73,11 @@
 }
 
 .note {
-  font-size: 13px !important;
+  font-size: 14px;
+  line-height: 1.65;
   color: var(--muted);
+  border-left: 2px solid var(--line-2);
+  padding-left: 12px;
 }
 
 .sources {
@@ -171,37 +135,8 @@
   color: var(--muted);
 }
 
-.conteneur .legalInner :global(.toc) {
-  font-size: 10.5px;
-  line-height: 2.05;
-  letter-spacing: 0.04em;
-}
-
-.conteneur .legalInner :global(.toc) a {
-  color: var(--muted-2);
-}
-
 @media (max-width: 1024px) {
-  .conteneur .legalInner :global(.toc) {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0 20px;
-    margin: 4px 0 28px;
-    padding: 14px 16px 6px;
-    border: 1px solid var(--line);
-    border-radius: 3px;
-    background: #f8f5ef;
-  }
-
-  .conteneur .legalInner :global(.toc) a {
-    display: flex;
-    align-items: center;
-    min-height: 44px;
-    padding: 4px 0;
-    border-bottom: 1px solid var(--line-2, rgba(18, 17, 15, 0.08));
-    font-size: 9.5px;
-    line-height: 1.45;
-  }
+  
 
   .tocLabel {
     grid-column: 1 / -1;
@@ -210,7 +145,5 @@
 }
 
 @media (max-width: 560px) {
-  .conteneur .legalInner :global(.toc) {
-    grid-template-columns: 1fr;
-  }
+  
 }

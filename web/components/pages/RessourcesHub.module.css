@@ -4,8 +4,8 @@
   gap: 14px;
   margin-top: 14px;
   font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
+  font-size: 11px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted-2);
 }
@@ -18,7 +18,7 @@
   align-items: center;
   padding: clamp(20px, 3vw, 34px);
   border: 1px solid var(--ink);
-  border-radius: 3px;
+  border-radius: var(--ds-radius);
   background: var(--paper);
   margin-bottom: clamp(14px, 2vw, 20px);
   text-decoration: none;
@@ -39,15 +39,15 @@
 
 .num {
   font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
+  font-size: 11px;
+  letter-spacing: 0.08em;
   color: var(--muted-2);
 }
 
 .kind {
   font-family: var(--mono);
-  font-size: 9.5px;
-  letter-spacing: 0.12em;
+  font-size: 11px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--accent);
 }
@@ -55,17 +55,17 @@
 .featuredTitle {
   margin: 0;
   font-family: var(--display);
-  font-size: clamp(21px, 2.4vw, 30px) !important;
-  font-weight: 500;
-  line-height: 1.14;
-  letter-spacing: -0.025em;
+  font-size: var(--ds-h2) !important;
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: var(--ds-track);
   color: var(--ink);
 }
 
 .text {
   margin: 0;
-  font-size: 14.5px;
-  line-height: 1.62;
+  font-size: 15.5px;
+  line-height: 1.65;
   color: var(--muted);
   max-width: 46ch;
 }
@@ -76,8 +76,8 @@
   gap: 8px;
   margin-top: 4px;
   font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.1em;
+  font-size: 11px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink);
   text-decoration: none;
@@ -109,7 +109,7 @@
   gap: 10px;
   padding: clamp(14px, 1.8vw, 18px);
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: var(--ds-radius);
   background: var(--paper);
   text-decoration: none;
   color: inherit;
@@ -131,17 +131,17 @@
 .cardTitle {
   margin: 0;
   font-family: var(--display);
-  font-size: clamp(17px, 1.5vw, 19px) !important;
-  font-weight: 500;
-  line-height: 1.22;
-  letter-spacing: -0.015em;
+  font-size: var(--ds-h3) !important;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.012em;
   color: var(--ink);
 }
 
 .cardText {
   margin: 0;
-  font-size: 13.5px;
-  line-height: 1.6;
+  font-size: 14px;
+  line-height: 1.65;
   color: var(--muted);
 }
 
@@ -159,7 +159,7 @@
   margin: clamp(26px, 4vw, 40px) 0 0;
   padding-top: 18px;
   border-top: 1px solid var(--line);
-  font-size: 14px;
+  font-size: 14.5px;
   line-height: 1.7;
   color: var(--muted);
   max-width: 62ch;

@@ -9,10 +9,6 @@
   gap: clamp(26px, 4vw, 44px);
   width: 100%;
   margin: 0 auto;
-  border: 1px solid var(--line);
-  border-radius: 3px;
-  background: var(--paper);
-  padding: clamp(18px, 3.4vw, 46px);
 }
 
 .conteneur > * {
@@ -36,37 +32,6 @@
 
 .legalInner > * {
   min-width: 0;
-}
-
-.legalInner :global(.toc) a {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  transition: color 0.2s ease;
-}
-
-.legalInner :global(.toc) a::before {
-  content: "";
-  flex: 0 0 auto;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--accent);
-  opacity: 0.55;
-}
-
-.legalInner :global(.toc) a:hover::before,
-.legalInner :global(.toc) a:focus-visible::before {
-  opacity: 1;
-}
-
-.conteneur :global(.prose) p,
-.conteneur :global(.prose) li {
-  max-width: none;
-  font-size: 15.5px;
-  line-height: 1.72;
-  hyphens: auto;
-  text-wrap: pretty;
 }
 
 .conteneur :global(.prose) h2 {

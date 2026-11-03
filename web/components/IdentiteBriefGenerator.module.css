@@ -72,7 +72,7 @@
   font-size: 14.5px;
   line-height: 1.55;
   color: var(--ink);
-  background: #fff;
+  background: var(--paper);
   border: 1px solid var(--line);
   border-radius: 2px;
   resize: vertical;
@@ -84,7 +84,7 @@
 }
 
 .input::placeholder {
-  color: #9a9a95;
+  color: var(--muted);
 }
 
 select.input {
@@ -105,13 +105,13 @@ select.input {
 }
 
 .chip {
-  padding: 6px 11px;
+  padding: 8px 12px;
   font-family: var(--sans);
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--ink);
-  background: transparent;
+  background: var(--paper);
   border: 1px solid var(--line);
-  border-radius: 2px;
+  border-radius: var(--ds-radius);
   cursor: pointer;
   transition: border-color 0.15s ease, color 0.15s ease;
 }
@@ -156,7 +156,7 @@ select.input {
   gap: 12px;
   padding: clamp(16px, 2.2vw, 22px);
   border: 1px solid var(--line);
-  border-radius: 3px;
+  border-radius: var(--ds-radius);
   background: var(--paper);
   min-width: 0;
 }
@@ -169,8 +169,8 @@ select.input {
 .summaryLabel {
   margin: 0;
   font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
+  font-size: 11px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
 }
