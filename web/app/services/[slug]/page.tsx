@@ -38,7 +38,14 @@ export function generateStaticParams() {
     .map((slug) => ({ slug }));
 }
 
-export const dynamicParams = false;
+/**
+ * Les slugs connus sont prérendus (`generateStaticParams`), mais les autres ne
+ * doivent pas produire un `NoFallbackError` au runtime : le `notFound()` plus bas
+ * suffit à renvoyer une 404 propre. Laisser `dynamicParams = false` rendait les
+ * quatre fiches inaccessibles en production dès que l'artefact prérendu manquait
+ * dans l'image (édition en place, ISR), alors qu'elles fonctionnaient en local.
+ */
+export const dynamicParams = true;
 
 /** Les fiches service se rafraîchissent pour refléter les éditions du back office. */
 export const revalidate = 60;
