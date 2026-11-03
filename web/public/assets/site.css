@@ -45,8 +45,23 @@ a{-webkit-tap-highlight-color:transparent}
 
 .wrap{max-width:var(--max);margin-inline:auto;padding-inline:var(--pad)}
 .mono{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
-.skip{position:absolute;left:-9999px;top:0;background:var(--bone);color:#0A0A09;padding:12px 18px;z-index:300}
-.skip:focus{left:16px;top:14px}
+/* Lien d'évitement : masqué hors écran, visible au clavier.
+   Couleurs en dur, pas de var(--bone) : dans le thème clair --bone vaut l'encre,
+   le texte devenait noir sur noir (rectangle plein sans libellé). */
+.skip{
+  position:fixed;left:-9999px;top:0;z-index:2147483001;
+  background:#0A0A0B;color:#F4F1E8;
+  border:1px solid rgba(255,255,255,.24);border-radius:2px;
+  padding:12px 18px;
+  font:500 12px/1 "Space Grotesk",system-ui,sans-serif;letter-spacing:.02em;
+  text-decoration:none;
+}
+/* Visible au clavier seulement : au clic souris, :focus-visible ne s'applique pas,
+   le lien reste hors écran au lieu de surgir en carré noir par-dessus le logo. */
+.skip:focus-visible{
+  left:16px;top:calc(14px + var(--sjd-admin-h,0px));
+  outline:2px solid #C9340F;outline-offset:3px;
+}
 
 /* ---------- Nav ---------- */
 .nav{
