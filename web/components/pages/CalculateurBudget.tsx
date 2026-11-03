@@ -25,7 +25,7 @@ import styles from "./CalculateurBudget.module.css";
 export const pageMeta = {
   title: "Calculateur de budget identité visuelle",
   description:
-    "Estimez en 30 secondes le budget d'une identité visuelle : logo, charte, déclinaisons, papeterie. Fourchettes réelles, sans engagement.",
+    "Estimez en 30 secondes le budget d'un logo ou d'une identité visuelle, du logo simple au branding complet. Fourchettes réelles, sans engagement.",
 };
 
 /** FAQ de la page, partagée avec le JSON-LD `FAQPage` (une seule source de vérité). */
@@ -48,7 +48,7 @@ export const faqItems = [
   {
     question: "Puis-je commencer par le logo et compléter plus tard ?",
     answer:
-      "Oui, c'est fréquent. Sachez simplement qu'une charte conçue après coup coûte un peu plus cher que si elle est pensée en même temps que le logo.",
+      "Oui, c'est fréquent. Sachez simplement qu'un niveau supérieur reprend le travail du précédent : compléter plus tard revient souvent plus cher que de monter d'un niveau tout de suite.",
   },
   {
     question: "Les prix sont-ils HT ?",
@@ -80,7 +80,7 @@ const FACTEURS = [
   {
     titre: "Le point de départ",
     texte:
-      "Partir d'une page blanche coûte moins cher qu'une refonte, où il faut d'abord comprendre et démonter l'existant.",
+      "Repartir d'un logo existant coûte moins cher qu'une création complète : la recherche est plus courte. Refondre une identité entière coûte plus cher, parce qu'il faut auditer l'existant et migrer tous les supports.",
   },
   {
     titre: "Les déclinaisons",
@@ -173,7 +173,7 @@ export function CalculateurBudget() {
               <div className={styles.tableWrap}>
                 <table className={styles.table}>
                   <caption className={styles.caption}>
-                    Contenu des quatre niveaux et fourchettes associées, hors taxes.
+                    Contenu des six niveaux et fourchettes associées, hors taxes.
                   </caption>
                   <thead>
                     <tr>
@@ -217,9 +217,8 @@ export function CalculateurBudget() {
                 </table>
               </div>
               <p className={styles.note}>
-                La charte graphique détaillée est déjà incluse dans l&apos;identité complète et
-                dans la refonte : elle n&apos;est donc pas proposée en option pour ces deux
-                niveaux.
+                Les options s&apos;ajoutent au niveau retenu. Elles restent chiffrées séparément :
+                vous pouvez en retirer une sans renégocier l&apos;ensemble.
               </p>
 
               <h2 id="prix-logo">Un logo à 200 € ou un logo de designer ?</h2>
@@ -276,8 +275,8 @@ export function CalculateurBudget() {
               </div>
               <p className={styles.note}>
                 Ordre de grandeur sur nos projets. À un taux horaire de 60 à 80 €, on retrouve
-                exactement les fourchettes affichées plus haut : 600 à 1 500 € pour un logo, 1 500
-                à 4 000 € pour une identité complète. Le prix n&apos;est pas une humeur, c&apos;est
+                exactement les fourchettes affichées plus haut : 650 à 1 800 € pour un logo, 1 500
+                à 3 500 € pour une identité complète. Le prix n&apos;est pas une humeur, c&apos;est
                 du temps plus une méthode.
               </p>
 

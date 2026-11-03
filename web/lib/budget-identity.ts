@@ -1,27 +1,28 @@
 /**
  * Calculateur de budget identité visuelle — données et règles.
  *
- * Source unique : la grille du brief P2 (`/opt/data/shared/briefs/P2-calculateur-budget-identite.md`).
- * Aucun prix n'est inventé ici : les fourchettes sont recopiées telles quelles, version publique
- * de la grille CRM. Les bornes basses s'additionnent entre elles, les bornes hautes aussi, sans
+ * Source unique : grille tarifaire validée par Sujee
+ * (`/opt/data/shared/briefs/grille-tarifaire-logo-identite-visuelle.md`).
+ * Aucun prix n'est inventé ici : les fourchettes sont recopiées telles quelles.
+ * Les bornes basses s'additionnent entre elles, les bornes hautes aussi, sans
  * arrondi : un visiteur qui recompte à la main retrouve exactement le même total.
  */
 
 export type Range = { low: number; high: number };
 
-export type BaseId = "logo" | "declinaisons" | "complete" | "refonte";
+export type BaseId = "essentiel" | "refonte" | "signature" | "starter" | "complete" | "avance";
 
-export type OptionId = "charte" | "papeterie" | "packaging" | "reseaux" | "photo";
+export type OptionId = "carte" | "email" | "post" | "brochure" | "picto" | "piste";
 
 export type Base = {
   id: BaseId;
   /** Libellé du choix, tel qu'affiché sur le bouton radio. */
   label: string;
-  /** Nom court utilisé dans le détail et le récapitulatif. */
+  /** Nom de l'offre, utilisé dans le détail et le récapitulatif. */
   shortLabel: string;
   /** Note affichée sous le libellé. */
   note: string;
-  /** Contenu du niveau (bloc « Ce qui est inclus dans chaque niveau »). */
+  /** Contenu de l'offre (bloc « Ce qui est inclus dans chaque niveau »). */
   includes: string;
   range: Range;
 };
@@ -34,80 +35,106 @@ export type Option = {
   range: Range;
 };
 
+/**
+ * Six points de départ, classés par borne basse croissante : la progression de
+ * prix reste lisible d'un bout à l'autre de la liste, y compris pour la refonte,
+ * qui repart d'un logo existant et coûte donc moins qu'une création complète.
+ */
 export const BASES: readonly Base[] = [
   {
-    id: "logo",
-    label: "J'ai besoin d'un logo",
-    shortLabel: "Logo",
-    note: "création, 3 pistes",
+    id: "essentiel",
+    label: "J'ai besoin d'un logo simple",
+    shortLabel: "Logo Essentiel",
+    note: "brief, 2 pistes, fichiers",
     includes:
-      "Trois pistes, une direction retenue, fichiers vectoriels et bitmap, versions couleur et monochrome.",
-    range: { low: 600, high: 1500 },
-  },
-  {
-    id: "declinaisons",
-    label: "J'ai un logo, il faut le décliner",
-    shortLabel: "Logo et déclinaisons",
-    note: "versions mono, favicon, formats",
-    includes:
-      "La même chose qu'un logo, plus favicon, avatar réseaux, version horizontale et verticale, miniatures lisibles à 16 px.",
-    range: { low: 800, high: 1500 },
-  },
-  {
-    id: "complete",
-    label: "Je pars de zéro, il me faut l'ensemble",
-    shortLabel: "Identité complète",
-    note: "logo, charte, guide d'usage",
-    includes:
-      "Logo, typographies, palette, règles d'usage, déclinaisons principales, guide d'usage.",
-    range: { low: 1500, high: 4000 },
+      "Brief, deux pistes créatives, deux séries de retours, logo finalisé, fichiers AI, SVG, PNG et PDF, versions couleur, noir et blanc et fond transparent.",
+    range: { low: 650, high: 900 },
   },
   {
     id: "refonte",
-    label: "Je refais une identité existante",
-    shortLabel: "Refonte d'identité",
-    note: "audit de l'existant et migration",
+    label: "Je refais mon logo existant",
+    shortLabel: "Refonte de logo",
+    note: "reprise de l'existant, mise à niveau",
     includes:
-      "Audit de l'existant, recommandation, nouvelle identité, plan de migration des supports, calendrier de bascule.",
-    range: { low: 3000, high: 6000 },
+      "Reprise du logo existant, nettoyage des tracés, remise à niveau des fichiers et des déclinaisons, sans repartir de zéro.",
+    range: { low: 800, high: 1500 },
+  },
+  {
+    id: "signature",
+    label: "Je veux un logo durable et polyvalent",
+    shortLabel: "Logo Signature",
+    note: "3 pistes, déclinaisons, favicon",
+    includes:
+      "Brief approfondi, recherche concurrentielle, trois pistes, trois séries de retours, déclinaisons horizontale, verticale et icône, favicon, mini-guide PDF.",
+    range: { low: 1200, high: 1800 },
+  },
+  {
+    id: "starter",
+    label: "Je lance mon activité",
+    shortLabel: "Identité Starter",
+    note: "logo, couleurs, typographies",
+    includes:
+      "Logo Signature, palette de couleurs, typographies, règles d'usage de base et mini brand book PDF.",
+    range: { low: 1500, high: 2200 },
+  },
+  {
+    id: "complete",
+    label: "Je veux l'identité et ses supports",
+    shortLabel: "Identité Complète",
+    note: "logo décliné, modèles, guidelines",
+    includes:
+      "Identité Starter, logo décliné sur plusieurs supports, modèles réseaux sociaux, carte de visite, signature e-mail et guidelines détaillées.",
+    range: { low: 2500, high: 3500 },
+  },
+  {
+    id: "avance",
+    label: "Je repositionne ma marque",
+    shortLabel: "Branding Avancé",
+    note: "positionnement, direction artistique, brand book",
+    includes:
+      "Atelier de positionnement, moodboard, direction artistique, univers graphique, pictogrammes, maquettes des supports clés et brand book complet.",
+    range: { low: 4000, high: 6000 },
   },
 ] as const;
 
 export const OPTIONS: readonly Option[] = [
   {
-    id: "charte",
-    label: "Charte graphique détaillée",
-    shortLabel: "charte graphique détaillée",
-    range: { low: 900, high: 2500 },
+    id: "carte",
+    label: "Carte de visite",
+    shortLabel: "carte de visite",
+    range: { low: 250, high: 450 },
   },
   {
-    id: "papeterie",
-    label: "Papeterie professionnelle",
-    shortLabel: "papeterie",
-    range: { low: 150, high: 500 },
+    id: "email",
+    label: "Signature e-mail",
+    shortLabel: "signature e-mail",
+    range: { low: 150, high: 300 },
   },
   {
-    id: "packaging",
-    label: "Packaging, une référence",
-    shortLabel: "packaging",
-    range: { low: 400, high: 1500 },
+    id: "post",
+    label: "Modèle de post réseaux sociaux",
+    shortLabel: "modèle de post réseaux sociaux",
+    range: { low: 150, high: 350 },
   },
   {
-    id: "reseaux",
-    label: "Déclinaisons réseaux sociaux",
-    shortLabel: "déclinaisons réseaux sociaux",
-    range: { low: 80, high: 300 },
+    id: "brochure",
+    label: "Plaquette ou brochure",
+    shortLabel: "plaquette ou brochure",
+    range: { low: 600, high: 1500 },
   },
   {
-    id: "photo",
-    label: "Shooting photo, demi-journée",
-    shortLabel: "shooting photo",
-    range: { low: 350, high: 900 },
+    id: "picto",
+    label: "Pictogramme ou illustration",
+    shortLabel: "pictogramme ou illustration",
+    range: { low: 150, high: 400 },
+  },
+  {
+    id: "piste",
+    label: "Piste créative supplémentaire",
+    shortLabel: "piste créative supplémentaire",
+    range: { low: 250, high: 450 },
   },
 ] as const;
-
-/** Bases qui embarquent déjà une charte graphique : l'option est alors désactivée. */
-const CHARTE_INCLUSE: readonly BaseId[] = ["complete", "refonte"];
 
 export function getBase(id: BaseId): Base {
   const base = BASES.find((item) => item.id === id);
@@ -119,12 +146,6 @@ export function getOption(id: OptionId): Option {
   const option = OPTIONS.find((item) => item.id === id);
   if (!option) throw new Error(`Option inconnue : ${id}`);
   return option;
-}
-
-/** Une option est désactivée quand le niveau de base l'inclut déjà. */
-export function isOptionAvailable(id: OptionId, base: BaseId | null): boolean {
-  if (id !== "charte") return true;
-  return !(base !== null && CHARTE_INCLUSE.includes(base));
 }
 
 export type BudgetLine = {
@@ -167,9 +188,7 @@ export function computeBudget(base: BaseId | null, options: readonly OptionId[])
   if (base === null) return null;
 
   const baseItem = getBase(base);
-  const chosen = OPTIONS.filter(
-    (option) => options.includes(option.id) && isOptionAvailable(option.id, base),
-  );
+  const chosen = OPTIONS.filter((option) => options.includes(option.id));
 
   const lines: BudgetLine[] = [
     { id: baseItem.id, label: baseItem.shortLabel, range: baseItem.range },

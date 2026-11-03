@@ -9,7 +9,6 @@ import {
   computeBudget,
   formatEuro,
   formatRange,
-  isOptionAvailable,
   type BaseId,
   type OptionId,
 } from "@/lib/budget-identity";
@@ -72,7 +71,6 @@ export function BudgetIdentityCalculator() {
   function chooseBase(next: BaseId) {
     setBase(next);
     // Une option devenue incluse ne peut pas rester cochée.
-    setOptions((current) => current.filter((id) => isOptionAvailable(id, next)));
     setCopied(false);
   }
 
@@ -147,33 +145,23 @@ export function BudgetIdentityCalculator() {
         ) : null}
         <div className={styles.optionsList}>
           {OPTIONS.map((item) => {
-            const available = isOptionAvailable(item.id, base);
-            const included = !available;
-            const checked = available && options.includes(item.id);
+            const checked = options.includes(item.id);
             return (
-              <label
-                key={item.id}
-                className={`${styles.option} ${included ? styles.optionDisabled : ""}`}
-              >
+              <label key={item.id} className={styles.option}>
                 <input
                   type="checkbox"
                   name="budget-options"
                   value={item.id}
                   checked={checked}
-                  disabled={!available || optionsLocked}
+                  disabled={optionsLocked}
                   onChange={(event) => toggleOption(item.id, event.currentTarget.checked)}
-                  aria-describedby={included ? "budget-option-charte-incluse" : undefined}
                   className={styles.input}
                 />
                 <span className={styles.optionBody}>
                   <span className={styles.optionLabel}>{item.label}</span>
-                  <span className={styles.optionNote} id={included ? "budget-option-charte-incluse" : undefined}>
-                    {included ? "déjà incluse dans ce niveau" : "option"}
-                  </span>
+                  <span className={styles.optionNote}>option</span>
                 </span>
-                <span className={styles.optionPrice}>
-                  {included ? "déjà incluse" : `+ ${formatRange(item.range)}`}
-                </span>
+                <span className={styles.optionPrice}>+ {formatRange(item.range)}</span>
               </label>
             );
           })}
