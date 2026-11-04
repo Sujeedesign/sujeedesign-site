@@ -72,8 +72,10 @@ body::after{opacity:.028}
 /* ---------- Cartes projet (accueil) ---------- */
 .c-paper{background:var(--paper);color:var(--ink);border-color:rgba(10,10,9,.14)}
 .c-paper .case__bar{background:rgba(10,10,9,.05);border-color:rgba(10,10,9,.12)}
-.case--ui{background:#0A0A09!important;color:#F4F4F1}
-.case--ui .case__idx,.case--ui .case__meta,.case--ui .case__sub{color:#9A958A}
+/* Cartes à fond noir : tons pierre. Les cartes photo gardent le texte clair
+   défini par .case--photo, sinon elles héritent d'un gris plus terne. */
+.case--ui:not(.case--photo){background:#0A0A09!important;color:#F4F4F1}
+.case--ui:not(.case--photo) .case__idx,.case--ui:not(.case--photo) .case__meta,.case--ui:not(.case--photo) .case__sub{color:#9A958A}
 .case--ui .case__bar{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12);color:#F4F4F1}
 .case--ui .case__ghost{-webkit-text-stroke-color:rgba(242,239,231,.16)}
 .case{border-color:rgba(10,10,9,.14)}

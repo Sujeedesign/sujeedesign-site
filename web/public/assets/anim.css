@@ -180,8 +180,12 @@ html.no-anim [data-stagger] > *{ opacity: 1 !important; transform: none !importa
 /* sur une photo, le texte passe en clair quel que soit le ton de la carte */
 .case--photo,
 .case--photo .case__title,
-.case--photo .case__kicker,
-.case--photo .case__cta{color:#F4F1EA}
+.case--photo .case__kicker{color:#F4F1EA}
+/* CTA : même accent que le reste du site sur les cartes photo (il était en
+   crème, donc confondu avec les titres et les descriptions). */
+.case--photo .case__cta{color:var(--accent);border-bottom-color:var(--accent)}
+.case--photo:hover .case__cta{color:#F4F1EA;border-bottom-color:#F4F1EA}
+.c-signal.case--photo .case__cta{color:#0A0A09;border-bottom-color:#0A0A09}
 .case--photo .case__kicker{color:rgba(244,241,234,.86)}
 .case--photo .case__kicker,
 .case--photo .case__cta{text-shadow:0 1px 10px rgba(0,0,0,.6)}
