@@ -63,7 +63,7 @@ function read(D: Dict) {
 
 const MEDIA = [
   { src: "/assets/img/svc-identite-2026.jpg", alt: "Planche d’identité visuelle Mathuraa Manokaran : logo en losange, palette bordeaux, typographies et applications papeterie." },
-  { src: "/assets/img/svc-da-2026.jpg", alt: "Campagne parfum Mkandjian Paris : mannequin en robe blanche dans une serre, flacon et roses blanches." },
+  { src: "/assets/img/svc-da-2026.jpg", alt: "Campagne parfum Mkanidjian : mannequin en robe blanche dans une serre, flacon et roses blanches." },
   { src: "/assets/img/svc-site-2026.jpg", alt: "Page d’accueil du site My Prestige Transport : chauffeur privé devant une Porsche Panamera." },
   { src: "/assets/img/svc-contenu-2026.jpg", alt: "Publications Steezo pour Instagram : portraits d’étudiants, textes de mission et palette magenta." },
   { src: "/assets/img/svc-agents-2026.jpg", alt: "Session Hermes sur ordinateur portable : conversation de stratégie de marque avec l’agent." },
