@@ -462,7 +462,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 
 /* Mentions légales */
 .legal{display:grid;grid-template-columns:220px 1fr;gap:clamp(20px,4vw,64px);align-items:start;padding-block:clamp(30px,5vw,60px)}
-.legal .toc{position:sticky;top:96px;font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;line-height:2.4;color:var(--muted)}
+.legal .toc{position:sticky;top:140px;font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;line-height:2.4;color:var(--muted)}
 .legal .toc a{color:var(--muted);text-decoration:none;display:block}
 .legal .toc a:hover{color:var(--bone)}
 .prose h2{font-family:var(--display);font-weight:600;font-variation-settings:"opsz" 72;font-size:clamp(20px,2vw,26px);letter-spacing:-.02em;margin:clamp(28px,4vw,44px) 0 12px;text-transform:uppercase}
