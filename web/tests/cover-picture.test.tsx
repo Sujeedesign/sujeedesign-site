@@ -33,6 +33,8 @@ describe("CoverPicture", () => {
     expect(mobile?.getAttribute("media")).toBe("(max-width: 720px)");
     expect(mobile?.getAttribute("type")).toBe("image/webp");
     expect(mobile?.getAttribute("srcset")).toContain("/cover-portrait-960.webp 960w");
+    // Un master 1080 px n'a pas de variante 1600 : l'annoncer provoquerait un 404.
+    expect(mobile?.getAttribute("srcset")).not.toContain("1600w");
 
     const img = container.querySelector("picture > img");
     expect(img?.getAttribute("src")).toBe(base.cover?.src);

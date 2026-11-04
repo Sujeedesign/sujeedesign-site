@@ -46,7 +46,7 @@ export function CoverPicture({
   const hasPortrait = portrait !== undefined && portrait.src !== landscape.src;
 
   const landscapeWebp = webpSrcSet(landscape.src);
-  const portraitWebp = portrait ? webpSrcSet(portrait.src) : undefined;
+  const portraitWebp = portrait ? webpSrcSet(portrait.src, portrait.width) : undefined;
 
   return (
     <picture data-cover-portrait={hasPortrait ? "" : undefined}>
