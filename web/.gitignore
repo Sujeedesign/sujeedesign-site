@@ -1,5 +1,5 @@
-# dépendances
-node_modules/
+# dépendances (le motif sans slash couvre aussi un éventuel lien symbolique)
+node_modules
 # build Next
 .next/
 out/
