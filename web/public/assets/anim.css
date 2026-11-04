@@ -156,9 +156,9 @@ html.no-anim [data-stagger] > *{ opacity: 1 !important; transform: none !importa
   inset:0;
   background:
     linear-gradient(to bottom,
-      rgba(8,8,7,.60) 0%,
-      rgba(8,8,7,.30) 76px,
-      rgba(8,8,7,0) 168px),
+      rgba(8,8,7,.74) 0%,
+      rgba(8,8,7,.46) 92px,
+      rgba(8,8,7,0) 210px),
     linear-gradient(to bottom,
       rgba(8,8,7,.10) 0%,
       rgba(8,8,7,.10) 48%,
@@ -175,39 +175,37 @@ html.no-anim [data-stagger] > *{ opacity: 1 !important; transform: none !importa
 .case--photo .case__body,
 .case--photo .case__foot{position:relative;z-index:2}
 .case--photo .case__ghost{z-index:1}
-.case--photo .case__title{text-shadow:0 2px 28px rgba(0,0,0,.5)}
-.case--photo .case__idx,.case--photo .case__meta{color:rgba(244,241,234,.9)}
-.case--photo .case__idx,.case--photo .case__meta,.case--photo .case__sub{text-shadow:0 1px 3px rgba(0,0,0,.55),0 1px 16px rgba(0,0,0,.7)}
-/* Sur les photos très claires (rays jaunes, ciel blanc) l'ombre ne suffit pas :
-   les libellés du haut reçoivent une pastille de verre dépoli, sans décalage
-   de mise en page (padding compensé par une marge négative). */
-.case--photo .case__idx,.case--photo .case__meta{
-  background:rgba(8,8,7,.40);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
-  border-radius:3px;padding:4px 7px;margin:-4px -7px;
-}
-/* sur une photo, le texte passe en clair quel que soit le ton de la carte */
+/* Cartes réalisation : une seule couleur de texte, le blanc, CTA compris.
+   Le ton de la carte (paper / signal / ui) ne change plus la couleur des
+   textes sur photo : il ne pilote que le fond et le décor.
+   Aucun cartouche ni pastille derrière les libellés : la lisibilité repose
+   sur le voile de la photo et une ombre portée, jamais sur un fond opaque. */
 .case--photo,
 .case--photo .case__title,
-.case--photo .case__kicker{color:#F4F1EA}
-/* CTA : même accent que le reste du site sur les cartes photo (il était en
-   crème, donc confondu avec les titres et les descriptions). */
-/* Sur photo sombre, l'accent du mode clair (#C9340F) tombe à 3,7:1 : on
-   utilise l'accent vif du thème de base, 5,9:1 sur #0A0A09. */
-.case--photo .case__cta{color:var(--accent-bright,var(--accent));border-bottom-color:var(--accent-bright,var(--accent))}
-.case--photo:hover .case__cta{color:#F4F1EA;border-bottom-color:#F4F1EA}
-.c-signal.case--photo .case__cta{color:#0A0A09;border-bottom-color:#0A0A09}
-.case--photo .case__kicker{color:rgba(244,241,234,.86)}
 .case--photo .case__kicker,
-.case--photo .case__cta{text-shadow:0 1px 10px rgba(0,0,0,.6)}
-.case--photo .case__title{text-shadow:0 2px 24px rgba(0,0,0,.5)}
-.case--photo .case__foot{border-top-color:rgba(244,241,234,.3)}
-.case--photo .case__ghost{-webkit-text-stroke-color:rgba(244,241,234,.2)}
+.case--photo .case__idx,
+.case--photo .case__meta,
+.case--photo .case__sub,
+.case--photo .case__sub li,
+.case--photo .case__cta{color:#fff}
+.case--photo .case__cta{border-bottom-color:#fff}
+.case--photo:hover .case__cta{color:rgba(255,255,255,.72);border-bottom-color:rgba(255,255,255,.72)}
+.case--photo .case__idx,.case--photo .case__meta{
+  background:none;-webkit-backdrop-filter:none;backdrop-filter:none;
+  border-radius:0;padding:0;margin:0;
+}
+.case--photo .case__idx,.case--photo .case__meta,.case--photo .case__sub{text-shadow:0 1px 3px rgba(0,0,0,.55),0 1px 16px rgba(0,0,0,.75)}
+.case--photo .case__kicker,
+.case--photo .case__cta{text-shadow:0 1px 10px rgba(0,0,0,.65)}
+.case--photo .case__title{text-shadow:0 2px 28px rgba(0,0,0,.55)}
+.case--photo .case__foot{border-top-color:rgba(255,255,255,.3)}
+.case--photo .case__ghost{-webkit-text-stroke-color:rgba(255,255,255,.2)}
 @media (max-width:860px){
   .case--photo .case__bg::after{
     background:linear-gradient(to bottom,
-      rgba(8,8,7,.32) 0%,
-      rgba(8,8,7,.20) 50%,
-      rgba(8,8,7,.20) 76%,
+      rgba(8,8,7,.46) 0%,
+      rgba(8,8,7,.30) 40%,
+      rgba(8,8,7,.22) 72%,
       rgba(8,8,7,.42) 100%);
   }
 }
