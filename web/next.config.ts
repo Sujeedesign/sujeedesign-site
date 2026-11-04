@@ -226,7 +226,14 @@ const nextConfig: NextConfig = {
       // (`/propositions/n2e/` est ramené en 308 vers `/propositions/n2e` par
       // `middleware.ts`, donc un seul saut.)
       // afterFiles : la règle ne s'applique que si aucun fichier ne correspond.
-      afterFiles: [{ source: "/propositions/n2e", destination: "/propositions/n2e/index.html" }],
+      afterFiles: [
+        { source: "/propositions/n2e", destination: "/propositions/n2e/index.html" },
+        // Refonte Dimension Nouvelle : même principe, page statique autonome.
+        {
+          source: "/propositions/dimension-nouvelle",
+          destination: "/propositions/dimension-nouvelle/index.html",
+        },
+      ],
       fallback: [],
     };
   },
