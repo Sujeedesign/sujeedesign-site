@@ -473,6 +473,16 @@ body.has-dark-hero .nav:not(.scrolled) .brand__logo--light{display:block}
 .logo-cell:hover{background:var(--paper)}
 .logo-cell .mark{width:44px;height:44px;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:15px;
   letter-spacing:-.02em;border:1.5px solid var(--ink);color:var(--ink);transition:all .3s}
+/* Logos clients fournis en SVG 180x180, fond blanc intégré au fichier. */
+.logo-cell .logo-mark{display:block;width:clamp(56px,6vw,72px);height:clamp(56px,6vw,72px);background:#fff;
+  border:1px solid var(--line);transition:border-color .3s}
+.logo-cell .logo-mark{overflow:hidden}
+.logo-cell .logo-mark img{display:block;width:100%;height:100%;object-fit:contain;transition:transform .3s}
+/* Équilibrage optique : les SVG n'ont pas la même masse dessinée. */
+.logo-cell .logo-mark img[src$="/xavier.svg"]{transform:scale(.86)}
+.logo-cell .logo-mark img[src$="/myprestige.svg"]{transform:scale(.94)}
+.logo-cell .logo-mark img[src$="/leslec.svg"]{transform:scale(1.12)}
+.logo-cell:hover .logo-mark{border-color:var(--accent)}
 .mark--cir{border-radius:50%}
 .mark--dia{transform:rotate(45deg)}
 .logo-cell:hover .mark{border-color:var(--accent);color:var(--accent)}

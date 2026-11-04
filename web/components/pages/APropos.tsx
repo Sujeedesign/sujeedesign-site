@@ -161,14 +161,14 @@ export function APropos({ doc }: { doc?: PageDoc }) {
               <div className="side">Sélection de clients</div>
             </div>
             <div className="wall rv">
-              <div className="logo-cell"><span className="mark mark--sq">RS</span><b>Raj Services</b><i>Services · Île-de-France</i></div>
-              <div className="logo-cell"><span className="mark mark--cir">MP</span><b>My Prestige Transport</b><i>Transport premium</i></div>
-              <div className="logo-cell"><span className="mark mark--dia">MK</span><b>Maison Kanidjian</b><i>Maison · Artisanat</i></div>
-              <div className="logo-cell"><span className="mark mark--sq">CA</span><b>La Chambre Avocat</b><i>Juridique · Paris</i></div>
-              <div className="logo-cell"><span className="mark mark--cir">XS</span><b>Xavier Sport Scientist</b><i>Santé · Performance</i></div>
-              <div className="logo-cell"><span className="mark mark--dia">CL</span><b>Cabinet Leslec</b><i>Conseil · Expertise</i></div>
+              <div className="logo-cell"><span className="logo-mark"><img src="/assets/img/clients/raj.svg" alt="" loading="lazy" decoding="async" /></span><b>Raj Services</b><i>Services · Île-de-France</i></div>
+              <div className="logo-cell"><span className="logo-mark"><img src="/assets/img/clients/myprestige.svg" alt="" loading="lazy" decoding="async" /></span><b>My Prestige Transport</b><i>Transport premium</i></div>
+              <div className="logo-cell"><span className="logo-mark"><img src="/assets/img/clients/mkanidjian.svg" alt="" loading="lazy" decoding="async" /></span><b>Maison Kanidjian</b><i>Maison · Artisanat</i></div>
+              <div className="logo-cell"><span className="logo-mark"><img src="/assets/img/clients/lachambre.svg" alt="" loading="lazy" decoding="async" /></span><b>La Chambre Avocat</b><i>Juridique · Paris</i></div>
+              <div className="logo-cell"><span className="logo-mark"><img src="/assets/img/clients/xavier.svg" alt="" loading="lazy" decoding="async" /></span><b>Xavier Sport Scientist</b><i>Santé · Performance</i></div>
+              <div className="logo-cell"><span className="logo-mark"><img src="/assets/img/clients/leslec.svg" alt="" loading="lazy" decoding="async" /></span><b>Cabinet Leslec</b><i>Conseil · Expertise</i></div>
             </div>
-            <p className="wall__note">Collaborations 2019 — 2026. Chaque marque est présentée par son monogramme, dans le même système graphique. Références et cas détaillés sur demande.</p>
+            <p className="wall__note">Collaborations 2019 — 2026. Références et cas détaillés sur demande.</p>
           </div>
         </section>
         {/* ENSEIGNEMENT */}
