@@ -22,7 +22,7 @@ describe("guide prix du logo", () => {
     const tables = container.querySelectorAll("table");
     expect(tables).toHaveLength(3);
     expect(container.querySelectorAll("details")).toHaveLength(faqItems.length);
-    expect(faqItems).toHaveLength(6);
+    expect(faqItems).toHaveLength(7);
     expect(container).toHaveTextContent("Combien coûte");
     expect(container).toHaveTextContent("Ce qui manque dans un devis à 200 €");
   });
