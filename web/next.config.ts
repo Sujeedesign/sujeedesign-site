@@ -60,6 +60,10 @@ const nextConfig: NextConfig = {
   skipTrailingSlashRedirect: true,
   async redirects() {
     return [
+      // Ancienne URL accentuée de la proposition Polyrésine : une seule adresse
+      // valide, /propositions/polyresine (sans accent).
+      { source: "/propositions/polyrésine", destination: "/propositions/polyresine", permanent: true },
+      { source: "/propositions/polyr%C3%A9sine", destination: "/propositions/polyresine", permanent: true },
       // Préversion /v5 : chaque page rejoint son équivalent à la racine.
       { source: "/v5", destination: "/", statusCode: 301 },
       { source: "/v5/index.html", destination: "/", statusCode: 301 },
@@ -240,16 +244,8 @@ const nextConfig: NextConfig = {
           source: "/propositions/polyresine",
           destination: "/propositions/polyresine/index.html",
         },
-        // URL accentuée demandée : /propositions/polyrésine (le routeur peut la voir
-        // décodée ou encodée selon le proxy, on couvre les deux écritures).
-        {
-          source: "/propositions/polyrésine",
-          destination: "/propositions/polyresine/index.html",
-        },
-        {
-          source: "/propositions/polyr%C3%A9sine",
-          destination: "/propositions/polyresine/index.html",
-        },
+        // L'URL accentuée n'existe pas : /propositions/polyresine est la seule
+        // adresse (voir les redirects permanents plus bas).
       ],
       fallback: [],
     };
