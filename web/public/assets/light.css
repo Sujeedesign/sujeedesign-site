@@ -478,6 +478,15 @@ body.has-dark-hero .nav:not(.scrolled) .brand__logo--light{display:block}
 .logo-cell .logo-mark{display:block;width:clamp(38px,4vw,44px);height:clamp(38px,4vw,44px)}
 .logo-cell .logo-mark img{display:block;width:100%;height:100%;object-fit:contain;opacity:.9;transition:opacity .3s}
 .logo-cell:hover .logo-mark img{opacity:1}
+/* Carte client cliquable : la cellule entière est le lien. */
+a.logo-cell{position:relative;text-decoration:none;color:inherit;cursor:pointer}
+a.logo-cell b{transition:color .3s}
+a.logo-cell::after{content:"↗";position:absolute;top:clamp(20px,2.4vw,30px);right:clamp(18px,2.2vw,28px);
+  font-family:var(--mono);font-size:11px;line-height:1;color:var(--accent);opacity:0;transform:translate(-5px,5px);
+  transition:opacity .25s,transform .25s}
+a.logo-cell:hover::after,a.logo-cell:focus-visible::after{opacity:1;transform:none}
+a.logo-cell:hover b{color:var(--accent)}
+a.logo-cell:focus-visible{outline:2px solid var(--accent);outline-offset:-3px}
 .mark--cir{border-radius:50%}
 .mark--dia{transform:rotate(45deg)}
 .logo-cell:hover .mark{border-color:var(--accent);color:var(--accent)}
