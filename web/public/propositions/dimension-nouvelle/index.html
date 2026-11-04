@@ -428,11 +428,13 @@ h1,h2,h3{font-family:var(--head);letter-spacing:-.045em;line-height:1.02}
           <li><a href="#contact">Contact</a></li>
         </ul>
       </div>
-      <div class="foot-cta">
-        <h4>Cette refonte</h4>
-        <p>Ce que vous voyez n'est pas votre site actuel : c'est une proposition. On regarde ensemble ce qui vous parle, ce qu'on ajuste, et ce que ça coûte.</p>
-        <a class="book" href="https://sujeedesign.com/contact">Réserver un rendez‑vous avec Sujeepan <span>↗</span></a>
-        <span class="book-note">30 min en visio · sans engagement · refonte par Sujee Design</span>
+      <div class="foot-col">
+        <h4>Contact</h4>
+        <ul>
+          <li>5 ZA les Quatre Vents<br>95650 Boissy-l'Aillerie</li>
+          <li><a href="tel:+33161030945">01 61 03 09 45</a></li>
+          <li><a href="mailto:dimnouvelle@gmail.com">dimnouvelle@gmail.com</a></li>
+        </ul>
       </div>
     </div>
     <div class="foot-bottom">
@@ -448,5 +450,7 @@ h1,h2,h3{font-family:var(--head);letter-spacing:-.045em;line-height:1.02}
   n.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{n.classList.remove('open');b.setAttribute('aria-expanded','false');b.textContent='☰';}));
   document.getElementById('year').textContent=new Date().getFullYear();
 </script>
+<!-- Bandeau CTA Sujee Design (commun a toutes les propositions) -->
+<script src="/propositions/_cta/cta.js" data-client="Dimension Nouvelle" defer></script>
 </body>
 </html>

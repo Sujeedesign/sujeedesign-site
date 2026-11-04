@@ -227,6 +227,8 @@ const nextConfig: NextConfig = {
       // `middleware.ts`, donc un seul saut.)
       // afterFiles : la règle ne s'applique que si aucun fichier ne correspond.
       afterFiles: [
+        // Sommaire des propositions (accès privé, noindex).
+        { source: "/propositions", destination: "/propositions/index.html" },
         { source: "/propositions/n2e", destination: "/propositions/n2e/index.html" },
         // Refonte Dimension Nouvelle : même principe, page statique autonome.
         {

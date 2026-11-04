@@ -79,5 +79,7 @@
   <script>
     const menu=document.querySelector('.menu-toggle'),nav=document.querySelector('.nav-links');menu.addEventListener('click',()=>{const open=nav.classList.toggle('open');menu.setAttribute('aria-expanded',open);menu.setAttribute('aria-label',open?'Fermer le menu':'Ouvrir le menu')});nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('open');menu.setAttribute('aria-expanded','false')}));
   </script>
+<!-- Bandeau CTA Sujee Design (commun a toutes les propositions) -->
+<script src="/propositions/_cta/cta.js" data-client="N2E Échafaudages" defer></script>
 </body>
 </html>
