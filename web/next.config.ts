@@ -233,6 +233,8 @@ const nextConfig: NextConfig = {
           source: "/propositions/dimension-nouvelle",
           destination: "/propositions/dimension-nouvelle/index.html",
         },
+        // Refonte de l'accueil Polyresine : page statique à la racine des propositions.
+        { source: "/propositions", destination: "/propositions/index.html" },
       ],
       fallback: [],
     };
