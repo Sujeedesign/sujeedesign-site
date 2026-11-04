@@ -4,9 +4,9 @@ import { routes, serviceHref } from "@/lib/routes";
 import styles from "./GuidePrixLogo.module.css";
 
 export const pageMeta = {
-  title: "Combien coûte un logo en 2026 ?",
+  title: "Combien coûte un logo en 2026 ? Prix et fourchettes",
   description:
-    "Quatre paliers de prix réels, ce qu'on obtient à chacun, le temps que ça représente et ce qui manque dans un devis à 200 €.",
+    "Prix d'un logo en 2026 : les fourchettes réelles de 40 à 6 000 €, ce que change chaque palier, et la différence avec une identité visuelle complète.",
 };
 
 export const faqItems = [
@@ -40,6 +40,11 @@ export const faqItems = [
     answer:
       "Oui. Sachez simplement qu'un niveau supérieur reprend le travail du précédent, donc compléter plus tard revient souvent plus cher que monter d'un niveau tout de suite.",
   },
+  {
+    question: "Un logo et une identité visuelle, est-ce le même prix ?",
+    answer:
+      "Non. Un logo règle la question du signe, une identité visuelle ajoute les couleurs, les typographies secondaires, les déclinaisons et le guide d'usage. Dans nos fourchettes, le logo seul démarre à 650 € et l'identité complète se situe entre 2 500 et 3 500 €.",
+  },
 ];
 
 const SOMMAIRE = [
@@ -49,6 +54,7 @@ const SOMMAIRE = [
   { href: "#devis-200", label: "Ce qui manque à 200 €" },
   { href: "#refait", label: "Le coût d'un logo refait" },
   { href: "#fourchettes", label: "Nos fourchettes" },
+  { href: "#identite", label: "Logo ou identité visuelle" },
   { href: "#faq", label: "Questions" },
 ];
 
@@ -354,6 +360,31 @@ export function GuidePrixLogo() {
                 <p className={styles.note}>
                   Ces fourchettes situent le budget. Le devis se construit ensuite sur votre
                   périmètre : nombre de déclinaisons, supports, délais et contenus fournis.
+                </p>
+
+                <h2 id="identite">Prix d&apos;un logo ou prix d&apos;une identité visuelle</h2>
+                <p>
+                  Un logo seul répond à une question de signe : le nom, la typographie, la
+                  marque. Une identité visuelle ajoute ce qui fait tenir ce signe dans le temps,
+                  les couleurs, les typographies secondaires, les règles d&apos;usage et les
+                  déclinaisons sur vos supports. Les deux prix ne se comparent donc pas, ils ne
+                  paient pas le même travail.
+                </p>
+                <p>
+                  Dans nos fourchettes, le logo seul démarre à 650 € et l&apos;identité complète
+                  se situe entre 2 500 et 3 500 €. L&apos;écart ne paie pas un dessin plus beau :
+                  il paie les déclinaisons et le guide d&apos;usage qui évitent de refaire carte,
+                  enseigne et signature dans les dix-huit mois.
+                </p>
+                <p>
+                  Pour situer votre cas, le{" "}
+                  <Link href={routes.calculateurBudgetIdentite}>calculateur de budget identité</Link>{" "}
+                  donne une fourchette en trois minutes, et la page{" "}
+                  <Link href={serviceHref("identite-de-marque")}>identité de marque</Link> détaille
+                  ce qui est livré, sources et accès à votre nom compris. Si vous partez d&apos;un
+                  brief encore flou, le{" "}
+                  <Link href={routes.generateurBriefIdentite}>générateur de brief</Link> le met en
+                  forme avant le premier rendez-vous.
                 </p>
 
                 <Faq items={faqItems} />
