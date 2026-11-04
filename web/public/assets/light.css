@@ -475,8 +475,8 @@ body.has-dark-hero .nav:not(.scrolled) .brand__logo--light{display:block}
   letter-spacing:-.02em;border:1.5px solid var(--ink);color:var(--ink);transition:all .3s}
 /* Logos clients : SVG détourés (fond blanc retiré du fichier), ratio d'origine conservé. */
 .logo-cell{align-items:flex-start}
-.logo-cell .logo-mark{display:flex;align-items:center;width:100%;height:clamp(26px,2.6vw,32px)}
-.logo-cell .logo-mark img{display:block;height:100%;width:auto;max-width:100%;object-fit:contain;opacity:.9;transition:opacity .3s}
+.logo-cell .logo-mark{display:block;width:clamp(38px,4vw,44px);height:clamp(38px,4vw,44px)}
+.logo-cell .logo-mark img{display:block;width:100%;height:100%;object-fit:contain;opacity:.9;transition:opacity .3s}
 .logo-cell:hover .logo-mark img{opacity:1}
 .mark--cir{border-radius:50%}
 .mark--dia{transform:rotate(45deg)}
