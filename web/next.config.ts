@@ -221,7 +221,12 @@ const nextConfig: NextConfig = {
           destination: `${admin}/assets/icon_sujeepansabesan.svg`,
         },
       ],
-      afterFiles: [],
+      // Proposition N2E : page statique autonome dans `public/propositions/n2e/`.
+      // Next la sert avec son extension ; cette rewrite donne l'URL propre.
+      // (`/propositions/n2e/` est ramené en 308 vers `/propositions/n2e` par
+      // `middleware.ts`, donc un seul saut.)
+      // afterFiles : la règle ne s'applique que si aucun fichier ne correspond.
+      afterFiles: [{ source: "/propositions/n2e", destination: "/propositions/n2e/index.html" }],
       fallback: [],
     };
   },

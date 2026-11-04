@@ -1,0 +1,27 @@
+Photos d'illustration de la page /propositions/n2e
+Source : Wikimedia Commons. Licences CC0 / domaine public : aucune attribution
+obligatoire, aucune restriction d'usage commercial.
+
+Fichiers utilisés
+- images/hero.webp, images/g3.webp
+  Échafaudage (ravalement de façade), rue Garibaldi, Lyon
+  https://commons.wikimedia.org/wiki/File:%C3%89chafaudage_(ravalement_de_fa%C3%A7ade)_rue_Garibaldi_(Lyon).jpg
+  Licence : CC0
+
+- images/bandeau.webp
+  Constructions and scaffolding at the Oosterdokseiland, Amsterdam-Centrum
+  https://commons.wikimedia.org/wiki/File:Constructions_and_scaffolding_at_the_Oosterdokseiland,_Amsterdam-Centrum.jpg
+  Licence : CC0
+
+- images/g1.webp
+  Rue Molière (Lyon), échafaudage de ravalement de façade
+  https://commons.wikimedia.org/wiki/File:Rue_Moli%C3%A8re_(Lyon)_-_%C3%A9chafaudage_ravalement_de_fa%C3%A7ade.jpg
+  Licence : CC0
+
+- images/g2.webp
+  Jean Batten Building, façade sur échafaudage
+  https://commons.wikimedia.org/wiki/File:Jean_Batten_Building_Facade_Scaffolded_In_I.jpg
+  Licence : domaine public
+
+Retouche : recadrage, WebP qualité 82, désaturation légère et harmonisation de
+la luminosité. Aucun élément n'a été ajouté ni supprimé sur les photos.
