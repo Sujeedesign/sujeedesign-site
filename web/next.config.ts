@@ -233,8 +233,22 @@ const nextConfig: NextConfig = {
           source: "/propositions/dimension-nouvelle",
           destination: "/propositions/dimension-nouvelle/index.html",
         },
-        // Refonte de l'accueil Polyresine : page statique à la racine des propositions.
-        { source: "/propositions", destination: "/propositions/index.html" },
+        // Refonte de l'accueil Polyresine : page statique, servie sous le nom du client.
+        { source: "/propositions", destination: "/propositions/polyresine/index.html" },
+        {
+          source: "/propositions/polyresine",
+          destination: "/propositions/polyresine/index.html",
+        },
+        // URL accentuée demandée : /propositions/polyrésine (le routeur peut la voir
+        // décodée ou encodée selon le proxy, on couvre les deux écritures).
+        {
+          source: "/propositions/polyrésine",
+          destination: "/propositions/polyresine/index.html",
+        },
+        {
+          source: "/propositions/polyr%C3%A9sine",
+          destination: "/propositions/polyresine/index.html",
+        },
       ],
       fallback: [],
     };
