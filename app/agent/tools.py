@@ -125,6 +125,8 @@ class ToolBox:
         self.booking: dict[str, Any] | None = None
         self.slots_emitted = False
         self.handed_off = False
+        # Phrase finale déjà rédigée : le tour ne doit plus la réécrire.
+        self.final_answer = False
 
     # -- helpers ----------------------------------------------------------
     def _session(self) -> sqlite3.Row:
@@ -236,7 +238,13 @@ class ToolBox:
             # Le visiteur change de demi-journée : on remplace les créneaux affichés.
             store.set_details(self.conn, self.session_id, {"moment": slots.MOMENT_LABELS[moment]})
         previous = [slots.parse_slot(item) for item in store.session_proposals(row)]
-        previous = [start for start in previous if start is not None and start > slots.now_paris()]
+        # Un créneau proposé il y a deux jours peut être devenu trop proche :
+        # on ne le represente pas, sinon la réservation échoue en boucle.
+        previous = [
+            start
+            for start in previous
+            if start is not None and start > slots.now_paris() + slots.LEAD_TIME
+        ]
         if str(row["step"] or "") == "creneaux" and previous and moment == known:
             labels = [self._label(start) for start in previous]
             return {
@@ -254,6 +262,9 @@ class ToolBox:
             taken=store.taken_slots(self.conn),
             moment=moment,
         )
+        # Même règle que pour les propositions existantes : jamais un créneau
+        # à moins de 48 h, sinon la réservation échoue et la question revient.
+        available = [start for start in available if start > slots.now_paris() + slots.LEAD_TIME]
         if not available:
             store.touch(self.conn, self.session_id, step="creneaux")
             return self._error(

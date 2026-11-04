@@ -229,7 +229,13 @@ def turn(
         if final is not None:
             answer = _clean(final.text) or pending
 
-    if answer.strip():
+    if answer.strip() and toolbox.final_answer:
+        # Phrase déjà rédigée par le moteur : on la diffuse telle quelle.
+        for chunk in _chunks(answer):
+            yield {"type": "delta", "text": chunk}
+            time.sleep(0.012)
+        store.add_message(conn, session_id, "assistant", answer)
+    elif answer.strip():
         row_now = store.get_session(conn, session_id)
         if slots_shown and not toolbox.booking and row_now and row_now["step"] == "creneaux":
             # Les boutons font le travail : une phrase suffit, jamais la liste.
@@ -643,11 +649,37 @@ def _server_slot_turn(toolbox: ToolBox, row: Any, message: str) -> str:
                 f"Une invitation vient de partir sur {email} (référence {toolbox.booking['reference']})."
             )
         if result.get("ok") is False:
-            erreur = str(result.get("erreur") or "")
-            if "pris" in erreur.lower():
-                store.set_chosen(toolbox.conn, toolbox.session_id, "")
-                store.set_contact(toolbox.conn, toolbox.session_id, name=name, email=email)
-                return "Ce créneau vient d'être pris. Choisissez-en un autre parmi ceux affichés."
+            # book_meeting renvoie "error" (et non "erreur") : sans cette lecture,
+            # tout échec de réservation retombait sur la question du format.
+            erreur = str(result.get("erreur") or result.get("error") or "")
+            bas = _flat(erreur)
+            if any(hint in bas for hint in _SLOT_GONE_HINTS):
+                # Créneau passé ou retiré pendant la conversation : on rouvre
+                # des propositions fraîches au lieu de reposer une question
+                # dont la réponse est déjà connue.
+                return _reopen_slots(toolbox, details.get("moment", ""))
+            # Panne agenda ou erreur inattendue : on enregistre la demande pour
+            # confirmation humaine, sinon le visiteur retombe en boucle.
+            prenom_humain = name.split()[0]
+            enregistre = toolbox.call(
+                "save_lead",
+                {
+                    "status": "a_trier",
+                    "name": name,
+                    "email": email,
+                    "phone": phone,
+                    "reason": "Réservation automatique impossible : " + (erreur or "erreur inconnue"),
+                },
+            )
+            store.touch(toolbox.conn, toolbox.session_id, step="confirme")
+            toolbox.final_answer = True
+            reference = str(enregistre.get("reference") or "")
+            suite = f" (référence {reference})" if reference else ""
+            return (
+                f"Merci {prenom_humain}, votre demande est enregistrée{suite}. "
+                "Je n'ai pas pu bloquer le créneau automatiquement : "
+                "Raj vous confirme l'horaire par email."
+            )
     if not name or not email:
         if email and not name:
             return "À quel nom dois-je réserver l'appel ?"
@@ -658,10 +690,41 @@ def _server_slot_turn(toolbox: ToolBox, row: Any, message: str) -> str:
         return f"{lead_in}Quel est votre prénom et nom ?"
     prenom = name.split()[0]
     if not phone:
-        return f"Merci {prenom}. Votre numéro de téléphone, pour que Raj vous rappelle ?"
+        return f"Merci {prenom}. Votre numéro de téléphone, pour l'appel avec Raj ?"
     if not branding:
         return "Quel est le nom du branding à réaliser (marque, produit ou projet) ?"
-    return "Vous préférez un point visio ou un appel téléphonique ?"
+    if not mode:
+        return "Vous préférez un point visio ou un appel téléphonique ?"
+    # Tout est connu et la réservation n'a pas abouti : jamais de boucle.
+    return (
+        "Je n'ai pas pu bloquer ce créneau. Choisissez-en un autre "
+        "parmi ceux affichés, ou dites-moi le matin ou l'après-midi."
+    )
+
+
+_SLOT_GONE_HINTS = (
+    "pris",
+    "trop proche",
+    "ne fait pas partie des propositions",
+    "illisible",
+)
+
+
+def _reopen_slots(toolbox: ToolBox, moment: str) -> str:
+    """Repropose des horaires frais quand le créneau retenu n'est plus valable."""
+    sid = toolbox.session_id
+    store.set_chosen(toolbox.conn, sid, "")
+    store.set_proposals(toolbox.conn, sid, [])
+    toolbox.slots_emitted = False
+    moment = slots.normalize_moment(moment)
+    fresh = toolbox.call("request_slots", {"moment": moment})
+    toolbox.final_answer = True
+    if fresh.get("ok") and fresh.get("creneaux"):
+        return "Ce créneau n'est plus disponible. Voici les prochains, lequel vous convient ?"
+    return (
+        "Ce créneau n'est plus disponible et je n'en ai pas d'autre à vous proposer. "
+        "Vous préférez le matin ou l'après-midi ?"
+    )
 
 
 def _preflight(toolbox: ToolBox, row: Any, message: str) -> list[dict[str, Any]]:

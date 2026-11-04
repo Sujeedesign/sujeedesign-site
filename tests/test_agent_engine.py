@@ -665,3 +665,102 @@ def test_heure_seule_suffit_quand_un_seul_creneau_correspond(conn):
     )
     assert "Choisissez l'un des créneaux" not in "".join(e["text"] for e in events if e.get("type") == "delta")
     assert store.session_chosen(store.get_session(conn, session_id)) == slots.slot_id(start)
+
+
+def _session_prete_a_reserver(conn, google, start, mode=""):
+    """Session où tout est connu : il ne reste plus qu'à bloquer le créneau."""
+    session_id = _session_avec_creneaux(conn, google)
+    store.set_chosen(conn, session_id, slots.slot_id(start))
+    store.set_contact(conn, session_id, name="Sujeepan Sabesan", email="sujeepan@example.com")
+    store.set_details(
+        conn,
+        session_id,
+        {"phone": "06 51 51 74 63", "branding": "Desigual", "call_mode": mode},
+    )
+    return session_id
+
+
+def test_creneau_devenu_trop_proche_repropose_sans_reposer_la_question(conn):
+    """Un créneau retenu puis devenu trop proche ne doit jamais boucler sur le format."""
+    from datetime import timedelta
+
+    stale = (slots.now_paris() + timedelta(hours=20)).replace(minute=0, second=0, microsecond=0)
+    fresh = slots.candidates()[0]
+    google = FakeGoogle(available=[stale, fresh])
+    session_id = _session_prete_a_reserver(conn, google, stale)
+
+    events = _collect(conn, session_id, "Appel", FakeLLM([]), google)
+    message = "".join(e["text"] for e in events if e.get("type") == "delta")
+
+    assert "visio ou un appel" not in message
+    assert "plus disponible" in message
+    assert "slots" in [e.get("type") for e in events]
+    assert not google.events
+    row = store.get_session(conn, session_id)
+    assert store.session_proposals(row) == [slots.slot_id(fresh)]
+    assert store.session_chosen(row) == ""
+
+
+def test_panne_agenda_enregistre_la_demande_et_sort_de_la_boucle(conn):
+    """Si l'agenda tombe, la demande est conservée pour un humain, sans reposer la question."""
+    start = slots.candidates()[0]
+    google = FakeGoogle(available=[start])
+    google.fail_event = True
+    session_id = _session_prete_a_reserver(conn, google, start, mode="téléphonique")
+
+    events = _collect(conn, session_id, "Appel", FakeLLM([]), google)
+    message = "".join(e["text"] for e in events if e.get("type") == "delta")
+
+    assert "visio ou un appel" not in message
+    assert "enregistrée" in message
+    row = store.get_session(conn, session_id)
+    assert row is not None and row["step"] == "confirme"
+    leads = store.list_leads(conn)
+    assert len(leads) == 1
+    assert leads[0]["status"] == store.STATUS_REVIEW
+    assert "Réservation automatique impossible" in leads[0]["summary"]
+
+    # Le tour suivant ne doit pas rejouer la réservation ni la question de format.
+    suite = _collect(conn, session_id, "Merci", FakeLLM([]), google)
+    suite_message = "".join(e["text"] for e in suite if e.get("type") == "delta")
+    assert "visio ou un appel" not in suite_message
+    assert not google.events
+
+
+def test_creneaux_caducs_ne_sont_pas_representes(conn):
+    """request_slots ne represente pas un créneau passé sous le délai minimum."""
+    from datetime import timedelta
+
+    stale = slots.now_paris() + timedelta(hours=10)
+    fresh = slots.candidates()[0]
+    google = FakeGoogle(available=[stale, fresh])
+    session_id = engine.prepare_session(conn)
+    store.merge_fields(
+        conn,
+        session_id,
+        {"project_type": "Identité de marque", "context": "Alimentation générale"},
+    )
+    store.touch(conn, session_id, step="creneaux")
+    store.set_proposals(conn, session_id, [slots.slot_id(stale), slots.slot_id(fresh)])
+
+    toolbox = agent_tools.ToolBox(conn, session_id, google)  # type: ignore[arg-type]
+    result = toolbox.request_slots({})
+
+    assert result["ok"] is True
+    assert slots.slot_id(stale) not in [item["id"] for item in result["creneaux"]]
+    assert slots.slot_id(fresh) in [item["id"] for item in result["creneaux"]]
+
+
+def test_la_question_du_telephone_annonce_l_appel_du_visiteur(conn):
+    """Le CTA doit dire « pour l'appel avec Raj », pas « pour que Raj vous rappelle »."""
+    google = FakeGoogle(available=slots.candidates()[:3])
+    session_id = _session_avec_creneaux(conn, google)
+    start = _creneau_unique(google.available)
+    _collect(conn, session_id, f"le {start.day} à {start.hour:02d}h{start.minute:02d}", FakeLLM([]), google)
+    _collect(conn, session_id, "Claire Martin", FakeLLM([]), google)
+    events = _collect(conn, session_id, "claire@example.com", FakeLLM([]), google)
+    message = "".join(e["text"] for e in events if e.get("type") == "delta")
+
+    assert "téléphone" in message.lower()
+    assert "rappelle" not in message.lower()
+    assert "appel avec Raj" in message
