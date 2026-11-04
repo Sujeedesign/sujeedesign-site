@@ -478,7 +478,7 @@ body.has-dark-hero .nav:not(.scrolled) .brand__logo--light{display:block}
   letter-spacing:-.02em;border:1.5px solid var(--ink);color:var(--ink);transition:all .3s}
 /* Logos clients : SVG détourés (fond blanc retiré du fichier), ratio d'origine conservé. */
 .logo-cell{align-items:flex-start}
-.logo-cell .logo-mark{display:block;width:clamp(38px,4vw,44px);height:clamp(38px,4vw,44px)}
+.logo-cell .logo-mark{display:block;width:clamp(49px,5.2vw,57px);height:clamp(49px,5.2vw,57px)}
 .logo-cell .logo-mark img{display:block;width:100%;height:100%;object-fit:contain;opacity:.9;transition:opacity .3s}
 .logo-cell:hover .logo-mark img{opacity:1}
 /* Carte client cliquable : la cellule entière est le lien. */
