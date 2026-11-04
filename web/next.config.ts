@@ -233,8 +233,7 @@ const nextConfig: NextConfig = {
           source: "/propositions/dimension-nouvelle",
           destination: "/propositions/dimension-nouvelle/index.html",
         },
-        // Racine des propositions : sommaire des maquettes en ligne.
-        { source: "/propositions", destination: "/propositions/index.html" },
+        // Pas de sommaire public : les propositions ne sont pas listées.
         {
           source: "/propositions/polyresine",
           destination: "/propositions/polyresine/index.html",
