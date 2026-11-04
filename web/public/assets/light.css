@@ -1521,25 +1521,17 @@ body.has-dark-hero .nav.nav--open .brand__logo--light{display:none!important}
   font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;transition:background .3s,border-color .3s}
 .pjx__link span{color:var(--accent)}
 .pjx__link:hover{background:var(--bg-2);border-color:var(--accent);color:var(--accent)}
-.pjx__cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(14px,1.5vw,22px)}
-.pjx__card{display:grid;gap:10px;padding:clamp(12px,1.2vw,16px);border:1px solid var(--line-2);background:var(--bg-2);
-  text-decoration:none;color:inherit;transition:transform .5s cubic-bezier(.22,.61,.36,1),border-color .4s}
-.pjx__card:hover{transform:translateY(-3px);border-color:var(--line)}
-.pjx__card img{width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;display:block}
-.pjx__card picture{display:block}
-/* Sous 720 px, une couverture portrait (visuel mobile dédié) est mieux servie
-   en 2:3 que rognée dans un cadre 16/10. Le 2:3 est celui des cartes de
-   l'accueil (356×542 mesurés en 390×844) : même recadrage d'un bout à l'autre,
-   dérivé du master 9:16 sans second fichier. Les projets sans `coverPortrait`
-   n'ont pas l'attribut et gardent leur cadrage d'origine. */
+/* Projets liés : mêmes cartes que les projets de l'accueil (.case--photo),
+   empilées comme la pile sticky de la home. On ne redéfinit ici que ce qui
+   doit coller au contexte (hauteur, respiration entre les cartes). */
+.pjx__cases{position:relative;display:block}
+.pjx__case{height:clamp(320px,56svh,560px);margin-bottom:clamp(14px,1.6vw,22px)}
+.pjx__case:last-child{margin-bottom:0}
 @media (max-width:720px){
-  .pjx__card picture[data-cover-portrait] img{aspect-ratio:2/3}
+  .pjx__case{height:clamp(330px,60svh,520px)}
 }
-.pjx__card span{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-2)}
-.pjx__card b{font-family:var(--display);font-weight:600;font-size:clamp(17px,1.6vw,22px);line-height:1.02;letter-spacing:-.03em}
-@media (max-width:860px){
-  .pjx__cards{grid-template-columns:minmax(0,1fr)}
-}
+
+
 
 /* --- Ressources liées sur les pages service --- */
 .res-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 clamp(20px,3vw,40px);margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}

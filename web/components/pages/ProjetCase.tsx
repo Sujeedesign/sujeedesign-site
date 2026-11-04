@@ -118,14 +118,44 @@ export function ProjetCase({ project, projects }: { project: Project; projects: 
                 <h2>Projets liés</h2>
                 <span>Réalisations</span>
               </div>
-              <div className="pjx__cards">
+              <div className="pjx__cases">
                 {related.map((entry) => (
-                  <a className="pjx__card" href={realisationPath(entry.slug)} key={entry.slug}>
+                  <a
+                    className="case c-paper case--photo pjx__case"
+                    href={realisationPath(entry.slug)}
+                    key={entry.slug}
+                  >
                     {coverOf(entry) ? (
-                      <CoverPicture project={entry} alt="" loading="lazy" />
+                      <span className="case__bg" aria-hidden="true">
+                        <CoverPicture project={entry} alt="" loading="lazy" />
+                      </span>
                     ) : null}
-                    <span>{entry.disciplines.join(" · ")}</span>
-                    <b>{entry.name}</b>
+                    <div className="case__top">
+                      <span className="case__idx">
+                        {entry.index} / {entry.disciplines.join(" · ")}
+                      </span>
+                      <span className="case__meta">
+                        {entry.client}
+                        {entry.year ? ` ${entry.year}` : ""}
+                      </span>
+                    </div>
+                    <div className="case__body" />
+                    <div className="case__foot">
+                      <div className="case__text">
+                        <h3 className="case__title">{entry.name}</h3>
+                        <ul className="case__sub">
+                          {entry.disciplines.map((d) => (
+                            <li key={d}>{d}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      <span className="case__cta">
+                        Voir l’étude de cas <span aria-hidden="true">↗</span>
+                      </span>
+                    </div>
+                    <span className="case__ghost" aria-hidden="true">
+                      {entry.index}
+                    </span>
                   </a>
                 ))}
               </div>
