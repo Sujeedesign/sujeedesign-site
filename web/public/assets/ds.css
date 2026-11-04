@@ -670,6 +670,11 @@ footer.sf{
   background: var(--accent);
   flex: 0 0 auto;
 }
+.sf__logo-img{
+  display: block;
+  width: clamp(132px, 14vw, 164px);
+  height: auto;
+}
 .sf__tagline{
   margin: 16px 0 0;
   color: #B8B2A6;

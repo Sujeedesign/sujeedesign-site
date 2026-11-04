@@ -207,8 +207,14 @@ export function SiteFooter() {
       <div className="wrap sf__grid">
         <div className="sf__brand">
           <a className="sf__logo" href={routes.home} aria-label="Sujee Design, accueil">
-            <span className="sf__dot" aria-hidden="true" />
-            Sujee Design
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              className="sf__logo-img"
+              src="/assets/logo-sujee-blanc.svg"
+              alt="Sujee Design"
+              width={971}
+              height={243}
+            />
           </a>
           <p className="sf__tagline">
             Votre marque, de A à Z.
