@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Propositions — Sujee Design</title>
+<meta name="description" content="Sélection de refontes et de maquettes réalisées par Sujee Design.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A0A09;
+    --paper:#F7F7F5;
+    --sand:#F2EFE7;
+    --muted:#6B665C;
+    --accent:#FF4B1F;
+    --line:rgba(10,10,9,.12);
+    --radius:2px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--paper);color:var(--ink);
+    font-family:"Bricolage Grotesque",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    font-size:15px;line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    padding:clamp(20px,4vw,56px);
+  }
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1180px;margin:0 auto}
+
+  header.top{display:flex;align-items:baseline;justify-content:space-between;gap:20px;
+    padding-bottom:18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .brand{font-weight:700;font-size:17px;letter-spacing:-.02em}
+  .brand span{color:var(--accent)}
+  .top nav{display:flex;gap:22px;font-size:13px;color:var(--muted)}
+  .top nav a:hover{color:var(--ink)}
+
+  .intro{padding:clamp(40px,7vw,84px) 0 clamp(28px,4vw,44px);max-width:760px}
+  .eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600}
+  h1{font-size:clamp(34px,6.2vw,68px);line-height:.96;letter-spacing:-.035em;font-weight:700;margin:14px 0 18px}
+  .intro p{color:var(--muted);max-width:56ch}
+
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(16px,2vw,26px)}
+
+  .card{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);
+    border-radius:var(--radius);overflow:hidden;transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+  .card:hover{transform:translateY(-3px);box-shadow:0 18px 40px -24px rgba(10,10,9,.45);border-color:rgba(10,10,9,.28)}
+  .card:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+  .shot{display:block;aspect-ratio:4/3;background:var(--sand);overflow:hidden}
+  .shot img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block;
+    transition:transform .5s ease}
+  .card:hover .shot img{transform:scale(1.03)}
+
+  .body{padding:18px 18px 20px;display:flex;flex-direction:column;gap:8px;flex:1}
+  .kind{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .name{font-size:20px;font-weight:600;letter-spacing:-.02em;line-height:1.2}
+  .desc{font-size:13.5px;color:var(--muted);flex:1}
+  .go{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;margin-top:6px}
+  .go .arrow{color:var(--accent);transition:transform .25s ease}
+  .card:hover .go .arrow{transform:translateX(4px)}
+
+  footer{margin-top:clamp(56px,8vw,104px);padding-top:22px;border-top:1px solid var(--line);
+    display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;
+    font-size:12.5px;color:var(--muted)}
+  footer a{font-weight:600;color:var(--ink)}
+  footer a:hover{color:var(--accent)}
+
+  @media (max-width:900px){
+    .grid{grid-template-columns:1fr}
+    .shot{aspect-ratio:16/10}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important;scroll-behavior:auto!important}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <a class="brand" href="https://sujeedesign.com/">Sujee Design<span>.</span></a>
+    <nav>
+      <a href="https://sujeedesign.com/">Site</a>
+      <a href="https://sujeedesign.com/contact">Contact</a>
+    </nav>
+  </header>
+
+  <section class="intro">
+    <p class="eyebrow">Propositions</p>
+    <h1>Trois refontes en ligne.</h1>
+    <p>Des maquettes de pages d'accueil travaillées sur mesure, avec les couleurs, les contenus et les images des clients. Chaque proposition est une page autonome, consultable telle quelle.</p>
+  </section>
+
+  <main class="grid">
+
+    <a class="card" href="/propositions/polyrésine">
+      <span class="shot"><img src="/propositions/thumbs/polyresine.webp" alt="Aperçu de la refonte Polyrésine" width="1200" height="750" loading="lazy"></span>
+      <span class="body">
+        <span class="kind">Industrie · Refonte d'accueil</span>
+        <span class="name">Polyrésine</span>
+        <span class="desc">Calage de précision et maintenance des machines tournantes. Une page qui assume l'industriel, sans perdre le premium.</span>
+        <span class="go">Voir la proposition <span class="arrow">→</span></span>
+      </span>
+    </a>
+
+    <a class="card" href="/propositions/dimension-nouvelle">
+      <span class="shot"><img src="/propositions/thumbs/dimension-nouvelle.webp" alt="Aperçu de la refonte Dimension Nouvelle" width="1200" height="750" loading="lazy"></span>
+      <span class="body">
+        <span class="kind">Agencement · Refonte</span>
+        <span class="name">Dimension Nouvelle</span>
+        <span class="desc">Stands d'exposition et agencement sur mesure. Une vitrine qui montre le savoir-faire plutôt que de le raconter.</span>
+        <span class="go">Voir la proposition <span class="arrow">→</span></span>
+      </span>
+    </a>
+
+    <a class="card" href="/propositions/n2e">
+      <span class="shot"><img src="/propositions/thumbs/n2e.webp" alt="Aperçu de la refonte N2E Échafaudages" width="1200" height="750" loading="lazy"></span>
+      <span class="body">
+        <span class="kind">BTP · Projection</span>
+        <span class="name">N2E Échafaudages</span>
+        <span class="desc">Location, montage et vente d'échafaudages en Île-de-France. Un site pensé pour générer des demandes de devis.</span>
+        <span class="go">Voir la proposition <span class="arrow">→</span></span>
+      </span>
+    </a>
+
+  </main>
+
+  <footer>
+    <span>Sujee Design — votre marque, de A à Z.</span>
+    <a href="https://sujeedesign.com/contact">Réserver un rendez-vous avec Sujeepan →</a>
+  </footer>
+
+</div>
+</body>
+</html>
