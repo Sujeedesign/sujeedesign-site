@@ -56,6 +56,9 @@
 
 .table {
   width: 100%;
+  /* Le tableau s'arrête avant le bord de la colonne : au-delà, la ligne devient
+     trop longue pour suivre du regard d'une colonne à l'autre. */
+  max-width: 760px;
   border-collapse: collapse;
   font-size: 14px;
   min-width: 560px;

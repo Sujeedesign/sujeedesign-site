@@ -46,6 +46,9 @@
 
 .table {
   width: 100%;
+  /* Largeur de lecture : un tableau pleine colonne oblige la tête à balayer
+     toute la page pour relier une ligne à son prix. */
+  max-width: 760px;
   min-width: 480px;
   border-collapse: collapse;
   font-size: 14px;
