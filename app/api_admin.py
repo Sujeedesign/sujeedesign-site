@@ -316,6 +316,41 @@ async def import_media(
     )
 
 
+@router.delete("/media/{media_id}")
+def remove_media(request: Request, media_id: int, author: str = Depends(require_token)) -> dict[str, Any]:
+    """Supprime un média de la médiathèque : fiche en base, puis fichier.
+
+    Refusé en 409 si un projet du catalogue référence encore ce fichier : la
+    suppression d'un visuel utilisé casserait une fiche en production.
+    """
+    conn = _conn(request)
+    try:
+        row = repo.get_media(conn, media_id)
+        if row is None:
+            raise HTTPException(status_code=404, detail=f"média inconnu : {media_id}")
+        needle = f"%{row['filename']}%"
+        usage = conn.execute(
+            "SELECT slug FROM projets WHERE images LIKE ? OR cover LIKE ? OR cover_portrait LIKE ? LIMIT 1",
+            (needle, needle, needle),
+        ).fetchone()
+        if usage is not None:
+            raise HTTPException(
+                status_code=409,
+                detail=f"média utilisé par le projet « {usage['slug']} »",
+            )
+        repo.delete_media(conn, media_id)
+        conn.commit()
+    finally:
+        conn.close()
+
+    target = Path(request.app.state.media_dir) / row["filename"]
+    try:
+        target.unlink(missing_ok=True)
+    except OSError:
+        pass
+    return {"ok": True, "author": author, "deleted": {"id": media_id, "filename": row["filename"]}}
+
+
 # -------------------------------------------------------------------- catalogue
 
 
