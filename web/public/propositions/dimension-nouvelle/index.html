@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0d2740">
+<meta name="description" content="Dimension Nouvelle : fabrication sur mesure de stands d'exposition, agencement d'espaces commerciaux et événementiels, installation et démontage. Boissy-l'Aillerie, Val-d'Oise.">
+<title>Dimension Nouvelle — Stands d'exposition & agencement sur mesure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0d2740;
+  --blue:#1d4e79;
+  --brand:#2b5672;
+  --royal:#116dff;
+  --sky:#e8f0f8;
+  --paper:#f5f6f8;
+  --white:#fff;
+  --ink:#0f1a24;
+  --muted:#5b6a77;
+  --line:#d9e0e7;
+  --max:1280px;
+  --pad:clamp(20px,4.5vw,64px);
+  --head:'Archivo',Helvetica,Arial,sans-serif;
+  --body:'Inter',Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:96px}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 var(--body);-webkit-font-smoothing:antialiased}
+img{display:block;width:100%;height:100%;object-fit:cover}
+a{color:inherit;text-decoration:none}
+h1,h2,h3,p{margin:0}
+h1,h2,h3{font-family:var(--head);letter-spacing:-.045em;line-height:1.02}
+.wrap{width:min(var(--max),calc(100% - 2*var(--pad)));margin-inline:auto}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+:focus-visible{outline:3px solid var(--royal);outline-offset:4px}
+.eyebrow{display:flex;align-items:center;gap:12px;font:600 11px/1 var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.eyebrow::before{content:"";width:30px;height:2px;background:var(--royal);flex:none}
+.eyebrow.on-dark{color:#a8c0d4}
+.btn{display:inline-flex;align-items:center;gap:14px;min-height:52px;padding:0 24px;font:600 14px var(--body);background:var(--royal);color:#fff;transition:transform .22s ease,background .22s ease,box-shadow .22s ease}
+.btn:hover{transform:translateY(-2px);background:#0a56cf;box-shadow:0 12px 28px rgba(17,109,255,.28)}
+.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,.42);color:#fff}
+.btn.ghost:hover{background:rgba(255,255,255,.1);box-shadow:none}
+.btn.dark{background:var(--navy)}
+.btn.dark:hover{background:#081c2e;box-shadow:0 12px 28px rgba(13,39,64,.24)}
+.btn .ar{font-size:17px;line-height:1;transition:transform .22s ease}
+.btn:hover .ar{transform:translateX(3px)}
+
+/* ---------- barre de contexte ---------- */
+.concept{background:var(--navy);color:#c9d8e5;font:500 10.5px/1.4 var(--body);letter-spacing:.14em;text-transform:uppercase;text-align:center;padding:8px 18px}
+.concept b{color:#7fb0ff;font-weight:600;margin-right:8px}
+
+/* ---------- header ---------- */
+.site-head{position:sticky;top:0;z-index:40;background:rgba(245,246,248,.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.head-row{display:flex;align-items:center;justify-content:space-between;gap:28px;height:84px}
+.brand{display:flex;align-items:center;gap:13px;flex:none}
+.brand-mark{width:42px;height:42px;flex:none;background:#fff;border:1px solid var(--line);display:grid;place-items:center;overflow:hidden}
+.brand-mark img{object-fit:contain;padding:4px}
+.brand-name{font:700 16px/1 var(--head);letter-spacing:.01em}
+.brand-name small{display:block;margin-top:5px;font:500 8.5px/1 var(--body);letter-spacing:.22em;color:var(--muted);text-transform:uppercase}
+.nav{display:flex;align-items:center;gap:30px;font:500 13.5px var(--body)}
+.nav a:not(.btn){color:#41505d;position:relative;padding:6px 0}
+.nav a:not(.btn)::after{content:"";position:absolute;left:0;bottom:0;width:0;height:1.5px;background:var(--royal);transition:width .25s ease}
+.nav a:not(.btn):hover::after{width:100%}
+.head-tel{display:flex;align-items:center;gap:9px;font:600 13.5px var(--body);color:var(--brand)}
+.head-tel span{width:6px;height:6px;background:var(--royal);border-radius:50%}
+.burger{display:none;width:46px;height:46px;border:1px solid var(--line);background:transparent;cursor:pointer;font-size:19px;line-height:1}
+
+/* ---------- hero ---------- */
+.hero{position:relative;background:var(--navy);color:#fff;overflow:hidden}
+.hero-grid{display:grid;grid-template-columns:1.02fr .98fr;min-height:min(78vh,700px)}
+.hero-copy{padding:clamp(42px,6vw,86px) clamp(22px,4vw,60px) clamp(42px,6vw,74px) 0;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:1}
+.hero h1{font-size:clamp(40px,5.4vw,72px);font-weight:700;margin:22px 0 24px;max-width:15ch}
+.hero h1 em{font-style:normal;color:#7fb0ff}
+.hero-sub{color:#b8cadd;max-width:46ch;font-size:16.5px;line-height:1.65}
+.hero-actions{display:flex;flex-wrap:wrap;gap:14px;margin-top:34px}
+.hero-meta{display:flex;gap:26px;margin-top:42px;padding-top:22px;border-top:1px solid rgba(255,255,255,.16);font-size:12px;color:#93aec6;flex-wrap:wrap}
+.hero-meta strong{display:block;font:600 14px var(--head);color:#fff;letter-spacing:0;margin-bottom:2px}
+.hero-visual{position:relative;min-height:360px}
+.hero-visual img{object-position:52% 52%}
+.hero-visual::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(13,39,64,.55),rgba(13,39,64,0) 45%)}
+.hero-tag{position:absolute;z-index:2;right:20px;bottom:20px;background:rgba(13,39,64,.82);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.2);padding:10px 14px;font:500 10px/1.5 var(--body);letter-spacing:.14em;text-transform:uppercase;color:#dce8f2}
+.hero-visual .grid-lines{position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,transparent 49.9%,rgba(255,255,255,.15) 50%,transparent 50.1%),linear-gradient(0deg,transparent 49.9%,rgba(255,255,255,.12) 50%,transparent 50.1%);background-size:25% 100%,100% 50%;opacity:.5;pointer-events:none}
+
+/* ---------- bandeau chiffres ---------- */
+.strip{background:var(--blue);color:#fff}
+.strip-row{display:grid;grid-template-columns:repeat(3,1fr)}
+.strip-item{padding:26px 30px;border-left:1px solid rgba(255,255,255,.16)}
+.strip-item:first-child{border-left:0;padding-left:0}
+.strip-item span{display:block;font:500 10px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:#a9c6e0;margin-bottom:9px}
+.strip-item strong{font:600 17px/1.3 var(--head);letter-spacing:-.02em}
+
+/* ---------- sections ---------- */
+.section{padding:clamp(66px,8vw,110px) 0}
+.sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:40px;margin-bottom:46px}
+.sec-head h2{font-size:clamp(32px,4.2vw,52px);font-weight:700;margin-top:16px;max-width:20ch}
+.sec-head p{max-width:36ch;color:var(--muted);font-size:15px}
+
+/* ---------- services ---------- */
+.services{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.service{background:var(--paper);padding:30px 26px 34px;display:flex;flex-direction:column;min-height:300px;transition:background .25s ease,color .25s ease;position:relative}
+.service:hover{background:#fff}
+.service-num{font:600 11px/1 var(--body);letter-spacing:.16em;color:var(--royal)}
+.service h3{font-size:clamp(22px,2.2vw,27px);font-weight:600;margin:auto 0 12px;max-width:15ch}
+.service p{color:var(--muted);font-size:14px;line-height:1.6;max-width:30ch}
+.service-go{margin-top:20px;font:600 12px var(--body);color:var(--brand);display:inline-flex;align-items:center;gap:9px}
+.service::after{content:"↗";position:absolute;right:24px;top:26px;font-size:18px;color:#b9c6d2;transition:color .25s ease,transform .25s ease}
+.service:hover::after{color:var(--royal);transform:translate(2px,-2px)}
+
+/* ---------- atelier ---------- */
+.atelier{background:var(--navy);color:#fff;overflow:hidden}
+.atelier-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(34px,5vw,72px);align-items:center}
+.atelier-media{position:relative;padding-bottom:34px}
+.atelier-media .main{aspect-ratio:4/5;overflow:hidden}
+.atelier-media .main img{object-position:50% 50%}
+.atelier-media .inset{position:absolute;right:-6%;bottom:0;width:46%;aspect-ratio:1;border:6px solid var(--navy);overflow:hidden}
+.atelier-copy h2{font-size:clamp(32px,4.4vw,54px);margin:16px 0 22px;font-weight:700}
+.atelier-copy h2 em{font-style:normal;color:#7fb0ff}
+.atelier-copy p{color:#b6c8d9;max-width:48ch;font-size:15.5px;line-height:1.7}
+.values{list-style:none;margin:32px 0 0;padding:0;border-top:1px solid rgba(255,255,255,.16)}
+.values li{display:grid;grid-template-columns:26px 1fr;gap:14px;padding:15px 0;border-bottom:1px solid rgba(255,255,255,.16);font:500 15px var(--head);letter-spacing:-.01em}
+.values li span{color:#7fb0ff;font-size:14px;line-height:1.6}
+
+/* ---------- réalisations ---------- */
+.gallery{display:grid;grid-template-columns:1.15fr .85fr;grid-template-rows:auto auto;gap:14px}
+.shot{position:relative;overflow:hidden;background:#dde3e9;margin:0}
+.shot img{transition:transform .6s cubic-bezier(.2,.7,.2,1);filter:saturate(.95)}
+.shot:hover img{transform:scale(1.03)}
+.shot figcaption{position:absolute;left:0;bottom:0;right:0;padding:18px 20px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;color:#fff;background:linear-gradient(0deg,rgba(10,26,42,.82),rgba(10,26,42,0));font:600 13px var(--head);letter-spacing:.02em}
+.shot figcaption span{font:500 10px var(--body);letter-spacing:.16em;text-transform:uppercase;color:#cfe0ee}
+.shot.tall{grid-row:span 2;aspect-ratio:4/5}
+.shot.small{aspect-ratio:16/11}
+.shot.wide{grid-column:1/-1;aspect-ratio:16/7}
+.gallery-note{margin-top:16px;font-size:11.5px;color:var(--muted)}
+
+/* ---------- méthode ---------- */
+.method{background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--line)}
+.step{padding:26px 22px 6px;border-left:1px solid var(--line)}
+.step:first-child{border-left:0;padding-left:0}
+.step i{display:block;font:600 11px var(--body);letter-spacing:.16em;color:var(--royal);font-style:normal;margin-bottom:34px}
+.step h3{font-size:19px;font-weight:600;margin-bottom:9px}
+.step p{font-size:13.5px;color:var(--muted);line-height:1.6}
+
+/* ---------- contact ---------- */
+.contact{background:var(--blue);color:#fff;position:relative;overflow:hidden}
+.contact::before{content:"";position:absolute;right:-140px;top:-140px;width:420px;height:420px;border:1px solid rgba(255,255,255,.14);transform:rotate(45deg)}
+.contact-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(30px,5vw,70px);align-items:center;position:relative}
+.contact h2{font-size:clamp(34px,4.6vw,58px);font-weight:700;margin:16px 0 18px;max-width:18ch}
+.contact p.lead{color:#c9dcec;max-width:46ch;font-size:15.5px}
+.contact-card{background:#fff;color:var(--ink);padding:28px}
+.contact-card h3{font-size:14px;font-weight:600;font-family:var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:18px}
+.contact-list{list-style:none;margin:0;padding:0;display:grid;gap:12px;font-size:14.5px}
+.contact-list a{display:flex;gap:10px;align-items:baseline;font-weight:500}
+.contact-list a:hover{color:var(--royal)}
+.contact-list small{display:block;color:var(--muted);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+.contact-card .btn{margin-top:22px;width:100%}
+
+/* ---------- footer ---------- */
+.site-foot{background:var(--navy);color:#c3d2e0;padding:clamp(46px,6vw,70px) 0 26px}
+.foot-top{display:grid;grid-template-columns:1.1fr .7fr 1fr;gap:clamp(28px,4vw,56px);padding-bottom:34px;border-bottom:1px solid rgba(255,255,255,.14)}
+.foot-brand .brand-mark{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18)}
+.foot-brand .brand-name{color:#fff}
+.foot-brand .brand-name small{color:#8ea9c0}
+.foot-brand p{margin-top:18px;font-size:13px;color:#93aac1;max-width:32ch;line-height:1.65}
+.foot-col h4{font:600 10.5px var(--body);letter-spacing:.18em;text-transform:uppercase;color:#7f9ab2;margin:0 0 16px}
+.foot-col ul{list-style:none;margin:0;padding:0;display:grid;gap:10px;font-size:14px}
+.foot-col a:hover{color:#fff}
+.foot-cta{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);padding:22px}
+.foot-cta p{font-size:12.5px;color:#9db5ca;margin-bottom:16px;line-height:1.6}
+.foot-cta a.book{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:56px;padding:0 18px;background:var(--royal);color:#fff;font:600 13.5px var(--body);transition:background .22s ease,transform .22s ease}
+.foot-cta a.book:hover{background:#0a56cf;transform:translateY(-2px)}
+.foot-cta a.book span{font-size:17px;line-height:1}
+.foot-cta .book-note{display:block;margin-top:11px;font-size:10.5px;letter-spacing:.06em;color:#7f9ab2}
+.foot-bottom{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;padding-top:20px;font-size:11.5px;color:#7f9ab2}
+.foot-bottom a:hover{color:#fff}
+
+@media(max-width:1040px){
+  .nav{display:none;position:absolute;top:84px;left:0;right:0;background:var(--paper);border-bottom:1px solid var(--line);flex-direction:column;align-items:stretch;gap:0;padding:10px var(--pad) 18px}
+  .nav.open{display:flex}
+  .nav a:not(.btn){padding:14px 0;border-bottom:1px solid var(--line)}
+  .nav .btn{margin-top:14px}
+  .burger{display:block}
+  .head-tel{display:none}
+  .hero-grid{grid-template-columns:1fr}
+  .hero-copy{padding:48px 0 40px}
+  .hero-visual{min-height:min(70vw,460px)}
+  .atelier-grid{grid-template-columns:1fr;gap:44px}
+  .atelier-media{max-width:560px}
+  .contact-grid{grid-template-columns:1fr}
+  .steps{grid-template-columns:repeat(2,1fr)}
+  .step:nth-child(3){border-left:0;padding-left:0}
+  .step{padding-bottom:26px}
+  .foot-top{grid-template-columns:1fr 1fr}
+  .foot-cta{grid-column:1/-1}
+}
+@media(max-width:720px){
+  .head-row{height:72px}
+  .nav{top:72px}
+  .strip-row{grid-template-columns:1fr}
+  .strip-item,.strip-item:first-child{border-left:0;border-top:1px solid rgba(255,255,255,.16);padding:16px 0}
+  .strip-item:first-child{border-top:0}
+  .sec-head{flex-direction:column;align-items:flex-start;gap:18px;margin-bottom:32px}
+  .services{grid-template-columns:1fr}
+  .service{min-height:0;padding:24px 0 28px}
+  .service h3{margin-top:26px}
+  .service::after{right:0;top:22px}
+  .gallery{grid-template-columns:1fr;grid-template-rows:none}
+  .shot.tall{grid-row:auto;aspect-ratio:4/3}
+  .shot.small,.shot.wide{aspect-ratio:4/3}
+  .steps{grid-template-columns:1fr}
+  .step,.step:nth-child(3){border-left:0;border-top:1px solid var(--line);padding:22px 0}
+  .step:first-child{border-top:0}
+  .step i{margin-bottom:16px}
+  .foot-top{grid-template-columns:1fr}
+  .foot-bottom{flex-direction:column;gap:8px}
+  .atelier-media .inset{width:42%;right:0;border-width:4px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<a class="sr-only" href="#main">Aller au contenu</a>
+<div class="concept"><b>Projection de refonte</b> · Proposition de direction artistique pour Dimension Nouvelle</div>
+
+<header class="site-head">
+  <div class="wrap head-row">
+    <a class="brand" href="#top" aria-label="Dimension Nouvelle, accueil">
+      <span class="brand-mark"><img src="/propositions/dimension-nouvelle/images/logo.png" alt=""></span>
+      <span class="brand-name">DIMENSION NOUVELLE<small>Stands &amp; agencement</small></span>
+    </a>
+    <nav class="nav" id="nav" aria-label="Navigation principale">
+      <a href="#services">Nos services</a>
+      <a href="#atelier">L'atelier</a>
+      <a href="#realisations">Réalisations</a>
+      <a href="#contact">Contact</a>
+      <a class="btn" href="#contact">Parler de mon projet <span class="ar">↗</span></a>
+    </nav>
+    <a class="head-tel" href="tel:+33161030945"><span></span>01 61 03 09 45</a>
+    <button class="burger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="nav">☰</button>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" id="top" aria-labelledby="hero-title">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <div class="eyebrow on-dark">Fabrication de stands · Agencement · Île-de-France</div>
+        <h1 id="hero-title">Un stand ne s'installe pas. Il se <em>fabrique</em>.</h1>
+        <p class="hero-sub">Conception, fabrication en atelier et installation de stands d'exposition sur mesure. Nous équipons vos salons, boutiques et espaces événementiels, du premier croquis au démontage.</p>
+        <div class="hero-actions">
+          <a class="btn" href="#contact">Parler de mon projet <span class="ar">↗</span></a>
+          <a class="btn ghost" href="#realisations">Voir nos réalisations</a>
+        </div>
+        <div class="hero-meta">
+          <div><strong>Sur mesure</strong>Étude et conception dédiées</div>
+          <div><strong>Atelier intégré</strong>Fabrication maîtrisée</div>
+          <div><strong>Clé en main</strong>Montage et démontage</div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <img src="/propositions/dimension-nouvelle/images/hero.webp" alt="Stand d'exposition sur mesure en bois cintré, accueil et espace de démonstration" fetchpriority="high">
+        <div class="grid-lines" aria-hidden="true"></div>
+        <span class="hero-tag">Stand sur mesure · Salon professionnel</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="strip" aria-label="Notre savoir-faire">
+    <div class="wrap strip-row">
+      <div class="strip-item"><span>Notre métier</span><strong>Fabrication de stands d'exposition</strong></div>
+      <div class="strip-item"><span>Notre atelier</span><strong>Menuiserie &amp; agencement sur mesure</strong></div>
+      <div class="strip-item"><span>Notre secteur</span><strong>Boissy-l'Aillerie · Val-d'Oise</strong></div>
+    </div>
+  </section>
+
+  <section class="section wrap" id="services" aria-labelledby="services-title">
+    <div class="sec-head">
+      <div>
+        <div class="eyebrow">Nos services</div>
+        <h2 id="services-title">De l'idée au stand monté.</h2>
+      </div>
+      <p>Trois expertises complémentaires, un seul interlocuteur, une exigence de finition constante.</p>
+    </div>
+    <div class="services">
+      <article class="service">
+        <span class="service-num">01 / CONCEPTION &amp; FABRICATION</span>
+        <h3>Fabrication sur mesure de stands d'exposition</h3>
+        <p>Un stand dessiné pour votre marque et vos contraintes de surface, fabriqué dans notre atelier avec des matériaux choisis.</p>
+        <span class="service-go">Demander une étude <span class="ar">↗</span></span>
+      </article>
+      <article class="service">
+        <span class="service-num">02 / AGENCEMENT</span>
+        <h3>Agencement d'espaces commerciaux et événementiels</h3>
+        <p>Boutiques, showrooms, espaces de réception : nous habillons vos volumes pour qu'ils servent votre image et votre parcours client.</p>
+        <span class="service-go">Voir le champ d'intervention <span class="ar">↗</span></span>
+      </article>
+      <article class="service">
+        <span class="service-num">03 / INSTALLATION</span>
+        <h3>Installation et démontage de stands</h3>
+        <p>Montage sur site, ajustements de dernière minute et démontage soigné : nous gérons la logistique pour que vous soyez disponible pour vos visiteurs.</p>
+        <span class="service-go">Organiser une installation <span class="ar">↗</span></span>
+      </article>
+    </div>
+  </section>
+
+  <section class="section atelier" id="atelier" aria-labelledby="atelier-title">
+    <div class="wrap atelier-grid">
+      <div class="atelier-media">
+        <div class="main"><img src="/propositions/dimension-nouvelle/images/atelier-2.webp" alt="Menuisier de l'atelier Dimension Nouvelle étudiant un plan de fabrication" loading="lazy"></div>
+        <div class="inset"><img src="/propositions/dimension-nouvelle/images/atelier-cnc.webp" alt="Centre d'usinage CNC dans l'atelier de fabrication" loading="lazy"></div>
+      </div>
+      <div class="atelier-copy">
+        <div class="eyebrow on-dark">À propos</div>
+        <h2 id="atelier-title">Le sur-mesure se joue <em>à l'atelier</em>.</h2>
+        <p>Dimension Nouvelle est une entreprise spécialisée dans la fabrication de stands d'exposition sur mesure et l'agencement d'espaces commerciaux. Notre équipe expérimentée travaille en étroite collaboration avec nos clients pour la conception des stands, puis assure la fabrication et l'installation.</p>
+        <ul class="values">
+          <li><span>01</span>Équipe spécialisée</li>
+          <li><span>02</span>Finition haut de gamme</li>
+          <li><span>03</span>Engagement durable</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section wrap" id="realisations" aria-labelledby="real-title">
+    <div class="sec-head">
+      <div>
+        <div class="eyebrow">Galerie</div>
+        <h2 id="real-title">Des stands qui portent la marque.</h2>
+      </div>
+      <p>Quelques réalisations d'agencement et de stands sur mesure.</p>
+    </div>
+    <div class="gallery">
+      <figure class="shot tall">
+        <img src="/propositions/dimension-nouvelle/images/stand-ibm.webp" alt="Stand d'exposition modulaire avec mur central bleu, écrans et espace lounge" loading="lazy">
+        <figcaption>Stand technologique <span>Îlot ouvert</span></figcaption>
+      </figure>
+      <figure class="shot small">
+        <img src="/propositions/dimension-nouvelle/images/stand-vusion.webp" alt="Stand d'exposition aux bannières colorées et espaces de démonstration retail" loading="lazy">
+        <figcaption>Stand retail <span>Démonstration</span></figcaption>
+      </figure>
+      <figure class="shot small">
+        <img src="/propositions/dimension-nouvelle/images/stand-lounge.webp" alt="Comptoir d'accueil en bois et noir avec mur végétal et espace lounge" loading="lazy">
+        <figcaption>Accueil &amp; lounge <span>Agencement</span></figcaption>
+      </figure>
+      <figure class="shot wide">
+        <img src="/propositions/dimension-nouvelle/images/atelier-1.webp" alt="Vue de l'atelier de menuiserie avec modules de mobilier en cours d'assemblage" loading="lazy">
+        <figcaption>Notre atelier <span>Fabrication</span></figcaption>
+      </figure>
+    </div>
+    <p class="gallery-note">Photos issues du site actuel de Dimension Nouvelle.</p>
+  </section>
+
+  <section class="section method" aria-labelledby="method-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="eyebrow">Notre méthode</div>
+          <h2 id="method-title">Quatre étapes, zéro surprise.</h2>
+        </div>
+        <p>Un interlocuteur unique suit votre projet de la première esquisse au démontage.</p>
+      </div>
+      <div class="steps">
+        <div class="step"><i>01</i><h3>Conception</h3><p>Nous étudions votre besoin, votre surface et votre image pour dessiner un stand adapté.</p></div>
+        <div class="step"><i>02</i><h3>Fabrication</h3><p>Les modules sont réalisés dans notre atelier, avec un contrôle des finitions avant départ.</p></div>
+        <div class="step"><i>03</i><h3>Installation</h3><p>Montage sur site, réglages et mise en lumière, dans le respect du planning du salon.</p></div>
+        <div class="step"><i>04</i><h3>Démontage</h3><p>Démontage et évacuation soignés, pour vous laisser repartir sans logistique à gérer.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section contact" id="contact" aria-labelledby="contact-title">
+    <div class="wrap contact-grid">
+      <div>
+        <div class="eyebrow on-dark">Parlons de votre projet</div>
+        <h2 id="contact-title">Votre prochain stand commence par un échange.</h2>
+        <p class="lead">Un salon à préparer, une boutique à aménager, un espace événementiel à habiller ? Décrivez-nous votre projet, nous revenons vers vous avec une proposition adaptée.</p>
+      </div>
+      <div class="contact-card">
+        <h3>Nous contacter</h3>
+        <ul class="contact-list">
+          <li><a href="tel:+33161030945"><span><small>Téléphone</small>01 61 03 09 45</span></a></li>
+          <li><a href="tel:+33643072094"><span><small>Mobile</small>06 43 07 20 94</span></a></li>
+          <li><a href="mailto:dimnouvelle@gmail.com"><span><small>Email</small>dimnouvelle@gmail.com</span></a></li>
+          <li><a href="https://www.instagram.com/dimension.nouvelle_/" target="_blank" rel="noopener"><span><small>Instagram</small>@dimension.nouvelle_</span></a></li>
+          <li><span><small>Adresse</small>5 ZA les Quatre Vents, 95650 Boissy-l'Aillerie</span></li>
+        </ul>
+        <a class="btn dark" href="mailto:dimnouvelle@gmail.com">Envoyer un message <span class="ar">↗</span></a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="foot-brand">
+        <span class="brand" href="#top">
+          <span class="brand-mark"><img src="/propositions/dimension-nouvelle/images/logo.png" alt=""></span>
+          <span class="brand-name">DIMENSION NOUVELLE<small>Stands &amp; agencement</small></span>
+        </span>
+        <p>Fabrication de stands d'exposition et agencement d'espaces commerciaux et événementiels. Boissy-l'Aillerie, Val-d'Oise.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Le site</h4>
+        <ul>
+          <li><a href="#services">Nos services</a></li>
+          <li><a href="#atelier">L'atelier</a></li>
+          <li><a href="#realisations">Réalisations</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+      <div class="foot-cta">
+        <p>Envie d'un stand ou d'un espace qui vous ressemble ? Échangeons directement sur votre projet.</p>
+        <a class="book" href="https://sujeedesign.com/contact">Réserver un rendez-vous avec Sujeepan <span>↗</span></a>
+        <span class="book-note">Prise de rendez-vous en ligne · sujeedesign.com</span>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© <span id="year">2026</span> Dimension Nouvelle. Tous droits réservés.</span>
+      <span>5 ZA les Quatre Vents, 95650 Boissy-l'Aillerie · 01 61 03 09 45</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const b=document.querySelector('.burger'),n=document.getElementById('nav');
+  b.addEventListener('click',()=>{const o=n.classList.toggle('open');b.setAttribute('aria-expanded',o);b.textContent=o?'✕':'☰';});
+  n.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{n.classList.remove('open');b.setAttribute('aria-expanded','false');b.textContent='☰';}));
+  document.getElementById('year').textContent=new Date().getFullYear();
+</script>
+</body>
+</html>
