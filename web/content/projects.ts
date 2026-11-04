@@ -675,13 +675,25 @@ export const projects: Project[] = [
     pitch:
       "Des logotypes réalisés entre 2013 et 2017, chacun sur sa planche : le signe, et le contexte de la marque quand il existe.",
     scope: "Création de logotypes et déclinaisons",
+    cover: {
+      src: "/assets/img/projet/logofolio/cover.jpg",
+      alt: "Couverture du Logofolio 2013 — 2017, collage de logotypes en noir et blanc",
+      width: 1920,
+      height: 1280,
+    },
+    coverPortrait: {
+      src: "/assets/img/projet/logofolio/cover-portrait.jpg",
+      alt: "Collage de logotypes du Logofolio en noir et blanc",
+      width: 1080,
+      height: 1920,
+    },
     sections: [
       {
         k: "01",
         label: "Contexte",
         title: "Comparer les signes, pas les décors",
         paragraphs: [
-          "Une collection de logotypes réalisés entre 2013 et 2017 pour des clients de secteurs différents : maison de retraite, fruits, événementiel, automobile, conseil, transfert d’argent, média.",
+          "Une collection de logotypes réalisés entre 2013 et 2017 pour des clients de secteurs différents : maison de retraite, fruits, événementiel, danse, logistique, automobile, conseil, service premium.",
           "Réunis sur une même planche, ils révèlent une constante : des signes construits sur une géométrie simple, lisibles en petit.",
         ],
       },
@@ -701,64 +713,58 @@ export const projects: Project[] = [
       {
         k: "03",
         label: "Résultat",
-        title: "Onze identités, une méthode",
+        title: "Huit identités, une méthode",
         paragraphs: [
-          "Le Village d’Angervilliers, Fruizi, NS4 Events, Avatharan, Demethon, Noisy Auto, Nine Brains, Asta, CGD Transfert, Yaal Media et Nett1net : onze identités nommées, présentées selon les mêmes règles.",
+          "Le Village d’Angervilliers, FruiZi, NS Events, Avatharam, Demethon, Noisy Automobiles, Nine Brains et Asta : huit identités nommées, présentées selon les mêmes règles.",
         ],
       },
     ],
     images: [
       {
         src: "/assets/img/projet/logofolio/01.jpg",
-        alt: "Couverture du Logofolio 2013 — 2017",
-        width: 1920,
-        height: 1280,
-      },
-      {
-        src: "/assets/img/projet/logofolio/02.jpg",
         alt: "Le Village d’Angervilliers, logotype et couple photographié",
         width: 1920,
         height: 1080,
       },
       {
+        src: "/assets/img/projet/logofolio/02.jpg",
+        alt: "FruiZi, logotype et jeune femme souriante",
+        width: 1920,
+        height: 1080,
+      },
+      {
         src: "/assets/img/projet/logofolio/03.jpg",
-        alt: "Logotype Fruizi",
+        alt: "NS Events, logotype et décor de cérémonie",
         width: 1920,
         height: 1080,
       },
       {
         src: "/assets/img/projet/logofolio/04.jpg",
-        alt: "NS4 Events, logotype et décor de cérémonie",
+        alt: "Avatharam, logotype et danseuse en mouvement",
         width: 1920,
         height: 1080,
       },
       {
         src: "/assets/img/projet/logofolio/05.jpg",
-        alt: "Avatharam, logotype et portrait",
+        alt: "Demethon, logotype et livreurs dans un camion",
         width: 1920,
         height: 1080,
       },
       {
         src: "/assets/img/projet/logofolio/06.jpg",
-        alt: "Logotype Demethon",
+        alt: "Noisy Automobiles, logotype et mécanicien à l’atelier",
         width: 1920,
         height: 1080,
       },
       {
         src: "/assets/img/projet/logofolio/07.jpg",
-        alt: "Noisy Automobiles, logotype et photos d’atelier",
-        width: 1920,
-        height: 1080,
-      },
-      {
-        src: "/assets/img/projet/logofolio/08.jpg",
         alt: "Nine Brains, logotype et photo d’équipe",
         width: 1920,
         height: 1080,
       },
       {
-        src: "/assets/img/projet/logofolio/09.jpg",
-        alt: "Logotype Asta",
+        src: "/assets/img/projet/logofolio/08.jpg",
+        alt: "Asta, logotype et femme montant dans une voiture avec chauffeur",
         width: 1920,
         height: 1080,
       },
