@@ -1,9 +1,11 @@
 import { CallToAction, Cases, Hero, Method, Services, Studio } from "@/components/home/Home";
+import { InstagramSection } from "@/components/home/Instagram";
 import { JsonLd } from "@/components/site/JsonLd";
 import { ReadRail, SiteFooter, SiteNav, SocialRail } from "@/components/site/Chrome";
 import { site } from "@/content/site";
 import { getProjects } from "@/lib/content/catalogue";
 import { getHomeContent } from "@/lib/content/live";
+import { getInstagramFeed } from "@/lib/content/instagram";
 import { routes } from "@/lib/routes";
 import { pageGraph, webPageNode } from "@/lib/structured-data";
 
@@ -12,7 +14,11 @@ import { pageGraph, webPageNode } from "@/lib/structured-data";
 export const revalidate = 3600;
 
 export default async function HomePage() {
-  const [doc, projects] = await Promise.all([getHomeContent(), getProjects()]);
+  const [doc, projects, instagram] = await Promise.all([
+    getHomeContent(),
+    getProjects(),
+    getInstagramFeed(),
+  ]);
   return (
     <>
       {/* L'image du hero est le LCP. Pas de <link rel="preload"> ici : la balise
@@ -28,6 +34,7 @@ export default async function HomePage() {
         <Cases doc={doc} projects={projects} />
         <Method doc={doc} />
         <Services doc={doc} />
+        {instagram ? <InstagramSection feed={instagram} /> : null}
         <CallToAction doc={doc} />
       </main>
       <SiteFooter />

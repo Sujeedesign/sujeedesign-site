@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Instagram{% endblock %}
+{% block heading %}Instagram{% endblock %}
+{% block content %}
+  <p class="card note">
+    <strong>Grille manuelle, cinq places.</strong>
+    Tu choisis toi-même les posts affichés sur l'accueil, juste au-dessus de l'appel
+    à l'action. Rien n'est récupéré depuis Instagram : importe l'image ou la vidéo,
+    écris la légende, colle le lien du post. Le site se met à jour dès
+    l'enregistrement.
+  </p>
+
+  <form class="card" method="post" action="/admin/instagram/reglages">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <div class="form-grid">
+      <label class="field"><span>Titre de la section</span>
+        <input type="text" name="titre" value="{{ values.title }}" maxlength="120">
+      </label>
+      <label class="field field-wide"><span>Chapeau</span>
+        <textarea name="intro" rows="2" maxlength="400">{{ values.intro }}</textarea>
+      </label>
+    </div>
+    <div class="toolbar-actions">
+      <span class="muted small">Profil lié : <a href="{{ values.profile }}" target="_blank" rel="noopener">{{ values.profile }}</a></span>
+      <button class="btn btn-accent" type="submit">Enregistrer les textes</button>
+    </div>
+  </form>
+
+  {% if posts %}
+    <div class="ig-admin-grid">
+      {% for post in posts %}
+        <section class="card ig-admin-card">
+          <header class="ig-admin-head">
+            <span class="ig-admin-num">{{ "%02d" | format(loop.index) }}</span>
+            <span class="pill">{{ "Vidéo" if post.kind == "video" else "Image" }}</span>
+          </header>
+
+          <div class="ig-admin-preview">
+            {% if post.kind == "video" %}
+              <video src="{{ post.src }}" {% if post.poster %}poster="{{ post.poster }}"{% endif %} controls preload="metadata" playsinline></video>
+            {% else %}
+              <img src="{{ post.src }}" alt="{{ post.alt or post.caption }}" loading="lazy">
+            {% endif %}
+          </div>
+
+          <form method="post" action="/admin/instagram/{{ post.id }}/modifier" enctype="multipart/form-data">
+            <input type="hidden" name="csrf" value="{{ csrf }}">
+            <label class="field"><span>Légende</span>
+              <textarea name="legende" rows="2" maxlength="600">{{ post.caption }}</textarea>
+            </label>
+            <label class="field"><span>Lien du post</span>
+              <input type="url" name="permalien" value="{{ post.permalink }}" placeholder="https://www.instagram.com/p/…">
+            </label>
+            <label class="field"><span>Texte alternatif</span>
+              <input type="text" name="alt" value="{{ post.alt }}" maxlength="300">
+            </label>
+            <label class="field"><span>Remplacer le fichier (facultatif)</span>
+              <input type="file" name="fichier" accept="image/jpeg,image/png,image/webp,image/avif,video/mp4,video/webm,video/quicktime">
+            </label>
+            <div class="toolbar-actions">
+              <button class="btn btn-accent btn-sm" type="submit">Enregistrer</button>
+            </div>
+          </form>
+
+          <div class="ig-admin-tools">
+            <form method="post" action="/admin/instagram/{{ post.id }}/deplacer">
+              <input type="hidden" name="csrf" value="{{ csrf }}">
+              <input type="hidden" name="direction" value="up">
+              <button class="btn btn-ghost btn-sm" type="submit" {% if loop.first %}disabled{% endif %} aria-label="Monter">↑</button>
+            </form>
+            <form method="post" action="/admin/instagram/{{ post.id }}/deplacer">
+              <input type="hidden" name="csrf" value="{{ csrf }}">
+              <input type="hidden" name="direction" value="down">
+              <button class="btn btn-ghost btn-sm" type="submit" {% if loop.last %}disabled{% endif %} aria-label="Descendre">↓</button>
+            </form>
+            <form method="post" action="/admin/instagram/{{ post.id }}/supprimer" data-confirm="Retirer ce post de la grille ?">
+              <input type="hidden" name="csrf" value="{{ csrf }}">
+              <button class="btn btn-danger btn-sm" type="submit">Supprimer</button>
+            </form>
+          </div>
+        </section>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% set libres = slots - posts|length %}
+  {% if libres > 0 %}
+    <form class="card ig-admin-add" method="post" action="/admin/instagram/ajouter" enctype="multipart/form-data">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <h2>Ajouter un post <span class="muted small">({{ libres }} place{{ 's' if libres > 1 else '' }} libre{{ 's' if libres > 1 else '' }})</span></h2>
+      <div class="upload-drop">
+        <input type="file" name="fichier" id="ig-fichier" required accept="image/jpeg,image/png,image/webp,image/avif,video/mp4,video/webm,video/quicktime">
+        <label for="ig-fichier" class="upload-label">
+          <strong>Choisir une image ou une vidéo</strong>
+          <span class="muted small">JPG, PNG, WebP, AVIF (15 Mo) · MP4, WebM, MOV (60 Mo)</span>
+        </label>
+        <span class="upload-name" data-file-name></span>
+      </div>
+      <div class="form-grid">
+        <label class="field"><span>Légende</span>
+          <input type="text" name="legende" maxlength="600" placeholder="Identité visuelle pour…">
+        </label>
+        <label class="field"><span>Lien du post (facultatif)</span>
+          <input type="url" name="permalien" placeholder="https://www.instagram.com/p/…">
+        </label>
+        <label class="field"><span>Texte alternatif</span>
+          <input type="text" name="alt" maxlength="300" placeholder="Décrit le visuel pour l'accessibilité">
+        </label>
+      </div>
+      <div class="toolbar-actions">
+        <button class="btn btn-accent" type="submit">Ajouter à la grille</button>
+      </div>
+    </form>
+  {% endif %}
+
+  <style>
+    .ig-admin-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); margin-bottom: 20px; }
+    .ig-admin-card { display: flex; flex-direction: column; gap: 10px; margin: 0; }
+    .ig-admin-head { display: flex; align-items: center; justify-content: space-between; }
+    .ig-admin-num { font-variant-numeric: tabular-nums; font-weight: 700; opacity: .55; }
+    .ig-admin-preview { aspect-ratio: 4 / 5; border-radius: 12px; overflow: hidden; background: #111; }
+    .ig-admin-preview img, .ig-admin-preview video { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .ig-admin-card .field { margin-bottom: 8px; }
+    .ig-admin-tools { display: flex; gap: 8px; align-items: center; border-top: 1px solid rgba(0,0,0,.08); padding-top: 10px; }
+    .ig-admin-tools form { margin: 0; }
+    .ig-admin-tools .btn-danger { margin-left: auto; }
+    .ig-admin-add h2 { margin-top: 0; }
+    .note { margin-bottom: 18px; line-height: 1.6; }
+  </style>
+{% endblock %}

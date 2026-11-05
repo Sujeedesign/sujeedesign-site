@@ -176,6 +176,87 @@ def revision_snapshot(row: sqlite3.Row) -> Any:
         return {}
 
 
+# ------------------------------------------------------------------ instagram
+#
+# Grille de cinq posts de l'accueil. Le contenu est 100 % manuel : Sujee importe
+# lui-même le visuel ou la vidéo et le texte. Aucun appel à Instagram.
+
+INSTAGRAM_SLOTS = 5
+
+INSTAGRAM_FIELDS = ("kind", "src", "poster", "caption", "permalink", "alt")
+
+
+def list_instagram_posts(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    return list(
+        conn.execute(
+            "SELECT * FROM instagram_posts ORDER BY position ASC, id ASC LIMIT ?",
+            (INSTAGRAM_SLOTS,),
+        )
+    )
+
+
+def get_instagram_post(conn: sqlite3.Connection, post_id: int) -> sqlite3.Row | None:
+    return conn.execute("SELECT * FROM instagram_posts WHERE id = ?", (post_id,)).fetchone()
+
+
+def add_instagram_post(conn: sqlite3.Connection, values: dict[str, Any]) -> int | None:
+    """Ajoute un post en fin de grille. Renvoie None si les cinq places sont prises."""
+    total = int(conn.execute("SELECT COUNT(*) FROM instagram_posts").fetchone()[0])
+    if total >= INSTAGRAM_SLOTS:
+        return None
+    next_position = int(
+        conn.execute("SELECT COALESCE(MAX(position), -1) + 1 FROM instagram_posts").fetchone()[0]
+    )
+    columns = ", ".join(("position",) + INSTAGRAM_FIELDS)
+    placeholders = ", ".join("?" for _ in range(len(INSTAGRAM_FIELDS) + 1))
+    cursor = conn.execute(
+        f"INSERT INTO instagram_posts ({columns}) VALUES ({placeholders})",
+        (next_position,) + tuple(str(values.get(key, "") or "") for key in INSTAGRAM_FIELDS),
+    )
+    return int(cursor.lastrowid) if cursor.lastrowid is not None else None
+
+
+def update_instagram_post(conn: sqlite3.Connection, post_id: int, values: dict[str, Any]) -> None:
+    assignments = ", ".join(f"{key} = ?" for key in INSTAGRAM_FIELDS)
+    conn.execute(
+        f"UPDATE instagram_posts SET {assignments} WHERE id = ?",
+        tuple(str(values.get(key, "") or "") for key in INSTAGRAM_FIELDS) + (post_id,),
+    )
+
+
+def delete_instagram_post(conn: sqlite3.Connection, post_id: int) -> sqlite3.Row | None:
+    row = get_instagram_post(conn, post_id)
+    if row is None:
+        return None
+    conn.execute("DELETE FROM instagram_posts WHERE id = ?", (post_id,))
+    _compact_instagram(conn)
+    return row
+
+
+def move_instagram_post(conn: sqlite3.Connection, post_id: int, direction: str) -> bool:
+    """Échange un post avec son voisin. `direction` vaut `up` ou `down`."""
+    rows = list(conn.execute("SELECT id, position FROM instagram_posts ORDER BY position, id"))
+    index = next((i for i, row in enumerate(rows) if int(row["id"]) == post_id), None)
+    if index is None:
+        return False
+    target = index - 1 if direction == "up" else index + 1
+    if target < 0 or target >= len(rows):
+        return False
+    rows[index], rows[target] = rows[target], rows[index]
+    for position, row in enumerate(rows):
+        conn.execute(
+            "UPDATE instagram_posts SET position = ? WHERE id = ?", (position, int(row["id"]))
+        )
+    return True
+
+
+def _compact_instagram(conn: sqlite3.Connection) -> None:
+    for position, row in enumerate(
+        conn.execute("SELECT id FROM instagram_posts ORDER BY position, id").fetchall()
+    ):
+        conn.execute("UPDATE instagram_posts SET position = ? WHERE id = ?", (position, row["id"]))
+
+
 # ------------------------------------------------------------------ compteurs
 
 

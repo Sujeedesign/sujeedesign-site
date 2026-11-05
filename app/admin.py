@@ -9,7 +9,9 @@ from __future__ import annotations
 
 import json
 import mimetypes
+import shutil
 import sqlite3
+import subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -26,7 +28,7 @@ from . import repo
 from . import security
 from . import settings as settings_module
 from .agent.store import FIELD_LABELS
-from .db import connect
+from .db import connect, get_meta, set_meta
 from .ui import templates
 
 router = APIRouter()
@@ -92,7 +94,7 @@ NAV_GROUPS: tuple[tuple[str, tuple[tuple[str, str, str], ...]], ...] = (
             ("prestations", "Prestations", "/admin/prestations"),
         ),
     ),
-    ("Contenu", (("pages", "Pages du site", "/admin/pages"),)),
+    ("Contenu", (("pages", "Pages du site", "/admin/pages"), ("instagram", "Instagram", "/admin/instagram"))),
     (
         "Échanges",
         (
@@ -1139,3 +1141,280 @@ def etat(request: Request, user: str = Depends(require_admin)) -> JSONResponse:
         )
     finally:
         conn.close()
+
+
+# ------------------------------------------------------------------ instagram
+#
+# Grille « Sur Instagram » de l'accueil, 100 % manuelle : Sujee importe l'image
+# ou la vidéo, écrit la légende et colle le lien du post. Rien n'est récupéré
+# automatiquement depuis Instagram.
+
+INSTAGRAM_SLOTS = repo.INSTAGRAM_SLOTS
+INSTAGRAM_VIDEO_MAX = 60 * 1024 * 1024
+INSTAGRAM_PROFILE = "https://www.instagram.com/sujeedesign.ai/"
+INSTAGRAM_DEFAULTS = {
+    "instagram_title": "Sur Instagram",
+    "instagram_intro": (
+        "Identités, coulisses et images générées : le fil @sujeedesign.ai "
+        "se regarde aussi ici."
+    ),
+}
+INSTAGRAM_IMAGE_TYPES = {
+    key: value
+    for key, value in ALLOWED_TYPES.items()
+    if key.startswith("image/") and key != "image/gif"
+}
+
+
+def _instagram_settings(conn: sqlite3.Connection) -> dict[str, str]:
+    return {
+        "title": get_meta(conn, "instagram_title", INSTAGRAM_DEFAULTS["instagram_title"]),
+        "intro": get_meta(conn, "instagram_intro", INSTAGRAM_DEFAULTS["instagram_intro"]),
+        "profile": INSTAGRAM_PROFILE,
+    }
+
+
+def _instagram_poster(folder: Path, filename: str) -> str:
+    """Extrait une vignette JPEG de la vidéo quand ffmpeg est disponible."""
+    if shutil.which("ffmpeg") is None:
+        return ""
+    poster_name = f"ig-{Path(filename).stem}.jpg"
+    try:
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-y",
+                "-loglevel",
+                "error",
+                "-ss",
+                "0.5",
+                "-i",
+                str(folder / filename),
+                "-frames:v",
+                "1",
+                "-vf",
+                "scale=720:-2",
+                str(folder / poster_name),
+            ],
+            check=True,
+            timeout=30,
+        )
+    except (subprocess.SubprocessError, OSError):
+        return ""
+    return f"/medias/{poster_name}" if (folder / poster_name).exists() else ""
+
+
+async def _instagram_store_file(
+    request: Request, fichier: UploadFile
+) -> tuple[dict[str, str], str]:
+    """Valide et enregistre le fichier importé. Renvoie (valeurs, message d'erreur)."""
+    payload = await fichier.read()
+    if not payload:
+        return {}, "Fichier vide."
+
+    mime = (fichier.content_type or "").lower()
+    extension = INSTAGRAM_IMAGE_TYPES.get(mime)
+    if extension is None:
+        extension = INSTAGRAM_IMAGE_TYPES.get(mimetypes.guess_type(fichier.filename or "")[0] or "")
+
+    kind = "image"
+    if extension is None:
+        video = security.sniff_video(payload)
+        if not video:
+            return {}, "Format refusé. Utilise JPG, PNG, WebP, AVIF, MP4 (H.264) ou WebM."
+        extension = ".mp4" if video == "video/mp4" else ".webm"
+        kind = "video"
+
+    limit = INSTAGRAM_VIDEO_MAX if kind == "video" else MAX_UPLOAD
+    if len(payload) > limit:
+        return {}, (
+            "Vidéo trop lourde (60 Mo maximum)." if kind == "video" else "Image trop lourde (15 Mo maximum)."
+        )
+    if kind == "image" and not security.sniff_matches(payload, extension):
+        return {}, "Le contenu du fichier ne correspond pas au format annoncé."
+
+    folder = Path(request.app.state.media_dir)
+    folder.mkdir(parents=True, exist_ok=True)
+    filename = security.random_filename(extension)
+    (folder / filename).write_bytes(payload)
+
+    values = {"kind": kind, "src": f"/medias/{filename}", "poster": ""}
+    if kind == "video":
+        values["poster"] = _instagram_poster(folder, filename)
+    return values, ""
+
+
+@router.get("/admin/instagram", response_class=HTMLResponse)
+def instagram_page(request: Request, user: str = Depends(require_admin)) -> Response:
+    conn = get_conn(request)
+    try:
+        posts = repo.list_instagram_posts(conn)
+        values = _instagram_settings(conn)
+    finally:
+        conn.close()
+    return render(
+        request,
+        "instagram.html",
+        posts=posts,
+        values=values,
+        slots=INSTAGRAM_SLOTS,
+    )
+
+
+@router.post("/admin/instagram/reglages")
+def instagram_reglages(
+    request: Request,
+    titre: str = Form(""),
+    intro: str = Form(""),
+    csrf: str = Form(""),
+    user: str = Depends(require_admin),
+) -> Response:
+    check_csrf(request, csrf)
+    conn = get_conn(request)
+    try:
+        set_meta(conn, "instagram_title", titre.strip()[:120] or INSTAGRAM_DEFAULTS["instagram_title"])
+        set_meta(conn, "instagram_intro", intro.strip()[:400] or INSTAGRAM_DEFAULTS["instagram_intro"])
+        conn.commit()
+    finally:
+        conn.close()
+    content_store.notify_site("instagram")
+    return back("/admin/instagram", "Textes de la section enregistrés.")
+
+
+@router.post("/admin/instagram/ajouter")
+async def instagram_ajouter(
+    request: Request,
+    fichier: UploadFile | None = File(None),
+    legende: str = Form(""),
+    permalien: str = Form(""),
+    alt: str = Form(""),
+    csrf: str = Form(""),
+    user: str = Depends(require_admin),
+) -> Response:
+    check_csrf(request, csrf)
+    if fichier is None or not fichier.filename:
+        return back("/admin/instagram", "Choisis une image ou une vidéo.", "error")
+
+    values, error = await _instagram_store_file(request, fichier)
+    if error:
+        return back("/admin/instagram", error, "error")
+
+    values.update(
+        caption=legende.strip()[:600],
+        permalink=_safe_instagram_url(permalien),
+        alt=alt.strip()[:300] or legende.strip()[:300],
+    )
+    conn = get_conn(request)
+    try:
+        post_id = repo.add_instagram_post(conn, values)
+        conn.commit()
+    finally:
+        conn.close()
+    if post_id is None:
+        return back(
+            "/admin/instagram",
+            "Les cinq places sont déjà prises. Supprime un post pour en ajouter un autre.",
+            "error",
+        )
+    content_store.notify_site("instagram")
+    return back("/admin/instagram", "Post ajouté à la grille.")
+
+
+@router.post("/admin/instagram/{post_id}/modifier")
+async def instagram_modifier(
+    request: Request,
+    post_id: int,
+    fichier: UploadFile | None = File(None),
+    legende: str = Form(""),
+    permalien: str = Form(""),
+    alt: str = Form(""),
+    csrf: str = Form(""),
+    user: str = Depends(require_admin),
+) -> Response:
+    check_csrf(request, csrf)
+    conn = get_conn(request)
+    try:
+        row = repo.get_instagram_post(conn, post_id)
+    finally:
+        conn.close()
+    if row is None:
+        return back("/admin/instagram", "Post introuvable.", "error")
+
+    values = {
+        "kind": row["kind"],
+        "src": row["src"],
+        "poster": row["poster"],
+        "caption": legende.strip()[:600],
+        "permalink": _safe_instagram_url(permalien),
+        "alt": alt.strip()[:300] or legende.strip()[:300],
+    }
+    if fichier is not None and fichier.filename:
+        stored, error = await _instagram_store_file(request, fichier)
+        if error:
+            return back("/admin/instagram", error, "error")
+        values.update(stored)
+
+    conn = get_conn(request)
+    try:
+        repo.update_instagram_post(conn, post_id, values)
+        conn.commit()
+    finally:
+        conn.close()
+    content_store.notify_site("instagram")
+    return back("/admin/instagram", "Post mis à jour.")
+
+
+@router.post("/admin/instagram/{post_id}/deplacer")
+def instagram_deplacer(
+    request: Request,
+    post_id: int,
+    direction: str = Form("up"),
+    csrf: str = Form(""),
+    user: str = Depends(require_admin),
+) -> Response:
+    check_csrf(request, csrf)
+    conn = get_conn(request)
+    try:
+        moved = repo.move_instagram_post(conn, post_id, direction)
+        conn.commit()
+    finally:
+        conn.close()
+    content_store.notify_site("instagram")
+    return back("/admin/instagram", "Ordre mis à jour." if moved else "Déplacement impossible.", "ok" if moved else "error")
+
+
+@router.post("/admin/instagram/{post_id}/supprimer")
+def instagram_supprimer(
+    request: Request, post_id: int, csrf: str = Form(""), user: str = Depends(require_admin)
+) -> Response:
+    check_csrf(request, csrf)
+    conn = get_conn(request)
+    try:
+        row = repo.delete_instagram_post(conn, post_id)
+        conn.commit()
+    finally:
+        conn.close()
+    if row is not None:
+        folder = Path(request.app.state.media_dir)
+        for key in ("src", "poster"):
+            value = str(row[key] or "")
+            if value.startswith("/medias/"):
+                try:
+                    (folder / value[len("/medias/") :]).unlink(missing_ok=True)
+                except OSError:
+                    pass
+    content_store.notify_site("instagram")
+    return back("/admin/instagram", "Post retiré de la grille.")
+
+
+def _safe_instagram_url(value: str) -> str:
+    """N'accepte qu'un lien http(s) pertinent, sinon vide."""
+    candidate = value.strip()[:400]
+    if not candidate:
+        return ""
+    if not candidate.startswith(("http://", "https://")):
+        return ""
+    parsed = urlparse(candidate)
+    if parsed.scheme not in ("http", "https") or not parsed.netloc:
+        return ""
+    return candidate

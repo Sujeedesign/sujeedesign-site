@@ -10,7 +10,7 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-SCHEMA_VERSION = 10
+SCHEMA_VERSION = 11
 
 # Colonnes ajoutées après la première mise en production. Chaque entrée est
 # appliquée une seule fois, dans l'ordre, par `migrate` (idempotent).
@@ -33,6 +33,7 @@ REQUIRED_TABLES = (
     "publications",
     "projets",
     "prestations",
+    "instagram_posts",
     "_meta",
 )
 
@@ -165,6 +166,21 @@ CREATE TABLE IF NOT EXISTS prestations_seeded (
   slug TEXT PRIMARY KEY,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+-- Grille « Sur Instagram » de l'accueil : cinq emplacements, remplis à la main
+-- depuis l'admin. Aucun lien avec l'API Instagram : Sujee choisit les posts.
+CREATE TABLE IF NOT EXISTS instagram_posts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  position INTEGER NOT NULL DEFAULT 0,
+  kind TEXT NOT NULL DEFAULT 'image',
+  src TEXT NOT NULL DEFAULT '',
+  poster TEXT NOT NULL DEFAULT '',
+  caption TEXT NOT NULL DEFAULT '',
+  permalink TEXT NOT NULL DEFAULT '',
+  alt TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_instagram_position ON instagram_posts(position);
 
 CREATE TABLE IF NOT EXISTS _meta (
   key TEXT PRIMARY KEY,

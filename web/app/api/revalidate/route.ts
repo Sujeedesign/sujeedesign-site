@@ -8,7 +8,7 @@ import { revalidateTag } from "next/cache";
  * route refuse tout : elle ne doit jamais être ouverte, sinon n'importe qui
  * pourrait forcer des régénérations.
  */
-const TAGS = new Set(["content", "catalogue"]);
+const TAGS = new Set(["content", "catalogue", "instagram"]);
 
 export async function POST(request: Request) {
   const expected = process.env.REVALIDATE_SECRET || "";

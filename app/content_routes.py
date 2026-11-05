@@ -66,3 +66,47 @@ def read_catalogue(request: Request) -> Response:
     if request.headers.get("if-none-match") == etag:
         return Response(status_code=304, headers=headers)
     return Response(content=body, media_type="application/json", headers=headers)
+
+
+@router.get("/api/v1/instagram")
+def read_instagram(request: Request) -> dict:
+    """Grille « Sur Instagram » de l'accueil (cinq posts choisis à la main).
+
+    Lecture ouverte comme le reste du contenu public. Pas de cache HTTP long :
+    le front met en cache via le tag `instagram`, invalidé à chaque
+    enregistrement dans le back office.
+    """
+    from . import repo
+    from .db import get_meta
+
+    conn = _conn(request)
+    try:
+        posts = repo.list_instagram_posts(conn)
+        title = get_meta(conn, "instagram_title", "Sur Instagram")
+        intro = get_meta(
+            conn,
+            "instagram_intro",
+            "Identités, coulisses et images générées : le fil @sujeedesign.ai "
+            "se regarde aussi ici.",
+        )
+    finally:
+        conn.close()
+
+    return {
+        "title": title,
+        "intro": intro,
+        "profile": "https://www.instagram.com/sujeedesign.ai/",
+        "handle": "@sujeedesign.ai",
+        "posts": [
+            {
+                "id": int(row["id"]),
+                "kind": row["kind"],
+                "src": row["src"],
+                "poster": row["poster"],
+                "caption": row["caption"],
+                "permalink": row["permalink"],
+                "alt": row["alt"],
+            }
+            for row in posts
+        ],
+    }

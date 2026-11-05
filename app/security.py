@@ -195,6 +195,16 @@ _MAGIC_CONTAINERS = {
 }
 
 
+def sniff_video(payload: bytes) -> str:
+    """Type de vidéo reconnu à partir des octets d'en-tête (mp4, mov, webm)."""
+    head = payload[:12]
+    if len(head) >= 8 and head[4:8] == b"ftyp":
+        return "video/mp4"
+    if head.startswith(b"\x1a\x45\xdf\xa3"):
+        return "video/webm"
+    return ""
+
+
 def sniff_matches(payload: bytes, extension: str) -> bool:
     """Vrai si les premiers octets du fichier correspondent au format annoncé."""
     ext = (extension or "").lower().lstrip(".")
