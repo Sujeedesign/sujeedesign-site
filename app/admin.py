@@ -1204,6 +1204,39 @@ def _instagram_poster(folder: Path, filename: str) -> str:
     return f"/medias/{poster_name}" if (folder / poster_name).exists() else ""
 
 
+def backfill_instagram_posters(conn, media_dir: Path) -> int:
+    """Génère les vignettes manquantes des vidéos Instagram déjà en base.
+
+    Appelé au démarrage : les vidéos importées avant l'ajout de ffmpeg dans
+    l'image n'ont pas de poster, la grille afficherait des rectangles noirs.
+    Renvoie le nombre de vignettes créées.
+    """
+    if shutil.which("ffmpeg") is None:
+        return 0
+    folder = Path(media_dir)
+    created = 0
+    try:
+        rows = list(
+            conn.execute(
+                "SELECT id, src FROM instagram_posts WHERE kind = 'video' AND (poster IS NULL OR poster = '')"
+            )
+        )
+    except sqlite3.Error:
+        return 0
+    for row in rows:
+        filename = Path(str(row["src"] or "")).name
+        if not filename or not (folder / filename).exists():
+            continue
+        poster = _instagram_poster(folder, filename)
+        if not poster:
+            continue
+        conn.execute("UPDATE instagram_posts SET poster = ? WHERE id = ?", (poster, int(row["id"])))
+        created += 1
+    if created:
+        conn.commit()
+    return created
+
+
 async def _instagram_store_file(
     request: Request, fichier: UploadFile
 ) -> tuple[dict[str, str], str]:

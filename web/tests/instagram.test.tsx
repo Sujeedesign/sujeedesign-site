@@ -58,7 +58,9 @@ describe("getInstagramFeed", () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       "https://admin.exemple/api/v1/instagram",
-      expect.objectContaining({ next: expect.objectContaining({ tags: ["instagram"] }) }),
+      expect.objectContaining({
+        next: expect.objectContaining({ tags: ["instagram"] }),
+      }),
     );
     expect(result?.posts).toHaveLength(5);
     expect(result?.posts[0]!.kind).toBe("video");
@@ -69,13 +71,19 @@ describe("getInstagramFeed", () => {
     expect(await getInstagramFeed()).toBeNull();
 
     process.env.CONTENT_API_URL = "https://admin.exemple";
-    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, json: async () => ({ posts: [] }) })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({ ok: true, json: async () => ({ posts: [] }) })),
+    );
     expect(await getInstagramFeed()).toBeNull();
   });
 
   it("renvoie null si l'API est en erreur", async () => {
     process.env.CONTENT_API_URL = "https://admin.exemple";
-    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: false, json: async () => ({}) })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({ ok: false, json: async () => ({}) })),
+    );
     expect(await getInstagramFeed()).toBeNull();
   });
 });
@@ -85,18 +93,28 @@ describe("InstagramSection", () => {
     render(<InstagramSection feed={feed} />);
 
     expect(screen.getByText("Sur Instagram")).toBeTruthy();
-    expect(screen.getByText("@sujeedesign.ai").closest("a")?.getAttribute("href")).toBe(feed.profile);
+    expect(
+      screen.getByText("@sujeedesign.ai").closest("a")?.getAttribute("href"),
+    ).toBe(feed.profile);
 
-    const tiles = screen.getAllByRole("button").filter((node) => node.classList.contains("ig__tile"));
+    const tiles = screen
+      .getAllByRole("button")
+      .filter((node) => node.classList.contains("ig__tile"));
     expect(tiles).toHaveLength(2);
-    expect(tiles[1]!.querySelector("video")?.getAttribute("poster")).toBe("/medias/reel.jpg");
+    expect(tiles[1]!.querySelector("video")?.getAttribute("poster")).toBe(
+      "/medias/reel.jpg",
+    );
 
     fireEvent.click(tiles[0]!);
     const dialog = screen.getByRole("dialog");
-    expect(dialog.querySelector("img")?.getAttribute("src")).toBe("/medias/image.jpg");
-    expect(screen.getByRole("link", { name: /Voir sur Instagram/ }).getAttribute("href")).toBe(
-      "https://www.instagram.com/p/AAA/",
+    expect(dialog.querySelector("img")?.getAttribute("src")).toBe(
+      "/medias/image.jpg",
     );
+    expect(
+      screen
+        .getByRole("link", { name: /Voir sur Instagram/ })
+        .getAttribute("href"),
+    ).toBe("https://www.instagram.com/p/AAA/");
 
     fireEvent.keyDown(document, { key: "Escape" });
     expect(screen.queryByRole("dialog")).toBeNull();
@@ -104,7 +122,9 @@ describe("InstagramSection", () => {
 
   it("monte le player dans body pour échapper au contexte d'empilement de la section", () => {
     const { container } = render(<InstagramSection feed={feed} />);
-    const tiles = screen.getAllByRole("button").filter((node) => node.classList.contains("ig__tile"));
+    const tiles = screen
+      .getAllByRole("button")
+      .filter((node) => node.classList.contains("ig__tile"));
 
     fireEvent.click(tiles[1]!);
     const dialog = screen.getByRole("dialog");
@@ -121,14 +141,36 @@ describe("InstagramSection", () => {
 
   it("navigue au clavier entre les posts", () => {
     render(<InstagramSection feed={feed} />);
-    const tiles = screen.getAllByRole("button").filter((node) => node.classList.contains("ig__tile"));
+    const tiles = screen
+      .getAllByRole("button")
+      .filter((node) => node.classList.contains("ig__tile"));
 
     fireEvent.click(tiles[0]!);
     fireEvent.keyDown(document, { key: "ArrowRight" });
     expect(screen.getByRole("dialog").querySelector("video")).toBeTruthy();
-    expect(screen.getByRole("dialog").querySelector("video")?.hasAttribute("controls")).toBe(true);
+    expect(
+      screen
+        .getByRole("dialog")
+        .querySelector("video")
+        ?.hasAttribute("controls"),
+    ).toBe(true);
 
     fireEvent.keyDown(document, { key: "ArrowRight" });
     expect(screen.getByRole("dialog").querySelector("img")).toBeTruthy();
+  });
+
+  it("propose un repli quand la vidéo ne peut pas être décodée", () => {
+    render(<InstagramSection feed={feed} />);
+    const tiles = screen
+      .getAllByRole("button")
+      .filter((node) => node.classList.contains("ig__tile"));
+
+    fireEvent.click(tiles[1]!);
+    const video = screen.getByRole("dialog").querySelector("video");
+    fireEvent.error(video!);
+
+    expect(screen.getByRole("dialog").querySelector("video")).toBeNull();
+    expect(screen.getByText(/ne peut pas être lue/i)).toBeTruthy();
+    expect(screen.getByRole("link", { name: /Ouvrir la vidéo/ })).toBeTruthy();
   });
 });

@@ -64,6 +64,15 @@ async def lifespan(app: FastAPI):
         added = catalogue.seed_from_file(conn)
         if added:
             log.info("catalogue amorcé : %s fiche(s) reprise(s) du site", added)
+        # Vignettes des vidéos Instagram importées avant ffmpeg : sans elles la
+        # grille affiche des rectangles noirs.
+        try:
+            posters = admin.backfill_instagram_posters(conn, Path(app.state.media_dir))
+        except Exception:  # noqa: BLE001  (le démarrage ne doit jamais échouer ici)
+            log.warning("vignettes Instagram non régénérées", exc_info=True)
+        else:
+            if posters:
+                log.info("vignettes Instagram créées : %s", posters)
     finally:
         conn.close()
     Path(app.state.media_dir).mkdir(parents=True, exist_ok=True)

@@ -11,15 +11,20 @@ import type { InstagramFeed } from "@/lib/content/instagram";
  */
 export function InstagramSection({ feed }: { feed: InstagramFeed }) {
   const [open, setOpen] = useState<number | null>(null);
+  const [videoError, setVideoError] = useState(false);
   const closeRef = useRef<HTMLButtonElement | null>(null);
   const lastFocused = useRef<HTMLElement | null>(null);
   const posts = feed.posts;
   const total = posts.length;
 
-  const close = useCallback(() => setOpen(null), []);
+  const close = useCallback(() => {
+    setOpen(null);
+    setVideoError(false);
+  }, []);
 
   const step = useCallback(
     (delta: number) => {
+      setVideoError(false);
       setOpen((current) => {
         if (current === null) return current;
         return (current + delta + total) % total;
@@ -57,6 +62,7 @@ export function InstagramSection({ feed }: { feed: InstagramFeed }) {
 
   const show = (index: number) => {
     lastFocused.current = document.activeElement as HTMLElement | null;
+    setVideoError(false);
     setOpen(index);
   };
 
@@ -167,14 +173,30 @@ export function InstagramSection({ feed }: { feed: InstagramFeed }) {
 
               <figure className="ig-player__frame">
                 {active.kind === "video" ? (
-                  <video
-                    className="ig-player__media"
-                    src={active.src}
-                    poster={active.poster || undefined}
-                    controls
-                    autoPlay
-                    playsInline
-                  />
+                  videoError ? (
+                    <div className="ig-player__error">
+                      <p>
+                        Cette vidéo ne peut pas être lue dans ce navigateur.
+                      </p>
+                      <a
+                        href={active.src}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Ouvrir la vidéo ↗
+                      </a>
+                    </div>
+                  ) : (
+                    <video
+                      className="ig-player__media"
+                      src={active.src}
+                      poster={active.poster || undefined}
+                      controls
+                      autoPlay
+                      playsInline
+                      onError={() => setVideoError(true)}
+                    />
+                  )
                 ) : (
                   <img
                     className="ig-player__media"

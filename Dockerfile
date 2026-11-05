@@ -11,8 +11,9 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
+# ffmpeg : vignettes des vidéos Instagram (et contrôle des médias importés).
 RUN apt-get update \
- && apt-get install -y --no-install-recommends curl \
+ && apt-get install -y --no-install-recommends curl ffmpeg \
  && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt ./
