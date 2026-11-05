@@ -700,6 +700,12 @@ def _guess_mode(message: str) -> str:
     return ""
 
 
+def _already_known(fields: dict, key: str, value: str) -> bool:
+    """Évite d'enregistrer deux fois la même phrase dans deux champs."""
+    flat = _flat(value)
+    return any(_flat(other) == flat for name, other in fields.items() if name != key and other)
+
+
 def _server_qualification_turn(toolbox: ToolBox, message: str) -> str:
     """Qualification pilotée par le serveur : l'ordre ne dépend pas du modèle.
 
@@ -724,11 +730,15 @@ def _server_qualification_turn(toolbox: ToolBox, message: str) -> str:
         # et la même question reposée mot pour mot.
         nxt = next((key for key in store.QUALIFICATION if not fields.get(key)), "")
         value = _qualification_value(nxt, message) if nxt else ""
+        if value and _already_known(fields, nxt, value):
+            value = ""
         if value:
             store.merge_fields(conn, session_id, {nxt: value})
             fields = store.session_fields(store.get_session(conn, session_id))
     if asked and asked in store.QUALIFICATION and not fields.get(asked):
         value = _qualification_value(asked, message)
+        if value and _already_known(fields, asked, value):
+            value = ""
         if value:
             store.merge_fields(conn, session_id, {asked: value})
             fields = store.session_fields(store.get_session(conn, session_id))
@@ -785,15 +795,45 @@ def _strip_greeting(text: str) -> str:
     return cleaned
 
 
+# Un message ne vaut pour le type de projet que s'il nomme un type de projet :
+# sans ce filtre, « Le matin » ou « auto » étaient enregistrés comme projet.
+_ANY_PROJECT = re.compile(
+    r"(?i)\b(site|web|e-?commerce|ecommerce|boutique|branding|logotype|logo|"
+    r"identit\w*|charte|applica\w*|appli|mobile|refonte|print|[eé]dition|affiche|"
+    r"flyer|brochure|packaging|photo|vid[eé]o|motion|3d|anim\w*|illustration|"
+    r"r[eé]seaux sociaux|social|seo|campagne|ads|ui|ux|maquette|portfolio|"
+    r"vitrine|crm|erp|logiciel|automatisation|chatbot)\b"
+)
+_PURE_MOMENT = re.compile(r"(?i)^\s*(?:le\s+|l')?(matin|apr[eè]s[- ]?midi|soir)\s*$")
+_PURE_MODE = re.compile(
+    r"(?i)^\s*(?:t[ée]l\w*|phone|appel|visio\w*|zoom|meet|téléphone)\s*$"
+)
+_BRAND_MARK = re.compile(r"(?i)(marque|branding|nom|appel\w*|s'appelle|soci[eé]t[eé])")
+
+
 def _qualification_value(key: str, message: str) -> str:
-    """Valeur exploitable tirée du message pour le champ demandé."""
+    """Valeur exploitable tirée du message pour le champ demandé.
+
+    Chaque champ a son propre filtre : le serveur ne range plus n'importe quoi
+    dans n'importe quel champ, sinon l'agent semble ne pas lire les messages.
+    """
     text = _strip_greeting(" ".join(str(message or "").split()))
     if not text or len(text) < 2 or "?" in text or len(text) > 200:
         return ""
+    if _PURE_MOMENT.match(text) or _PURE_MODE.match(text) or _EMAIL.search(text) or _PHONE.search(text):
+        return ""
     if key == "branding":
+        if not _BRAND_MARK.search(text) and _ANY_PROJECT.search(text):
+            # « Création d'un site ecommerce » répond au type de projet, pas au
+            # nom du branding : on ne l'enregistre pas comme marque.
+            return ""
         return store.normalize_branding(text)
     if key == "project_type":
-        return "" if store._BRANDING_NOISE.match(text.lower()) else text
+        if store._BRANDING_NOISE.match(text.lower()):
+            return ""
+        if re.search(r"(?i)(pas encore|pas trouv|aucun|à définir|a definir)", text):
+            return ""
+        return text if _ANY_PROJECT.search(text) else ""
     return text
 
 

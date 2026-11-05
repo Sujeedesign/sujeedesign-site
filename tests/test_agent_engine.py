@@ -879,3 +879,21 @@ def test_faute_telephone_reconnue_comme_appel() -> None:
     for reponse in ("télphone", "tel", "Telephon", "par téléphone"):
         assert engine._guess_mode(reponse) == store.CALL_MODES["telephone"], reponse
     assert engine._guess_mode("visio") == store.CALL_MODES["visio"]
+
+
+def test_le_serveur_ne_range_pas_n_importe_quoi_dans_les_champs() -> None:
+    """Chaque champ a son filtre : un message lu pour un autre champ ne fuit pas."""
+    # Le type de projet n'accepte que les messages qui nomment un projet.
+    assert engine._qualification_value("project_type", "Site web ou e-commerce")
+    assert engine._qualification_value("project_type", "Le matin") == ""
+    assert engine._qualification_value("project_type", "auto") == ""
+    assert engine._qualification_value("project_type", "télphone 0651517463") == ""
+    # Le branding ne prend pas une phrase de type de projet pour un nom de marque.
+    assert engine._qualification_value("branding", "Création d'un site ecommerce") == ""
+    assert engine._qualification_value("branding", "Vaasam") == "Vaasam"
+    assert (
+        engine._qualification_value(
+            "branding", "Branding pas encore trouvé mais ça sera vente de pièce auto"
+        )
+        == store.BRANDING_UNKNOWN
+    )
