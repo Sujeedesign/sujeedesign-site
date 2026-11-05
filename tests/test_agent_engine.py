@@ -327,6 +327,27 @@ def test_creneau_choisi_est_transmis_au_modele(conn):
     assert "book_meeting" in hint[0]["content"]
 
 
+def test_creneau_demande_absent_des_propositions_est_refuse(conn):
+    """« mardi 10 à 09h00 » non proposé : on le dit, sans décaler le rendez-vous."""
+    from datetime import datetime
+
+    paris = lambda j, h, mi=0: datetime(2026, 11, j, h, mi, tzinfo=slots.PARIS)  # noqa: E731
+    proposals = [paris(9, 9, 30), paris(10, 9, 30), paris(11, 9)]
+    google = FakeGoogle(available=proposals)
+    session_id = engine.prepare_session(conn)
+    store.merge_fields(conn, session_id, FIELDS)
+    store.touch(conn, session_id, step="creneaux")
+    store.set_proposals(conn, session_id, [slots.slot_id(start) for start in proposals])
+
+    events = _collect(conn, session_id, "mardi 10 novembre à 09h00", FakeLLM([[]]), google)
+    texte = " ".join("".join(e["text"] for e in events if e.get("type") == "delta").split())
+
+    assert "n'est pas libre" in texte
+    assert "mardi 10 novembre à 09h30" in texte
+    assert google.events == []
+    assert store.session_chosen(store.get_session(conn, session_id)) in (None, "")
+
+
 class PanneLLM:
     """Modèle injoignable : le tour doit rester utilisable côté serveur."""
 

@@ -489,7 +489,7 @@ export default function ContactChat() {
                 <span className={styles.confirmTag}>Créneau réservé</span>
                 <strong>{booking.label}</strong>
                 <span className={styles.ref}>Réf. {booking.reference}</span>
-                {booking.branding && <span className={styles.ref}>Projet : {booking.branding}</span>}
+                {booking.branding && <span className={styles.ref}>Branding : {booking.branding}</span>}
                 <p>
                   {booking.mail_sent
                     ? booking.call_mode === "visio"

@@ -239,7 +239,12 @@ def turn(
         store.add_message(conn, session_id, "assistant", answer)
     elif answer.strip():
         row_now = store.get_session(conn, session_id)
-        if slots_shown and not toolbox.booking and row_now and row_now["step"] == "creneaux":
+        # Refus explicite d'un créneau absent : la phrase est déjà juste, ne pas
+        # la remplacer par un gabarit qui perdrait les horaires disponibles.
+        refus = answer.startswith("Ce créneau n'est pas libre")
+        if refus:
+            pass
+        elif slots_shown and not toolbox.booking and row_now and row_now["step"] == "creneaux":
             # Les boutons font le travail : une phrase suffit, jamais la liste.
             if store.session_chosen(row_now):
                 answer = _one_question(answer)
@@ -419,10 +424,15 @@ def _pick_slot(row: Any, message: str) -> dict[str, str] | None:
         (int(match.group(1)), int(match.group(2)) if match.group(2) else None)
         for match in re.finditer(r"\b(\d{1,2})\s*(?:h|:)\s*(\d{2})?\b", said)
     ]
+    wanted = _wanted_slot(message)
     scored: list[tuple[int, dict[str, str]]] = []
     for proposal in proposals:
         start = slots.parse_slot(proposal["id"])
         if start is None:
+            continue
+        if _slot_contradiction(proposal, wanted):
+            # Jour, quantième, mois ou heure explicitement différents : on ne
+            # décale pas le rendez-vous sur un créneau voisin.
             continue
         if wanted_hours and not any(
             hour == start.hour and (minute is None or minute == start.minute)
@@ -438,7 +448,76 @@ def _pick_slot(row: Any, message: str) -> dict[str, str] | None:
         winners = [item for item in scored if item[0] == best]
         if best >= 3 and len(winners) == 1:
             return winners[0][1]
+    # Jour de la semaine et heure annoncés, sans quantième ni minute exacte :
+    # « mardi matin à 9 h ». On tranche seulement si un seul créneau correspond.
+    jours = [nom for nom in _WEEKDAYS if nom in said]
+    if len(jours) == 1 and wanted_hours:
+        memes = [
+            proposal
+            for proposal in proposals
+            if (start := slots.parse_slot(proposal["id"])) is not None
+            and _WEEKDAYS[start.weekday()] == jours[0]
+            and any(
+                hour == start.hour and (minute is None or minute == start.minute)
+                for hour, minute in wanted_hours
+            )
+        ]
+        if len(memes) == 1:
+            return memes[0]
     return None
+
+
+_MONTHS = (
+    "janvier", "fevrier", "mars", "avril", "mai", "juin", "juillet",
+    "aout", "septembre", "octobre", "novembre", "decembre",
+)
+
+
+def _wanted_slot(message: str) -> dict[str, int]:
+    """Ce que le visiteur demande : jour de semaine, quantième, mois, heure."""
+    said = _flat(message)
+    wanted: dict[str, int] = {}
+    for index, nom in enumerate(_WEEKDAYS):
+        if re.search(rf"\b{nom}\b", said):
+            wanted["weekday"] = index
+            break
+    jour = re.search(r"\b(\d{1,2})(?:er)?\s+(?:" + "|".join(_MONTHS) + r")\b", said)
+    if jour:
+        wanted["day"] = int(jour.group(1))
+    for index, nom in enumerate(_MONTHS, start=1):
+        if re.search(rf"\b{nom}\b", said):
+            wanted["month"] = index
+            break
+    heure = re.search(r"\b(\d{1,2})\s*(?:h|:)\s*(\d{2})?\b", said)
+    if heure:
+        wanted["hour"] = int(heure.group(1))
+        if heure.group(2):
+            wanted["minute"] = int(heure.group(2))
+    return wanted
+
+
+def _slot_parts(proposal: dict[str, str]) -> dict[str, int]:
+    start = slots.parse_slot(proposal["id"])
+    if start is None:
+        return {}
+    return {
+        "weekday": start.weekday(),
+        "day": start.day,
+        "month": start.month,
+        "hour": start.hour,
+        "minute": start.minute,
+    }
+
+
+def _slot_contradiction(proposal: dict[str, str], wanted: dict[str, int]) -> bool:
+    """Vrai si le créneau proposé contredit un élément explicitement demandé."""
+    parts = _slot_parts(proposal)
+    if not parts:
+        return True
+    for cle in ("weekday", "day", "month", "hour", "minute"):
+        if cle in wanted and wanted[cle] != parts.get(cle):
+            return True
+    return False
 
 
 _WEEKDAYS = ("lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche")
@@ -787,6 +866,15 @@ def _server_moment_turn(toolbox: ToolBox, row: Any, message: str) -> str:
     )
 
 
+def _slots_answer(row: Any, moment: str = "") -> str:
+    """Liste les propositions en cours, prêtes à être lues par le visiteur."""
+    proposals = _proposal_slots(row)
+    if not proposals:
+        return ""
+    libelles = " ; ".join(proposal["label"] for proposal in proposals[:6])
+    return f"Voici les créneaux disponibles : {libelles}. Lequel vous convient ?"
+
+
 def _server_slot_turn(toolbox: ToolBox, row: Any, message: str) -> str:
     """Choix du créneau et coordonnées : piloté par le serveur, sans le modèle.
 
@@ -813,9 +901,30 @@ def _server_slot_turn(toolbox: ToolBox, row: Any, message: str) -> str:
     chosen_now = choice is not None
     lead_in = ""
     if choice is None:
-        # Pas de créneau dans ce message : c'est la suite des coordonnées.
         if not pending:
-            return ""
+            # Le visiteur demande un créneau (jour/heure) : s'il n'est pas dans
+            # les propositions, on le dit franchement au lieu de laisser le
+            # modèle inventer une heure voisine.
+            wanted = _wanted_slot(message)
+            if wanted:
+                libre = [
+                    proposal
+                    for proposal in _proposal_slots(row)
+                    if not _slot_contradiction(proposal, wanted)
+                ]
+                if len(libre) == 1:
+                    choice = libre[0]
+                    lead_in = f"C'est noté pour {choice['label']}. "
+                else:
+                    libelles = " ; ".join(p["label"] for p in _proposal_slots(row)[:6])
+                    if libelles:
+                        return (
+                            f"Ce créneau n'est pas libre. Voici ce que j'ai : {libelles}. "
+                            "Lequel vous convient ?"
+                        )
+                    return ""
+            if choice is None and not pending:
+                return ""
         choice = _choice_by_id(row, pending)
         if choice is None:
             return ""

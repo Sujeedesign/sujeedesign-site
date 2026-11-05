@@ -29,6 +29,7 @@ FAMILIES: dict[str, tuple[str, tuple[int, ...]]] = {
     "Space Mono": ("space-mono", (400, 700)),
     "Bricolage Grotesque": ("bricolage-grotesque", (400, 700)),
     "Fraunces": ("fraunces", (400, 700)),
+    "Poppins": ("poppins", (300, 400, 500, 600, 700)),
 }
 
 HEADER = """/* Polices auto-hébergées des pages /propositions/ (aucun appel à Google).
