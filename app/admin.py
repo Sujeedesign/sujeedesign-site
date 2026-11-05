@@ -679,7 +679,7 @@ def propositions(request: Request, user: str = Depends(require_admin)) -> Respon
         recent = [
             dict(row)
             for row in conn.execute(
-                "SELECT slug, secondes, referer, ua, created_at"
+                "SELECT id, slug, secondes, referer, ua, created_at"
                 " FROM proposition_vues ORDER BY id DESC LIMIT 80"
             ).fetchall()
         ]
@@ -709,6 +709,19 @@ def propositions(request: Request, user: str = Depends(require_admin)) -> Respon
         item["temps"] = _duree(item.get("secondes"))
         item["navigateur"] = _navigateur(item.get("ua") or "")
     return render(request, "propositions.html", cartes=cartes, recent=recent)
+
+
+@router.post("/admin/propositions/{vue_id}/supprimer")
+def proposition_supprimer(request: Request, vue_id: int, csrf: str = Form("")) -> Response:
+    """Retire une consultation : sert aussi à effacer ses propres tests."""
+    check_csrf(request, csrf)
+    conn = get_conn(request)
+    try:
+        conn.execute("DELETE FROM proposition_vues WHERE id = ?", (vue_id,))
+        conn.commit()
+    finally:
+        conn.close()
+    return back("/admin/propositions", "Consultation supprimée.")
 
 
 def _navigateur(ua: str) -> str:

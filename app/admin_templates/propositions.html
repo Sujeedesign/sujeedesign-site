@@ -44,6 +44,7 @@
             <th>Temps</th>
             <th>Appareil</th>
             <th>Provenance</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -55,6 +56,12 @@
             <td>{{ v.navigateur }}</td>
             <td class="tiny muted">
               {% if v.referer %}{{ v.referer }}{% else %}lien direct{% endif %}
+            </td>
+            <td>
+              <form method="post" action="/admin/propositions/{{ v.id }}/supprimer" data-confirm="Retirer cette consultation du suivi ?">
+                <input type="hidden" name="csrf" value="{{ csrf }}">
+                <button class="btn btn-ghost btn-sm" type="submit">Retirer</button>
+              </form>
             </td>
           </tr>
           {% endfor %}

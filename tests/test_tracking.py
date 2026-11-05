@@ -64,3 +64,17 @@ def test_la_page_admin_liste_les_trois_propositions(client: TestClient) -> None:
     assert "N2E Échafaudages" in page.text
     assert "Dimension Nouvelle" in page.text
     assert "Polyrésine" in page.text
+
+
+def test_suppression_d_une_consultation(client: TestClient, conn: sqlite3.Connection) -> None:
+    import re
+
+    client.post("/admin/connexion", data={"password": "mot-de-passe-de-test"})
+    client.post("/api/track/vue", json={"slug": "n2e", "evenement": "ouverture", "session": "y"})
+    page = client.get("/admin/propositions").text
+    vue_id = conn.execute("SELECT id FROM proposition_vues").fetchone()[0]
+    csrf = re.search(r'name="csrf" value="([^"]+)"', page).group(1)
+    response = client.post(f"/admin/propositions/{vue_id}/supprimer", data={"csrf": csrf})
+    assert response.status_code in (200, 303)
+    assert conn.execute("SELECT COUNT(*) FROM proposition_vues").fetchone()[0] == 0
+
