@@ -31,11 +31,13 @@ const merge = (baseDoc, patch) => {
 
 /**
  * Même règle que `lib/content/contact-links.ts` : un CTA ne part jamais en
- * `mailto:`, il ouvre la page contact. La base peut contenir une valeur
- * ancienne ; sans ce filtre, elle revient dans le JSON versionné à chaque
- * build et laisse un diff fantôme que personne n'ose committer.
+ * `mailto:`, ni vers un schéma exécutable, il ouvre la page contact. La base
+ * peut contenir une valeur ancienne ; sans ce filtre, elle revient dans le
+ * JSON versionné à chaque build et laisse un diff fantôme que personne n'ose
+ * committer.
  */
 const CONTACT_HREF = "/contact";
+const UNSAFE_HREF = /^(javascript|data|vbscript|file):/i;
 let replacedHrefs = 0;
 
 const sanitiseHrefs = (value) => {
@@ -43,10 +45,13 @@ const sanitiseHrefs = (value) => {
   if (!isObject(value)) return value;
   const out = {};
   for (const [key, item] of Object.entries(value)) {
-    if (key === "href" && typeof item === "string" && item.trim().toLowerCase().startsWith("mailto:")) {
-      replacedHrefs += 1;
-      out[key] = CONTACT_HREF;
-      continue;
+    if (key === "href" && typeof item === "string") {
+      const href = item.trim();
+      if (href.toLowerCase().startsWith("mailto:") || UNSAFE_HREF.test(href)) {
+        replacedHrefs += 1;
+        out[key] = CONTACT_HREF;
+        continue;
+      }
     }
     out[key] = sanitiseHrefs(item);
   }
