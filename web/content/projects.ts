@@ -995,6 +995,117 @@ export const projects: Project[] = [
     tags: ["Direction artistique", "Identité", "Web"],
     tone: "dark",
   },
+  {
+    slug: "societe-generale-voeux-2018",
+    index: "11",
+    name: "Société Générale — Vœux 2018",
+    client: "Société Générale",
+    year: "2017",
+    disciplines: ["Direction artistique", "Motion design"],
+    pitch:
+      "Deux films de vœux pour la Société Générale, écrits à partir d’œuvres de sa collection : scénario, direction artistique et animation sur After Effects.",
+    scope: "Scénario, storyboard, direction artistique, animation After Effects, cartons de crédits",
+    duration: "2 films de 25 s",
+    cover: {
+      src: "/assets/img/projet/societe-generale-voeux-2018/cover.jpg",
+      alt: "L’œuvre Cercles de Geneviève Claisse et le carton de crédits des vœux 2018 de la Société Générale",
+      width: 1920,
+      height: 1080,
+    },
+    coverPortrait: {
+      src: "/assets/img/projet/societe-generale-voeux-2018/cover-portrait.jpg",
+      alt: "L’œuvre Cercles de Geneviève Claisse, cercles orange, magenta et bleu sur fond violet",
+      width: 1080,
+      height: 1920,
+    },
+    sections: [
+      {
+        k: "01",
+        label: "Contexte",
+        title: "Deux œuvres sorties du cadre",
+        paragraphs: [
+          "Pour les vœux 2018, la direction de la Société Générale a retenu deux pièces de la collection du groupe : Cercles, huile sur toile de Geneviève Claisse peinte en 1968, et une toile sans titre de Louis Granet.",
+          "Deux mondes très différents, la géométrie dure et colorée de l’une, le trait doré et les fleurs de l’autre, pour un même format de sortie : deux films de vingt-cinq secondes.",
+        ],
+      },
+      {
+        k: "02",
+        label: "Décision",
+        title: "Mettre en mouvement sans trahir",
+        paragraphs: [
+          "Chaque film suit la même partition : la date qui s’installe, le motif qui se déploie, les vœux en plusieurs langues, puis le retour à l’œuvre et à ses crédits.",
+          "Chez Claisse, les cercles deviennent un mécanisme, les disques glissent et se recouvrent sur une palette réduite, avec une typographie dorée. Chez Granet, le dessin au trait pousse comme un branchage avant de laisser la toile occuper l’écran.",
+        ],
+        bullets: [
+          "Scénario, storyboard et direction artistique de chaque film",
+          "Animation, compositing et habillage sur After Effects",
+          "Cartons de crédits et signature Société Générale en fin de film",
+          "Deux films de 25 secondes au format 16/9",
+        ],
+      },
+      {
+        k: "03",
+        label: "Résultat",
+        title: "L’œuvre reste le sujet",
+        paragraphs: [
+          "Le mouvement ne sert pas d’effet : il guide la lecture, de la date aux vœux, puis au crédit de l’artiste. Le spectateur voit une œuvre de la collection, pas une publicité.",
+          "Deux films, une même écriture, où la marque s’efface derrière ce qu’elle a choisi de montrer.",
+        ],
+      },
+    ],
+    images: [
+      {
+        src: "/assets/img/projet/societe-generale-voeux-2018/01.jpg",
+        alt: "Disques gris, blanc et ocre superposés, motif géométrique du film inspiré de Geneviève Claisse",
+        width: 1920,
+        height: 1080,
+      },
+      {
+        src: "/assets/img/projet/societe-generale-voeux-2018/02.jpg",
+        alt: "La date 2018 en chiffres dorés sur fond blanc, ouverture du film de vœux",
+        width: 1920,
+        height: 1080,
+      },
+      {
+        src: "/assets/img/projet/societe-generale-voeux-2018/03.jpg",
+        alt: "Anneau gris et disque ocre, variation du motif de cercles en mouvement",
+        width: 1920,
+        height: 1080,
+      },
+      {
+        src: "/assets/img/projet/societe-generale-voeux-2018/04.jpg",
+        alt: "L’œuvre Cercles de Geneviève Claisse, carton de crédits et logo Société Générale",
+        width: 1920,
+        height: 1080,
+      },
+      {
+        src: "/assets/img/projet/societe-generale-voeux-2018/05.jpg",
+        alt: "Dessin au trait doré, branches et feuillages du film inspiré de Louis Granet",
+        width: 1920,
+        height: 1080,
+      },
+      {
+        src: "/assets/img/projet/societe-generale-voeux-2018/06.jpg",
+        alt: "Motif végétal doré et date 2018 sur fond vert menthe",
+        width: 1920,
+        height: 1080,
+      },
+      {
+        src: "/assets/img/projet/societe-generale-voeux-2018/07.jpg",
+        alt: "Réseau de feuillages dorés sur fond vert clair avec la date 2018",
+        width: 1920,
+        height: 1080,
+      },
+      {
+        src: "/assets/img/projet/societe-generale-voeux-2018/08.jpg",
+        alt: "Détail de la toile sans titre de Louis Granet, fleurs et feuillages, et carton de crédits",
+        width: 1920,
+        height: 1080,
+      },
+    ],
+    tags: ["Direction artistique", "Motion design", "Animation"],
+    tone: "paper",
+  },
 ];
 
 export const projectSlugs = projects.map((project) => project.slug);
