@@ -24,7 +24,7 @@ export const projectVideos: Record<string, ProjectVideo[]> = {
     {
       mp4: "/assets/video/societe-generale-voeux-2018/claisse.mp4",
       webm: "/assets/video/societe-generale-voeux-2018/claisse.webm",
-      poster: "/assets/img/projet/societe-generale-voeux-2018/01.jpg",
+      poster: "/assets/img/projet/societe-generale-voeux-2018/poster-claisse.jpg",
       title: "Geneviève Claisse, Cercles",
       caption: "Film de vœux 2018, 25 secondes, animation After Effects",
       width: 1280,
@@ -33,7 +33,7 @@ export const projectVideos: Record<string, ProjectVideo[]> = {
     {
       mp4: "/assets/video/societe-generale-voeux-2018/granet.mp4",
       webm: "/assets/video/societe-generale-voeux-2018/granet.webm",
-      poster: "/assets/img/projet/societe-generale-voeux-2018/05.jpg",
+      poster: "/assets/img/projet/societe-generale-voeux-2018/poster-granet.jpg",
       title: "Louis Granet, Sans titre",
       caption: "Film de vœux 2018, 25 secondes, animation After Effects",
       width: 1280,
