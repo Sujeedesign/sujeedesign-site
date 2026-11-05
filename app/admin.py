@@ -637,6 +637,7 @@ PROPOSITIONS = {
     "n2e": "N2E Échafaudages",
     "dimension-nouvelle": "Dimension Nouvelle",
     "polyresine": "Polyrésine",
+    "sei": "SEI",
 }
 
 
