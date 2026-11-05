@@ -998,12 +998,12 @@ export const projects: Project[] = [
   {
     slug: "societe-generale-voeux-2018",
     index: "11",
-    name: "Société Générale — Vœux 2018",
+    name: "Vœux Société Générale",
     client: "Société Générale",
     year: "2017",
     disciplines: ["Direction artistique", "Motion design"],
     pitch:
-      "Deux films de vœux pour la Société Générale, écrits à partir d’œuvres de sa collection : scénario, direction artistique et animation sur After Effects.",
+      "Deux films de vœux 2018 pour la Société Générale, écrits à partir d’œuvres de sa collection : scénario, direction artistique et animation sur After Effects.",
     scope: "Scénario, storyboard, direction artistique, animation After Effects, cartons de crédits",
     duration: "2 films de 25 s",
     cover: {
