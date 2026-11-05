@@ -29,6 +29,30 @@ const merge = (baseDoc, patch) => {
   return out;
 };
 
+/**
+ * Même règle que `lib/content/contact-links.ts` : un CTA ne part jamais en
+ * `mailto:`, il ouvre la page contact. La base peut contenir une valeur
+ * ancienne ; sans ce filtre, elle revient dans le JSON versionné à chaque
+ * build et laisse un diff fantôme que personne n'ose committer.
+ */
+const CONTACT_HREF = "/contact";
+let replacedHrefs = 0;
+
+const sanitiseHrefs = (value) => {
+  if (Array.isArray(value)) return value.map((item) => sanitiseHrefs(item));
+  if (!isObject(value)) return value;
+  const out = {};
+  for (const [key, item] of Object.entries(value)) {
+    if (key === "href" && typeof item === "string" && item.trim().toLowerCase().startsWith("mailto:")) {
+      replacedHrefs += 1;
+      out[key] = CONTACT_HREF;
+      continue;
+    }
+    out[key] = sanitiseHrefs(item);
+  }
+  return out;
+};
+
 const fetchDoc = async (slug) => {
   const response = await fetch(`${base}/api/v1/content/${slug}`, {
     headers: { accept: "application/json" },
@@ -51,7 +75,13 @@ const run = async () => {
     const current = JSON.parse(await readFile(file, "utf8"));
     try {
       const remote = await fetchDoc(slug);
-      const merged = merge(current, remote);
+      const merged = sanitiseHrefs(merge(current, remote));
+      if (replacedHrefs) {
+        console.warn(
+          `[contenu] ${slug} : ${replacedHrefs} lien(s) mailto remplacé(s) par ${CONTACT_HREF} (CTA vers la page contact).`,
+        );
+        replacedHrefs = 0;
+      }
       const serialised = `${JSON.stringify(merged, null, 2)}\n`;
       if (serialised === `${JSON.stringify(current, null, 2)}\n`) {
         console.log(`[contenu] ${slug} : déjà à jour.`);
