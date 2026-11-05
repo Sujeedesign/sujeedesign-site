@@ -395,6 +395,36 @@ body.has-dark-hero .nav:not(.scrolled) .nav-drop__btn[aria-current]{
 .pj-fig img{ border-radius: 0; }
 
 /* ============================================================
+   Page projet : lecteur des films MP4
+   ============================================================ */
+.pj-films .chapter{ border-top:0; }
+.pj-film-list{
+  display: grid;
+  gap: clamp(28px, 3.4vw, 48px);
+  margin-top: clamp(22px, 3vw, 34px);
+}
+.pj-film{ margin: 0; }
+.pj-film video{
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  background: #000;
+  border-radius: 2px;
+}
+.pj-film figcaption{
+  margin: 10px 0 0;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .12em;
+  color: var(--muted);
+}
+.pj-film figcaption b{ color: var(--ink); font-weight: 500; }
+@media (max-width:700px){
+  .pj-film figcaption{ font-size: 9px; }
+}
+
+/* ============================================================
    Réseaux sociaux : rail fixe à gauche + ligne dans le footer
    ============================================================ */
 .social-rail{

@@ -1,4 +1,5 @@
 import { coverOf, type Project } from "@/content/projects";
+import { projectVideos } from "@/content/videos";
 import { CoverPicture } from "@/components/CoverPicture";
 import { nextProjectIn } from "@/lib/content/catalogue";
 import { linkedServices, relatedProjects } from "@/lib/project-links";
@@ -18,6 +19,7 @@ export function ProjetCase({ project, projects }: { project: Project; projects: 
   // Maillage interne : services déduits des disciplines, puis deux fiches voisines.
   const services = linkedServices(project);
   const related = relatedProjects(project, 2, projects);
+  const videos = projectVideos[project.slug] ?? [];
   const meta = [
     { label: "Client", value: project.client },
     { label: "Année", value: project.year },
@@ -60,6 +62,45 @@ export function ProjetCase({ project, projects }: { project: Project; projects: 
           </div>
         </div>
       </header>
+
+      {videos.length ? (
+        <section className="section pj-films" aria-labelledby="films-titre">
+          <div className="wrap">
+            <div className="chapter">
+              <div className="k">
+                <b>Films</b>
+                Les deux animations
+              </div>
+              <div>
+                <h2 id="films-titre">Les vœux, en mouvement</h2>
+                <p>Les deux films diffusés pour les vœux 2018, dans leur montage final.</p>
+                <div className="pj-film-list">
+                  {videos.map((video) => (
+                    <figure className="pj-film" key={video.src}>
+                      <video
+                        controls
+                        playsInline
+                        preload="metadata"
+                        poster={video.poster}
+                        width={video.width}
+                        height={video.height}
+                        aria-label={`${video.title} — ${video.caption}`}
+                      >
+                        <source src={video.src} type="video/mp4" />
+                        Votre navigateur ne peut pas lire cette vidéo.{" "}
+                        <a href={video.src}>Télécharger le film</a>.
+                      </video>
+                      <figcaption>
+                        <b>{video.title}</b> — {video.caption}
+                      </figcaption>
+                    </figure>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <section className="section">
         <div className="wrap">

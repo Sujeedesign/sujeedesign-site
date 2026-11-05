@@ -1008,13 +1008,13 @@ export const projects: Project[] = [
     duration: "2 films de 25 s",
     cover: {
       src: "/assets/img/projet/societe-generale-voeux-2018/cover.jpg",
-      alt: "L’œuvre Cercles de Geneviève Claisse et le carton de crédits des vœux 2018 de la Société Générale",
+      alt: "Le logotype Société Générale au centre d’un cercle gris traversé par un croissant doré",
       width: 1920,
-      height: 1080,
+      height: 1280,
     },
     coverPortrait: {
       src: "/assets/img/projet/societe-generale-voeux-2018/cover-portrait.jpg",
-      alt: "L’œuvre Cercles de Geneviève Claisse, cercles orange, magenta et bleu sur fond violet",
+      alt: "Le logotype Société Générale entouré d’un cercle gris et d’un croissant doré, cadrage vertical",
       width: 1080,
       height: 1920,
     },
