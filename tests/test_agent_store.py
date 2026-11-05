@@ -85,3 +85,15 @@ def test_purge_conserve_les_rdv(conn: sqlite3.Connection) -> None:
     assert store.get_session(conn, stale) is None
     assert store.messages(conn, stale) == []
     assert store.get_session(conn, booked) is not None
+
+
+def test_branding_inconnu_ne_bloque_pas(conn: sqlite3.Connection) -> None:
+    """« Je ne sais pas encore » doit se ranger en « à définir », pas en blocage."""
+    session_id = store.new_session(conn)
+    store.merge_fields(conn, session_id, {"branding": "Je ne sais pas encore"})
+    fields = store.session_fields(store.get_session(conn, session_id))
+    assert fields["branding"] == store.BRANDING_UNKNOWN
+
+
+def test_branding_pose_juste_apres_le_type_de_projet() -> None:
+    assert store.QUALIFICATION[:3] == ("project_type", "branding", "context")

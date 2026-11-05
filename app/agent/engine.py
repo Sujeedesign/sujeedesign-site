@@ -253,11 +253,11 @@ def turn(
             fields = store.session_fields(row_now) if row_now else {}
             if _fake_slots(answer) and not toolbox.booking:
                 # Le modèle invente parfois des horaires alors que rien n'est affiché.
-                answer = _question_for(store.missing_fields(fields))
+                answer = _question_for(fields)
             if _asks_known_field(answer, fields) and not toolbox.booking:
                 # Le modèle redemande ce qu'il sait déjà (ex. « quel type de projet »
                 # après « identité de marque ») : on reprend la question utile.
-                answer = _question_for(store.missing_fields(fields))
+                answer = _question_for(fields)
             answer = _one_question(answer)
         for chunk in _chunks(answer):
             yield {"type": "delta", "text": chunk}
@@ -298,11 +298,17 @@ def _fake_slots(text: str) -> bool:
     )
 
 
-def _question_for(missing: list[str]) -> str:
-    if "context" in missing:
-        return "Pour quelle activité ou quel secteur est-ce ?"
-    if "project_type" in missing:
-        return "Quel type de projet avez-vous en tête ?"
+def _question_for(fields: dict[str, str]) -> str:
+    """Question suivante, dans l'ordre de store.QUALIFICATION."""
+    missing = [key for key in store.QUALIFICATION if not fields.get(key)]
+    if missing:
+        first = missing[0]
+        if first == "project_type":
+            return "Quel type de projet avez-vous en tête ?"
+        if first == "branding":
+            return "Quel est le nom du branding à réaliser (marque, produit ou projet) ?"
+        if first == "context":
+            return "Pour quelle activité ou quel secteur est-ce ?"
     return "Pouvez-vous préciser votre besoin en une phrase ?"
 
 
@@ -318,7 +324,11 @@ _VALIDATION = re.compile(
 _EMAIL = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
 _PHONE = re.compile(r"(?:\+33|0)\s?[1-9](?:[\s.-]?\d{2}){4}")
 _MODE_VISIO = re.compile(r"\b(?:visio|visioconf\w*|zoom|teams|meet|video|en ligne|par ecran)\b")
-_MODE_PHONE_CALL = re.compile(r"\b(?:telephon\w*|tel|phone|appel|portable|mobile|rappel|par telephone)\b")
+_MODE_PHONE_CALL = re.compile(
+    r"\b(?:telephon\w*|telphon\w*|tel|phone|appel\w*|portable|mobile|rappel)\b"
+)
+# Fautes courantes sur "téléphone" ramenées à la forme canonique avant analyse.
+_MODE_PHONE_TYPOS = re.compile(r"\bt[a-z]?l[e]?phon\w*|\bt[e]?l[e]?phone\b")
 _MODE_WORDS = {
     "visio", "visioconference", "zoom", "teams", "meet", "video", "ligne", "ecran",
     "telephonique", "telephone", "tel", "phone", "appel", "portable", "mobile", "rappel",
@@ -558,6 +568,8 @@ def _guess_branding(message: str) -> str:
 def _guess_mode(message: str) -> str:
     """Déduit le format souhaité : visio ou appel téléphonique."""
     text = _flat(message)
+    # "télphone", "telephon", "tlphone", "tel" : on tolère la faute et l'abrégé.
+    text = _MODE_PHONE_TYPOS.sub("telephone ", text)
     visio = bool(_MODE_VISIO.search(text))
     phone = bool(_MODE_PHONE_CALL.search(text))
     if visio and not phone:
@@ -778,7 +790,7 @@ def _preflight(toolbox: ToolBox, row: Any, message: str) -> list[dict[str, Any]]
                 {
                     "role": "system",
                     "content": (
-                        "[consigne serveur] Les deux points sont renseignés et les créneaux "
+                        "[consigne serveur] Les trois points sont renseignés et les créneaux "
                         "réels sont déjà affichés en boutons. En une phrase, dis qu'ils sont "
                         "affichés, sans les recopier en liste, et demande lequel lui convient. "
                         "Ne demande pas encore ses coordonnées et n'annonce aucune vérification. "

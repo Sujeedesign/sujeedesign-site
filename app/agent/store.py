@@ -3,17 +3,41 @@
 from __future__ import annotations
 
 import json
+import re
 import secrets
 import sqlite3
+import unicodedata
 from datetime import date, datetime, timedelta
 from typing import Any
 
-# Parcours volontairement court : deux points suffisent pour ouvrir un créneau.
+# Parcours volontairement court : trois points suffisent pour ouvrir un créneau.
 # Le reste (décideur, budget, délais, périmètre) se traite en réunion.
 FIELDS: tuple[str, ...] = (
     "project_type",
     "context",
 )
+# Ordre des questions de qualification posées au visiteur : le branding
+# arrive juste après le type de projet, mais il ne bloque jamais l'agenda.
+QUALIFICATION: tuple[str, ...] = ("project_type", "branding", "context")
+BRANDING_UNKNOWN = "à définir"
+# Réponses acceptées quand le visiteur n'a pas encore de nom de marque.
+_UNKNOWN_BRANDING = re.compile(
+    r"^(?:je\s+)?(?:ne\s+)?(?:sais|sait|savoir)\s+(?:pas|pas\s+encore)"
+    r"|pas\s+encore\s+(?:de\s+)?nom|aucune?\s+idee|pas\s+d[ei]\s+nom"
+    r"|a\s+definir|inconnu|pas\s+encore|sans\s+nom",
+)
+
+
+def normalize_branding(value: str) -> str:
+    """Un branding encore inconnu ne doit pas bloquer la qualification."""
+    text = " ".join(str(value or "").split())
+    if not text:
+        return ""
+    folded = unicodedata.normalize("NFKD", text.lower())
+    folded = "".join(ch for ch in folded if not unicodedata.combining(ch))
+    if _UNKNOWN_BRANDING.search(folded):
+        return BRANDING_UNKNOWN
+    return text[:120]
 FIELD_LABELS = {
     "project_type": "type de projet",
     "context": "activité / secteur",
@@ -168,6 +192,8 @@ def merge_fields(conn: sqlite3.Connection, session_id: str, learned: dict[str, A
         if key not in FIELDS and key not in DETAILS:
             continue
         text = " ".join(str(value or "").split())[:600]
+        if key == "branding":
+            text = normalize_branding(text)
         if text:
             current[key] = text
     touch(conn, session_id, fields=json.dumps(current, ensure_ascii=False))

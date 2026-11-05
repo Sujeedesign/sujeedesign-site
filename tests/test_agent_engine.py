@@ -405,7 +405,11 @@ def test_horaires_inventes_remplaces_par_la_question_utile(conn):
     """Si aucun bouton n'est affiché, on ne laisse pas le modèle inventer des créneaux."""
     google = FakeGoogle(available=[slots.candidates()[0]])
     session_id = engine.prepare_session(conn)
-    store.merge_fields(conn, session_id, {"project_type": "Identité de marque"})
+    store.merge_fields(
+        conn,
+        session_id,
+        {"project_type": "Identité de marque", "branding": "Vaasam"},
+    )
     store.touch(conn, session_id, step="qualification")
     store.add_message(conn, session_id, "user", "Je veux refaire mon identité")
     store.add_message(conn, session_id, "assistant", "Pour quelle activité ?")
@@ -764,3 +768,10 @@ def test_la_question_du_telephone_annonce_l_appel_du_visiteur(conn):
     assert "téléphone" in message.lower()
     assert "rappelle" not in message.lower()
     assert "appel avec Raj" in message
+
+
+def test_faute_telephone_reconnue_comme_appel() -> None:
+    """« télphone » et « tel » sont des appels téléphoniques, pas du bruit."""
+    for reponse in ("télphone", "tel", "Telephon", "par téléphone"):
+        assert engine._guess_mode(reponse) == store.CALL_MODES["telephone"], reponse
+    assert engine._guess_mode("visio") == store.CALL_MODES["visio"]

@@ -41,7 +41,7 @@ const PROJECT_TYPES = [
 ];
 
 const WELCOME =
-  "Bonjour, je suis l'assistant de Sujee. Deux questions suffisent, puis je vous ouvre un créneau d'appel de 30 minutes. Quel type de projet avez-vous en tête ?";
+  "Bonjour, je suis l'assistant de Sujee. Trois questions suffisent, puis je vous ouvre un créneau d'appel de 30 minutes. Quel type de projet avez-vous en tête ?";
 
 const STORAGE_KEY = "sjd-contact-v1";
 
