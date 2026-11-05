@@ -86,6 +86,8 @@
   .before .pink .slogan{font-family:var(--display);font-size:12px;opacity:.95}
   .before .pink p{font-family:var(--display);font-size:9.5px;line-height:1.45;margin:6px 0 0;
     opacity:.95;max-height:88px;overflow:hidden}
+  .before .foot{font-family:var(--body);font-size:8px;letter-spacing:.04em;color:#9b8b90;
+    padding:8px 12px;border-top:1px solid #eee}
   .tag{position:absolute;font-family:var(--mono);font-size:9px;letter-spacing:.12em;
     text-transform:uppercase;padding:4px 8px;border-radius:3px;background:var(--ink);color:var(--paper)}
   .tag.tr{top:12px;right:12px}
@@ -110,6 +112,8 @@
     font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:13px 10px;
     border-radius:2px;text-align:center}
   .after .mini-btn.ghost{background:transparent;color:var(--blush);border:1px solid rgba(231,207,201,.5)}
+  .after .mini-foot{font-family:var(--mono);font-size:9px;letter-spacing:.06em;opacity:.72;
+    margin-top:12px;line-height:1.5}
 
   /* ---------- trois problèmes ---------- */
   .issues{padding-top:clamp(48px,8vw,92px);padding-bottom:clamp(8px,2vw,20px)}
@@ -123,12 +127,18 @@
   .issue h3{font-family:var(--display);font-weight:400;font-size:clamp(21px,2.4vw,26px);
     line-height:1.12;margin:8px 0 10px;letter-spacing:-.01em}
   .issue p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft);max-width:42ch}
+  .issue p q, .issue p em{font-style:normal;font-family:var(--mono);font-size:13px;color:var(--prune-deep)}
   .issue .fix{color:var(--prune-deep);border-left:2px solid var(--prune);padding-left:12px;font-size:15px}
   .issue .fix b{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;
     display:block;color:var(--prune);margin-bottom:2px}
 
+  /* ---------- aussi ---------- */
+  .also{max-width:78ch;margin-top:clamp(30px,4vw,44px);font-size:14.5px;color:var(--ink-soft)}
+  .also b{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--prune);display:block;margin-bottom:6px}
+
   /* ---------- relevé ---------- */
-  .proof{margin-top:clamp(32px,5vw,56px);border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  .proof{margin-top:clamp(28px,4vw,40px);border-top:1px solid var(--line);border-bottom:1px solid var(--line);
     padding:18px 0;display:flex;flex-wrap:wrap;gap:12px 40px;align-items:baseline}
   .proof span{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
   .proof b{font-family:var(--display);font-size:20px;color:var(--prune);margin-right:6px}
@@ -151,19 +161,6 @@
   .scope li::before{content:"";position:absolute;left:0;top:16px;width:6px;height:1px;background:var(--prune)}
   .offer-note{margin-top:28px;font-size:14px;color:var(--ink-soft);max-width:78ch}
   .offer-note strong{color:var(--prune-deep)}
-
-  /* ---------- contact ---------- */
-  .contact{padding-top:clamp(44px,8vw,96px);padding-bottom:clamp(44px,8vw,96px)}
-  .contact h2{font-family:var(--display);font-weight:400;font-size:clamp(32px,5.4vw,60px);
-    line-height:1.02;letter-spacing:-.03em;margin:0 0 16px;max-width:20ch}
-  .contact h2 em{font-style:italic;color:var(--prune)}
-  .contact p{max-width:52ch;color:var(--ink-soft);margin:0 0 26px}
-  .btns{display:flex;flex-wrap:wrap;gap:12px}
-  .btn{display:inline-flex;align-items:center;gap:10px;text-decoration:none;padding:15px 24px;
-    border-radius:999px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;
-    text-transform:uppercase;border:1px solid var(--prune);color:var(--paper);background:var(--prune)}
-  .btn.ghost{background:transparent;color:var(--prune)}
-  .btn:hover{transform:translateY(-1px)}
   footer{padding:26px 0 40px;border-top:1px solid var(--line);color:var(--ink-soft);
     display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:13px}
 </style>
@@ -174,7 +171,7 @@
   <div class="top-in">
     <b>Sujee Design</b>
     <span class="meta mono">Proposition · 5 novembre 2026</span>
-    <a class="cta" href="#contact">Réserver un appel</a>
+    <a class="cta" href="#sd-cta">Réserver un appel</a>
   </div>
 </header>
 
@@ -183,9 +180,9 @@
     <p class="kicker mono">Diagnostic et refonte</p>
     <h1>À la Prunelle de mes ongle'S, <em>ce qu'on voit avant de lire</em></h1>
     <p class="lead">
-      Une cliente tape votre nom dans Google, arrive sur un aplat rose et un titre coupé,
-      et ne voit <strong>aucun bouton pour réserver</strong>. Elle repart.
-      Votre travail, lui, n'est nulle part sur la page.
+      Une cliente tape votre nom dans Google. Elle tombe sur un aplat rose, un titre coupé,
+      et n'apprend <strong>ni votre adresse, ni votre numéro, ni vos horaires</strong>.
+      Elle repart chez l'institut d'à côté.
     </p>
     <div class="facts mono">
       <span><i>·</i> Institut à Boissy-l'Aillerie</span>
@@ -199,7 +196,7 @@
       <h2>Le test des 50 millisecondes</h2>
       <p class="sub">
         À gauche, votre page d'accueil aujourd'hui. À droite, ce qu'une cliente doit comprendre
-        dans le même temps : le résultat, le lieu, un bouton. La différence n'est pas une question de goût.
+        dans le même temps : le lieu, les horaires, un bouton. La différence n'est pas une question de goût.
       </p>
       <div class="phones">
         <div class="before">
@@ -213,7 +210,8 @@
                 <p>A la Prunelle de mes ongle'S est un institut de qualité et exclusivement féminin,
                   Sandrine prothésiste ongulaire, esthéticienne diplômée, sera ravie de vous accueillir…</p>
               </div>
-              <span class="tag tr">titre coupé</span>
+              <div class="foot">Règlement accepté CB / CHEQUE / ESPECE</div>
+              <span class="tag tr">ni adresse, ni téléphone</span>
             </div>
           </div>
         </div>
@@ -223,13 +221,14 @@
             <div class="screen">
               <div class="ph"></div><div class="grain"></div>
               <div class="screen-in">
-                <div class="mini-nav"><span>Boissy-l'Aillerie</span><span>Sur rendez-vous</span></div>
+                <div class="mini-nav"><span>Boissy-l'Aillerie</span><span>Mar–Sam</span></div>
                 <h3>La main, <em>le geste</em>, le lieu.</h3>
-                <p class="mini-lead">Onglerie et esthétique à Boissy-l'Aillerie. Sur rendez-vous.</p>
+                <p class="mini-lead">Onglerie et esthétique, sur rendez-vous à Boissy-l'Aillerie.</p>
                 <div class="mini-btns">
                   <span class="mini-btn">Réserver un créneau</span>
                   <span class="mini-btn ghost">Voir les prestations</span>
                 </div>
+                <p class="mini-foot">12 rue de la République · 01 23 45 67 89<br>Réservation en ligne, annulation 24 h avant</p>
               </div>
             </div>
           </div>
@@ -240,39 +239,48 @@
 
   <section class="issues wrap">
     <h2>Trois choses qui coûtent des clientes</h2>
-    <p class="intro">Tout le reste est secondaire. Ces trois points se règlent dans la même refonte.</p>
+    <p class="intro">
+      Le reste est secondaire. Ces trois points se règlent dans la même refonte, et sont vérifiables
+      sur votre site en ligne aujourd'hui.
+    </p>
 
     <div class="issues-grid">
       <article class="issue">
         <span class="n">01</span>
-        <h3>Aucune photo de votre travail</h3>
-        <p>Un institut vend un résultat qui se voit. Ici : ni main, ni avant et après, ni vue du lieu.
-          La cliente n'a aucune raison de vous préférer à l'institut d'à côté.</p>
-        <p class="fix"><b>Le correctif</b> Un shooting macro dirigé : mains, gestes, avant et après, lieu.</p>
+        <h3>On ne sait pas où vous êtes</h3>
+        <p>Sur les quatre pages : aucune adresse, aucun numéro cliquable, aucun horaire.
+          Le titre finit par « | France ». Votre fiche Google et votre site ne se parlent pas.</p>
+        <p class="fix"><b>Le correctif</b> Adresse, horaires et téléphone dès le premier écran, une carte, et une fiche Google alignée au mot près.</p>
       </article>
 
       <article class="issue">
         <span class="n">02</span>
-        <h3>Le rendez-vous est enterré</h3>
-        <p>Pas de réservation en haut de page, numéro non cliquable, prestations et tarifs derrière
-          deux clics puis un tunnel séparé. Chaque étape en perd quelques-unes.</p>
-        <p class="fix"><b>Le correctif</b> Réserver dès le premier écran, téléphone cliquable, tarifs sur l'accueil.</p>
+        <h3>La galerie est vide depuis 2020</h3>
+        <p>Le lien « Galerie photos » mène à <em>/page-vierge-1</em> : une page blanche, en ligne
+          depuis six ans. Le seul endroit où une cliente juge votre travail ne montre aucun ongle.</p>
+        <p class="fix"><b>Le correctif</b> Douze à vingt photos réelles : poses, remplissages, avant et après, macro, plus deux vues du lieu.</p>
       </article>
 
       <article class="issue">
         <span class="n">03</span>
-        <h3>Des promesses invérifiables</h3>
-        <p>« Institut de qualité », « produits de qualité », « chacune est unique ».
-          Ce qu'elle cherche : est-ce propre, est-ce que ça tient, combien de temps, combien ça coûte,
-          où je me gare.</p>
-        <p class="fix"><b>Le correctif</b> Des faits à la place des adjectifs : hygiène, diplôme, durées, tarifs, accès, avis.</p>
+        <h3>La réservation existe, mais elle est cachée</h3>
+        <p>Les boutons « Réserver » sont dans les pages « Nos prestations », et le menu d'onglerie
+          pointe vers <em>/book-online</em>. Personne ne devine qu'on peut réserver là.</p>
+        <p class="fix"><b>Le correctif</b> Un bouton « Réserver » fixe sur chaque écran, branché sur votre outil actuel : aucune nouvelle plateforme à apprendre.</p>
       </article>
     </div>
 
+    <p class="also">
+      <b>Corrigé au passage</b>
+      Titre de l'onglet avec un cheval 🐴 et « Ethéticienne » mal orthographié, tarifs écrits deux fois
+      (« 8,50 euros » puis « 8,50 € »), virgules et points mélangés d'une prestation à l'autre,
+      « CHEQUE / ESPECE » sans accents, mention « ©2020 » jamais mise à jour.
+    </p>
+
     <div class="proof">
-      <span><b>0</b> bouton de réservation en haut de page</span>
-      <span><b>1</b> page vide toujours en ligne</span>
-      <span><b>712 Ko</b> et 144 requêtes pour un seul écran</span>
+      <span><b>0</b> adresse et 0 téléphone</span>
+      <span><b>1</b> page blanche en ligne</span>
+      <span><b>147</b> requêtes pour un seul écran</span>
       <span class="src">Mesuré le 5 novembre 2026 sur alaprunelledemesongles.com</span>
     </div>
   </section>
@@ -289,9 +297,9 @@
         <span class="lab">01</span>
         <h3>Le site</h3>
         <ul>
-          <li>Cinq pages : accueil, prestations, tarifs, galerie, contact</li>
-          <li>Design sur mesure, pensé mobile d'abord</li>
-          <li>Textes relus, images cadrées, aucune page vide</li>
+          <li>Accueil, esthétique, onglerie, galerie, cartes-cadeaux, contact</li>
+          <li>Design sur mesure, mobile d'abord, photos de votre travail</li>
+          <li>Textes et tarifs repris, relus, écrits une seule fois</li>
         </ul>
       </article>
 
@@ -299,9 +307,9 @@
         <span class="lab">02</span>
         <h3>Le rendez-vous</h3>
         <ul>
-          <li>Réservation reliée à votre outil actuel</li>
-          <li>Numéro cliquable sur chaque écran</li>
-          <li>Rappel de réservation en fin de section</li>
+          <li>Bouton Réserver sur chaque écran, branché sur Wix Bookings</li>
+          <li>Téléphone, adresse et horaires cliquables</li>
+          <li>Rappel de réservation en fin de page</li>
         </ul>
       </article>
 
@@ -309,7 +317,7 @@
         <span class="lab">03</span>
         <h3>La visibilité</h3>
         <ul>
-          <li>SEO local Boissy-l'Aillerie et communes voisines</li>
+          <li>Titres et pages pensés pour « ongles Boissy-l'Aillerie »</li>
           <li>Fiche Google alignée sur le site</li>
           <li>Mise en ligne et une heure de prise en main</li>
         </ul>
@@ -323,18 +331,6 @@
       sur Google, personne ne peut.
     </p>
   </section>
-
-  <section class="contact wrap" id="contact">
-    <h2>Trente minutes, <em>un périmètre clair</em></h2>
-    <p>
-      Je vous montre le diagnostic à l'écran, on regarde vos photos, vos tarifs et votre agenda.
-      Vous repartez avec un périmètre écrit et une date, que vous décidiez de travailler avec moi ou non.
-    </p>
-    <div class="btns">
-      <a class="btn" href="https://sujeedesign.com/contact">Réserver un appel</a>
-      <a class="btn ghost" href="https://sujeedesign.com/services/site-ecommerce">Voir la méthode</a>
-    </div>
-  </section>
 </main>
 
 <footer class="wrap">
@@ -344,22 +340,6 @@
   <span class="mono">Document de travail · ne pas diffuser</span>
 </footer>
 
-<script id="sj-suivi">
-(function(){
-  var slug="prunelle", session=Math.random().toString(36).slice(2)+Date.now().toString(36);
-  var debut=Date.now(), envoye=false;
-  function envoi(ev,sec){
-    var d={slug:slug,evenement:ev,session:session};
-    if(sec!=null){d.secondes=sec}
-    var corps=JSON.stringify(d);
-    if(navigator.sendBeacon){navigator.sendBeacon("/api/track/vue",new Blob([corps],{type:"application/json"}));}
-    else{fetch("/api/track/vue",{method:"POST",headers:{"Content-Type":"application/json"},body:corps,keepalive:true}).catch(function(){});}
-  }
-  envoi("ouverture");
-  function fin(){if(envoye){return}envoye=true;envoi("fermeture",Math.round((Date.now()-debut)/1000));}
-  addEventListener("pagehide",fin);
-  document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){fin();}});
-})();
-</script>
+<script src="/propositions/_cta/cta.js" data-client="À la Prunelle de mes ongle'S" defer></script>
 </body>
 </html>
