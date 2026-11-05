@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="À la Prunelle de mes ongle'S">
+  <defs>
+    <linearGradient id="cream" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f7f2ec"/><stop offset="1" stop-color="#eadfd4"/>
+    </linearGradient>
+    <radialGradient id="iris" cx="38%" cy="32%" r="72%">
+      <stop offset="0" stop-color="#9d5a6c"/>
+      <stop offset="55%" stop-color="#6b3242"/>
+      <stop offset="100%" stop-color="#33161f"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#cream)"/>
+  <circle cx="600" cy="380" r="230" fill="url(#iris)"/>
+  <circle cx="600" cy="380" r="230" fill="none" stroke="#251519" stroke-opacity=".14"/>
+  <circle cx="600" cy="380" r="118" fill="#1b0e12"/>
+  <circle cx="561" cy="333" r="34" fill="#f7f2ec" opacity=".55"/>
+  <path d="M600 150v-70M600 610v70M370 380H300M900 380h70" stroke="#251519" stroke-opacity=".28" stroke-width="2"/>
+  <text x="600" y="742" text-anchor="middle" font-family="Georgia, serif" font-size="30" letter-spacing="6" fill="#4a2430">PRUNELLE</text>
+</svg>
