@@ -4,7 +4,7 @@ import { routes, serviceHref } from "@/lib/routes";
 import styles from "./GuidePrixLogo.module.css";
 
 export const pageMeta = {
-  title: "Combien coûte un logo en 2026 ? Prix et fourchettes",
+  title: "Combien coûte un logo en 2026 ? Prix et tarifs",
   description:
     "Prix d'un logo en 2026 : les fourchettes réelles de 40 à 6 000 €, ce que change chaque palier, et la différence avec une identité visuelle complète.",
 };
