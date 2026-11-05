@@ -182,6 +182,22 @@ CREATE TABLE IF NOT EXISTS instagram_posts (
 );
 CREATE INDEX IF NOT EXISTS idx_instagram_position ON instagram_posts(position);
 
+-- Suivi des propositions clients envoyées par lien direct
+-- (/propositions/<slug>/). Une ligne par ouverture, mise à jour en fin de
+-- visite avec le temps passé. Aucune IP en clair : seul un condensat salé.
+CREATE TABLE IF NOT EXISTS proposition_vues (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  slug TEXT NOT NULL DEFAULT '',
+  session TEXT NOT NULL DEFAULT '',
+  evenement TEXT NOT NULL DEFAULT 'ouverture',
+  secondes INTEGER NOT NULL DEFAULT 0,
+  referer TEXT NOT NULL DEFAULT '',
+  ua TEXT NOT NULL DEFAULT '',
+  ip_hash TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_proposition_vues_slug ON proposition_vues(slug, created_at);
+
 CREATE TABLE IF NOT EXISTS _meta (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL DEFAULT ''

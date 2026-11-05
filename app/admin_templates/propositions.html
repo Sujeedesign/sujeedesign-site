@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Propositions{% endblock %}
+{% block heading %}Propositions{% endblock %}
+{% block content %}
+  <header class="page-head">
+    <div class="title-wrap">
+      <h1>Propositions clients</h1>
+      <p class="sub">
+        Ouvertures des trois maquettes envoyées par lien direct. Le suivi démarre
+        à la première visite : les vues antérieures ne sont pas comptées.
+      </p>
+    </div>
+  </header>
+
+  <section class="grid grid-stats">
+    {% for c in cartes %}
+      <a class="card stat" href="{{ c.url }}" target="_blank" rel="noopener">
+        <span class="stat-k">{{ c.nom }}</span>
+        <strong class="stat-v">{{ c.vues }}</strong>
+        <span class="stat-s">
+          {% if c.vues %}
+            {{ c.visiteurs }} visiteur{{ 's' if c.visiteurs > 1 }} · {{ c.duree }} en moyenne
+          {% else %}
+            pas encore consultée
+          {% endif %}
+        </span>
+      </a>
+    {% endfor %}
+  </section>
+
+  {% if recent %}
+    <section class="ledger">
+      <div class="ledger-head">
+        <h2>Dernières consultations</h2>
+        <span class="count">{{ recent|length }}</span>
+        <span class="spacer"></span>
+        <span class="tiny muted">heure de Paris</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Proposition</th>
+            <th>Quand</th>
+            <th>Temps</th>
+            <th>Appareil</th>
+            <th>Provenance</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for v in recent %}
+          <tr>
+            <td><strong>{{ v.nom }}</strong></td>
+            <td class="num">{{ v.quand }}</td>
+            <td class="num">{{ v.temps }}</td>
+            <td>{{ v.navigateur }}</td>
+            <td class="tiny muted">
+              {% if v.referer %}{{ v.referer }}{% else %}lien direct{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  {% else %}
+    <div class="card">
+      <p class="muted">Aucune consultation enregistrée pour l'instant.</p>
+    </div>
+  {% endif %}
+{% endblock %}

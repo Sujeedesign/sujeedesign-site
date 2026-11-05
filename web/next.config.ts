@@ -202,6 +202,8 @@ const nextConfig: NextConfig = {
         // Agent de contact : la page publique parle à FastAPI par la même origine.
         { source: "/api/agent/:path*", destination: `${admin}/api/agent/:path*` },
         { source: "/api/editor/:path*", destination: `${admin}/api/editor/:path*` },
+        // Suivi de consultation des propositions clients (voir app/tracking.py).
+        { source: "/api/track/:path*", destination: `${admin}/api/track/:path*` },
         // Assets du back office et de l'éditeur visuel : le site Next possède son
         // propre dossier public/assets, on ne relaie que les fichiers qui lui
         // manquent (voir tests/admin-proxy.test.ts).

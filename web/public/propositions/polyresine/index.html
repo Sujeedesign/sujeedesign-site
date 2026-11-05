@@ -923,5 +923,22 @@ section[id]{scroll-margin-top:calc(var(--header-h) + 18px)}
 </script>
 <!-- Bandeau CTA Sujee Design (commun a toutes les propositions) -->
 <script src="/propositions/_cta/cta.js" data-client="Polyrésine" defer></script>
+<script id="sj-suivi">
+(function(){
+  var slug="polyresine", session=Math.random().toString(36).slice(2)+Date.now().toString(36);
+  var debut=Date.now(), envoye=false;
+  function envoi(ev,sec){
+    var d={slug:slug,evenement:ev,session:session};
+    if(sec!=null){d.secondes=sec}
+    var corps=JSON.stringify(d);
+    if(navigator.sendBeacon){navigator.sendBeacon("/api/track/vue",new Blob([corps],{type:"application/json"}));}
+    else{fetch("/api/track/vue",{method:"POST",headers:{"Content-Type":"application/json"},body:corps,keepalive:true}).catch(function(){});}
+  }
+  envoi("ouverture");
+  function fin(){if(envoye){return}envoye=true;envoi("fermeture",Math.round((Date.now()-debut)/1000));}
+  addEventListener("pagehide",fin);
+  document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){fin();}});
+})();
+</script>
 </body>
 </html>

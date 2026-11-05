@@ -17,7 +17,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
-from . import admin, api_admin, contact, content_routes, editor_api
+from . import admin, api_admin, contact, content_routes, editor_api, tracking
 from . import agent as agent_module
 from . import catalogue
 from . import content as content_store
@@ -205,6 +205,7 @@ def create_app(db_file: Path | None = None) -> FastAPI:
     app.include_router(content_routes.router)
     app.include_router(api_admin.router)
     app.include_router(editor_api.router)
+    app.include_router(tracking.router)
     return app
 
 

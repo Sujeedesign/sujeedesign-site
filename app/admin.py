@@ -12,7 +12,7 @@ import mimetypes
 import shutil
 import sqlite3
 import subprocess
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote, urlparse
@@ -100,6 +100,7 @@ NAV_GROUPS: tuple[tuple[str, tuple[tuple[str, str, str], ...]], ...] = (
         (
             ("messages", "Messages", "/admin/messages"),
             ("demandes", "Demandes du chat", "/admin/demandes"),
+            ("propositions", "Propositions", "/admin/propositions"),
         ),
     ),
     (
@@ -626,6 +627,105 @@ def demandes(request: Request, user: str = Depends(require_admin)) -> Response:
         lead["status_label"] = STATUS_LABELS.get(str(lead.get("status")), str(lead.get("status") or ""))
         lead["status_class"] = STATUS_CLASSES.get(str(lead.get("status")), "archivee")
     return render(request, "demandes.html", leads=leads, bookings=bookings, labels=FIELD_LABELS)
+
+
+# ------------------------------------------------------- propositions clients
+
+
+PROPOSITIONS = {
+    "n2e": "N2E Échafaudages",
+    "dimension-nouvelle": "Dimension Nouvelle",
+    "polyresine": "Polyrésine",
+}
+
+
+def _paris_datetime(value: str) -> str:
+    """Horodatage SQLite (UTC) -> « 5 nov. à 14:32 » en heure de Paris."""
+    try:
+        moment = datetime.fromisoformat(str(value)).replace(tzinfo=timezone.utc)
+    except (TypeError, ValueError):
+        return ""
+    from zoneinfo import ZoneInfo
+
+    local = moment.astimezone(ZoneInfo("Europe/Paris"))
+    return f"{local.day} {local.strftime('%b').rstrip('.')} à {local:%H:%M}"
+
+
+def _duree(secondes: float | None) -> str:
+    total = int(secondes or 0)
+    if total <= 0:
+        return "—"
+    if total < 60:
+        return f"{total} s"
+    minutes, reste = divmod(total, 60)
+    return f"{minutes} min {reste:02d}" if reste else f"{minutes} min"
+
+
+@router.get("/admin/propositions", response_class=HTMLResponse)
+def propositions(request: Request, user: str = Depends(require_admin)) -> Response:
+    """Consultation des trois propositions envoyées aux clients."""
+    conn = get_conn(request)
+    try:
+        rows = [
+            dict(row)
+            for row in conn.execute(
+                "SELECT slug, COUNT(*) AS vues,"
+                " COUNT(DISTINCT NULLIF(ip_hash, '')) AS visiteurs,"
+                " MAX(created_at) AS derniere,"
+                " AVG(NULLIF(secondes, 0)) AS duree"
+                " FROM proposition_vues GROUP BY slug"
+            ).fetchall()
+        ]
+        recent = [
+            dict(row)
+            for row in conn.execute(
+                "SELECT slug, secondes, referer, ua, created_at"
+                " FROM proposition_vues ORDER BY id DESC LIMIT 80"
+            ).fetchall()
+        ]
+    except sqlite3.Error:
+        rows, recent = [], []
+    finally:
+        conn.close()
+
+    stats = {row["slug"]: row for row in rows}
+    cartes = []
+    for slug, nom in PROPOSITIONS.items():
+        row = stats.get(slug, {})
+        cartes.append(
+            {
+                "slug": slug,
+                "nom": nom,
+                "url": f"/propositions/{slug}/",
+                "vues": int(row.get("vues") or 0),
+                "visiteurs": int(row.get("visiteurs") or 0),
+                "derniere": _paris_datetime(row.get("derniere") or ""),
+                "duree": _duree(row.get("duree")),
+            }
+        )
+    for item in recent:
+        item["nom"] = PROPOSITIONS.get(str(item.get("slug") or ""), item.get("slug") or "")
+        item["quand"] = _paris_datetime(item.get("created_at") or "")
+        item["temps"] = _duree(item.get("secondes"))
+        item["navigateur"] = _navigateur(item.get("ua") or "")
+    return render(request, "propositions.html", cartes=cartes, recent=recent)
+
+
+def _navigateur(ua: str) -> str:
+    ua = ua.lower()
+    if "iphone" in ua or "ipad" in ua:
+        return "iPhone/iPad"
+    if "android" in ua:
+        return "Android"
+    if "edg/" in ua:
+        return "Edge"
+    if "firefox" in ua:
+        return "Firefox"
+    if "chrome" in ua:
+        return "Chrome"
+    if "safari" in ua:
+        return "Safari"
+    return "Autre"
 
 
 STATUS_CLASSES = {
