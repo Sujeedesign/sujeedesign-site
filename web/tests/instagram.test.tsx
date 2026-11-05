@@ -102,6 +102,23 @@ describe("InstagramSection", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
+  it("monte le player dans body pour échapper au contexte d'empilement de la section", () => {
+    const { container } = render(<InstagramSection feed={feed} />);
+    const tiles = screen.getAllByRole("button").filter((node) => node.classList.contains("ig__tile"));
+
+    fireEvent.click(tiles[1]!);
+    const dialog = screen.getByRole("dialog");
+
+    // La section porte position:relative + z-index, donc un enfant fixe resterait
+    // coincé sous le header collant : le portail doit sortir le player du <section>.
+    expect(container.contains(dialog)).toBe(false);
+    expect(dialog.parentElement).toBe(document.body);
+    expect(screen.getByRole("button", { name: "Fermer" })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Fermer" }));
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
   it("navigue au clavier entre les posts", () => {
     render(<InstagramSection feed={feed} />);
     const tiles = screen.getAllByRole("button").filter((node) => node.classList.contains("ig__tile"));

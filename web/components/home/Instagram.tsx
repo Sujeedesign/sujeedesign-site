@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { InstagramFeed } from "@/lib/content/instagram";
 
 /**
@@ -122,75 +123,82 @@ export function InstagramSection({ feed }: { feed: InstagramFeed }) {
         </ul>
       </div>
 
-      {active ? (
-        <div
-          className="ig-player"
-          role="dialog"
-          aria-modal="true"
-          aria-label={active.caption || feed.title}
-          onClick={(event) => {
-            if (event.target === event.currentTarget) close();
-          }}
-        >
-          <button
-            type="button"
-            className="ig-player__close"
-            onClick={close}
-            ref={closeRef}
-            aria-label="Fermer"
-          >
-            ✕
-          </button>
-
-          {total > 1 ? (
-            <>
+      {active
+        ? createPortal(
+            <div
+              className="ig-player"
+              role="dialog"
+              aria-modal="true"
+              aria-label={active.caption || feed.title}
+              onClick={(event) => {
+                if (event.target === event.currentTarget) close();
+              }}
+            >
               <button
                 type="button"
-                className="ig-player__nav ig-player__nav--prev"
-                onClick={() => step(-1)}
-                aria-label="Post précédent"
+                className="ig-player__close"
+                onClick={close}
+                ref={closeRef}
+                aria-label="Fermer"
               >
-                ‹
+                <span aria-hidden="true">✕</span>
               </button>
-              <button
-                type="button"
-                className="ig-player__nav ig-player__nav--next"
-                onClick={() => step(1)}
-                aria-label="Post suivant"
-              >
-                ›
-              </button>
-            </>
-          ) : null}
 
-          <figure className="ig-player__frame">
-            {active.kind === "video" ? (
-              <video
-                className="ig-player__media"
-                src={active.src}
-                poster={active.poster || undefined}
-                controls
-                autoPlay
-                playsInline
-              />
-            ) : (
-              <img
-                className="ig-player__media"
-                src={active.src}
-                alt={active.alt || active.caption}
-              />
-            )}
-            <figcaption className="ig-player__caption">
-              {active.caption ? <p>{active.caption}</p> : null}
-              {active.permalink ? (
-                <a href={active.permalink} target="_blank" rel="noopener noreferrer">
-                  Voir sur Instagram ↗
-                </a>
+              {total > 1 ? (
+                <>
+                  <button
+                    type="button"
+                    className="ig-player__nav ig-player__nav--prev"
+                    onClick={() => step(-1)}
+                    aria-label="Post précédent"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    type="button"
+                    className="ig-player__nav ig-player__nav--next"
+                    onClick={() => step(1)}
+                    aria-label="Post suivant"
+                  >
+                    ›
+                  </button>
+                </>
               ) : null}
-            </figcaption>
-          </figure>
-        </div>
-      ) : null}
+
+              <figure className="ig-player__frame">
+                {active.kind === "video" ? (
+                  <video
+                    className="ig-player__media"
+                    src={active.src}
+                    poster={active.poster || undefined}
+                    controls
+                    autoPlay
+                    playsInline
+                  />
+                ) : (
+                  <img
+                    className="ig-player__media"
+                    src={active.src}
+                    alt={active.alt || active.caption}
+                  />
+                )}
+                <figcaption className="ig-player__caption">
+                  {active.caption ? <p>{active.caption}</p> : null}
+                  {active.permalink ? (
+                    <a
+                      href={active.permalink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Voir sur Instagram ↗
+                    </a>
+                  ) : null}
+                </figcaption>
+              </figure>
+            </div>,
+            document.body,
+          )
+        : null}
     </section>
   );
 }
