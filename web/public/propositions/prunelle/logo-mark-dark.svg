@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="À la Prunelle de mes ongle'S">
+  <defs>
+    <linearGradient id="gd" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#E3CB9B"/>
+      <stop offset="50%" stop-color="#B08D57"/>
+      <stop offset="100%" stop-color="#8E6B39"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="45.4" fill="none" stroke="url(#gd)" stroke-width="1.4" opacity="0.75"/>
+  <path d="M50 31.6C58.4 30 66.4 32.6 70.4 39.4C74.4 46.2 73.8 56.6 69.2 64.6C64.6 72.6 57.2 77.4 50 77.4C42.8 77.4 35.4 72.6 30.8 64.6C26.2 56.6 25.6 46.2 29.6 39.4C33.6 32.6 41.6 30 50 31.6Z" fill="none" stroke="url(#gd)" stroke-width="1.8"/>
+  <path d="M50 33.6C44.4 36.8 43.6 40.4 44.6 43.2" fill="none" stroke="url(#gd)" stroke-width="1.4" opacity="0.6" stroke-linecap="round"/>
+  <path d="M50 45.6C48.6 54 48.6 64.8 50 71.8" fill="none" stroke="url(#gd)" stroke-width="1" opacity="0.55" stroke-linecap="round"/>
+  <path d="M53.4 31.2C55.6 26.8 58.2 23.4 61.4 20.8" fill="none" stroke="url(#gd)" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M61.2 20.8C65.6 13.4 76 12.6 80 17.2C83.4 21.4 73.6 28.6 61.2 20.8Z" fill="url(#gd)"/>
+</svg>

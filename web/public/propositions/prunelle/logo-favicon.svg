@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="À la Prunelle de mes ongle'S">
+  <rect width="100" height="100" rx="20" fill="#3B1420"/>
+  <path d="M46.5 33C56 31.4 65 34.6 68.5 42.4C72 50.2 69.6 60.4 63.4 67.2C57.2 74 50.4 77 46.5 77C42.6 77 35.8 74 29.6 67.2C23.4 60.4 21 50.2 24.5 42.4C28 34.6 37 31.4 46.5 33Z" fill="#C6A268"/>
+  <path d="M56.5 33.5C57.5 27.6 60.6 22.4 65.6 18.6" fill="none" stroke="#C6A268" stroke-width="6" stroke-linecap="round"/>
+  <path d="M63 19.5C68.6 9.5 81.6 9 84.6 16.4C87.2 23 76.6 28.6 63 19.5Z" fill="#C6A268"/>
+</svg>
