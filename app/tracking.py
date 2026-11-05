@@ -34,6 +34,7 @@ SLUGS = {
     "n2e": "N2E Échafaudages",
     "dimension-nouvelle": "Dimension Nouvelle",
     "polyresine": "Polyrésine",
+    "sei": "SEI",
 }
 LIMITE = 120  # événements par heure et par IP
 DUREE_MAX = 7200  # secondes : on ignore les onglets restés ouverts la nuit
