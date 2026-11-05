@@ -261,6 +261,11 @@ const nextConfig: NextConfig = {
           source: "/propositions/prunelle",
           destination: "/propositions/prunelle/index.html",
         },
+        // Institut JL : déclinaison de l'architecture Prunelle.
+        {
+          source: "/propositions/institut-jl",
+          destination: "/propositions/institut-jl/index.html",
+        },
         // L'URL accentuée n'existe pas : /propositions/polyresine est la seule
         // adresse (voir les redirects permanents plus bas).
       ],
