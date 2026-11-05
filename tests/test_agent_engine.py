@@ -12,6 +12,7 @@ from app.agent import tools as agent_tools
 
 FIELDS = {
     "project_type": "Refonte d'identité visuelle",
+    "branding": "Vaasam",
     "context": "Studio de yoga à Paris 11e, deux ans d'existence",
 }
 
@@ -86,22 +87,10 @@ def test_parcours_complet_jusqu_au_rendez_vous(conn):
     session_id = engine.prepare_session(conn)
     notifications: list[str] = []
 
+    # Le modèle n'est appelé qu'une fois la qualification terminée : le serveur
+    # pilote l'ordre des questions (projet, branding, activité).
     llm = FakeLLM(
         [
-            [
-                TurnOutput(
-                    text="Merci. Pour quelle activité ?",
-                    tool_calls=[_call("record_fields", project_type="Refonte d'identité visuelle")],
-                ),
-                TurnOutput(text="Merci. Pour quelle activité ?"),
-            ],
-            [
-                TurnOutput(
-                    text="Parfait, voici les créneaux.",
-                    tool_calls=[_call("record_fields", context="Studio de yoga à Paris 11e")],
-                ),
-                TurnOutput(text="Lequel vous convient ?"),
-            ],
             [
                 TurnOutput(
                     text="C'est noté.",
@@ -122,28 +111,41 @@ def test_parcours_complet_jusqu_au_rendez_vous(conn):
     first = _collect(conn, session_id, "Bonjour, je veux refaire mon identité", llm, google, notifications.append)
     assert any(event["type"] == "progress" for event in first)
     assert not any(event["type"] == "slots" for event in first)
+    assert llm.calls == 0
 
-    second = _collect(conn, session_id, "Studio de yoga à Paris 11e", llm, google, notifications.append)
-    assert any(event["type"] == "moment" for event in second)
-    assert not any(event["type"] == "slots" for event in second)
+    # Le branding arrive juste après le type de projet, rangé côté serveur.
+    second = _collect(conn, session_id, "Refonte d'identité visuelle", llm, google, notifications.append)
+    texte = "".join(e["text"] for e in second if e.get("type") == "delta")
+    assert "branding" in texte.lower() or "marque" in texte.lower()
+    assert llm.calls == 0
+
+    third = _collect(conn, session_id, "Vaasam", llm, google, notifications.append)
+    row_branding = store.get_session(conn, session_id)
+    assert row_branding is not None
+    assert store.session_fields(row_branding)["branding"] == "Vaasam"
+    assert "activit" in "".join(e["text"] for e in third if e.get("type") == "delta").lower()
+
+    fourth = _collect(conn, session_id, "Studio de yoga à Paris 11e", llm, google, notifications.append)
+    assert any(event["type"] == "moment" for event in fourth)
+    assert not any(event["type"] == "slots" for event in fourth)
     row_apres = store.get_session(conn, session_id)
     assert row_apres is not None
     assert row_apres["step"] == "moment"
 
     # La demi-journée choisie suffit : le serveur affiche les créneaux sans le modèle.
-    third = _collect(conn, session_id, "Plutôt le matin", llm, google, notifications.append)
-    assert any(event["type"] == "slots" for event in third)
+    fifth = _collect(conn, session_id, "Plutôt le matin", llm, google, notifications.append)
+    assert any(event["type"] == "slots" for event in fifth)
     row_creneaux = store.get_session(conn, session_id)
     assert row_creneaux is not None
     assert row_creneaux["step"] == "creneaux"
+    assert llm.calls == 0
 
-    row = store.get_session(conn, session_id)
-    first_choice = engine._choice_by_id(row, store.session_proposals(row)[0])
+    first_choice = engine._choice_by_id(row_creneaux, store.session_proposals(row_creneaux)[0])
     label = first_choice["label"]
     events = _collect(
         conn,
         session_id,
-        f"{label}, Claire Martin, claire@example.com, 06 12 34 56 78, branding Vaasam, en visio",
+        f"{label}, Claire Martin, claire@example.com, 06 12 34 56 78, en visio",
         llm,
         google,
         notifications.append,
@@ -437,18 +439,15 @@ def test_creneaux_deja_affiches_ne_sont_pas_rediffuses(conn):
     store.merge_fields(
         conn,
         session_id,
-        {"project_type": "Identité de marque", "context": "Studio de yoga"},
+        {
+            "project_type": "Identité de marque",
+            "branding": "Vaasam",
+            "context": "Studio de yoga",
+        },
     )
-    store.touch(conn, session_id, step="qualification")
-    llm0 = FakeLLM(
-        [
-            [
-                TurnOutput(text="", tool_calls=[_call("request_slots", **{})]),
-                TurnOutput(text="Voici les créneaux."),
-            ]
-        ]
-    )
-    first = _collect(conn, session_id, "Studio de yoga à Paris", llm0, google)
+    store.touch(conn, session_id, step="moment")
+    llm0 = FakeLLM([[]])
+    first = _collect(conn, session_id, "plutôt le matin", llm0, google)
     assert "slots" in [e.get("type") for e in first]
 
     llm = FakeLLM(

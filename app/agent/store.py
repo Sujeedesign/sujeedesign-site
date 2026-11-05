@@ -20,6 +20,11 @@ FIELDS: tuple[str, ...] = (
 # arrive juste après le type de projet, mais il ne bloque jamais l'agenda.
 QUALIFICATION: tuple[str, ...] = ("project_type", "branding", "context")
 BRANDING_UNKNOWN = "à définir"
+_BRANDING_NOISE = re.compile(
+    r"^(?:telephon\w*|tel|phone|appel|visio\w*|zoom|teams|meet|en ligne|"
+    r"matin|apres-midi|apres midi|oui|non|ok|d'accord)$|"
+    r"^(?:\+?\d[\d\s.-]{7,})"
+)
 # Réponses acceptées quand le visiteur n'a pas encore de nom de marque.
 _UNKNOWN_BRANDING = re.compile(
     r"^(?:je\s+)?(?:ne\s+)?(?:sais|sait|savoir)\s+(?:pas|pas\s+encore)"
@@ -37,6 +42,10 @@ def normalize_branding(value: str) -> str:
     folded = "".join(ch for ch in folded if not unicodedata.combining(ch))
     if _UNKNOWN_BRANDING.search(folded):
         return BRANDING_UNKNOWN
+    # Une réponse de mode d'appel, d'horaire ou un numéro n'est pas un branding :
+    # mieux vaut reposer la question que d'enregistrer n'importe quoi.
+    if _BRANDING_NOISE.search(folded):
+        return ""
     return text[:120]
 FIELD_LABELS = {
     "project_type": "type de projet",
@@ -97,6 +106,7 @@ def touch(conn: sqlite3.Connection, session_id: str, **values: Any) -> None:
         "recap_ok",
         "proposals",
         "chosen_slot",
+        "pending",
         "contact_name",
         "contact_email",
         "consent",

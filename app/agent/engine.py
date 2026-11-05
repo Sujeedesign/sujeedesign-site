@@ -93,7 +93,9 @@ def turn(
     answer = ""
     pending = ""
     # Demi-journée puis choix du créneau : chemins serveur déterministes.
-    answer = _server_moment_turn(toolbox, store.get_session(conn, session_id), message)
+    answer = _server_qualification_turn(toolbox, message)
+    if not answer:
+        answer = _server_moment_turn(toolbox, store.get_session(conn, session_id), message)
     if not answer:
         answer = _server_slot_turn(toolbox, store.get_session(conn, session_id), message)
     if answer:
@@ -258,6 +260,8 @@ def turn(
                 # Le modèle redemande ce qu'il sait déjà (ex. « quel type de projet »
                 # après « identité de marque ») : on reprend la question utile.
                 answer = _question_for(fields)
+            if not slots_shown:
+                answer = _qualification_question(toolbox, row_now, answer)
             answer = _one_question(answer)
         for chunk in _chunks(answer):
             yield {"type": "delta", "text": chunk}
@@ -579,6 +583,120 @@ def _guess_mode(message: str) -> str:
     return ""
 
 
+def _server_qualification_turn(toolbox: ToolBox, message: str) -> str:
+    """Qualification pilotée par le serveur : l'ordre ne dépend pas du modèle.
+
+    Le serveur retient le champ qu'il vient de demander (`pending`). La réponse
+    suivante est rangée dans ce champ, puis la question suivante est posée.
+    Le branding arrive ainsi juste après le type de projet, et une réponse
+    hors sujet (mode d'appel, numéro) ne vient pas polluer les champs.
+    """
+    conn, session_id = toolbox.conn, toolbox.session_id
+    row = store.get_session(conn, session_id)
+    if row is None or toolbox.booking or toolbox.handed_off:
+        return ""
+    if str(row["status"] or "") != store.STATUS_OPEN:
+        return ""
+    if str(row["step"] or "") in ("creneaux", "confirme") or store.session_proposals(row):
+        return ""
+    fields = store.session_fields(row)
+    asked = str(row["pending"] or "")
+    if asked and asked in store.QUALIFICATION and not fields.get(asked):
+        value = _qualification_value(asked, message)
+        if value:
+            store.merge_fields(conn, session_id, {asked: value})
+            fields = store.session_fields(store.get_session(conn, session_id))
+        if not fields.get(asked):
+            # Réponse inexploitable : on repose la même question.
+            return _question_for(fields)
+    missing = [key for key in store.QUALIFICATION if not fields.get(key)]
+    if not missing:
+        if asked:
+            store.touch(conn, session_id, pending="")
+        fresh = store.get_session(conn, session_id)
+        if (
+            asked == store.QUALIFICATION[-1]
+            and fresh is not None
+            and str(fresh["status"] or "") == store.STATUS_OPEN
+            and str(fresh["step"] or "") not in ("moment", "creneaux", "confirme")
+            and not store.session_proposals(fresh)
+            and not store.session_fields(fresh).get("moment")
+        ):
+            # Qualification bouclée côté serveur : on demande la demi-journée,
+            # comme le ferait l'outil record_fields.
+            store.touch(conn, session_id, step="moment")
+            toolbox.events.append(
+                {
+                    "type": "moment",
+                    "question": "Vous préférez le matin ou l'après-midi ?",
+                    "options": [
+                        {"value": "matin", "label": "Le matin"},
+                        {"value": "apres-midi", "label": "L'après-midi"},
+                    ],
+                }
+            )
+            return "Vous préférez le matin ou l'après-midi ?"
+        return ""
+    nxt = missing[0]
+    if nxt != asked:
+        store.touch(conn, session_id, pending=nxt)
+    return _question_for(fields)
+
+
+def _qualification_value(key: str, message: str) -> str:
+    """Valeur exploitable tirée du message pour le champ demandé."""
+    text = " ".join(str(message or "").split())
+    if not text or "?" in text or len(text) > 200:
+        return ""
+    if key == "branding":
+        return store.normalize_branding(text)
+    if key == "project_type":
+        return "" if store._BRANDING_NOISE.match(text.lower()) else text
+    return text
+
+
+def _qualification_question(
+    toolbox: ToolBox, row: Any, answer: str
+) -> str:
+    """Garde-fou après le modèle : on ne saute jamais une question."""
+    if toolbox.booking or toolbox.handed_off:
+        return answer
+    # Le modèle vient peut-être d'enregistrer des champs : on relit la session.
+    row = store.get_session(toolbox.conn, toolbox.session_id)
+    if row is None:
+        return answer
+    if str(row["status"] or "") != store.STATUS_OPEN:
+        return answer
+    if str(row["step"] or "") in ("creneaux", "confirme") or store.session_proposals(row):
+        return answer
+    fields = store.session_fields(row)
+    missing = [key for key in store.QUALIFICATION if not fields.get(key)]
+    if not missing:
+        if str(row["pending"] or ""):
+            store.touch(toolbox.conn, toolbox.session_id, pending="")
+        return answer
+    nxt = missing[0]
+    if str(row["pending"] or "") != nxt:
+        store.touch(toolbox.conn, toolbox.session_id, pending=nxt)
+    if _asks_field(answer, nxt):
+        return answer
+    return _question_for(fields)
+
+
+_ASKS_FIELD = {
+    "project_type": re.compile(r"type de projet|projet|besoin", re.IGNORECASE),
+    "branding": re.compile(r"branding|nom de (?:la )?marque|marque", re.IGNORECASE),
+    "context": re.compile(r"activit|secteur|domaine", re.IGNORECASE),
+}
+
+
+def _asks_field(answer: str, key: str) -> bool:
+    if "?" not in (answer or ""):
+        return False
+    pattern = _ASKS_FIELD.get(key)
+    return bool(pattern and pattern.search(answer))
+
+
 def _server_moment_turn(toolbox: ToolBox, row: Any, message: str) -> str:
     """Demi-journée préférée : dès que le visiteur répond matin / après-midi,
     le serveur ouvre les créneaux correspondants sans passer par le modèle.
@@ -748,8 +866,10 @@ def _preflight(toolbox: ToolBox, row: Any, message: str) -> list[dict[str, Any]]
     # Qualification complète mais créneaux pas encore ouverts (le modèle a
     # oublié de les demander) : le serveur les ouvre lui-même.
     fields = store.session_fields(row)
+    qualification_pending = [key for key in store.QUALIFICATION if not fields.get(key)]
     if (
         not store.missing_fields(fields)
+        and not qualification_pending
         and step in ("accueil", "qualification", "recap", "coordonnees", "moment")
         and not store.session_proposals(row)
         and row["status"] != store.STATUS_BOOKED

@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS agent_sessions (
   recap_ok INTEGER NOT NULL DEFAULT 0,
   proposals TEXT NOT NULL DEFAULT '[]',
   chosen_slot TEXT NOT NULL DEFAULT '',
+  pending TEXT NOT NULL DEFAULT '',
   contact_name TEXT NOT NULL DEFAULT '',
   contact_email TEXT NOT NULL DEFAULT '',
   consent INTEGER NOT NULL DEFAULT 0,
@@ -81,6 +82,8 @@ def _add_missing_columns(conn: sqlite3.Connection) -> None:
         conn.execute("ALTER TABLE agent_sessions ADD COLUMN contact_name TEXT NOT NULL DEFAULT ''")
     if "contact_email" not in columns:
         conn.execute("ALTER TABLE agent_sessions ADD COLUMN contact_email TEXT NOT NULL DEFAULT ''")
+    if "pending" not in columns:
+        conn.execute("ALTER TABLE agent_sessions ADD COLUMN pending TEXT NOT NULL DEFAULT ''")
 
 
 def init_agent_db(conn: sqlite3.Connection) -> None:
