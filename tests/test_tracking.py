@@ -173,3 +173,34 @@ def test_aucune_police_chargee_chez_google() -> None:
     ]
     assert coupables == []
 
+
+MENTION_MESURE = "Consultation mesurée de façon anonyme · données conservées 12 mois"
+
+
+def test_mention_de_mesure_sur_chaque_page_qui_mesure() -> None:
+    """Toute page de proposition qui charge le suivi doit afficher la mention.
+
+    Garde-fou né du cas SEI (commit 55ae202) : une 4e page avait été ajoutée
+    avec `sj-suivi` mais sans la ligne d'information. Le test boucle sur les
+    pages au lieu de n'en vérifier que trois.
+    """
+    from pathlib import Path
+
+    dossier = Path(__file__).resolve().parents[1] / "web" / "public" / "propositions"
+    pages = sorted(dossier.glob("*/index.html"))
+    assert pages, "aucune page de proposition trouvée"
+
+    mesurees = [
+        page
+        for page in pages
+        if "sj-suivi" in page.read_text(encoding="utf-8", errors="ignore")
+    ]
+    assert mesurees, "aucune page ne charge le suivi : le garde-fou ne teste rien"
+
+    sans_mention = [
+        str(page.relative_to(dossier))
+        for page in mesurees
+        if MENTION_MESURE not in page.read_text(encoding="utf-8", errors="ignore")
+    ]
+    assert sans_mention == []
+
