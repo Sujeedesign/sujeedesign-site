@@ -102,6 +102,40 @@ def test_mail_avec_expediteur_et_piece_jointe_calendrier(monkeypatch):
     assert "text/calendar" in parts
 
 
+def test_echec_temporaire_de_google_est_rejoue(monkeypatch):
+    """Un 503 passager ne doit pas annuler la reservation du client."""
+    calls: list[httpx.Request] = []
+    attempts = {"n": 0}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(request)
+        if request.url.host == "oauth2.googleapis.com":
+            return httpx.Response(200, json={"access_token": "jeton", "expires_in": 3600})
+        attempts["n"] += 1
+        if attempts["n"] == 1:
+            return httpx.Response(503, json={"error": "backend"})
+        return httpx.Response(200, json={"id": "evt_2", "htmlLink": "https://cal.example/evt_2"})
+
+    config = GoogleConfig(
+        client_id="id",
+        client_secret="secret",
+        refresh_token="refresh",
+        calendar_id="primary",
+        from_email="hello@sujeedesign.com",
+        from_name="Sujee Design",
+    )
+    client = CalendarClient(config=config, transport=httpx.MockTransport(handler))
+    event = client.create_event(
+        start=START,
+        attendee_email="claire@example.com",
+        attendee_name="Claire Martin",
+        summary="Appel decouverte",
+        description="Brief",
+    )
+    assert event["id"] == "evt_2"
+    assert attempts["n"] == 2
+
+
 def test_ics_heure_de_paris_et_organisateur():
     payload = ics.build_invite(
         start=START,

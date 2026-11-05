@@ -138,18 +138,30 @@ class CalendarClient:
         self._token_until = time.time() + float(data.get("expires_in", 3600))
         return token
 
+    RETRY_STATUS = frozenset({429, 500, 502, 503, 504})
+
     def _request(self, method: str, url: str, **kwargs: Any) -> dict[str, Any]:
         headers = kwargs.pop("headers", {})
         headers["Authorization"] = f"Bearer {self.access_token()}"
-        try:
-            response = self._client.request(method, url, headers=headers, **kwargs)
-        except httpx.HTTPError as error:
-            raise GoogleError(f"Google injoignable : {error}") from error
-        if response.status_code >= 400:
-            raise GoogleError(f"Google a répondu {response.status_code} : {response.text[:200]}")
-        if not response.content:
-            return {}
-        return response.json()
+        last: GoogleError | None = None
+        for attempt in range(3):
+            try:
+                response = self._client.request(method, url, headers=headers, **kwargs)
+            except httpx.HTTPError as error:
+                last = GoogleError(f"Google injoignable : {error}")
+            else:
+                if response.status_code < 400:
+                    if not response.content:
+                        return {}
+                    return response.json()
+                last = GoogleError(
+                    f"Google a répondu {response.status_code} : {response.text[:200]}"
+                )
+                if response.status_code not in self.RETRY_STATUS:
+                    raise last
+            if attempt < 2:
+                time.sleep(0.6 * (3**attempt))
+        raise last or GoogleError("Google injoignable")
 
     # -- agenda -----------------------------------------------------------
     def busy(self, time_min: datetime, time_max: datetime) -> list[tuple[datetime, datetime]]:

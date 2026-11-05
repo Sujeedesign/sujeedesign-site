@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS agent_leads (
   summary TEXT NOT NULL DEFAULT '',
   status TEXT NOT NULL DEFAULT 'qualifie',
   event_id TEXT NOT NULL DEFAULT '',
+  event_link TEXT NOT NULL DEFAULT '',
   slot_start TEXT NOT NULL DEFAULT '',
   notified_at TEXT,
   ip_hash TEXT NOT NULL DEFAULT '',
@@ -84,6 +85,9 @@ def _add_missing_columns(conn: sqlite3.Connection) -> None:
         conn.execute("ALTER TABLE agent_sessions ADD COLUMN contact_email TEXT NOT NULL DEFAULT ''")
     if "pending" not in columns:
         conn.execute("ALTER TABLE agent_sessions ADD COLUMN pending TEXT NOT NULL DEFAULT ''")
+    lead_columns = {row["name"] for row in conn.execute("PRAGMA table_info(agent_leads)")}
+    if lead_columns and "event_link" not in lead_columns:
+        conn.execute("ALTER TABLE agent_leads ADD COLUMN event_link TEXT NOT NULL DEFAULT ''")
 
 
 def init_agent_db(conn: sqlite3.Connection) -> None:

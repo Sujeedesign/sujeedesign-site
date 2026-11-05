@@ -382,6 +382,7 @@ class ToolBox:
             self.conn,
             lead["id"],
             event_id=event_id,
+            event_link=str(event.get("htmlLink", "")),
             slot_start=slot_start,
             notified_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         )

@@ -38,6 +38,11 @@
           {% if lead.slot_start %}
             <div class="msg-tags">
               <span class="tag acc">rendez-vous {{ lead.slot_label }}</span>
+              {% if lead.event_id %}
+                <a class="tag" href="{{ lead.event_link or 'https://calendar.google.com/calendar/r' }}" target="_blank" rel="noopener">dans Google Agenda</a>
+              {% else %}
+                <span class="tag">hors agenda</span>
+              {% endif %}
             </div>
           {% endif %}
 
