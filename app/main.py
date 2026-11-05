@@ -60,6 +60,12 @@ async def lifespan(app: FastAPI):
     try:
         init_db(conn)
         conn.commit()
+        # Purge quotidienne des vues de propositions de plus de 12 mois
+        # (alignement CNIL + mention affichée dans le pied de page).
+        try:
+            tracking.purger_vues(conn)
+        except Exception:  # noqa: BLE001  (le démarrage ne doit jamais échouer ici)
+            log.warning("purge des vues de propositions impossible", exc_info=True)
         # Fiches historiques du site, insérées une seule fois (slugs absents).
         added = catalogue.seed_from_file(conn)
         if added:

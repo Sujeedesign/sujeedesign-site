@@ -9,14 +9,13 @@
   var qs = client ? '&utm_content=' + encodeURIComponent(client) : '';
   href = href + qs;
 
-  if (!document.getElementById('sd-fonts')) {
-    var pre = document.createElement('link');
-    pre.id = 'sd-fonts-pre'; pre.rel = 'preconnect'; pre.href = 'https://fonts.gstatic.com'; pre.crossOrigin = '';
-    document.head.appendChild(pre);
-    var fl = document.createElement('link');
-    fl.id = 'sd-fonts'; fl.rel = 'stylesheet';
-    fl.href = 'https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Space+Grotesk:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap';
-    document.head.appendChild(fl);
+  // Polices auto-hébergées (fichiers dans _cta/fonts/) : plus aucun appel à
+  // Google Fonts depuis un document client privé.
+  if (!document.querySelector('link[href="/propositions/_cta/fonts.css"]')) {
+    var fonts = document.createElement('link');
+    fonts.id = 'sd-fonts'; fonts.rel = 'stylesheet';
+    fonts.href = '/propositions/_cta/fonts.css';
+    document.head.appendChild(fonts);
   }
 
   var css = ''
@@ -33,7 +32,7 @@
   + '.sd-copy p strong{font-weight:500;color:rgba(244,244,241,.92)}'
   + '.sd-act{display:flex;flex-direction:column;gap:12px;align-items:flex-start;align-self:center}'
   + '.sd-btn{display:inline-flex;align-items:center;gap:14px;height:50px;padding:0 24px;background:var(--sd-accent);color:var(--sd-paper);text-decoration:none;border-radius:2px;font:400 11px/1 var(--sd-mono);letter-spacing:.13em;text-transform:uppercase;transition:background .2s,transform .2s}'
-  + '.sd-btn:hover{background:var(--sd-accent-b);transform:translateY(-1px)}'
+  + '.sd-btn:hover,.sd-btn:focus-visible{background:var(--sd-accent-b);color:var(--sd-ink);transform:translateY(-1px)}'
   + '.sd-btn span{font-family:var(--sd-sans);font-size:15px;line-height:1}'
   + '.sd-note{font:400 10.5px/1.5 var(--sd-mono);letter-spacing:.05em;text-transform:uppercase;color:rgba(244,244,241,.66)}'
   + '.sd-fab{position:fixed;right:20px;bottom:20px;z-index:9998;display:inline-flex;align-items:center;gap:10px;padding:0 14px 0 12px;height:42px;background:var(--sd-ink);color:var(--sd-bone);text-decoration:none;border-radius:2px;font:400 10.5px/1 var(--sd-mono);letter-spacing:.11em;text-transform:uppercase;box-shadow:0 14px 34px -12px rgba(10,10,11,.7);border:1px solid rgba(255,255,255,.16);transition:transform .22s,box-shadow .22s,opacity .25s,visibility .25s,background .2s}'

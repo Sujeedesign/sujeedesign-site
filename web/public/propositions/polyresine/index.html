@@ -13,9 +13,8 @@
 <meta property="og:title" content="Polyrésine — Caler juste. Faire durer.">
 <meta property="og:description" content="Le calage de précision des machines tournantes. Une expertise française déployée dans le monde entier depuis 1972.">
 <meta property="og:image" content="/propositions/polyresine/assets/hero-platform.webp">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Polices auto-hébergées : plus aucun appel à Google Fonts -->
+<link rel="stylesheet" href="/propositions/_cta/fonts.css">
 <link rel="preload" as="image" href="/propositions/polyresine/assets/hero-platform.webp" fetchpriority="high">
 <style>
 /* ============================================================
@@ -881,6 +880,7 @@ section[id]{scroll-margin-top:calc(var(--header-h) + 18px)}
 
     <div class="footer__bottom">
       <span>© 2026 Polyrésine — BMGP Group</span>
+      <span>Consultation mesurée de façon anonyme · données conservées 12 mois</span>
       <nav aria-label="Liens légaux">
         <a href="https://www.polyresine.com/mentions-legales/">Mentions légales</a>
         <a href="https://www.polyresine.com/politique-de-confidentialite/">Confidentialité</a>
@@ -926,7 +926,9 @@ section[id]{scroll-margin-top:calc(var(--header-h) + 18px)}
 <script id="sj-suivi">
 (function(){
   var slug="polyresine", session=Math.random().toString(36).slice(2)+Date.now().toString(36);
-  var debut=Date.now(), envoye=false;
+  // Chrono : le temps se cumule tant que l'onglet est visible. Un passage sur
+  // un autre onglet met le compteur en pause au lieu de figer la durée.
+  var total=0, depuis=Date.now(), actif=(document.visibilityState!=="hidden"), envoye=false;
   function envoi(ev,sec){
     var d={slug:slug,evenement:ev,session:session};
     if(sec!=null){d.secondes=sec}
@@ -935,9 +937,15 @@ section[id]{scroll-margin-top:calc(var(--header-h) + 18px)}
     else{fetch("/api/track/vue",{method:"POST",headers:{"Content-Type":"application/json"},body:corps,keepalive:true}).catch(function(){});}
   }
   envoi("ouverture");
-  function fin(){if(envoye){return}envoye=true;envoi("fermeture",Math.round((Date.now()-debut)/1000));}
-  addEventListener("pagehide",fin);
-  document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"){fin();}});
+  function accumuler(){if(actif){total+=Math.round((Date.now()-depuis)/1000);actif=false;}}
+  function reprendre(){if(!actif){depuis=Date.now();actif=true;}}
+  document.addEventListener("visibilitychange",function(){
+    if(document.visibilityState==="hidden"){accumuler();}else{reprendre();}
+  });
+  // Retour depuis le cache de navigation : on repart sur le même compteur.
+  addEventListener("pageshow",function(e){if(e.persisted){envoye=false;reprendre();}});
+  // Fermeture réelle : une seule fois, sur pagehide.
+  addEventListener("pagehide",function(){if(envoye){return;}accumuler();envoye=true;envoi("fermeture",total);});
 })();
 </script>
 </body>

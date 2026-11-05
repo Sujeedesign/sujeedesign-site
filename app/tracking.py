@@ -7,20 +7,26 @@ quittée avec le temps passé.
 
 Vie privée : aucun cookie, aucune adresse IP en clair. Seul un condensat salé
 de l'IP sert à compter les visiteurs uniques, et l'identifiant de session est
-régénéré à chaque chargement de page.
+régénéré à chaque chargement de page. Les vues sont supprimées au-delà de
+12 mois (voir `purger_vues`), la durée annoncée dans le pied de page des
+propositions.
 """
 
 from __future__ import annotations
 
 import json
+import logging
 import sqlite3
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
 from . import security
 from .contact import client_ip
-from .db import connect
+from .db import connect, get_meta, set_meta
+
+log = logging.getLogger("sujee.admin")
 
 router = APIRouter(prefix="/api/track", tags=["suivi"])
 
@@ -31,6 +37,30 @@ SLUGS = {
 }
 LIMITE = 120  # événements par heure et par IP
 DUREE_MAX = 7200  # secondes : on ignore les onglets restés ouverts la nuit
+PURGE_MOIS = 12  # conservation des vues, alignée sur la mention du pied de page
+PURGE_META_KEY = "proposition_purge_at"
+
+
+def purger_vues(conn: sqlite3.Connection, aujourdhui: str | None = None) -> int:
+    """Supprime les vues de plus de 12 mois. Une passe par jour au maximum.
+
+    La dispense CNIL pour la mesure d'audience plafonne la conservation à
+    13 mois : on coupe à 12 pour rester cohérent avec la mention affichée
+    dans le pied de page des propositions. Le marqueur `_meta` évite de
+    relancer la requête à chaque démarrage de conteneur.
+    """
+    jour = aujourdhui or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    if get_meta(conn, PURGE_META_KEY, "") == jour:
+        return 0
+    cursor = conn.execute(
+        "DELETE FROM proposition_vues WHERE created_at < datetime('now', ?)",
+        (f"-{PURGE_MOIS} months",),
+    )
+    set_meta(conn, PURGE_META_KEY, jour)
+    conn.commit()
+    supprimees = int(cursor.rowcount or 0)
+    log.info("vues de propositions purgées : %s ligne(s) de plus de %s mois", supprimees, PURGE_MOIS)
+    return supprimees
 
 
 def _conn(request: Request) -> sqlite3.Connection:

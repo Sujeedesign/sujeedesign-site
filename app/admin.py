@@ -27,6 +27,7 @@ from . import content_model
 from . import repo
 from . import security
 from . import settings as settings_module
+from . import tracking
 from .agent.store import FIELD_LABELS
 from .db import connect, get_meta, set_meta
 from .ui import templates
@@ -666,6 +667,12 @@ def propositions(request: Request, user: str = Depends(require_admin)) -> Respon
     """Consultation des trois propositions envoyées aux clients."""
     conn = get_conn(request)
     try:
+        # Purge quotidienne : la page admin est le point de passage sûr même
+        # quand le conteneur tourne plusieurs jours sans redémarrage.
+        try:
+            tracking.purger_vues(conn)
+        except sqlite3.Error:
+            pass
         rows = [
             dict(row)
             for row in conn.execute(
