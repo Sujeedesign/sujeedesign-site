@@ -251,6 +251,11 @@ const nextConfig: NextConfig = {
           source: "/propositions/sei",
           destination: "/propositions/sei/index.html",
         },
+        // À la Prunelle de mes ongle'S : diagnostic perceptuel et refonte.
+        {
+          source: "/propositions/prunelle",
+          destination: "/propositions/prunelle/index.html",
+        },
         // L'URL accentuée n'existe pas : /propositions/polyresine est la seule
         // adresse (voir les redirects permanents plus bas).
       ],
