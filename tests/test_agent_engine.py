@@ -928,3 +928,13 @@ def test_conversation_reelle_les_champs_sont_vraiment_ranges(conn):
     assert fields["context"] == "auto"
     assert fields.get("branding") == store.BRANDING_UNKNOWN
     assert google.events == []
+
+
+def test_aucun_autre_prenom_n_atteint_le_visiteur() -> None:
+    """Filet de sécurité : même un modèle qui recopie « Raj » est corrigé."""
+    assert engine._sans_autre_prenom("L'appel avec Raj dure 30 minutes.") == (
+        "L'appel avec Sujee dure 30 minutes."
+    )
+    assert engine._sans_autre_prenom("Votre numéro, pour l'appel avec Sujee ?") == (
+        "Votre numéro, pour l'appel avec Sujee ?"
+    )

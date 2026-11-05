@@ -231,6 +231,10 @@ def turn(
         # Ni chemin serveur ni modèle : on ne laisse jamais le visiteur sans réponse.
         answer = _fallback_answer(store.get_session(conn, session_id), message)
 
+    # Le studio, c'est Sujee : même si le modèle dérape, aucun autre prénom
+    # n'atteint le visiteur.
+    answer = _sans_autre_prenom(answer)
+
     if answer.strip() and toolbox.final_answer:
         # Phrase déjà rédigée par le moteur : on la diffuse telle quelle.
         for chunk in _chunks(answer):
@@ -328,6 +332,14 @@ def _question_for(fields: dict[str, str]) -> str:
         if first == "context":
             return "Pour quelle activité ou quel secteur est-ce ?"
     return "Pouvez-vous préciser votre besoin en une phrase ?"
+
+
+_AUTRE_PRENOM = re.compile(r"\bRaj\b", re.IGNORECASE)
+
+
+def _sans_autre_prenom(text: str) -> str:
+    """Filet de sécurité : le visiteur ne lit jamais un prénom autre que Sujee."""
+    return _AUTRE_PRENOM.sub("Sujee", text)
 
 
 def _fallback_answer(row: Any, message: str) -> str:
