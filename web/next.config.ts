@@ -161,6 +161,12 @@ const nextConfig: NextConfig = {
           { key: "Cache-Control", value: "no-store" },
         ],
       },
+      // Propositions clients : jamais indexées ni suivies. Les pages portent déjà
+      // une balise meta, l'en-tête couvre aussi les assets et les variantes d'URL.
+      {
+        source: "/propositions/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
       // Images du site (projets, partages).
       { source: "/assets/img/:path*", headers: [{ key: "Cache-Control", value: longCache }] },
       // Photographies et portraits posés à la racine de /assets.
@@ -233,8 +239,7 @@ const nextConfig: NextConfig = {
       // `middleware.ts`, donc un seul saut.)
       // afterFiles : la règle ne s'applique que si aucun fichier ne correspond.
       afterFiles: [
-        // Sommaire des propositions (accès privé, noindex).
-        { source: "/propositions", destination: "/propositions/index.html" },
+        // Aucun sommaire : /propositions ne liste plus les clients (404).
         { source: "/propositions/n2e", destination: "/propositions/n2e/index.html" },
         // Refonte Dimension Nouvelle : même principe, page statique autonome.
         {
