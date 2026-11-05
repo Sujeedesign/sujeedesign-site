@@ -31,6 +31,26 @@ log = logging.getLogger("sujee.admin")
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "admin_static"
 
+# Plafonds du corps de requête, avec une marge pour l'enveloppe multipart.
+TEXT_BODY_LIMIT = 1024 * 1024
+MEDIA_BODY_LIMIT = admin.MAX_UPLOAD + 1024 * 1024
+INSTAGRAM_BODY_LIMIT = admin.INSTAGRAM_VIDEO_MAX + 4 * 1024 * 1024
+
+
+def body_limit(path: str) -> int:
+    """Plafond de corps autorisé pour un chemin donné.
+
+    Les formulaires texte restent à 1 Mo ; seuls les écrans qui acceptent un
+    fichier montent plus haut, selon le plafond de leur propre route.
+    """
+    if path in ("/admin/medias", "/api/v1/admin/media"):
+        return MEDIA_BODY_LIMIT
+    if path == "/admin/instagram/ajouter" or (
+        path.startswith("/admin/instagram/") and path.endswith("/modifier")
+    ):
+        return INSTAGRAM_BODY_LIMIT
+    return TEXT_BODY_LIMIT
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -71,15 +91,12 @@ def create_app(db_file: Path | None = None) -> FastAPI:
     app.mount("/medias", StaticFiles(directory=str(media_dir)), name="medias")
 
     @app.middleware("http")
-    async def body_limit(request: Request, call_next):
+    async def body_limit_middleware(request: Request, call_next):
         # Garde-fou anti-saturation : les formulaires texte n'ont aucune raison
-        # de dépasser 1 Mo, seuls les imports de médias montent à 16 Mo.
+        # de dépasser 1 Mo ; les écrans d'import ont leur plafond à eux.
         raw = request.headers.get("content-length")
-        if raw and raw.isdigit():
-            path = request.url.path
-            limit = 16 * 1024 * 1024 if path in ("/admin/medias", "/api/v1/admin/media") else 1024 * 1024
-            if int(raw) > limit:
-                return JSONResponse({"detail": "requête trop volumineuse"}, status_code=413)
+        if raw and raw.isdigit() and int(raw) > body_limit(request.url.path):
+            return JSONResponse({"detail": "requête trop volumineuse"}, status_code=413)
         return await call_next(request)
 
     @app.middleware("http")

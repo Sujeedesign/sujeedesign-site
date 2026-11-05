@@ -89,6 +89,29 @@ def test_ajout_video(logged: TestClient) -> None:
     assert posts[0]["src"].endswith(".mp4")
 
 
+def test_ajout_video_plus_d_un_mega(logged: TestClient) -> None:
+    """Une vraie vidéo dépasse vite 1 Mo : le garde-fou corps ne doit pas la couper."""
+    grosse = MP4 + b"\x00" * (2 * 1024 * 1024)
+    response = _add(logged, payload=grosse, name="reel.mp4", legende="Reel 2 Mo")
+    assert response.status_code == 303, response.text
+    posts = _posts(logged)
+    assert len(posts) == 1
+    assert posts[0]["kind"] == "video"
+    media = Path(logged.app.state.media_dir)  # type: ignore[attr-defined]
+    assert (media / posts[0]["src"].split("/")[-1]).stat().st_size == len(grosse)
+
+
+def test_formulaire_texte_toujours_plafonne(client: TestClient) -> None:
+    """Le garde-fou reste actif là où aucun fichier n'est attendu."""
+    response = client.post(
+        "/admin/connexion",
+        content=b"password=" + b"a" * (2 * 1024 * 1024),
+        headers={"content-type": "application/x-www-form-urlencoded"},
+    )
+    assert response.status_code == 413
+    assert response.json()["detail"] == "requête trop volumineuse"
+
+
 def test_fichier_refuse(logged: TestClient) -> None:
     response = _add(logged, payload=GARBAGE, name="x.png")
     assert response.status_code == 303
