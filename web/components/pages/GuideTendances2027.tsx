@@ -4,7 +4,7 @@ import { routes, serviceHref } from "@/lib/routes";
 import styles from "./GuideTendances2027.module.css";
 
 export const pageMeta = {
-  title: "Tendances web design 2027 : ce qui change vraiment",
+  title: "Tendances web design 2027 : ce qui change",
   description:
     "Onze tendances web design 2027 passées au filtre du réel : ce qui change pour votre site, ce que ça coûte, et ce qu'il vaut mieux ignorer.",
 };
