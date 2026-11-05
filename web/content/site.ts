@@ -8,6 +8,13 @@ import { CONTACT_EMAIL, CONTACT_PHONE_HREF, routes } from "@/lib/routes";
  */
 const siteSchema = z.object({
   name: z.string().min(1),
+  /**
+   * Variantes du nom, pour le nom de site dans Google. Google recommande
+   * `alternateName` : si « Sujee Design » n'est pas retenu (collision, marque
+   * peu reconnue), son système peut piocher dans ces variantes au lieu de
+   * retomber sur le domaine nu.
+   */
+  alternateName: z.array(z.string().min(1)).min(1),
   legalName: z.string().min(1),
   url: z.string().url(),
   email: z.string().email(),
@@ -32,6 +39,7 @@ const siteSchema = z.object({
 
 export const site = siteSchema.parse({
   name: "Sujee Design",
+  alternateName: ["Sujeedesign", "Sujee Design Studio"],
   legalName: "Sujeepan Sabesan",
   url: "https://sujeedesign.com",
   email: CONTACT_EMAIL,

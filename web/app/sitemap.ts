@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { routes, realisationPath, serviceHref, serviceSlugs } from "@/lib/routes";
 import { getProjects } from "@/lib/content/catalogue";
+import { contentUpdated } from "@/lib/content/freshness";
 
 const SITE_URL = "https://sujeedesign.com";
 
@@ -10,10 +11,13 @@ const SITE_URL = "https://sujeedesign.com";
  * Les routes dynamiques sont générées depuis la même source que les pages : les
  * services depuis `serviceSlugs`, les réalisations depuis le catalogue publié
  * dans l'admin (repli sur les fiches du dépôt).
+ *
+ * `lastModified` vient de `contentUpdated()` : une date réelle et stable, pas
+ * `new Date()`. Voir `lib/content/freshness.ts`.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const projects = await getProjects();
-  const now = new Date();
+  const now = contentUpdated();
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: `${SITE_URL}${routes.home}`, lastModified: now, changeFrequency: "monthly", priority: 1 },

@@ -97,6 +97,11 @@ const nextConfig: NextConfig = {
       { source: "/contact.html", destination: "/contact", statusCode: 301 },
       { source: "/v5/:path*", destination: "/", statusCode: 301 },
       ...legacyUrls.map((url) => ({ ...url, statusCode: 301 as const })),
+      // Filet de sécurité : une ancienne page statique en .html non listée
+      // ci-dessus rejoint son équivalent sans extension (/a-propos.html ->
+      // /a-propos) au lieu de tomber en 404. Placé en dernier pour ne jamais
+      // court-circuiter une règle explicite.
+      { source: "/:page.html", destination: "/:page", statusCode: 301 },
     ];
   },
   /**
