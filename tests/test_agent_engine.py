@@ -897,3 +897,34 @@ def test_le_serveur_ne_range_pas_n_importe_quoi_dans_les_champs() -> None:
         )
         == store.BRANDING_UNKNOWN
     )
+
+
+def test_conversation_reelle_les_champs_sont_vraiment_ranges(conn):
+    """Rejoue la conversation signalée : chaque réponse atterrit dans son champ."""
+    google = FakeGoogle(available=slots.candidates()[:6])
+    session_id = engine.prepare_session(conn)
+    llm = FakeLLM([])
+
+    etapes = [
+        ("Site web ou e-commerce", "project_type", "Site web ou e-commerce"),
+        ("Création d'un site ecommerce", "project_type", "Création d'un site ecommerce"),
+        (
+            "Branding pas encore trouvé mais ça sera vente de pièce auto",
+            "branding",
+            store.BRANDING_UNKNOWN,
+        ),
+        ("auto", "context", "auto"),
+    ]
+    for message, champ, attendu in etapes:
+        _collect(conn, session_id, message, llm, google)
+        fields = store.session_fields(store.get_session(conn, session_id))
+        assert fields.get(champ) == attendu, (message, champ, fields)
+
+    # « auto » n'a pas écrasé le type de projet, et « Le matin » ne finit pas
+    # dans un champ de qualification.
+    _collect(conn, session_id, "Le matin", llm, google)
+    fields = store.session_fields(store.get_session(conn, session_id))
+    assert fields["project_type"] == "Création d'un site ecommerce"
+    assert fields["context"] == "auto"
+    assert fields.get("branding") == store.BRANDING_UNKNOWN
+    assert google.events == []

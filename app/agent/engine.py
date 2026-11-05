@@ -743,6 +743,13 @@ def _server_qualification_turn(toolbox: ToolBox, message: str) -> str:
             store.merge_fields(conn, session_id, {asked: value})
             fields = store.session_fields(store.get_session(conn, session_id))
         if not fields.get(asked):
+            # Le visiteur précise son projet alors qu'on demande la marque :
+            # on garde la précision et on repose la question du branding.
+            if asked != "project_type":
+                precision = _qualification_value("project_type", message)
+                if precision and not _already_known(fields, "project_type", precision):
+                    store.merge_fields(conn, session_id, {"project_type": precision})
+                    fields = store.session_fields(store.get_session(conn, session_id))
             # Réponse inexploitable : on repose la même question.
             return _question_for(fields)
     missing = [key for key in store.QUALIFICATION if not fields.get(key)]

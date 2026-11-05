@@ -208,6 +208,9 @@ def read_session(request: Request, session_id: str) -> JSONResponse:
                 "step": row["step"],
                 "status": row["status"],
                 "reference": row["reference"] or "",
+                # Champs de qualification réellement enregistrés : permet de
+                # vérifier ce que l'agent a compris du visiteur.
+                "fields": store.session_fields(row),
                 "messages": [
                     {"role": item["role"], "content": item["content"]}
                     for item in store.messages(conn, session_id)
