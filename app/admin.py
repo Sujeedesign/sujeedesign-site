@@ -362,6 +362,7 @@ def tableau_de_bord(request: Request, user: str = Depends(require_admin)) -> Res
         publication = content_store.last_publication(conn)
         recents = repo.list_messages(conn, limit=5)
         revisions = repo.list_revisions(conn, limit=4)
+        propositions_cartes = _propositions_cartes(conn)
     finally:
         conn.close()
     return render(
@@ -373,6 +374,7 @@ def tableau_de_bord(request: Request, user: str = Depends(require_admin)) -> Res
         publication=publication,
         recents=recents,
         revisions=revisions,
+        propositions=propositions_cartes,
         publish_ready=content_store.publish_ready(),
     )
 
@@ -664,17 +666,13 @@ def _duree(secondes: float | None) -> str:
     return f"{minutes} min {reste:02d}" if reste else f"{minutes} min"
 
 
-@router.get("/admin/propositions", response_class=HTMLResponse)
-def propositions(request: Request, user: str = Depends(require_admin)) -> Response:
-    """Consultation des trois propositions envoyées aux clients."""
-    conn = get_conn(request)
+def _propositions_cartes(conn: sqlite3.Connection) -> list[dict[str, Any]]:
+    """Une carte par proposition : trafic agrégé, prêt pour l'admin."""
     try:
-        # Purge quotidienne : la page admin est le point de passage sûr même
-        # quand le conteneur tourne plusieurs jours sans redémarrage.
-        try:
-            tracking.purger_vues(conn)
-        except sqlite3.Error:
-            pass
+        tracking.purger_vues(conn)
+    except sqlite3.Error:
+        pass
+    try:
         rows = [
             dict(row)
             for row in conn.execute(
@@ -685,18 +683,8 @@ def propositions(request: Request, user: str = Depends(require_admin)) -> Respon
                 " FROM proposition_vues GROUP BY slug"
             ).fetchall()
         ]
-        recent = [
-            dict(row)
-            for row in conn.execute(
-                "SELECT id, slug, secondes, referer, ua, created_at"
-                " FROM proposition_vues ORDER BY id DESC LIMIT 80"
-            ).fetchall()
-        ]
     except sqlite3.Error:
-        rows, recent = [], []
-    finally:
-        conn.close()
-
+        rows = []
     stats = {row["slug"]: row for row in rows}
     cartes = []
     for slug, nom in PROPOSITIONS.items():
@@ -712,6 +700,30 @@ def propositions(request: Request, user: str = Depends(require_admin)) -> Respon
                 "duree": _duree(row.get("duree")),
             }
         )
+    return cartes
+
+
+
+@router.get("/admin/propositions", response_class=HTMLResponse)
+def propositions(request: Request, user: str = Depends(require_admin)) -> Response:
+    """Consultation des trois propositions envoyées aux clients."""
+    conn = get_conn(request)
+    try:
+        # Purge quotidienne : la page admin est le point de passage sûr même
+        # quand le conteneur tourne plusieurs jours sans redémarrage.
+        cartes = _propositions_cartes(conn)
+        recent = [
+            dict(row)
+            for row in conn.execute(
+                "SELECT id, slug, secondes, referer, ua, created_at"
+                " FROM proposition_vues ORDER BY id DESC LIMIT 80"
+            ).fetchall()
+        ]
+    except sqlite3.Error:
+        cartes, recent = [], []
+    finally:
+        conn.close()
+
     for item in recent:
         item["nom"] = PROPOSITIONS.get(str(item.get("slug") or ""), item.get("slug") or "")
         item["quand"] = _paris_datetime(item.get("created_at") or "")

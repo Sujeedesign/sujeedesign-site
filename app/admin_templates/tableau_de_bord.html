@@ -79,6 +79,30 @@
     </section>
   </div>
 
+  <section class="card">
+    <header class="card-head">
+      <h2>Propositions clients</h2>
+      <span class="spacer"></span>
+      <a class="link" href="/admin/propositions">Suivi détaillé</a>
+    </header>
+    <ul class="list">
+      {% for p in propositions %}
+        <li>
+          <a class="list-row" href="{{ p.url }}" target="_blank" rel="noopener">
+            <div class="list-body">
+              <strong>{{ p.nom }}</strong>
+              <span class="muted small">/propositions/{{ p.slug }}/</span>
+            </div>
+            <span class="muted small">
+              {% if p.vues %}{{ p.derniere }}{% else %}jamais consultée{% endif %}
+            </span>
+            <span class="badge">{{ p.vues }} vue{{ 's' if p.vues > 1 }}</span>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+
   {% if revisions %}
   <section class="card">
     <header class="card-head"><h2>Versions enregistrées</h2></header>

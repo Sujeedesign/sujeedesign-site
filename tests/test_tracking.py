@@ -66,6 +66,18 @@ def test_la_page_admin_liste_les_trois_propositions(client: TestClient) -> None:
     assert "Polyrésine" in page.text
 
 
+def test_le_tableau_de_bord_affiche_les_propositions(client: TestClient) -> None:
+    login = client.post("/admin/connexion", data={"password": "mot-de-passe-de-test"})
+    assert login.status_code in (200, 303)
+    client.post("/api/track/vue", json={"slug": "n2e", "evenement": "ouverture", "session": "dash"})
+
+    page = client.get("/admin")
+    assert page.status_code == 200
+    assert "Propositions clients" in page.text
+    assert "/propositions/n2e/" in page.text
+    assert "1 vue" in page.text
+
+
 def test_suppression_d_une_consultation(client: TestClient, conn: sqlite3.Connection) -> None:
     import re
 
