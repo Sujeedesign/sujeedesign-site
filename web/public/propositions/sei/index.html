@@ -1,593 +1,483 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="robots" content="noindex, nofollow">
-  <meta name="theme-color" content="#07161e">
-  <meta name="description" content="SEI, Service Entretien Incendie : fourniture et mise en oeuvre de matériels d'adduction d'eau et d'assainissement depuis 1982. Boissy-l'Aillerie (95) et Le Havre (76).">
-  <title>SEI — Réseaux d'eau et assainissement depuis 1982</title>
-  <link rel="stylesheet" href="/propositions/_cta/fonts.css">
-  <style>
-    :root{
-      --paper:#f4f1e9;--card:#fffdf7;--ink:#0b1e28;--deep:#07161e;--deep2:#0d2632;
-      --water:#2c7a96;--water-l:#8fc3d4;--signal:#e4a93c;--muted:#5d6f76;--line:#d6d0c1;
-      --max:1280px;--space:clamp(20px,4.6vw,68px);
-      --head:'Archivo',sans-serif;--body:'DM Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
-    }
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth;scroll-padding-top:88px}
-    body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 var(--body);-webkit-font-smoothing:antialiased}
-    a{color:inherit;text-decoration:none}
-    h1,h2,h3,h4{margin:0;font-family:var(--head);font-weight:600;letter-spacing:-.035em;line-height:1.02}
-    p{margin:0}
-    .wrap{width:min(var(--max),calc(100% - 2*var(--space)));margin:auto}
-    .mono{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
-    .concept{min-height:34px;background:var(--deep);color:#dfe6e6;display:flex;align-items:center;justify-content:center;gap:10px;padding:8px 16px;text-align:center;font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase}
-    .concept b{color:var(--signal);font-weight:500}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>SEI · Travaux sur réseaux d'eau depuis 1982</title>
+<meta name="description" content="SEI, Service Entretien Incendie : adduction d'eau potable, assainissement et négoce de matériaux TP. Deux agences, Boissy-l'Aillerie et Le Havre. Depuis 1982.">
+<meta name="theme-color" content="#0a0c0d">
+<link rel="stylesheet" href="/propositions/_cta/fonts.css">
+<style>
+  :root{
+    --ink:#0a0c0d;
+    --paper:#ece9e1;
+    --line:rgba(10,12,13,.14);
+    --line-d:rgba(236,233,225,.16);
+    --signal:#ff4d14;
+    --pad:clamp(20px,4.2vw,60px);
+    --display:"Bricolage Grotesque","Archivo",system-ui,sans-serif;
+    --body:"DM Sans",system-ui,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:70px}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);
+       font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  img{max-width:100%;display:block}
+  a{color:inherit}
+  ::selection{background:var(--signal);color:#fff}
+  .wrap{max-width:1320px;margin:0 auto;padding:0 var(--pad)}
+  .mono{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase}
 
-    /* Header */
-    .nav{position:sticky;top:0;z-index:40;height:80px;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 var(--space);background:rgba(244,241,233,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
-    .brand{display:flex;align-items:center;gap:13px}
-    .brand-mark{width:42px;height:42px;border:1.5px solid var(--ink);display:grid;place-items:center;font:600 13px/1 var(--head);letter-spacing:.02em;position:relative}
-    .brand-mark::after{content:"";position:absolute;inset:4px;border-top:1px solid var(--water);border-left:1px solid var(--water)}
-    .brand-txt{font:600 15px/1.1 var(--head);letter-spacing:-.02em}
-    .brand-txt small{display:block;font:400 9.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:6px}
-    .nav-links{display:flex;align-items:center;gap:30px;font-size:13px;font-weight:500}
-    .nav-links a:not(.nav-cta){color:#3c5058;position:relative;padding:6px 0}
-    .nav-links a:not(.nav-cta)::after{content:"";position:absolute;left:0;bottom:0;width:0;height:1px;background:var(--water);transition:width .25s}
-    .nav-links a:not(.nav-cta):hover::after{width:100%}
-    .nav-cta,.btn{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:48px;padding:0 22px;background:var(--ink);color:#fff;font-weight:600;font-size:13px;border:1px solid var(--ink);transition:background .2s,color .2s,transform .2s}
-    .nav-cta:hover,.btn:hover{background:var(--water);border-color:var(--water);transform:translateY(-2px)}
-    .btn-ghost{background:transparent;color:var(--ink);border-color:#b9b3a3}
-    .btn-ghost:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
-    .btn-light{background:var(--signal);border-color:var(--signal);color:var(--deep)}
-    .btn-light:hover{background:#f0bc5a;border-color:#f0bc5a;color:var(--deep)}
-    .arrow{font-size:17px;line-height:1}
-    .menu-toggle{display:none;background:none;border:1px solid var(--line);width:44px;height:44px;font-size:18px;cursor:pointer}
+  /* header */
+  header{position:fixed;inset:0 0 auto;z-index:60;display:flex;align-items:center;
+    justify-content:space-between;gap:20px;padding:16px var(--pad);color:#fff;
+    mix-blend-mode:difference;pointer-events:none}
+  header>*{pointer-events:auto}
+  .brand{display:flex;align-items:baseline;gap:12px;text-decoration:none}
+  .brand b{font-family:var(--display);font-weight:700;font-size:23px;letter-spacing:-.02em}
+  .brand span{font-family:var(--mono);font-size:10px;letter-spacing:.18em;opacity:.75;text-transform:uppercase}
+  nav{display:flex;gap:22px}
+  nav a{text-decoration:none;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;
+    text-transform:uppercase;opacity:.85;padding-bottom:2px;border-bottom:1px solid transparent}
+  nav a:hover{opacity:1;border-color:currentColor}
+  @media(max-width:860px){nav{display:none}.brand span{display:none}}
 
-    /* Hero */
-    .hero{display:grid;grid-template-columns:1.08fr .92fr;gap:clamp(28px,4vw,64px);align-items:center;padding:clamp(44px,6vw,86px) 0 clamp(40px,5vw,62px)}
-    .eyebrow{display:flex;align-items:center;gap:12px;color:var(--water);margin-bottom:26px}
-    .eyebrow::before{content:"";width:40px;height:1px;background:var(--water)}
-    .hero h1{font-size:clamp(44px,6.6vw,88px);letter-spacing:-.05em}
-    .hero h1 em{font-style:normal;color:var(--water);display:inline-block}
-    .hero-sub{max-width:46ch;margin-top:26px;font-size:17px;color:#35474f}
-    .hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:34px}
-    .hero-meta{display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:38px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted)}
-    .hero-meta span{display:flex;align-items:center;gap:8px}
-    .dot{width:5px;height:5px;background:var(--signal);border-radius:50%}
+  /* hero */
+  .hero{position:relative;min-height:100svh;display:flex;align-items:flex-end;
+    padding:0 var(--pad) clamp(26px,4vw,48px);color:#fff;overflow:hidden;background:#111}
+  .hero picture,.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:52% 50%}
+  .hero::after{content:"";position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(6,8,9,.66) 0%,rgba(6,8,9,.12) 30%,rgba(6,8,9,.62) 62%,rgba(6,8,9,.95) 100%)}
+  .hero-in{position:relative;z-index:2;width:100%;max-width:1320px;margin:0 auto}
+  .hero-top{position:absolute;top:clamp(84px,11vh,120px);left:0;right:0;display:flex;
+    justify-content:space-between;gap:20px;color:#fff;z-index:3}
+  .hero-top .mono{opacity:.9;line-height:1.8;text-shadow:0 1px 12px rgba(0,0,0,.5)}
+  .hero-top .mono:last-child{text-align:right}
+  .hero h1{font-family:var(--display);font-weight:700;font-size:clamp(44px,8.2vw,120px);
+    line-height:.86;letter-spacing:-.035em;text-transform:uppercase;margin:0 0 22px;max-width:15ch;
+    text-wrap:balance;text-shadow:0 2px 30px rgba(0,0,0,.35)}
+  .hero h1 em{font-style:normal;color:var(--signal)}
+  .hero-sub{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;
+    gap:26px;border-top:1px solid rgba(255,255,255,.3);padding-top:20px}
+  .hero-sub p{margin:0;max-width:44ch;font-size:clamp(15px,1.35vw,18px);line-height:1.6}
+  .hero-cta{display:flex;flex-wrap:wrap;gap:10px}
+  .btn{display:inline-flex;align-items:center;gap:10px;text-decoration:none;padding:15px 22px;
+    font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    border:1px solid rgba(255,255,255,.5);transition:.18s;background:rgba(0,0,0,.1)}
+  .btn:hover{background:#fff;color:#0a0c0d;border-color:#fff}
+  .btn.solid{background:var(--signal);border-color:var(--signal);color:#fff}
+  .btn.solid:hover{background:#fff;border-color:#fff;color:#0a0c0d}
+  .scroll-hint{position:absolute;right:var(--pad);bottom:clamp(26px,4vw,48px);z-index:3;
+    writing-mode:vertical-rl;font-family:var(--mono);font-size:10px;letter-spacing:.22em;
+    text-transform:uppercase;color:rgba(255,255,255,.62)}
+  @media(max-width:760px){
+    .hero{min-height:94svh;align-items:flex-end;padding-bottom:30px}
+    .hero img{object-position:56% 45%}
+    .hero-top{display:none}
+    .scroll-hint{display:none}
+    .hero h1{font-size:clamp(36px,11.4vw,62px);margin-bottom:16px}
+    .hero-cta{width:100%}
+    .hero-cta .btn{flex:1 1 auto;justify-content:center}
+  }
 
-    .plan{position:relative;background:var(--deep);color:#cfe0e6;padding:20px;overflow:hidden}
-    .plan::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(143,195,212,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(143,195,212,.07) 1px,transparent 1px);background-size:26px 26px;pointer-events:none}
-    .plan-top{display:flex;justify-content:space-between;align-items:center;position:relative;padding-bottom:14px;border-bottom:1px solid rgba(143,195,212,.22);color:#9fc0cb}
-    .plan svg{display:block;width:100%;height:auto;position:relative}
-    .plan-foot{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(143,195,212,.2);position:relative}
-    .plan-foot div{background:var(--deep);padding:13px 4px 4px}
-    .plan-foot b{display:block;font:600 13px var(--head);color:#e8f1f3;letter-spacing:0}
-    .plan-foot span{color:#7d9aa5}
-    .flow{stroke-dasharray:7 9;animation:flow 2.6s linear infinite}
-    @keyframes flow{to{stroke-dashoffset:-32}}
+  /* marquee */
+  .marquee{background:var(--ink);color:var(--paper);overflow:hidden;padding:11px 0}
+  .marquee-in{display:flex;width:max-content;animation:slide 46s linear infinite}
+  .marquee span{font-family:var(--mono);font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;
+    padding:0 18px;white-space:nowrap;opacity:.92}
+  .marquee span::after{content:"";display:inline-block;width:6px;height:6px;background:var(--signal);
+    margin-left:36px;vertical-align:middle}
+  @keyframes slide{to{transform:translateX(-50%)}}
+  @media(prefers-reduced-motion:reduce){.marquee-in{animation:none}}
 
-    /* Stats */
-    .stats{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-    .stat{padding:26px 0 26px 22px;border-left:1px solid var(--line)}
-    .stat:first-child{border-left:0;padding-left:0}
-    .stat b{display:block;font:600 clamp(24px,3vw,34px)/1 var(--head);letter-spacing:-.04em}
-    .stat span{display:block;margin-top:9px;color:var(--muted);font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase}
+  /* chiffres */
+  .figs{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--line)}
+  .figs div{padding:clamp(22px,3vw,38px) 22px;border-left:1px solid var(--line)}
+  .figs div:first-child{border-left:0;padding-left:0}
+  .figs b{display:block;font-family:var(--display);font-weight:700;font-size:clamp(34px,4.4vw,60px);
+    line-height:.9;letter-spacing:-.04em;margin-bottom:8px}
+  .figs small{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#5c6467}
+  @media(max-width:760px){
+    .figs{grid-template-columns:1fr 1fr}
+    .figs div:nth-child(3){border-left:0;padding-left:0;border-top:1px solid var(--line)}
+    .figs div:nth-child(4){border-top:1px solid var(--line)}
+  }
 
-    /* Sections */
-    section{padding:clamp(58px,8vw,110px) 0}
-    .sec-head{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(20px,4vw,60px);align-items:end;margin-bottom:clamp(34px,4vw,56px)}
-    .sec-head h2{font-size:clamp(30px,4.2vw,52px)}
-    .sec-head p{color:#3d4f57;font-size:16.5px;max-width:52ch}
-    .kicker{color:var(--water);margin-bottom:18px;display:block}
+  /* sections */
+  .sec{padding:clamp(62px,9vw,124px) 0}
+  .sec-head{display:grid;grid-template-columns:132px 1fr;gap:clamp(16px,3vw,44px);
+    align-items:start;margin-bottom:clamp(30px,5vw,58px)}
+  .sec-num{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--signal);
+    padding-top:10px;border-top:1px solid var(--ink)}
+  .sec-head h2{font-family:var(--display);font-weight:700;font-size:clamp(31px,4.9vw,64px);
+    line-height:.94;letter-spacing:-.035em;text-transform:uppercase;margin:0;text-wrap:balance}
+  .sec-head p{margin:16px 0 0;max-width:52ch;font-size:17px;line-height:1.62;color:#3b4245}
+  @media(max-width:760px){.sec-head{grid-template-columns:1fr;gap:12px}}
 
-    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
-    .card{background:var(--card);padding:clamp(24px,2.6vw,36px);display:flex;flex-direction:column;min-height:340px;transition:background .25s}
-    .card:hover{background:#fff}
-    .card .num{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--water);display:flex;justify-content:space-between;align-items:center}
-    .card h3{font-size:23px;margin-top:26px;letter-spacing:-.03em}
-    .card p{margin-top:14px;color:#4a5c64;font-size:15px}
-    .card ul{margin:18px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
-    .card li{font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--line);padding:5px 8px;color:#56686f;background:#faf8f2}
-    .card-ico{margin-top:auto;padding-top:26px;color:var(--water)}
-    .card-ico svg{width:46px;height:46px}
+  /* 01 metier */
+  .metier{display:grid;grid-template-columns:1.02fr .98fr;gap:clamp(24px,4vw,60px);align-items:start}
+  .metier figure{margin:0;position:relative}
+  .metier figure img{width:100%;aspect-ratio:4/3;object-fit:cover}
+  .metier figcaption{position:absolute;left:0;bottom:0;background:var(--paper);
+    padding:12px 18px 0 0;font-family:var(--mono);font-size:10px;letter-spacing:.13em;
+    text-transform:uppercase;color:#5c6467;max-width:78%;line-height:1.7}
+  .metier ul{list-style:none;margin:0;padding:0}
+  .metier li{padding:18px 0;border-top:1px solid var(--line);display:grid;
+    grid-template-columns:34px 1fr;gap:14px}
+  .metier li:last-child{border-bottom:1px solid var(--line)}
+  .metier li i{font-family:var(--mono);font-style:normal;font-size:11px;color:var(--signal);padding-top:4px}
+  .metier li strong{font-family:var(--display);font-weight:700;font-size:19px;letter-spacing:-.01em;display:block}
+  .metier li span{color:#4a5256;font-size:15px}
+  .note{margin-top:20px;font-size:14px;color:#5c6467;border-left:2px solid var(--signal);padding-left:14px;max-width:46ch;line-height:1.65}
+  @media(max-width:900px){.metier{grid-template-columns:1fr}}
 
-    /* Dark terrain */
-    .dark{background:var(--deep);color:#e6eef0;position:relative;overflow:hidden}
-    .dark::after{content:"";position:absolute;right:-140px;top:-140px;width:520px;height:520px;border:1px solid rgba(143,195,212,.14);border-radius:50%}
-    .dark .wrap{position:relative;z-index:1}
-    .dark .kicker{color:var(--signal)}
-    .dark h2{font-size:clamp(30px,4.4vw,56px);max-width:16ch}
-    .dark h2 em{font-style:normal;color:var(--water-l)}
-    .dark-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,5vw,80px);margin-top:44px;align-items:start}
-    .dark-lead{color:#b4c6cc;font-size:17px;max-width:44ch}
-    .dark-note{margin-top:26px;padding:18px 20px;border-left:2px solid var(--signal);background:rgba(228,169,60,.07);color:#d9e5e8;font-size:14.5px}
-    .rows{list-style:none;margin:0;padding:0}
-    .rows li{display:grid;grid-template-columns:44px 1fr;gap:16px;padding:22px 0;border-top:1px solid rgba(143,195,212,.2)}
-    .rows li:last-child{border-bottom:1px solid rgba(143,195,212,.2)}
-    .rows b{display:block;font:600 16.5px var(--head);color:#fff;letter-spacing:-.01em}
-    .rows p{color:#a6bac0;font-size:14.5px;margin-top:6px}
-    .rows .idx{font-family:var(--mono);font-size:11px;color:var(--water-l);padding-top:3px}
+  /* 02 methode */
+  .band{position:relative;color:var(--paper);background:#0a0c0d;isolation:isolate}
+  .band img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.34;z-index:-1;
+    filter:grayscale(1) contrast(1.1)}
+  .band::after{content:"";position:absolute;inset:0;z-index:-1;
+    background:linear-gradient(90deg,rgba(8,10,11,.95) 0%,rgba(8,10,11,.74) 55%,rgba(8,10,11,.94) 100%)}
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line-d);
+    border:1px solid var(--line-d);margin-top:clamp(26px,4vw,48px)}
+  .steps div{background:#0d1011;padding:clamp(20px,2.4vw,30px);display:flex;flex-direction:column;
+    gap:12px;min-height:220px}
+  .steps b{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--signal);font-weight:400}
+  .steps h3{font-family:var(--display);font-weight:700;font-size:21px;line-height:1.1;margin:0;letter-spacing:-.015em}
+  .steps p{margin:0;font-size:14.5px;line-height:1.6;color:rgba(236,233,225,.72)}
+  .band .sec-num{border-color:rgba(236,233,225,.4);color:var(--signal)}
+  .band .sec-head h2{color:var(--paper)}
+  .band .sec-head p{color:rgba(236,233,225,.78)}
+  @media(max-width:900px){.steps{grid-template-columns:1fr 1fr}}
+  @media(max-width:560px){.steps{grid-template-columns:1fr}.steps div{min-height:0}}
 
-    /* Agences */
-    .agences{display:grid;grid-template-columns:1fr 1fr;gap:22px}
-    .agence{border:1px solid var(--line);background:var(--card);padding:clamp(24px,3vw,38px);display:flex;flex-direction:column;gap:20px}
-    .agence .tag{display:inline-flex;align-self:flex-start;gap:8px;align-items:center;background:#eee9dc;padding:6px 11px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#4e6067}
-    .agence h3{font-size:26px;letter-spacing:-.03em}
-    .agence address{font-style:normal;color:#42555d;font-size:15.5px;line-height:1.65}
-    .agence dl{display:grid;grid-template-columns:auto 1fr;gap:9px 18px;margin:0;padding-top:18px;border-top:1px solid var(--line);font-size:14px}
-    .agence dt{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-top:2px}
-    .agence dd{margin:0;color:#25373f}
-    .agence a:hover{color:var(--water)}
+  /* 03 terrains */
+  .terrains{display:grid;grid-template-columns:1.28fr .72fr;gap:clamp(24px,4vw,58px);align-items:start}
+  .rows{border-top:1px solid var(--ink)}
+  .rows div{display:grid;grid-template-columns:38px 1fr auto;gap:16px;align-items:baseline;
+    padding:19px 0;border-bottom:1px solid var(--line);transition:padding .2s}
+  .rows div:hover{padding-left:8px}
+  .rows b{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:#7c8487;font-weight:400}
+  .rows h3{font-family:var(--display);font-weight:700;font-size:clamp(19px,2vw,26px);margin:0;letter-spacing:-.02em}
+  .rows span{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:#7c8487;text-align:right}
+  .terrains figure{margin:0;position:relative}
+  .terrains figure img{width:100%;aspect-ratio:3/4;object-fit:cover;filter:grayscale(1) contrast(1.05)}
+  .terrains figure figcaption{font-family:var(--mono);font-size:10px;letter-spacing:.13em;
+    text-transform:uppercase;color:#5c6467;margin-top:10px;line-height:1.8}
+  @media(max-width:900px){.terrains{grid-template-columns:1fr}.terrains figure{order:-1}
+    .terrains figure img{aspect-ratio:16/10}}
 
-    /* Terrains */
-    .terrains{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
-    .terrain{background:var(--paper);padding:26px 24px;display:flex;gap:14px;align-items:flex-start}
-    .terrain svg{flex:0 0 22px;margin-top:2px;color:var(--water)}
-    .terrain b{font:600 15px var(--head);letter-spacing:-.01em}
-    .terrain span{display:block;color:var(--muted);font-size:13px;margin-top:4px}
+  /* 04 agences */
+  .ag{display:grid;grid-template-columns:.7fr 1.3fr;gap:clamp(22px,4vw,52px);align-items:start}
+  .ag figure{margin:0}
+  .ag figure img{width:100%;aspect-ratio:3/4;object-fit:cover;filter:grayscale(1)}
+  .ag figure figcaption{font-family:var(--mono);font-size:10px;letter-spacing:.13em;
+    text-transform:uppercase;color:#5c6467;margin-top:10px;line-height:1.8}
+  .sites{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line);border:1px solid var(--line)}
+  .sites article{background:var(--paper);padding:clamp(22px,3vw,34px);display:flex;flex-direction:column;gap:6px}
+  .sites .tag{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--signal)}
+  .sites h3{font-family:var(--display);font-weight:700;font-size:clamp(24px,2.6vw,34px);margin:6px 0 2px;letter-spacing:-.03em}
+  .sites p{margin:0;color:#4a5256;font-size:15px;max-width:40ch}
+  .sites .meta{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:#6f777a;text-transform:uppercase;line-height:2}
+  @media(max-width:900px){.ag{grid-template-columns:1fr}.ag figure{order:2}}
 
-    /* Proposition */
-    .prop{background:#eee9dc;border-top:1px solid var(--line)}
-    .prop-head{display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;align-items:flex-end;padding-bottom:26px;border-bottom:1px solid #cbc4b2}
-    .prop-head h2{font-size:clamp(28px,4vw,48px);max-width:20ch}
-    .prop-head .mono{color:#6a6355}
-    .prop-intro{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(24px,4vw,60px);padding:32px 0 42px}
-    .prop-intro p{font-size:16px;color:#3b4a4e}
-    .prop-intro p+p{margin-top:14px}
-    .findings{list-style:none;margin:0;padding:0;display:grid;gap:1px;background:#cfc8b6}
-    .findings li{background:#f6f2e8;padding:16px 18px;display:grid;grid-template-columns:auto 1fr;gap:12px 14px;align-items:baseline}
-    .findings b{font:600 22px/1 var(--head);color:var(--water);letter-spacing:-.04em;min-width:74px}
-    .findings span{font-size:14px;color:#41525a}
-    .packs{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:8px}
-    .pack{background:#fffdf7;border:1px solid #cfc8b6;padding:26px 24px 28px;display:flex;flex-direction:column;position:relative}
-    .pack.best{border:1.5px solid var(--ink);box-shadow:0 16px 34px -26px rgba(11,30,40,.6)}
-    .pack .best-badge{position:absolute;top:-11px;left:22px;background:var(--signal);color:#2b2415;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;padding:5px 9px}
-    .pack h3{font-size:20px;margin-top:6px}
-    .pack .price{font:600 36px/1 var(--head);letter-spacing:-.04em;margin:18px 0 4px}
-    .pack .price small{font:400 11px var(--mono);letter-spacing:.06em;color:var(--muted);margin-left:6px}
-    .pack .delay{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--water);margin-bottom:18px}
-    .pack ul{list-style:none;margin:0 0 22px;padding:18px 0 0;border-top:1px solid #e5e0d2;display:grid;gap:9px;font-size:13.5px;color:#3f5158}
-    .pack li{display:grid;grid-template-columns:16px 1fr;gap:9px}
-    .pack li::before{content:"";width:10px;height:1px;background:var(--water);margin-top:9px}
-    .pack .btn{margin-top:auto;width:100%}
-    .options{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:22px;font-size:13px;color:#4c5a5f}
-    .options b{color:var(--ink)}
-    .honest{margin-top:26px;padding:20px 22px;background:#e5dfcf;border-left:2px solid var(--water);font-size:14.5px;color:#374a51}
-    .honest b{font-weight:600}
+  /* 05 offre */
+  .offre .sec-head h2{max-width:24ch}
+  .packs{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,2vw,22px)}
+  .pack{border:1px solid var(--ink);padding:clamp(22px,2.6vw,30px);display:flex;flex-direction:column;
+    background:var(--paper);position:relative}
+  .pack.hot{background:var(--ink);color:var(--paper)}
+  .pack.hot .price small,.pack.hot .kicker{color:rgba(236,233,225,.7)}
+  .pack.hot li{color:rgba(236,233,225,.86);border-color:rgba(236,233,225,.18)}
+  .pack.hot ul{border-color:rgba(236,233,225,.5)}
+  .pack .kicker{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#6f777a}
+  .pack h3{font-family:var(--display);font-weight:700;font-size:clamp(22px,2.2vw,28px);
+    margin:8px 0 16px;letter-spacing:-.025em}
+  .pack .price{font-family:var(--display);font-weight:700;font-size:clamp(34px,4.4vw,48px);
+    line-height:1;letter-spacing:-.04em;margin-bottom:4px}
+  .pack .price small{font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+    vertical-align:baseline;margin-left:6px;color:#6f777a;text-transform:uppercase}
+  .pack ul{list-style:none;margin:18px 0 0;padding:0;border-top:1px solid var(--ink)}
+  .pack li{border-bottom:1px solid var(--line);padding:11px 0;font-size:14.5px;
+    color:#3b4245;display:grid;grid-template-columns:14px 1fr;gap:10px;line-height:1.45}
+  .pack li::before{content:"+";font-family:var(--mono);color:var(--signal);font-size:13px}
+  .pack .badge{position:absolute;top:-1px;right:-1px;background:var(--signal);color:#fff;
+    font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;padding:6px 10px}
+  @media(max-width:900px){.packs{grid-template-columns:1fr}}
+  .pack-note{margin-top:24px;font-size:14.5px;color:#5c6467;max-width:74ch;line-height:1.7}
 
-    /* Contact */
-    .contact{background:var(--deep);color:#e9f0f2;padding:clamp(50px,7vw,90px) 0}
-    .contact-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(28px,5vw,70px);align-items:center}
-    .contact h2{font-size:clamp(30px,4.6vw,56px);max-width:18ch}
-    .contact h2 em{font-style:normal;color:var(--signal)}
-    .contact p{color:#a9bec5;margin-top:18px;max-width:44ch}
-    .contact-card{border:1px solid rgba(143,195,212,.28);padding:clamp(22px,3vw,32px)}
-    .contact-card div+div{margin-top:16px;padding-top:16px;border-top:1px solid rgba(143,195,212,.18)}
-    .contact-card b{display:block;font:600 16px var(--head);color:#fff;margin-top:4px}
-    .contact-card a:hover{color:var(--signal)}
+  /* contact */
+  .contact{background:var(--ink);color:var(--paper);padding:clamp(62px,9vw,116px) 0}
+  .contact h2{font-family:var(--display);font-weight:700;font-size:clamp(33px,6vw,80px);
+    line-height:.9;letter-spacing:-.04em;text-transform:uppercase;margin:0 0 28px;max-width:18ch}
+  .contact h2 em{font-style:normal;color:var(--signal)}
+  .contact-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(24px,5vw,64px);align-items:end;
+    border-top:1px solid var(--line-d);padding-top:28px}
+  .contact a.big{font-family:var(--display);font-weight:700;font-size:clamp(20px,2.6vw,32px);
+    letter-spacing:-.02em;text-decoration:none;display:inline-block;border-bottom:1px solid var(--line-d);
+    padding-bottom:4px;margin-bottom:12px}
+  .contact a.big:hover{color:var(--signal);border-color:var(--signal)}
+  .contact .mono{color:rgba(236,233,225,.6);line-height:2}
+  @media(max-width:760px){.contact-grid{grid-template-columns:1fr}}
 
-    footer{background:#050f15;color:#7e959d;padding:36px 0 30px;font-size:12.5px}
-    .foot{display:flex;flex-wrap:wrap;gap:14px 30px;justify-content:space-between;align-items:center}
-    .foot .mono{color:#5e757e;font-size:10px}
-    .foot-mesure{margin-top:10px;color:#7e959d;font-size:10.5px;letter-spacing:.02em}
-    .disclaimer{margin-top:18px;padding-top:16px;border-top:1px solid rgba(143,195,212,.14);color:#63787f;font-size:11.5px;line-height:1.6;max-width:88ch}
-
-    @media (max-width:980px){
-      .hero{grid-template-columns:1fr;gap:34px}
-      .sec-head,.prop-intro,.dark-grid,.contact-grid{grid-template-columns:1fr}
-      .cards,.packs,.agences{grid-template-columns:1fr}
-      .stats{grid-template-columns:1fr 1fr}
-      .stat{padding:20px 0 20px 18px}
-      .stat:nth-child(3){border-left:0;padding-left:0}
-      .terrains{grid-template-columns:1fr 1fr}
-      .nav-links{position:fixed;inset:80px 0 auto;flex-direction:column;align-items:flex-start;gap:0;background:var(--paper);border-bottom:1px solid var(--line);padding:10px var(--space) 22px;display:none}
-      .nav-links.open{display:flex}
-      .nav-links a{width:100%;padding:14px 0;border-bottom:1px solid var(--line)}
-      .nav-links a:not(.nav-cta)::after{display:none}
-      .nav-cta{width:100%;margin-top:14px}
-      .menu-toggle{display:block}
-    }
-    @media (max-width:560px){
-      body{padding-bottom:80px}
-      .plan{padding:14px}
-      .plan svg text{font-size:19px;letter-spacing:.3px}
-      .plan svg .lbl-sec{display:none}
-      .plan-top{font-size:9px}
-      .hero h1{font-size:clamp(33px,9.6vw,46px)}
-      .hero{padding-top:26px}
-      .stats{grid-template-columns:1fr}
-      .stat{border-left:0;padding-left:0;border-top:1px solid var(--line)}
-      .stat:first-child{border-top:0}
-      .terrains{grid-template-columns:1fr}
-      .hero-actions .btn{width:100%}
-      .plan-foot{grid-template-columns:1fr}
-    }
-    @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
-  </style>
+  footer{padding:24px 0 32px;background:var(--ink);color:rgba(236,233,225,.42);
+    border-top:1px solid var(--line-d);font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+    line-height:1.9;text-transform:uppercase}
+  footer .wrap{display:flex;justify-content:space-between;gap:14px 30px;flex-wrap:wrap}
+  footer a{text-decoration:none;border-bottom:1px solid rgba(236,233,225,.2)}
+  footer a:hover{color:var(--paper)}
+  .reveal{opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+</style>
 </head>
 <body>
 
-<div class="concept"><b>Proposition</b> Projection de site réalisée par Sujee Design, contenu à valider par SEI</div>
-
-<header class="nav">
-  <a class="brand" href="#top" aria-label="SEI, accueil">
-    <span class="brand-mark">SEI</span>
-    <span class="brand-txt">Service Entretien Incendie<small>Réseaux d'eau · depuis 1982</small></span>
-  </a>
-  <nav class="nav-links" id="menu">
-    <a href="#savoir-faire">Savoir-faire</a>
-    <a href="#terrain">Méthode</a>
+<header>
+  <a class="brand" href="#top" aria-label="SEI, retour en haut"><b>SEI</b><span>Réseaux d'eau · depuis 1982</span></a>
+  <nav aria-label="Sommaire">
+    <a href="#metier">Métier</a>
+    <a href="#methode">Méthode</a>
+    <a href="#terrains">Terrains</a>
     <a href="#agences">Agences</a>
-    <a href="#terrains">Interventions</a>
-    <a href="#proposition">La proposition</a>
-    <a class="nav-cta" href="#contact">Demander une étude <span class="arrow">↗</span></a>
+    <a href="#offre">Proposition</a>
   </nav>
-  <button class="menu-toggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="menu">☰</button>
 </header>
 
 <main id="top">
 
-  <div class="wrap">
-    <div class="hero">
-      <div>
-        <span class="eyebrow mono">Adduction d'eau · Assainissement · 95&nbsp;&amp;&nbsp;76</span>
-        <h1>Nous tenons<br>le <em>réseau</em>.</h1>
-        <p class="hero-sub">Depuis 1982, SEI fournit et met en oeuvre les matériels d'adduction d'eau et d'assainissement des collectivités, des entreprises de travaux publics et des sites industriels d'Île-de-France et de Normandie.</p>
-        <div class="hero-actions">
-          <a class="btn" href="#contact">Demander une étude <span class="arrow">↗</span></a>
-          <a class="btn btn-ghost" href="#savoir-faire">Voir nos savoir-faire</a>
-        </div>
-        <div class="hero-meta mono">
-          <span><i class="dot"></i>Boissy-l'Aillerie · 95</span>
-          <span><i class="dot"></i>Le Havre · 76</span>
-          <span><i class="dot"></i>Marchés publics &amp; privés</span>
+  <section class="hero">
+    <picture>
+      <source media="(max-width:760px)" srcset="/propositions/sei/img/hero-m.webp">
+      <img src="/propositions/sei/img/hero.webp" alt="Pose d'une grande conduite sur un chantier : deux compagnons guident le tuyau, pelle mécanique en arrière-plan." fetchpriority="high" width="2200" height="1237">
+    </picture>
+    <div class="hero-in">
+      <div class="hero-top">
+        <p class="mono">SEI · Service Entretien Incendie<br>Boissy-l'Aillerie · Le Havre</p>
+        <p class="mono">Adduction d'eau potable<br>Assainissement · Négoce TP</p>
+      </div>
+      <h1>Le réseau<br>se refait<br><em>sous terre.</em></h1>
+      <div class="hero-sub">
+        <p>Quarante-quatre ans de pose, de reprise et de réhabilitation sur les réseaux d'eau. On tient le chantier, du branchement au regard.</p>
+        <div class="hero-cta">
+          <a class="btn solid" href="#offre">Voir la proposition</a>
+          <a class="btn" href="#metier">Le métier</a>
         </div>
       </div>
+    </div>
+    <div class="scroll-hint">Défiler</div>
+  </section>
 
-      <div class="plan" aria-hidden="true">
-        <div class="plan-top mono"><span>Coupe type / réseau AEP</span><span>Réf. SEI-DN200</span></div>
-        <svg viewBox="0 0 520 430" role="img">
-          <g fill="none" stroke="#8fc3d4" stroke-width="1.2" opacity=".95">
-            <!-- conduite principale -->
-            <line x1="16" y1="258" x2="504" y2="258"/>
-            <line x1="16" y1="330" x2="504" y2="330"/>
-            <!-- brides -->
-            <line x1="118" y1="246" x2="118" y2="342"/><line x1="134" y1="246" x2="134" y2="342"/>
-            <line x1="356" y1="246" x2="356" y2="342"/><line x1="372" y1="246" x2="372" y2="342"/>
-            <!-- vanne -->
-            <path d="M222 282 L262 268 L262 320 L222 306 Z"/>
-            <line x1="242" y1="268" x2="242" y2="196"/>
-            <circle cx="242" cy="186" r="13"/>
-            <line x1="229" y1="186" x2="255" y2="186"/><line x1="242" y1="173" x2="242" y2="199"/>
-            <!-- té vers le haut -->
-            <line x1="430" y1="258" x2="430" y2="128"/><line x1="466" y1="258" x2="466" y2="128"/>
-            <line x1="416" y1="128" x2="480" y2="128"/>
-            <!-- débit -->
-            <line class="flow" x1="30" y1="294" x2="500" y2="294" stroke="#e4a93c" stroke-width="1.6"/>
-            <!-- cote horizontale -->
-            <line x1="16" y1="368" x2="504" y2="368" stroke-dasharray="3 4" opacity=".55"/>
-            <line x1="16" y1="362" x2="16" y2="374"/><line x1="504" y1="362" x2="504" y2="374"/>
-            <!-- cote verticale -->
-            <line x1="500" y1="258" x2="500" y2="330" stroke-dasharray="3 4" opacity=".55"/>
-            <!-- sol hachuré -->
-            <line x1="16" y1="392" x2="504" y2="392" opacity=".35"/>
-            <g opacity=".3" stroke-width=".8">
-              <line x1="24" y1="392" x2="12" y2="404"/><line x1="54" y1="392" x2="42" y2="404"/>
-              <line x1="84" y1="392" x2="72" y2="404"/><line x1="114" y1="392" x2="102" y2="404"/>
-              <line x1="144" y1="392" x2="132" y2="404"/><line x1="174" y1="392" x2="162" y2="404"/>
-              <line x1="204" y1="392" x2="192" y2="404"/><line x1="234" y1="392" x2="222" y2="404"/>
-              <line x1="264" y1="392" x2="252" y2="404"/><line x1="294" y1="392" x2="282" y2="404"/>
-              <line x1="324" y1="392" x2="312" y2="404"/><line x1="354" y1="392" x2="342" y2="404"/>
-              <line x1="384" y1="392" x2="372" y2="404"/><line x1="414" y1="392" x2="402" y2="404"/>
-              <line x1="444" y1="392" x2="432" y2="404"/><line x1="474" y1="392" x2="462" y2="404"/>
-            </g>
-            <!-- noeuds -->
-            <circle cx="126" cy="294" r="3.4" fill="#e4a93c" stroke="none"/>
-            <circle cx="364" cy="294" r="3.4" fill="#e4a93c" stroke="none"/>
-            <circle cx="448" cy="128" r="3.4" fill="#e4a93c" stroke="none"/>
-          </g>
-          <g fill="#9fc0cb" font-family="'IBM Plex Mono',monospace" font-size="9.5" letter-spacing="1.2">
-            <text x="16" y="234">DN 200</text>
-            <text class="lbl-sec" x="286" y="234">VANNE DE SECTIONNEMENT</text>
-            <text class="lbl-sec" x="404" y="112">BRANCHEMENT</text>
-            <text x="16" y="384">FONTE DUCTILE · PRESSION 10 BARS</text>
-            <text x="504" y="296" text-anchor="end" fill="#e4a93c">SENS DU DÉBIT</text>
-          </g>
-        </svg>
-        <div class="plan-foot mono">
-          <div><span>Fluide</span><b>Eau potable</b></div>
-          <div><span>Usage</span><b>AEP · EU · EP</b></div>
-          <div><span>Zone</span><b>Île-de-France</b></div>
-          <div><span>Second site</span><b>Normandie</b></div>
-        </div>
-      </div>
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-in">
+      <span>Adduction d'eau potable</span><span>Assainissement</span><span>Fontes &amp; PEHD</span><span>Branchements</span><span>Regards</span><span>Réhabilitation</span><span>Terrassement</span><span>Négoce TP</span>
+      <span>Adduction d'eau potable</span><span>Assainissement</span><span>Fontes &amp; PEHD</span><span>Branchements</span><span>Regards</span><span>Réhabilitation</span><span>Terrassement</span><span>Négoce TP</span>
     </div>
   </div>
 
   <div class="wrap">
-    <div class="stats">
-      <div class="stat"><b>1982</b><span>Création de SEI</span></div>
-      <div class="stat"><b>22 M€</b><span>Chiffre d'affaires 2024</span></div>
-      <div class="stat"><b>20 à 49</b><span>Collaborateurs</span></div>
-      <div class="stat"><b>2</b><span>Sites, 95 et 76</span></div>
+    <div class="figs">
+      <div><b>1982</b><small>Création de l'entreprise</small></div>
+      <div><b>44 ans</b><small>Sur les réseaux</small></div>
+      <div><b>2</b><small>Agences, 95 et 76</small></div>
+      <div><b>20-49</b><small>Compagnons et techniciens</small></div>
     </div>
   </div>
 
-  <section id="savoir-faire">
+  <section class="sec" id="metier">
     <div class="wrap">
       <div class="sec-head">
+        <div class="sec-num">01 / Métier</div>
         <div>
-          <span class="kicker mono">01 / Savoir-faire</span>
-          <h2>Du stock au chantier,<br>la même exigence.</h2>
+          <h2>L'eau potable<br>et l'assainissement,<br>pas autre chose.</h2>
+          <p>On intervient sur les réseaux des collectivités et des syndicats des eaux : pose de conduites, renouvellement, branchements, ouvrages. Le terrassement, la pose et le raccordement sont faits par les mêmes équipes.</p>
         </div>
-        <p>SEI n'est ni un simple négoce, ni une entreprise de travaux comme les autres. Nous faisons les deux, avec les mêmes équipes et le même stock. C'est ce qui nous permet de tenir un délai quand le chantier ne peut pas attendre.</p>
       </div>
-
-      <div class="cards">
-        <article class="card">
-          <div class="num"><span>01</span><span>Négoce</span></div>
-          <h3>Fourniture technique</h3>
-          <p>Fontes ductiles, PVC, PEHD, robinetterie, pièces spéciales, regards et accessoires de réseau. Références courantes en stock, découpe et préparation de commandes.</p>
-          <ul><li>Fontes</li><li>PEHD</li><li>Robinetterie</li><li>Regards</li></ul>
-          <div class="card-ico">
-            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 18h36v12H6z"/><path d="M12 18v12M36 18v12M6 24h36"/><path d="M18 18v12M30 18v12" opacity=".5"/></svg>
-          </div>
-        </article>
-
-        <article class="card">
-          <div class="num"><span>02</span><span>Travaux</span></div>
-          <h3>Réseaux d'eau</h3>
-          <p>Renouvellement de conduites AEP, réseaux d'eaux usées et pluviales, branchements, réhabilitation sans tranchée, essais de pression et mise en service.</p>
-          <ul><li>AEP</li><li>EU / EP</li><li>Branchements</li><li>Essais</li></ul>
-          <div class="card-ico">
-            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 30h14l6-10 6 16 6-6h8"/><path d="M4 40h40" opacity=".4"/><circle cx="24" cy="20" r="2.6"/></svg>
-          </div>
-        </article>
-
-        <article class="card">
-          <div class="num"><span>03</span><span>Maintenance</span></div>
-          <h3>Équipements &amp; pièces</h3>
-          <p>Pompes de relevage, vannes, pièces sur mesure, fourniture pour sites portuaires et industriels. Recherche de référence et dépannage sur existant.</p>
-          <ul><li>Pompes</li><li>Vannes</li><li>Sur mesure</li><li>Portuaire</li></ul>
-          <div class="card-ico">
-            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="22" cy="26" r="11"/><path d="M22 26l7-5M22 15v-5h12v8"/><path d="M11 37h26" opacity=".4"/></svg>
-          </div>
-        </article>
+      <div class="metier">
+        <figure class="reveal">
+          <img src="/propositions/sei/img/pipe.webp" alt="Intérieur d'une grande conduite circulaire, compagnon au travail au fond de l'ouvrage." loading="lazy" width="1500" height="1125">
+          <figcaption>Reprise en conduite visitable</figcaption>
+        </figure>
+        <div>
+          <ul>
+            <li><i>01</i><div><strong>Adduction d'eau potable</strong><span>Pose et renouvellement de conduites fonte, PVC et PEHD, pièces spéciales, essais de pression, désinfection.</span></div></li>
+            <li><i>02</i><div><strong>Assainissement</strong><span>Réseaux gravitaires, regards, branchements, réhabilitation d'ouvrages existants.</span></div></li>
+            <li><i>03</i><div><strong>Terrassement et voirie</strong><span>Ouverture, blindage, remblai, réfection de chaussée. Le chantier est rendu propre.</span></div></li>
+            <li><i>04</i><div><strong>Négoce matériaux TP</strong><span>Fontes, PVC, PEHD, regards et accessoires disponibles pour les entreprises du secteur.</span></div></li>
+          </ul>
+          <p class="note">Le nom d'origine, Service Entretien Incendie, date de 1982. Le métier réel est celui de l'eau : c'est ce qu'on met devant.</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="dark" id="terrain">
-    <div class="wrap">
-      <span class="kicker mono">02 / Méthode</span>
-      <h2>Le matériel ne suffit pas. <em>C'est le chantier qui tranche.</em></h2>
-
-      <div class="dark-grid">
+  <section class="band" id="methode">
+    <img src="/propositions/sei/img/band.webp" alt="" aria-hidden="true" loading="lazy" width="2000" height="856">
+    <div class="wrap sec" style="padding-block:clamp(62px,9vw,116px)">
+      <div class="sec-head">
+        <div class="sec-num">02 / Méthode</div>
         <div>
-          <p class="dark-lead">Un réseau existant ne se pose jamais comme sur un plan. Accès réduits, coupures à organiser, riverains, délais de marché public : nos équipes travaillent dans ces contraintes depuis plus de quarante ans.</p>
-          <div class="dark-note">Notre règle : on ne valide pas une commande sans avoir regardé le terrain, et on ne livre pas un chantier sans avoir vérifié la mise en service.</div>
+          <h2>Quatre étapes,<br>un seul interlocuteur.</h2>
+          <p>Un conducteur de travaux suit l'affaire du premier relevé à la réception. Pas de sous-traitance en cascade sur les points sensibles.</p>
         </div>
-
-        <ul class="rows">
-          <li><span class="idx">01</span><div><b>Stock et délais</b><p>Les références courantes sont disponibles, pas de rupture au milieu d'une campagne de travaux.</p></div></li>
-          <li><span class="idx">02</span><div><b>Interlocuteur unique</b><p>Du devis à la réception, le même technicien suit le dossier et connaît l'historique du réseau.</p></div></li>
-          <li><span class="idx">03</span><div><b>Marchés publics</b><p>Réponse aux consultations, pièces administratives, traçabilité complète des fournitures.</p></div></li>
-          <li><span class="idx">04</span><div><b>Deux implantations</b><p>Boissy-l'Aillerie pour l'Île-de-France, Le Havre pour la Normandie depuis 2026.</p></div></li>
-        </ul>
+      </div>
+      <div class="steps">
+        <div><b>ÉTAPE 01</b><h3>Relevé sur site</h3><p>Repérage des réseaux existants, contraintes d'accès, coordination avec l'exploitant.</p></div>
+        <div><b>ÉTAPE 02</b><h3>Méthode et planning</h3><p>Choix de la technique, phasage, coupures d'eau annoncées et fenêtres d'intervention.</p></div>
+        <div><b>ÉTAPE 03</b><h3>Chantier</h3><p>Équipes et engins dédiés, blindage, pose, essais, contrôle des soudures et des raccords.</p></div>
+        <div><b>ÉTAPE 04</b><h3>Réception</h3><p>Dossier de récolement, remise en état, essais de mise en service avec le maître d'ouvrage.</p></div>
       </div>
     </div>
   </section>
 
-  <section id="agences">
+  <section class="sec" id="terrains">
     <div class="wrap">
       <div class="sec-head">
+        <div class="sec-num">03 / Terrains</div>
         <div>
-          <span class="kicker mono">03 / Agences</span>
-          <h2>Deux points<br>d'appui.</h2>
+          <h2>Là où<br>ça se complique.</h2>
+          <p>Rue étroite, réseau en charge, nappe haute, accès impossible. C'est là que l'expérience du terrain compte plus que la taille de l'entreprise.</p>
         </div>
-        <p>Le siège historique du Val-d'Oise couvre l'Île-de-France. L'ouverture du Havre en juillet 2026 étend le stock et la livraison sur l'axe Normandie.</p>
       </div>
-
-      <div class="agences">
-        <article class="agence">
-          <span class="tag">Siège · Val-d'Oise</span>
-          <h3>Boissy-l'Aillerie</h3>
-          <address>Parc d'Activités du Coudrier<br>95650 Boissy-l'Aillerie</address>
-          <dl>
-            <dt>Horaires</dt><dd>Lun. au ven., 7h30-12h / 13h30-17h30</dd>
-            <dt>Téléphone</dt><dd><a href="tel:+33134421820">01 34 42 18 20</a></dd>
-            <dt>Email</dt><dd><a href="mailto:sei@seitp.fr">sei@seitp.fr</a></dd>
-            <dt>Zone</dt><dd>Île-de-France, 95, 78, 92, 93, 60</dd>
-          </dl>
-        </article>
-
-        <article class="agence">
-          <span class="tag">Agence · Normandie</span>
-          <h3>Le Havre</h3>
-          <address>261 boulevard Jules Durand<br>76600 Le Havre</address>
-          <dl>
-            <dt>Ouverture</dt><dd>Juillet 2026</dd>
-            <dt>Téléphone</dt><dd><a href="tel:+33134421820">01 34 42 18 20</a></dd>
-            <dt>Email</dt><dd><a href="mailto:sei@seitp.fr">sei@seitp.fr</a></dd>
-            <dt>Zone</dt><dd>Normandie, 76, 27, 14</dd>
-          </dl>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <section id="terrains" style="padding-top:0">
-    <div class="wrap">
-      <div class="sec-head">
-        <div>
-          <span class="kicker mono">04 / Interventions</span>
-          <h2>Nos terrains<br>d'intervention.</h2>
-        </div>
-        <p>Collectivités, entreprises et industriels : nous parlons la même langue que les maîtres d'oeuvre et les services techniques.</p>
-      </div>
-
       <div class="terrains">
-        <div class="terrain">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 21h18M5 21V8l7-4 7 4v13"/><path d="M9 21v-6h6v6"/></svg>
-          <div><b>Communes et EPCI</b><span>Voirie, réseaux, renouvellement</span></div>
+        <div class="rows">
+          <div><b>01</b><h3>Voirie urbaine contrainte</h3><span>95 · 76</span></div>
+          <div><b>02</b><h3>Traversée de cours d'eau</h3><span>Forage</span></div>
+          <div><b>03</b><h3>Réseaux en charge</h3><span>Sans coupure</span></div>
+          <div><b>04</b><h3>Réhabilitation sans tranchée</h3><span>Chemisage</span></div>
+          <div><b>05</b><h3>Branchements particuliers</h3><span>Unitaire</span></div>
+          <div><b>06</b><h3>Ouvrages et regards</h3><span>Génie civil</span></div>
         </div>
-        <div class="terrain">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 20V6h16v14"/><path d="M8 10h8M8 14h8M8 18h4"/></svg>
-          <div><b>Syndicats des eaux</b><span>AEP, assainissement collectif</span></div>
+        <figure class="reveal">
+          <img src="/propositions/sei/img/hydrant.webp" alt="Bouche d'incendie et ses poteaux de manœuvre en pied de trottoir." loading="lazy" width="950" height="1187">
+          <figcaption>Le réseau se juge aussi à ses points d'accès.<br>Photo d'illustration, Wikimedia Commons.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="agences" style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="sec-num">04 / Agences</div>
+        <div>
+          <h2>Deux bases,<br>un seul standard.</h2>
+          <p>Le siège historique dans le Val-d'Oise, une implantation récente au Havre pour suivre les chantiers normands de près.</p>
         </div>
-        <div class="terrain">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 17h20M5 17V9l5 3V9l5 3V6l4 3v8"/><circle cx="7" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
-          <div><b>Entreprises de TP</b><span>Fourniture et sous-traitance</span></div>
-        </div>
-        <div class="terrain">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 20h18M4 20V8h6v12M14 20V4h6v16"/><path d="M16 8h2M16 12h2"/></svg>
-          <div><b>Industriels</b><span>Réseaux process et eau</span></div>
-        </div>
-        <div class="terrain">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 18c3 0 3-2 6-2s3 2 6 2 3-2 6-2"/><path d="M6 16V8h12v8M12 8V4M9 4h6"/></svg>
-          <div><b>Ports et logistique</b><span>Équipements, pièces, réseaux</span></div>
-        </div>
-        <div class="terrain">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 21V10l8-6 8 6v11"/><path d="M9 21v-7h6v7"/><path d="M4 10h16"/></svg>
-          <div><b>Aménageurs</b><span>Lots réseaux, viabilisation</span></div>
+      </div>
+      <div class="ag">
+        <figure class="reveal">
+          <img src="/propositions/sei/img/riser.webp" alt="Colonne d'eau verticale et passerelle métallique dans un ouvrage industriel." loading="lazy" width="950" height="1266">
+          <figcaption>Un seul standard technique<br>sur les deux sites.</figcaption>
+        </figure>
+        <div class="sites">
+          <article>
+            <span class="tag">Siège · depuis 1982</span>
+            <h3>Boissy-l'Aillerie</h3>
+            <p>Parc d'Activités du Coudrier, 95650. Dépôt, atelier et négoce de matériaux.</p>
+            <div class="meta">01 34 42 18 20<br>Lun-Ven · 7h30-12h / 13h30-17h30</div>
+          </article>
+          <article>
+            <span class="tag">Agence · Normandie</span>
+            <h3>Le Havre</h3>
+            <p>261 boulevard Jules Durand, 76600. Base travaux pour la Seine-Maritime.</p>
+            <div class="meta">Sur rendez-vous<br>sei@seitp.fr</div>
+          </article>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="prop" id="proposition">
+  <section class="sec offre" id="offre">
     <div class="wrap">
-      <div class="prop-head">
+      <div class="sec-head">
+        <div class="sec-num">05 / Proposition</div>
         <div>
-          <span class="kicker mono" style="color:#6a6355">05 / Note de proposition, Sujee Design, 5 novembre 2026</span>
-          <h2>Un site à la hauteur<br>de vos chantiers.</h2>
+          <h2>Ce qu'on mettrait<br>en ligne.</h2>
+          <p>Une entreprise de travaux se juge sur ses chantiers et sur sa réponse à un appel d'offres. Le site doit le montrer en trente secondes, pas raconter une histoire.</p>
         </div>
-        <span class="mono">3 formules · 3 900 à 7 900 € HT</span>
       </div>
-
-      <div class="prop-intro">
-        <div>
-          <p>Aujourd'hui, seitp.fr affiche « Site en construction ». Un donneur d'ordre, un maître d'oeuvre ou un acheteur qui vérifie SEI avant une consultation ne trouve ni références, ni organigramme, ni coordonnées à jour. Pour une entreprise de 22 M€, c'est le seul point faible visible.</p>
-          <p>La page que vous lisez est une projection : elle montre ce que pourrait être le site de SEI, avec vos métiers réels, vos deux agences et votre ton. Tout est modifiable, rien n'est engageant.</p>
-          <p><b>Pourquoi maintenant :</b> nouveau président depuis septembre, agence du Havre ouverte en juillet, un nom qui évoque l'incendie alors que le métier est l'eau. Trois raisons de poser une identité claire une seule fois, plutôt que de la corriger trois fois.</p>
-        </div>
-        <ul class="findings">
-          <li><b>22 M€</b><span>de chiffre d'affaires, zéro page publique aujourd'hui</span></li>
-          <li><b>2 sites</b><span>depuis juillet 2026, une seule adresse visible en ligne</span></li>
-          <li><b>1982</b><span>44 ans de métier, aucune référence chantier consultable</span></li>
-        </ul>
-      </div>
-
       <div class="packs">
-        <article class="pack">
-          <span class="mono" style="color:#5d6f76">Formule 01</span>
-          <h3>Socle</h3>
+        <div class="pack">
+          <span class="kicker">Socle</span>
+          <h3>Être trouvé</h3>
           <div class="price">3 900 €<small>HT</small></div>
-          <div class="delay">Livraison 3 semaines</div>
           <ul>
-            <li>Page d'accueil complète et responsive</li>
-            <li>Présentation des 3 savoir-faire</li>
-            <li>Coordonnées et formulaire de contact</li>
-            <li>SEO local (95, 76, métiers)</li>
-            <li>Mise en ligne sur seitp.fr</li>
-            <li>2 séries de modifications</li>
+            <li>Site une page, photographie de chantier</li>
+            <li>Métiers, agences, contacts</li>
+            <li>Formulaire de demande de devis</li>
+            <li>Fiche Google et annuaires alignés</li>
+            <li>Mise en ligne et nom de domaine</li>
           </ul>
-          <a class="btn btn-ghost" href="#contact">Choisir Socle</a>
-        </article>
-
-        <article class="pack best">
-          <span class="best-badge">Recommandé</span>
-          <span class="mono" style="color:#5d6f76">Formule 02</span>
-          <h3>Références</h3>
+        </div>
+        <div class="pack hot">
+          <span class="badge">Recommandé</span>
+          <span class="kicker">Références</span>
+          <h3>Prouver</h3>
           <div class="price">5 900 €<small>HT</small></div>
-          <div class="delay">Livraison 5 semaines</div>
           <ul>
-            <li>Tout le pack Socle</li>
-            <li>8 pages : métiers, méthode, agences</li>
-            <li>3 références chantier rédigées</li>
-            <li>Fiches agences Boissy et Le Havre</li>
-            <li>Fiche Google Business + analytics</li>
-            <li>Formation d'1 h à la mise à jour</li>
+            <li>Tout le socle</li>
+            <li>Trois chantiers photographiés et racontés</li>
+            <li>Une page par métier, préparée pour Google</li>
+            <li>Charte de prise de vue pour les équipes</li>
+            <li>Prise en main et formation d'une heure</li>
           </ul>
-          <a class="btn" href="#contact">Choisir Références</a>
-        </article>
-
-        <article class="pack">
-          <span class="mono" style="color:#5d6f76">Formule 03</span>
-          <h3>Appels d'offres</h3>
+        </div>
+        <div class="pack">
+          <span class="kicker">Appels d'offres</span>
+          <h3>Être retenu</h3>
           <div class="price">7 900 €<small>HT</small></div>
-          <div class="delay">Livraison 6 semaines</div>
           <ul>
             <li>Tout le pack Références</li>
-            <li>Espace documents (Kbis, assurances, PDF)</li>
-            <li>Page dédiée marchés publics</li>
-            <li>Reportage photo sur un chantier</li>
-            <li>Accompagnement 3 mois</li>
-            <li>Suivi des demandes entrantes</li>
+            <li>Section références et qualifications</li>
+            <li>Mémoire technique type, à personnaliser</li>
+            <li>Documents téléchargeables, à jour</li>
+            <li>Deux demi-journées de conseil</li>
           </ul>
-          <a class="btn btn-ghost" href="#contact">Choisir Appels d'offres</a>
-        </article>
+        </div>
       </div>
-
-      <div class="options">
-        <span><b>Options :</b></span>
-        <span>Reportage photo chantier, 690 € la demi-journée</span>
-        <span>Rédaction supplémentaire, 120 € la page</span>
-        <span>Maintenance et mises à jour, 49 €/mois</span>
-      </div>
-
-      <div class="honest"><b>Ce qu'un site ne fera pas.</b> Il ne vous fera pas gagner un marché public à lui seul, et nous ne le vendrons pas comme tel. Il évite qu'on vous écarte à la vérification, il raccourcit la réponse aux consultations, et il donne à vos commerciaux une adresse à envoyer au lieu d'un PDF. Le reste, c'est votre terrain qui le fait.</div>
+      <p class="pack-note">Prix de lancement, valables trente jours. Un site ne fait pas gagner un marché public : il évite d'être écarté au moment où le maître d'ouvrage vérifie qui est en face. C'est là qu'il rapporte.</p>
     </div>
   </section>
 
   <section class="contact" id="contact">
     <div class="wrap">
+      <h2>On en parle<br>cette <em>semaine</em> ?</h2>
       <div class="contact-grid">
         <div>
-          <span class="kicker mono" style="color:#e4a93c">06 / Suite</span>
-          <h2>On regarde votre réseau, <em>puis on décide.</em></h2>
-          <p>Un échange de 30 minutes suffit pour valider le périmètre et le budget. Si le projet n'est pas pertinent pour SEI aujourd'hui, on vous le dira aussi.</p>
-          <div class="hero-actions">
-            <a class="btn btn-light" href="https://sujeedesign.com/contact">Prendre rendez-vous <span class="arrow">↗</span></a>
-            <a class="btn btn-ghost" style="color:#e9f0f2;border-color:rgba(143,195,212,.4)" href="tel:+33134421820">Appeler SEI</a>
-          </div>
+          <a class="big" href="mailto:sei@seitp.fr?subject=Site%20SEI%20-%20proposition">sei@seitp.fr</a><br>
+          <a class="big" href="tel:+33134421820">01 34 42 18 20</a>
+          <p class="mono" style="margin-top:18px">Florent Dubois, président<br>Parc d'Activités du Coudrier, 95650 Boissy-l'Aillerie</p>
         </div>
-        <div class="contact-card">
-          <div><span class="mono" style="color:#7d9aa5">Siège</span><b>Parc d'Activités du Coudrier, 95650 Boissy-l'Aillerie</b></div>
-          <div><span class="mono" style="color:#7d9aa5">Agence</span><b>261 bd Jules Durand, 76600 Le Havre</b></div>
-          <div><span class="mono" style="color:#7d9aa5">Contact</span><b><a href="mailto:sei@seitp.fr">sei@seitp.fr</a> · <a href="tel:+33134421820">01 34 42 18 20</a></b></div>
+        <div>
+          <p class="mono">Proposition préparée par<br>Sujee Design · sujeedesign.com</p>
+          <p class="mono" style="margin-top:16px">Projection de site, non contractuelle.</p>
         </div>
       </div>
     </div>
   </section>
-
 </main>
 
 <footer>
   <div class="wrap">
-    <div class="foot">
-      <span class="mono">SEI · Service Entretien Incendie · SIREN 325 414 563</span>
-      <span class="mono">Projection Sujee Design · 5 novembre 2026</span>
-    </div>
-    <p class="foot-mesure">Consultation mesurée de façon anonyme · données conservées 12 mois</p>
-    <p class="disclaimer">Page de démonstration, non officielle, réalisée par Sujee Design pour illustrer une proposition de site. Les informations affichées proviennent de sources publiques (INSEE/SIRENE, BODACC, BOAMP, annuaires d'entreprises) et doivent être validées par SEI avant toute publication. Aucune donnée client confidentielle n'est utilisée.</p>
+    <div>SEI · Service Entretien Incendie · SIREN 325 414 563</div>
+    <div>Photos : T. Castelazo <a href="https://creativecommons.org/licenses/by-sa/3.0" rel="noopener">CC BY-SA 3.0</a> · Czeva <a href="https://creativecommons.org/licenses/by-sa/4.0" rel="noopener">CC BY-SA 4.0</a> · Tournasol7 <a href="https://creativecommons.org/licenses/by/4.0" rel="noopener">CC BY 4.0</a></div>
   </div>
 </footer>
 
 <script>
-  const menu = document.querySelector('.menu-toggle'), nav = document.querySelector('.nav-links');
-  menu.addEventListener('click', () => {
-    const open = nav.classList.toggle('open');
-    menu.setAttribute('aria-expanded', open);
-    menu.setAttribute('aria-label', open ? 'Fermer le menu' : 'Ouvrir le menu');
-  });
-  nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
-    nav.classList.remove('open');
-    menu.setAttribute('aria-expanded', 'false');
-  }));
+(function(){
+  var els=document.querySelectorAll('.reveal');
+  if(!('IntersectionObserver' in window)||matchMedia('(prefers-reduced-motion: reduce)').matches){
+    els.forEach(function(e){e.classList.add('in')});return;
+  }
+  var io=new IntersectionObserver(function(en){en.forEach(function(e){
+    if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}
+  })},{rootMargin:'0px 0px -12% 0px'});
+  els.forEach(function(e){io.observe(e)});
+})();
 </script>
 <script src="/propositions/_cta/cta.js" data-client="SEI" defer></script>
 <script id="sj-suivi">
