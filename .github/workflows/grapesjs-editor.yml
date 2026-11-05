@@ -1,41 +1,37 @@
-name: GrapesJS editor
+name: CI site et admin
 
 on:
   push:
     paths:
       - "app/**"
-      - "sujee_editor/**"
-      - "theme/**"
+      - "web/**"
       - "tests/**"
+      - "requirements.txt"
+      - "pytest.ini"
       - "Dockerfile"
       - ".dockerignore"
-      - "requirements.txt"
       - ".github/workflows/grapesjs-editor.yml"
   pull_request:
     paths:
       - "app/**"
-      - "sujee_editor/**"
-      - "theme/**"
+      - "web/**"
       - "tests/**"
+      - "requirements.txt"
+      - "pytest.ini"
       - "Dockerfile"
       - ".dockerignore"
-      - "requirements.txt"
       - ".github/workflows/grapesjs-editor.yml"
 
 permissions:
   contents: read
 
 jobs:
-  test:
+  back-office:
+    name: Tests back office
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22.12.0"
-          cache: npm
-          cache-dependency-path: sujee_editor/editor/frontend/package-lock.json
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
@@ -43,15 +39,26 @@ jobs:
           cache-dependency-path: requirements.txt
       - name: Install Python dependencies
         run: python -m pip install -r requirements.txt pytest httpx
-      - name: Install frontend dependencies
-        run: npm ci --prefix sujee_editor/editor/frontend
-      - name: Build self-hosted editor assets
-        run: npm run build --prefix sujee_editor/editor/frontend
-      - name: Install Playwright Chromium
-        run: sujee_editor/editor/frontend/node_modules/.bin/playwright install --with-deps chromium
-      - name: Run visual editor browser smoke tests
-        run: npm run test:smoke --prefix sujee_editor/editor/frontend
       - name: Run Python tests
         run: python -m pytest -q -m "not e2e"
-      - name: Build production image
-        run: docker build --tag sujee-site-editor-ci .
+
+  vitrine:
+    name: Tests vitrine et éditeur
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install frontend dependencies
+        run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Run web tests
+        run: npm test
