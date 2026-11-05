@@ -76,7 +76,7 @@ export function ProjetCase({ project, projects }: { project: Project; projects: 
                 <p>Les deux films diffusés pour les vœux 2018, dans leur montage final.</p>
                 <div className="pj-film-list">
                   {videos.map((video) => (
-                    <figure className="pj-film" key={video.src}>
+                    <figure className="pj-film" key={video.mp4}>
                       <video
                         controls
                         playsInline
@@ -86,9 +86,10 @@ export function ProjetCase({ project, projects }: { project: Project; projects: 
                         height={video.height}
                         aria-label={`${video.title} — ${video.caption}`}
                       >
-                        <source src={video.src} type="video/mp4" />
+                        <source src={video.mp4} type="video/mp4" />
+                        <source src={video.webm} type="video/webm" />
                         Votre navigateur ne peut pas lire cette vidéo.{" "}
-                        <a href={video.src}>Télécharger le film</a>.
+                        <a href={video.mp4}>Télécharger le film</a>.
                       </video>
                       <figcaption>
                         <b>{video.title}</b> — {video.caption}
