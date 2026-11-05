@@ -246,6 +246,11 @@ const nextConfig: NextConfig = {
           source: "/propositions/polyresine",
           destination: "/propositions/polyresine/index.html",
         },
+        // SEI (Service Entretien Incendie) : projection de site, page autonome.
+        {
+          source: "/propositions/sei",
+          destination: "/propositions/sei/index.html",
+        },
         // L'URL accentuée n'existe pas : /propositions/polyresine est la seule
         // adresse (voir les redirects permanents plus bas).
       ],

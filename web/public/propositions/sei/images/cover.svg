@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 750" width="1200" height="750">
+  <defs>
+    <pattern id="g" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M30 0H0V30" fill="none" stroke="#8fc3d4" stroke-opacity=".10" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="750" fill="#07161e"/>
+  <rect width="1200" height="750" fill="url(#g)"/>
+  <g fill="none" stroke="#8fc3d4" stroke-width="2.4" stroke-opacity=".9">
+    <line x1="60" y1="430" x2="1140" y2="430"/>
+    <line x1="60" y1="560" x2="1140" y2="560"/>
+    <line x1="300" y1="405" x2="300" y2="585"/><line x1="330" y1="405" x2="330" y2="585"/>
+    <line x1="860" y1="405" x2="860" y2="585"/><line x1="890" y1="405" x2="890" y2="585"/>
+    <path d="M520 470 L600 442 L600 548 L520 520 Z"/>
+    <line x1="560" y1="442" x2="560" y2="300"/>
+    <circle cx="560" cy="280" r="24"/>
+    <line x1="536" y1="280" x2="584" y2="280"/><line x1="560" y1="256" x2="560" y2="304"/>
+    <line x1="1000" y1="430" x2="1000" y2="180"/><line x1="1060" y1="430" x2="1060" y2="180"/>
+    <line x1="976" y1="180" x2="1084" y2="180"/>
+    <line x1="80" y1="495" x2="1120" y2="495" stroke="#e4a93c" stroke-width="3" stroke-dasharray="14 18"/>
+    <line x1="60" y1="630" x2="1140" y2="630" stroke-dasharray="6 8" stroke-opacity=".5"/>
+    <circle cx="315" cy="495" r="7" fill="#e4a93c" stroke="none"/>
+    <circle cx="875" cy="495" r="7" fill="#e4a93c" stroke="none"/>
+    <circle cx="1030" cy="180" r="7" fill="#e4a93c" stroke="none"/>
+  </g>
+  <g fill="#9fc0cb" font-family="'IBM Plex Mono',monospace" font-size="20" letter-spacing="3">
+    <text x="60" y="390">DN 200 · FONTE DUCTILE</text>
+    <text x="620" y="390">VANNE DE SECTIONNEMENT</text>
+    <text x="60" y="672" fill="#8fc3d4" opacity=".7">COUPE TYPE / RÉSEAU AEP</text>
+  </g>
+  <g fill="#e4a93c" font-family="'IBM Plex Mono',monospace" font-size="20" letter-spacing="3">
+    <text x="944" y="640">SENS DU DÉBIT</text>
+  </g>
+</svg>
