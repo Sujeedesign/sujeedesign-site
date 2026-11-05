@@ -101,9 +101,11 @@ describe("InstagramSection", () => {
       .getAllByRole("button")
       .filter((node) => node.classList.contains("ig__tile"));
     expect(tiles).toHaveLength(2);
-    expect(tiles[1]!.querySelector("video")?.getAttribute("poster")).toBe(
+    // la vignette vidéo affiche son poster (fiable même sans codec)
+    expect(tiles[1]!.querySelector("img")?.getAttribute("src")).toBe(
       "/medias/reel.jpg",
     );
+    expect(tiles[1]!.querySelector(".ig__play")).toBeTruthy();
 
     fireEvent.click(tiles[0]!);
     const dialog = screen.getByRole("dialog");

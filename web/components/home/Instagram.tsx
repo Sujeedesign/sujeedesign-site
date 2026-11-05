@@ -102,16 +102,27 @@ export function InstagramSection({ feed }: { feed: InstagramFeed }) {
               >
                 {post.kind === "video" ? (
                   <>
-                    <video
-                      className="ig__media"
-                      src={post.src}
-                      poster={post.poster || undefined}
-                      preload="metadata"
-                      muted
-                      playsInline
-                      aria-hidden="true"
-                      tabIndex={-1}
-                    />
+                    {post.poster ? (
+                      /* la vignette affiche le poster : fiable même si le
+                         navigateur ne décode pas le codec de la vidéo */
+                      <img
+                        className="ig__media"
+                        src={post.poster}
+                        alt=""
+                        loading="lazy"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <video
+                        className="ig__media"
+                        src={post.src}
+                        preload="metadata"
+                        muted
+                        playsInline
+                        aria-hidden="true"
+                        tabIndex={-1}
+                      />
+                    )}
                     <span className="ig__play" aria-hidden="true" />
                   </>
                 ) : (
