@@ -64,8 +64,16 @@ class FakeGoogle:
         )
         return {"id": "evt_123"}
 
-    def send_mail(self, to, subject, text, html=""):
-        self.mails.append({"to": to, "subject": subject, "text": text})
+    def send_mail(self, to, subject, text, html="", attachments=None, reply_to=""):
+        self.mails.append(
+            {
+                "to": to,
+                "subject": subject,
+                "text": text,
+                "attachments": attachments or [],
+                "reply_to": reply_to,
+            }
+        )
         return {"id": "msg_1"}
 
 
@@ -165,7 +173,14 @@ def test_parcours_complet_jusqu_au_rendez_vous(conn):
 
     assert len(google.events) == 1
     assert google.events[0]["email"] == "claire@example.com"
-    assert len(google.mails) == 1
+    # Deux mails partent : le client et la notification interne.
+    assert len(google.mails) == 2
+    client_mail = next(mail for mail in google.mails if mail["to"] == "claire@example.com")
+    admin_mail = next(mail for mail in google.mails if mail["to"] != "claire@example.com")
+    assert "Votre rendez-vous" in client_mail["subject"]
+    assert client_mail["attachments"][0][1].startswith(b"BEGIN:VCALENDAR")
+    assert "DEM-" in admin_mail["subject"] and "claire@example.com" in admin_mail["text"]
+    assert admin_mail["attachments"][0][1].startswith(b"BEGIN:VCALENDAR")
     assert notifications and "DEM-" in notifications[0]
     booking = conn.execute("SELECT * FROM agent_bookings").fetchone()
     assert booking["event_id"] == "evt_123"

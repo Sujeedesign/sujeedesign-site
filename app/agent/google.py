@@ -199,6 +199,7 @@ class CalendarClient:
         summary: str,
         description: str,
         location: str = "",
+        notify_guest: bool = False,
     ) -> dict[str, Any]:
         end = start + timedelta(minutes=slots.SLOT_MINUTES)
         body = {
@@ -215,26 +216,41 @@ class CalendarClient:
         return self._request(
             "POST",
             f"{CALENDAR_API}/calendars/{self.config.calendar_id}/events",
-            params={"sendUpdates": "all"},
+            # L'invitation Google part du compte qui héberge l'agenda, donc d'une
+            # adresse inconnue du client. Par défaut on la désactive : la
+            # confirmation part de notre côté via `send_mail` (hello@).
+            params={"sendUpdates": "all" if notify_guest else "none"},
             json=body,
         )
 
-    def delete_event(self, event_id: str) -> None:
+    def delete_event(self, event_id: str, notify_guest: bool = False) -> None:
         self._request(
             "DELETE",
             f"{CALENDAR_API}/calendars/{self.config.calendar_id}/events/{event_id}",
-            params={"sendUpdates": "all"},
+            params={"sendUpdates": "all" if notify_guest else "none"},
         )
 
     # -- email ------------------------------------------------------------
-    def send_mail(self, to: str, subject: str, text: str, html: str = "") -> dict[str, Any]:
+    def send_mail(
+        self,
+        to: str,
+        subject: str,
+        text: str,
+        html: str = "",
+        attachments: list[tuple[str, bytes, str, str]] | None = None,
+        reply_to: str = "",
+    ) -> dict[str, Any]:
         message = EmailMessage()
         message["To"] = to
         message["From"] = f"{self.config.from_name} <{self.config.from_email}>"
+        if reply_to:
+            message["Reply-To"] = reply_to
         message["Subject"] = subject
         message.set_content(text)
         if html:
             message.add_alternative(html, subtype="html")
+        for filename, payload, maintype, subtype in attachments or []:
+            message.add_attachment(payload, maintype=maintype, subtype=subtype, filename=filename)
         raw = base64.urlsafe_b64encode(message.as_bytes()).decode("ascii")
         return self._request("POST", GMAIL_SEND, json={"raw": raw})
 

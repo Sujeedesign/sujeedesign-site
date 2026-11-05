@@ -8,12 +8,13 @@ sans créneau libre revérifié, un seul rendez-vous par conversation.
 from __future__ import annotations
 
 import json
+import os
 import re
 import sqlite3
 from datetime import datetime, timedelta
 from typing import Any, Callable
 
-from . import slots, store
+from . import ics, slots, store
 from .google import CalendarClient, GoogleError
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[a-zA-Z]{2,}$")
@@ -398,7 +399,13 @@ class ToolBox:
             lead_id=lead["id"],
             recap_ok=1,
         )
-        mailed = self._send_confirmation(email, name, start, reference, mode, phone)
+        mailed = self._send_confirmation(
+            email, name, start, reference, mode, phone, event_id=event_id, title=titre, location=location
+        )
+        admin_mailed = self._send_admin_notice(
+            reference, name, email, phone, fields, start, event_id=event_id, title=titre,
+            location=location, mode=mode, event_link=str(event.get("htmlLink", "")),
+        )
         if self.notify:
             self.notify(self._notification(reference, name, email, phone, fields, start))
         self.booking = {
@@ -411,6 +418,7 @@ class ToolBox:
             "branding": branding,
             "call_mode": mode,
             "mail_sent": mailed,
+            "admin_mail_sent": admin_mailed,
         }
         self.events.append({"type": "booking", **self.booking})
         return {
@@ -503,14 +511,133 @@ class ToolBox:
             "À bientôt,\nSujee Design\nhttps://sujeedesign.com"
         )
 
+    # -- emails -----------------------------------------------------------
+    def _organizer(self) -> tuple[str, str]:
+        config = getattr(self.google, "config", None)
+        email = getattr(config, "from_email", "") or "hello@sujeedesign.com"
+        name = getattr(config, "from_name", "") or "Sujee Design"
+        return email, name
+
+    def _invite(
+        self,
+        *,
+        start: datetime,
+        name: str,
+        email: str,
+        title: str,
+        description: str,
+        location: str,
+        uid: str,
+    ) -> tuple[str, bytes, str, str]:
+        organizer_email, organizer_name = self._organizer()
+        payload = ics.build_invite(
+            start=start,
+            end=start + timedelta(minutes=slots.SLOT_MINUTES),
+            summary=title,
+            description=description,
+            location=location,
+            attendee_email=email,
+            attendee_name=name,
+            organizer_email=organizer_email,
+            organizer_name=organizer_name,
+            uid=uid,
+        )
+        return ("rendez-vous-sujee-design.ics", payload, "text", "calendar")
+
     def _send_confirmation(
-        self, email: str, name: str, start: datetime, reference: str, mode: str = "", phone: str = ""
+        self,
+        email: str,
+        name: str,
+        start: datetime,
+        reference: str,
+        mode: str = "",
+        phone: str = "",
+        *,
+        event_id: str = "",
+        title: str = "",
+        location: str = "",
     ) -> bool:
+        organizer_email, _ = self._organizer()
         try:
             self.google.send_mail(
                 to=email,
-                subject=f"Votre rendez-vous avec Sujee Design · {start:%d/%m à %Hh%M}",
+                subject=f"Votre rendez-vous avec Sujee Design · {self._label(start)}",
                 text=self._confirmation_text(name, start, reference, mode, phone),
+                attachments=[
+                    self._invite(
+                        start=start,
+                        name=name,
+                        email=email,
+                        title=title or "Rendez-vous avec Sujee Design",
+                        description=(
+                            f"Rendez-vous de {slots.SLOT_MINUTES} minutes avec Sujee Design."
+                            f"\nRéférence : {reference}"
+                        ),
+                        location=location,
+                        uid=f"{event_id or reference}@sujeedesign.com",
+                    )
+                ],
+                reply_to=organizer_email,
+            )
+            return True
+        except GoogleError:
+            return False
+
+    def _admin_recipients(self) -> list[str]:
+        raw = os.environ.get("AGENT_NOTIFY_EMAIL", "s.sujeepan.pro@gmail.com")
+        return [item.strip() for item in raw.split(",") if item.strip()]
+
+    def _send_admin_notice(
+        self,
+        reference: str,
+        name: str,
+        email: str,
+        phone: str,
+        fields: dict[str, str],
+        start: datetime,
+        *,
+        event_id: str = "",
+        title: str = "",
+        location: str = "",
+        mode: str = "",
+        event_link: str = "",
+    ) -> bool:
+        recipients = self._admin_recipients()
+        if not recipients:
+            return False
+        format_line = "visio" if mode == "visio" else f"téléphone ({phone})" if phone else "téléphone"
+        lines = [
+            f"Nouveau rendez-vous {reference}",
+            "",
+            f"Quand : {self._label(start)}, heure de Paris ({slots.SLOT_MINUTES} min)",
+            f"Client : {name}",
+            f"Email : {email}",
+            f"Téléphone : {phone}",
+            f"Format : {format_line}",
+            f"Agenda : {event_link}" if event_link else "",
+            "",
+        ]
+        for key in (*store.FIELDS, *store.DETAILS):
+            if fields.get(key):
+                lines.append(f"{store.FIELD_LABELS[key]} : {fields[key]}")
+        try:
+            organizer_email, _ = self._organizer()
+            self.google.send_mail(
+                to=", ".join(recipients),
+                subject=f"Nouveau RDV {reference} · {self._label(start)} · {name}",
+                text="\n".join(line for line in lines if line is not None),
+                attachments=[
+                    self._invite(
+                        start=start,
+                        name=name,
+                        email=email,
+                        title=title or "Rendez-vous avec Sujee Design",
+                        description=self._summary(fields),
+                        location=location,
+                        uid=f"{event_id or reference}@sujeedesign.com",
+                    )
+                ],
+                reply_to=email,
             )
             return True
         except GoogleError:
