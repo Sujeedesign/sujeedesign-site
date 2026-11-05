@@ -3879,15 +3879,17 @@ button:focus-visible {
   }
 }
 @media (max-width: 600px) {
+  /* Une seule colonne : chaque publication prend toute la largeur du bloc,
+     plus lisible qu'une grille 2 colonnes où les vidéos paraissaient timides. */
   .ig__grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
   .ig__grid li:last-child {
-    grid-column: 1 / -1;
+    grid-column: auto;
   }
   .ig__grid li:last-child .ig__tile {
-    aspect-ratio: 16/9;
+    aspect-ratio: 4/5;
   }
   /* garder la hauteur du header fixe en haut, sinon le média vient s'y coller */
   .ig-player {

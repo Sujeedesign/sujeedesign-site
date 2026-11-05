@@ -144,6 +144,8 @@ html.no-anim [data-stagger] > *{ opacity: 1 !important; transform: none !importa
   object-fit:cover;
   object-position:center;
   display:block;
+  transform-origin:center;
+  will-change:transform;
 }
 /* Voile : une seule nappe régulière sur TOUTE la carte (aucune zone laissée
    vive, sinon l'image paraît à moitié traitée). La nappe de base est

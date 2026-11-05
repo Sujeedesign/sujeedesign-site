@@ -147,9 +147,17 @@
     io.observe(b);
   });
 
-  /* ----- 7. Parallaxe douce sur les visuels de hero ----- */
+  /* ----- 7. Parallaxe douce : visuels de hero et couvertures des réalisations ----- */
   const par = [...document.querySelectorAll('.sv-hero__fig, .hero__still, .ab-hero__media, .sp-hero figure')];
-  if (par.length) {
+  /* Les cartes réalisations ont leur photo en fond (overflow:hidden) : on
+     translate l'image dans son cadre, avec un léger zoom pour éviter tout
+     bord blanc quand elle remonte. Amplitude plus discrète que le hero.
+     La liste est relue à chaque frame : React peut remplacer les <img>
+     après l'hydratation, une NodeList capturée trop tôt pointerait sur des
+     nœuds détachés. */
+  const CASE_SEL = '#travaux .case--photo .case__bg img';
+  const cases = () => document.querySelectorAll(CASE_SEL);
+  if (par.length || cases().length) {
     let ticking = false;
     const update = () => {
       const vh = innerHeight;
@@ -158,6 +166,12 @@
         if (r.bottom < -200 || r.top > vh + 200) return;
         const p = (r.top + r.height / 2 - vh / 2) / vh; // -1 → 1
         el.style.transform = 'translate3d(0,' + (p * -24).toFixed(2) + 'px,0)';
+      });
+      cases().forEach((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.bottom < -200 || r.top > vh + 200) return;
+        const p = (r.top + r.height / 2 - vh / 2) / vh;
+        el.style.transform = 'translate3d(0,' + (p * -46).toFixed(2) + 'px,0) scale(1.14)';
       });
       ticking = false;
     };
