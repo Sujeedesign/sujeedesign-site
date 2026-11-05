@@ -12,7 +12,7 @@ from zoneinfo import ZoneInfo
 
 PARIS = ZoneInfo("Europe/Paris")
 
-SLOT_MINUTES = 20
+SLOT_MINUTES = 30
 BUFFER_MINUTES = 10
 LEAD_TIME = timedelta(hours=48)
 MAX_PER_DAY = 4
