@@ -638,6 +638,7 @@ PROPOSITIONS = {
     "dimension-nouvelle": "Dimension Nouvelle",
     "polyresine": "Polyrésine",
     "sei": "SEI",
+    "prunelle": "À la Prunelle de mes ongle'S",
 }
 
 

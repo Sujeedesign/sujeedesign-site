@@ -35,6 +35,7 @@ SLUGS = {
     "dimension-nouvelle": "Dimension Nouvelle",
     "polyresine": "Polyrésine",
     "sei": "SEI",
+    "prunelle": "À la Prunelle de mes ongle'S",
 }
 LIMITE = 120  # événements par heure et par IP
 DUREE_MAX = 7200  # secondes : on ignore les onglets restés ouverts la nuit

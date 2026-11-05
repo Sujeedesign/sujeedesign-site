@@ -7,6 +7,7 @@ import json
 import pytest
 
 from app.agent import engine, slots, store
+from app.agent import llm
 from app.agent.llm import TurnOutput
 from app.agent import tools as agent_tools
 
@@ -324,6 +325,27 @@ def test_creneau_choisi_est_transmis_au_modele(conn):
     assert len(hint) == 1
     assert slots.slot_id(start) in hint[0]["content"]
     assert "book_meeting" in hint[0]["content"]
+
+
+class PanneLLM:
+    """Modèle injoignable : le tour doit rester utilisable côté serveur."""
+
+    def __init__(self) -> None:
+        self.calls = 0
+
+    def stream(self, messages, tools, model=None):  # noqa: ANN001, ANN201
+        self.calls += 1
+        raise llm.LLMError("503 indisponible")
+        yield  # pragma: no cover
+
+
+def test_panne_du_modele_ne_coupe_pas_la_conversation(conn):
+    google = FakeGoogle()
+    session_id = engine.prepare_session(conn)
+    events = _collect(conn, session_id, "Bonjour", PanneLLM(), google)
+    assert not [e for e in events if e.get("type") == "error"]
+    texte = "".join(e["text"] for e in events if e.get("type") == "delta").strip()
+    assert "type de projet" in texte.lower()
 
 
 def test_message_hors_sujet_recoit_toujours_une_phrase(conn):

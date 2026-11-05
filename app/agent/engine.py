@@ -114,15 +114,11 @@ def turn(
                 else:
                     output = event["done"]
         except LLMError as error:
+            # Panne du fournisseur : on continue en mode serveur plutôt que de
+            # laisser le visiteur devant une conversation morte.
             print(f"agent: modèle indisponible · {error}")
-            yield {
-                "type": "error",
-                "message": (
-                    "Je ne peux pas répondre à l'instant. Réessayez dans un moment, "
-                    "ou utilisez le formulaire pour décrire votre projet."
-                ),
-            }
-            return
+            answer = ""
+            break
         if output is None:
             yield {"type": "error", "message": "Réponse incomplète du modèle."}
             return
