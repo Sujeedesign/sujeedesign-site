@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex,nofollow">
 <title>À la Prunelle de mes ongle'S · diagnostic et refonte</title>
 <meta name="description" content="Proposition Sujee Design : diagnostic et refonte du site de l'institut À la Prunelle de mes ongle'S, Boissy-l'Aillerie.">
-<meta name="theme-color" content="#f7f2ec">
+<meta name="theme-color" content="#1d1216">
 <link rel="stylesheet" href="/propositions/_cta/fonts.css">
 <style>
   :root{
@@ -17,6 +17,8 @@
     --blush:#e7cfc9;
     --prune:#7b3f50;
     --prune-deep:#4a2430;
+    --night:#1d1216;
+    --brass:#a98456;
     --line:rgba(37,21,25,.16);
     --pad:clamp(20px,5vw,64px);
     --display:"Fraunces",Georgia,"Times New Roman",serif;
@@ -34,7 +36,7 @@
   .mono{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
 
   /* ---------- entête ---------- */
-  header.top{position:sticky;top:0;z-index:40;background:rgba(247,242,236,.92);
+  header.top{position:sticky;top:0;z-index:40;background:rgba(247,242,236,.94);
     backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
   .top-in{display:flex;align-items:center;justify-content:space-between;gap:16px;
     padding:14px var(--pad);max-width:1180px;margin:0 auto}
@@ -46,122 +48,146 @@
   .top-in a.cta:hover{background:var(--prune);color:var(--paper)}
   @media(max-width:720px){.top-in .meta{display:none}}
 
-  /* ---------- hero ---------- */
-  .hero{padding-top:clamp(48px,9vw,104px);padding-bottom:clamp(24px,4vw,44px)}
-  .kicker{display:flex;align-items:center;gap:12px;color:var(--prune);margin-bottom:26px}
-  .kicker::after{content:"";height:1px;flex:1;background:var(--line)}
-  h1{font-family:var(--display);font-weight:400;font-size:clamp(38px,7vw,84px);
-    line-height:.99;letter-spacing:-.025em;margin:0 0 24px;max-width:17ch}
-  h1 em{font-style:italic;color:var(--prune)}
-  .lead{font-size:clamp(18px,2.1vw,22px);line-height:1.5;max-width:46ch;color:var(--ink-soft);margin:0 0 30px}
-  .lead strong{color:var(--ink);font-weight:600}
-  .facts{display:flex;flex-wrap:wrap;gap:10px 28px;padding-top:20px;border-top:1px solid var(--line);color:var(--ink-soft)}
+  /* ---------- hero photo ---------- */
+  .hero{position:relative;overflow:hidden;background:var(--night);color:var(--paper)}
+  .hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+    object-position:52% 58%;opacity:.7;filter:saturate(.92)}
+  .hero::after{content:"";position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(29,18,22,.78) 0%,rgba(29,18,22,.5) 28%,rgba(29,18,22,.8) 62%,rgba(29,18,22,.98) 96%)}
+  .hero-in{position:relative;z-index:2;min-height:clamp(540px,86vh,800px);
+    display:flex;flex-direction:column;justify-content:flex-end;
+    padding-top:clamp(80px,14vw,150px);padding-bottom:clamp(40px,6vw,64px)}
+  .kicker{display:flex;align-items:center;gap:12px;color:var(--blush);margin-bottom:22px}
+  .kicker::after{content:"";height:1px;flex:1;background:rgba(231,207,201,.3)}
+  h1{font-family:var(--display);font-weight:300;font-size:clamp(40px,7.2vw,88px);
+    line-height:.96;letter-spacing:-.03em;margin:0 0 22px;max-width:16ch;text-wrap:balance}
+  h1 em{font-style:italic;color:var(--blush)}
+  .lead{font-size:clamp(17px,2vw,21px);line-height:1.55;max-width:44ch;color:rgba(247,242,236,.9);margin:0 0 38px}
+  .lead strong{color:#fff;font-weight:600}
+  .facts{display:flex;flex-wrap:wrap;gap:10px 26px;padding-top:18px;
+    border-top:1px solid rgba(231,207,201,.25);color:rgba(247,242,236,.72)}
   .facts span{display:flex;gap:8px;align-items:baseline}
-  .facts i{font-style:normal;color:var(--prune)}
+  .facts i{font-style:normal;color:var(--brass)}
+  .credit{position:absolute;right:var(--pad);bottom:14px;z-index:3;font-family:var(--mono);
+    font-size:9px;letter-spacing:.1em;color:rgba(247,242,236,.45);text-transform:uppercase}
+  @media(max-width:700px){.credit{display:none}}
 
-  /* ---------- le test 50 ms ---------- */
-  .fifty{background:var(--paper-2);padding:clamp(40px,7vw,76px) 0}
-  .fifty h2{font-family:var(--display);font-weight:400;font-size:clamp(28px,4vw,44px);
-    line-height:1.06;letter-spacing:-.02em;margin:0 0 14px;max-width:24ch}
-  .fifty p.sub{max-width:54ch;color:var(--ink-soft);margin:0 0 36px}
-  .phones{display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,4vw,56px);align-items:start}
+  /* ---------- bande photos ---------- */
+  .strip{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;background:var(--night);
+    padding:2px 0 0}
+  .strip img{width:100%;height:clamp(150px,17vw,230px);object-fit:cover;
+    filter:saturate(1.02) contrast(1.02)}
   @media(max-width:820px){
-    .phones{grid-template-columns:1fr;gap:30px}
-    .phone{max-width:290px;margin:0 auto}
-    .phone-label{max-width:290px;margin-left:auto;margin-right:auto}
+    .strip{grid-template-columns:repeat(3,1fr);gap:2px}
+    .strip img{height:clamp(110px,30vw,150px)}
   }
-  .phone-label{display:flex;justify-content:space-between;align-items:baseline;
-    border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:14px;color:var(--ink-soft)}
-  .phone{border:1px solid var(--line);border-radius:22px;padding:10px;background:#fff;
-    box-shadow:0 18px 44px -28px rgba(37,21,25,.4)}
-  .screen{border-radius:14px;overflow:hidden;aspect-ratio:9/15.4;position:relative;
-    display:flex;flex-direction:column}
-  .before .screen{background:#fff}
-  .before .bar{padding:9px 12px;font-family:var(--display);font-size:11px;color:#251519;
-    border-bottom:1px solid #eee}
-  .before .pink{flex:1;background:linear-gradient(160deg,#e9c6c3,#f0d6d2 55%,#e3b9b7);
-    color:#fff;padding:20px 16px;display:flex;flex-direction:column;justify-content:center;gap:10px}
-  .before .pink h3{font-family:var(--display);font-style:italic;font-weight:400;
-    font-size:26px;line-height:1.02;margin:0;white-space:nowrap;overflow:hidden;text-overflow:clip}
-  .before .pink .slogan{font-family:var(--display);font-size:12px;opacity:.95}
-  .before .pink p{font-family:var(--display);font-size:9.5px;line-height:1.45;margin:6px 0 0;
-    opacity:.95;max-height:88px;overflow:hidden}
-  .before .foot{font-family:var(--body);font-size:8px;letter-spacing:.04em;color:#9b8b90;
-    padding:8px 12px;border-top:1px solid #eee}
-  .tag{position:absolute;font-family:var(--mono);font-size:9px;letter-spacing:.12em;
-    text-transform:uppercase;padding:4px 8px;border-radius:3px;background:var(--ink);color:var(--paper)}
-  .tag.tr{top:12px;right:12px}
-  .after .screen{background:#1d1216;color:#f7f2ec}
-  .after .ph{position:absolute;inset:0;background:
-      radial-gradient(120% 90% at 70% 10%,rgba(231,207,201,.42),transparent 60%),
-      radial-gradient(90% 70% at 20% 90%,rgba(123,63,80,.55),transparent 65%),
-      #1d1216}
-  .after .grain{position:absolute;inset:0;opacity:.5;
-    background-image:radial-gradient(rgba(255,255,255,.16) 1px,transparent 1px);
-    background-size:5px 5px}
-  .after .screen-in{position:relative;z-index:2;padding:18px 16px;display:flex;
-    flex-direction:column;height:100%}
-  .after .mini-nav{display:flex;justify-content:space-between;font-family:var(--mono);
-    font-size:9px;letter-spacing:.14em;text-transform:uppercase;opacity:.8}
-  .after h3{font-family:var(--display);font-weight:400;font-size:clamp(30px,3.4vw,40px);line-height:.95;
-    letter-spacing:-.02em;margin:auto 0 10px}
-  .after h3 em{font-style:italic;color:var(--blush)}
-  .after .mini-lead{font-size:12px;line-height:1.5;opacity:.9;margin:0 0 16px;max-width:26ch}
-  .after .mini-btns{display:flex;flex-direction:column;gap:8px}
-  .after .mini-btn{background:var(--blush);color:#2a1218;font-family:var(--mono);
-    font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:13px 10px;
-    border-radius:2px;text-align:center}
-  .after .mini-btn.ghost{background:transparent;color:var(--blush);border:1px solid rgba(231,207,201,.5)}
-  .after .mini-foot{font-family:var(--mono);font-size:9px;letter-spacing:.06em;opacity:.72;
-    margin-top:12px;line-height:1.5}
+  .strip-cap{background:var(--night);color:rgba(247,242,236,.5);padding:12px var(--pad) 14px;
+    display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .strip-cap span:last-child{text-transform:none;letter-spacing:.04em;font-family:var(--body);font-size:12px}
 
-  /* ---------- trois problèmes ---------- */
-  .issues{padding-top:clamp(48px,8vw,92px);padding-bottom:clamp(8px,2vw,20px)}
-  .issues h2{font-family:var(--display);font-weight:400;font-size:clamp(28px,4vw,44px);
-    line-height:1.06;letter-spacing:-.02em;margin:0 0 12px;max-width:26ch}
-  .issues .intro{max-width:56ch;color:var(--ink-soft);margin:0 0 40px}
-  .issues-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(20px,3.4vw,40px)}
-  @media(max-width:900px){.issues-grid{grid-template-columns:1fr}}
-  .issue{border-top:2px solid var(--ink);padding-top:16px}
-  .issue .n{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--prune)}
-  .issue h3{font-family:var(--display);font-weight:400;font-size:clamp(21px,2.4vw,26px);
-    line-height:1.12;margin:8px 0 10px;letter-spacing:-.01em}
-  .issue p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft);max-width:42ch}
-  .issue p q, .issue p em{font-style:normal;font-family:var(--mono);font-size:13px;color:var(--prune-deep)}
-  .issue .fix{color:var(--prune-deep);border-left:2px solid var(--prune);padding-left:12px;font-size:15px}
-  .issue .fix b{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;
-    display:block;color:var(--prune);margin-bottom:2px}
+  /* ---------- constat ---------- */
+  .constat{padding-top:clamp(52px,8vw,96px);padding-bottom:clamp(40px,6vw,72px)}
+  .constat-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(28px,5vw,64px);align-items:start}
+  @media(max-width:900px){.constat-grid{grid-template-columns:1fr;gap:34px}}
+  .constat h2{font-family:var(--display);font-weight:400;font-size:clamp(29px,4.2vw,46px);
+    line-height:1.04;letter-spacing:-.02em;margin:0 0 14px;max-width:22ch}
+  .constat .intro{max-width:52ch;color:var(--ink-soft);margin:0 0 34px}
+  .issue{border-top:1px solid var(--line);padding:18px 0 20px;display:grid;
+    grid-template-columns:44px 1fr;gap:0 12px}
+  .issue:first-of-type{border-top:2px solid var(--ink)}
+  .issue .n{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--brass);padding-top:4px}
+  .issue h3{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.3vw,25px);
+    line-height:1.12;margin:0 0 8px;letter-spacing:-.01em}
+  .issue p{margin:0;font-size:15.5px;color:var(--ink-soft);max-width:46ch}
+  .issue p em{font-style:normal;font-family:var(--mono);font-size:13px;color:var(--prune-deep)}
+  .issue .fix{margin-top:9px;color:var(--prune-deep);font-size:14.5px}
+  .issue .fix b{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--brass);margin-right:6px}
+  .shots{display:grid;gap:18px;position:sticky;top:86px}
+  @media(max-width:900px){.shots{position:static;grid-template-columns:1fr;gap:16px}}
+  .shot{background:#fff;border:1px solid var(--line);border-radius:18px;padding:8px;
+    box-shadow:0 22px 50px -34px rgba(37,21,25,.55)}
+  .shot img{border-radius:11px;width:100%}
+  .shot .cap{display:flex;justify-content:space-between;gap:8px;padding:9px 4px 2px;
+    font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+  .shot .cap b{color:var(--prune);font-weight:400}
+  @media(max-width:900px){.shot:nth-child(2){display:none}
+    .shot .cap{font-size:10px}}
 
-  /* ---------- aussi ---------- */
-  .also{max-width:78ch;margin-top:clamp(30px,4vw,44px);font-size:14.5px;color:var(--ink-soft)}
-  .also b{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;
-    color:var(--prune);display:block;margin-bottom:6px}
+  /* ---------- galerie ---------- */
+  .galerie{background:var(--night);color:var(--paper);padding-top:clamp(56px,8vw,96px);
+    padding-bottom:clamp(48px,7vw,88px)}
+  .galerie h2{font-family:var(--display);font-weight:400;font-size:clamp(29px,4.2vw,46px);
+    line-height:1.04;letter-spacing:-.02em;margin:0 0 12px;max-width:24ch}
+  .galerie h2 em{font-style:italic;color:var(--blush)}
+  .galerie .intro{max-width:54ch;color:rgba(247,242,236,.72);margin:0 0 34px}
+  .galerie .intro b{color:var(--blush);font-weight:600}
+  .gal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  @media(max-width:1000px){.gal-grid{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:700px){.gal-grid{grid-template-columns:repeat(2,1fr);gap:6px}}
+  .gal-grid img{width:100%;height:100%;aspect-ratio:4/5;object-fit:cover;border-radius:2px}
+  .gal-more{border:1px dashed rgba(231,207,201,.32);aspect-ratio:4/5;display:flex;
+    flex-direction:column;justify-content:flex-end;gap:6px;padding:16px;border-radius:2px;
+    font-size:13px;line-height:1.45;color:rgba(247,242,236,.72)}
+  .gal-more b{font-family:var(--display);font-weight:400;font-size:19px;color:var(--blush);
+    line-height:1.15;display:block}
+  .gal-more span{font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:rgba(231,207,201,.55)}
+  .gal-note{margin-top:26px;padding-top:18px;border-top:1px solid rgba(231,207,201,.2);
+    display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;color:rgba(247,242,236,.6);font-size:14px}
+  .gal-note b{color:var(--blush);font-weight:500}
 
-  /* ---------- relevé ---------- */
-  .proof{margin-top:clamp(28px,4vw,40px);border-top:1px solid var(--line);border-bottom:1px solid var(--line);
-    padding:18px 0;display:flex;flex-wrap:wrap;gap:12px 40px;align-items:baseline}
-  .proof span{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
-  .proof b{font-family:var(--display);font-size:20px;color:var(--prune);margin-right:6px}
-  .proof .src{margin-left:auto;font-size:10px;opacity:.75;text-transform:none;letter-spacing:.04em;font-family:var(--body)}
-  @media(max-width:720px){.proof .src{margin-left:0}}
+  /* ---------- direction ---------- */
+  .direction{padding-top:clamp(52px,8vw,92px);padding-bottom:clamp(44px,7vw,80px)}
+  .dir-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(28px,5vw,60px);align-items:center}
+  @media(max-width:900px){.dir-grid{grid-template-columns:1fr;gap:34px}}
+  .direction h2{font-family:var(--display);font-weight:400;font-size:clamp(29px,4.2vw,46px);
+    line-height:1.04;letter-spacing:-.02em;margin:0 0 16px;max-width:20ch}
+  .direction p{max-width:46ch;color:var(--ink-soft);margin:0 0 22px}
+  .principles{list-style:none;margin:0;padding:0}
+  .principles li{border-top:1px solid var(--line);padding:12px 0;display:grid;
+    grid-template-columns:20px 1fr;gap:10px;font-size:15.5px}
+  .principles li span{font-family:var(--mono);font-size:10px;color:var(--brass);padding-top:4px}
+  .mock{display:flex;justify-content:center}
+  .phone{position:relative;width:min(100%,320px);border-radius:26px;background:#fff;padding:9px;
+    box-shadow:0 40px 80px -46px rgba(37,21,25,.7)}
+  .screen{border-radius:18px;overflow:hidden;position:relative;aspect-ratio:9/16;
+    background:var(--night);color:var(--paper);display:flex;flex-direction:column}
+  .screen>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.9}
+  .screen::after{content:"";position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(29,18,22,.35),rgba(29,18,22,.15) 40%,rgba(29,18,22,.96) 78%)}
+  .screen-in{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;
+    padding:16px 15px 15px}
+  .mini-nav{display:flex;justify-content:space-between;font-family:var(--mono);font-size:8px;
+    letter-spacing:.14em;text-transform:uppercase;color:rgba(247,242,236,.85)}
+  .screen h3{font-family:var(--display);font-weight:300;font-size:clamp(27px,7.4vw,34px);line-height:.98;
+    letter-spacing:-.02em;margin:auto 0 8px}
+  .screen h3 em{font-style:italic;color:var(--blush)}
+  .mini-lead{font-size:12.5px;line-height:1.45;color:rgba(247,242,236,.86);margin:0 0 14px}
+  .mini-btn{background:var(--blush);color:#2a1218;font-family:var(--mono);font-size:10px;
+    letter-spacing:.1em;text-transform:uppercase;padding:12px;border-radius:3px;text-align:center}
+  .mini-btns{display:grid;gap:7px}
+  .mini-btn.ghost{background:transparent;border:1px solid rgba(231,207,201,.45);color:var(--blush)}
+  .mini-foot{font-family:var(--mono);font-size:9.5px;letter-spacing:.02em;color:rgba(247,242,236,.95);
+    margin-top:10px;line-height:1.65;position:relative;z-index:3;
+    text-shadow:0 1px 3px rgba(20,10,14,.9)}
 
   /* ---------- offre ---------- */
-  .offer{padding-top:clamp(44px,7vw,80px);padding-bottom:clamp(44px,7vw,80px)}
-  .offer h2{font-family:var(--display);font-weight:400;font-size:clamp(28px,4vw,44px);
-    line-height:1.06;letter-spacing:-.02em;margin:0 0 12px;max-width:24ch}
-  .offer .intro{max-width:56ch;color:var(--ink-soft);margin:0 0 36px}
+  .offer{background:var(--paper-2);padding-top:clamp(52px,8vw,88px);padding-bottom:clamp(52px,8vw,88px)}
+  .offer h2{font-family:var(--display);font-weight:400;font-size:clamp(29px,4.2vw,46px);
+    line-height:1.04;letter-spacing:-.02em;margin:0 0 12px;max-width:22ch}
+  .offer .intro{max-width:54ch;color:var(--ink-soft);margin:0 0 36px}
   .offer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(20px,3vw,40px)}
   @media(max-width:860px){.offer-grid{grid-template-columns:1fr}}
   .scope{border-top:2px solid var(--prune);padding-top:14px}
-  .scope .lab{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--prune)}
+  .scope .lab{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--brass)}
   .scope h3{font-family:var(--display);font-weight:400;font-size:clamp(21px,2.4vw,26px);
     margin:6px 0 10px;letter-spacing:-.01em}
   .scope ul{list-style:none;margin:0;padding:0;font-size:15px;color:var(--ink-soft)}
   .scope li{padding:8px 0 8px 16px;border-top:1px solid var(--line);position:relative;line-height:1.4}
   .scope li::before{content:"";position:absolute;left:0;top:16px;width:6px;height:1px;background:var(--prune)}
-  .offer-note{margin-top:28px;font-size:14px;color:var(--ink-soft);max-width:78ch}
+  .offer-note{margin-top:36px;font-size:14px;color:var(--ink-soft);max-width:78ch}
   .offer-note strong{color:var(--prune-deep)}
-  footer{padding:26px 0 40px;border-top:1px solid var(--line);color:var(--ink-soft);
+  footer{padding:26px 0 44px;border-top:1px solid var(--line);color:var(--ink-soft);
     display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:13px}
 </style>
 </head>
@@ -176,60 +202,146 @@
 </header>
 
 <main>
-  <section class="hero wrap">
-    <p class="kicker mono">Diagnostic et refonte</p>
-    <h1>À la Prunelle de mes ongle'S, <em>ce qu'on voit avant de lire</em></h1>
-    <p class="lead">
-      Une cliente tape votre nom dans Google. Elle tombe sur un aplat rose, un titre coupé,
-      et n'apprend <strong>ni votre adresse, ni votre numéro, ni vos horaires</strong>.
-      Elle repart chez l'institut d'à côté.
-    </p>
-    <div class="facts mono">
-      <span><i>·</i> Institut à Boissy-l'Aillerie</span>
-      <span><i>·</i> Site Wix de 2020</span>
-      <span><i>·</i> Relevé du 5 novembre 2026</span>
+  <section class="hero">
+    <img class="hero-img" src="/propositions/prunelle/img/gal8.webp" alt="Mains manucurées, vernis sombre marbré" fetchpriority="high">
+    <div class="wrap hero-in">
+      <p class="kicker mono">Diagnostic et refonte</p>
+      <h1>Un institut qui se juge <em>sur photo</em></h1>
+      <p class="lead">
+        Votre travail tient la route. Votre site, non : sur mobile le titre se coupe,
+        l'accueil n'affiche <strong>aucune photo</strong> et votre adresse n'apparaît nulle part.
+      </p>
+      <div class="facts mono">
+        <span><i>·</i> Boissy-l'Aillerie</span>
+        <span><i>·</i> 8 photos en galerie</span>
+        <span><i>·</i> Relevé du 5 novembre 2026</span>
+      </div>
+    </div>
+    <span class="credit">Photo : extraite de votre galerie</span>
+  </section>
+
+  <div class="strip" aria-label="Photos de la galerie Prunelle">
+    <img src="/propositions/prunelle/img/gal4.webp" alt="Ongles rouges, motifs de fêtes" loading="lazy">
+    <img src="/propositions/prunelle/img/gal2.webp" alt="Ongles bleu roi" loading="lazy">
+    <img src="/propositions/prunelle/img/gal6.webp" alt="Manucure rouge et blanc" loading="lazy">
+    <img src="/propositions/prunelle/img/gal3.webp" alt="Macro, ongles bleu électrique" loading="lazy">
+    <img src="/propositions/prunelle/img/gal1.webp" alt="Manucure nude et brune" loading="lazy">
+    <img src="/propositions/prunelle/img/gal5.webp" alt="Ongles bordeaux" loading="lazy">
+  </div>
+  <div class="strip-cap mono">
+    <span>Vos photos, votre meilleur argument</span>
+    <span>Elles existent déjà. Elles sont simplement rangées dans une page nommée /page-vierge-1.</span>
+  </div>
+
+  <section class="constat wrap">
+    <div class="constat-grid">
+      <div>
+        <h2>Ce qu'une cliente comprend en arrivant</h2>
+        <p class="intro">
+          J'ai ouvert votre site sur un téléphone, comme le font la plupart de vos clientes.
+          Trois choses manquent, et ce sont celles qui déclenchent l'appel.
+        </p>
+
+        <article class="issue">
+          <span class="n">01</span>
+          <div>
+            <h3>On ne sait pas où vous êtes</h3>
+            <p>L'adresse existe, mais seulement dans le code destiné à Google : <em>Rue Pasteur, 95650 Boissy-l'Aillerie</em>.
+              Sur la page, aucun numéro cliquable, aucun horaire, aucune carte. Le menu n'a même pas d'entrée « Contact ».</p>
+            <p class="fix"><b>Le correctif</b> Adresse, horaires et téléphone au premier écran, une carte et un itinéraire en un clic.</p>
+          </div>
+        </article>
+
+        <article class="issue">
+          <span class="n">02</span>
+          <div>
+            <h3>Sur mobile, votre site se coupe</h3>
+            <p>Le titre déborde à gauche et à droite, le paragraphe de présentation est tronqué en plein mot.
+              Et l'accueil, c'est un aplat rose : <em>pas une seule photo de votre travail</em>.</p>
+            <p class="fix"><b>Le correctif</b> Une page pensée d'abord pour le pouce, avec une vraie photo en ouverture.</p>
+          </div>
+        </article>
+
+        <article class="issue">
+          <span class="n">03</span>
+          <div>
+            <h3>Vos photos sont enterrées</h3>
+            <p>Huit photos, visibles seulement dans « Galerie photos », adresse <em>/page-vierge-1</em>,
+              affichées en 309 pixels, sans légende ni catégorie. Une cliente doit chercher pour vous juger.</p>
+            <p class="fix"><b>Le correctif</b> Une galerie pleine largeur, par catégories, avec vos avant / après et un vrai zoom.</p>
+          </div>
+        </article>
+      </div>
+
+      <div class="shots">
+        <figure class="shot">
+          <img src="/propositions/prunelle/img/avant-accueil.webp" alt="Capture réelle de l'accueil sur mobile" loading="lazy">
+          <figcaption class="cap"><span>Accueil, iPhone</span><b>capture réelle</b></figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="/propositions/prunelle/img/avant-resa.webp" alt="Capture réelle de la page réservation" loading="lazy">
+          <figcaption class="cap"><span>Réservation</span><b>existe déjà</b></figcaption>
+        </figure>
+      </div>
     </div>
   </section>
 
-  <section class="fifty">
+  <section class="galerie">
     <div class="wrap">
-      <h2>Le test des 50 millisecondes</h2>
-      <p class="sub">
-        À gauche, votre page d'accueil aujourd'hui. À droite, ce qu'une cliente doit comprendre
-        dans le même temps : le lieu, les horaires, un bouton. La différence n'est pas une question de goût.
+      <h2>Huit photos. <em>309 pixels.</em></h2>
+      <p class="intro">
+        C'est tout ce que votre site montre de six ans de travail. <b>Ces images sont bonnes</b> :
+        elles sont justes trop petites, sans ordre et sans contexte. Une galerie bien construite
+        les remet en grand, et les rend cliquables depuis l'accueil.
       </p>
-      <div class="phones">
-        <div class="before">
-          <div class="phone-label mono"><span>Aujourd'hui</span><span>reproduction du hero actuel</span></div>
-          <div class="phone">
-            <div class="screen">
-              <div class="bar">A la Prunelle de mes ongle'S</div>
-              <div class="pink">
-                <h3>A la Prun… ongle'S à…</h3>
-                <span class="slogan">Faites-vous dorloter</span>
-                <p>A la Prunelle de mes ongle'S est un institut de qualité et exclusivement féminin,
-                  Sandrine prothésiste ongulaire, esthéticienne diplômée, sera ravie de vous accueillir…</p>
+      <div class="gal-grid">
+        <img src="/propositions/prunelle/img/gal1.webp" alt="Manucure nude et brune" loading="lazy">
+        <img src="/propositions/prunelle/img/gal2.webp" alt="Ongles bleu roi sur table en bois" loading="lazy">
+        <img src="/propositions/prunelle/img/gal3.webp" alt="Macro ongles bleu électrique" loading="lazy">
+        <img src="/propositions/prunelle/img/gal4.webp" alt="Ongles rouges sur sac matelassé" loading="lazy">
+        <img src="/propositions/prunelle/img/gal5.webp" alt="Ongles bordeaux en extérieur" loading="lazy">
+        <img src="/propositions/prunelle/img/gal6.webp" alt="Manucure rouge et blanc" loading="lazy">
+
+        <img src="/propositions/prunelle/img/gal8.webp" alt="Ongles sombres marbrés" loading="lazy">
+        <article class="gal-more">
+          <span>La suite</span>
+          <b>Vos avant / après,<br>à ajouter ici</b>
+          <span>Sur 6 ans, c'est la preuve qui manque</span>
+        </article>
+      </div>
+      <p class="gal-note">
+        <span><b>Sept de vos huit photos</b>, telles quelles.</span>
+        <span>Dans la refonte : mêmes photos, recadrées et légendées, plus les avant / après à ajouter.</span>
+      </p>
+    </div>
+  </section>
+
+  <section class="direction wrap">
+    <div class="dir-grid">
+      <div>
+        <h2>La direction : la photo d'abord</h2>
+        <p>
+          On garde votre univers, prune et poudré, et on met le travail au premier plan.
+          Le reste tient en trois règles.
+        </p>
+        <ul class="principles">
+          <li><span>01</span><div>Une photo pleine largeur en ouverture, pas un aplat de couleur.</div></li>
+          <li><span>02</span><div>Lieu, horaires et « Réserver » visibles sans faire défiler.</div></li>
+          <li><span>03</span><div>Un seul bouton d'action, répété, branché sur votre réservation actuelle.</div></li>
+        </ul>
+      </div>
+      <div class="mock">
+        <div class="phone">
+          <div class="screen">
+            <img src="/propositions/prunelle/img/gal4.webp" alt="Aperçu de la maquette avec une photo de manucure" loading="lazy">
+            <div class="screen-in">
+              <div class="mini-nav"><span>Boissy-l'Aillerie</span><span>Mar–Sam</span></div>
+              <h3>La main, <em>le geste</em>, le lieu.</h3>
+              <p class="mini-lead">Onglerie et esthétique, sur rendez-vous, à deux pas de chez vous.</p>
+              <div class="mini-btns">
+                <span class="mini-btn">Réserver un créneau</span>
               </div>
-              <div class="foot">Règlement accepté CB / CHEQUE / ESPECE</div>
-              <span class="tag tr">ni adresse, ni téléphone</span>
-            </div>
-          </div>
-        </div>
-        <div class="after">
-          <div class="phone-label mono"><span>Direction proposée</span><span>maquette</span></div>
-          <div class="phone">
-            <div class="screen">
-              <div class="ph"></div><div class="grain"></div>
-              <div class="screen-in">
-                <div class="mini-nav"><span>Boissy-l'Aillerie</span><span>Mar–Sam</span></div>
-                <h3>La main, <em>le geste</em>, le lieu.</h3>
-                <p class="mini-lead">Onglerie et esthétique, sur rendez-vous à Boissy-l'Aillerie.</p>
-                <div class="mini-btns">
-                  <span class="mini-btn">Réserver un créneau</span>
-                  <span class="mini-btn ghost">Voir les prestations</span>
-                </div>
-                <p class="mini-foot">12 rue de la République · 01 23 45 67 89<br>Réservation en ligne, annulation 24 h avant</p>
-              </div>
+              <p class="mini-foot">Rue Pasteur, 95650 Boissy-l'Aillerie<br>Ouvert du mardi au samedi</p>
             </div>
           </div>
         </div>
@@ -237,107 +349,54 @@
     </div>
   </section>
 
-  <section class="issues wrap">
-    <h2>Trois choses qui coûtent des clientes</h2>
-    <p class="intro">
-      Le reste est secondaire. Ces trois points se règlent dans la même refonte, et sont vérifiables
-      sur votre site en ligne aujourd'hui.
-    </p>
-
-    <div class="issues-grid">
-      <article class="issue">
-        <span class="n">01</span>
-        <h3>On ne sait pas où vous êtes</h3>
-        <p>Sur les quatre pages : aucune adresse, aucun numéro cliquable, aucun horaire.
-          Le titre finit par « | France ». Votre fiche Google et votre site ne se parlent pas.</p>
-        <p class="fix"><b>Le correctif</b> Adresse, horaires et téléphone dès le premier écran, une carte, et une fiche Google alignée au mot près.</p>
-      </article>
-
-      <article class="issue">
-        <span class="n">02</span>
-        <h3>La galerie est vide depuis 2020</h3>
-        <p>Le lien « Galerie photos » mène à <em>/page-vierge-1</em> : une page blanche, en ligne
-          depuis six ans. Le seul endroit où une cliente juge votre travail ne montre aucun ongle.</p>
-        <p class="fix"><b>Le correctif</b> Douze à vingt photos réelles : poses, remplissages, avant et après, macro, plus deux vues du lieu.</p>
-      </article>
-
-      <article class="issue">
-        <span class="n">03</span>
-        <h3>La réservation existe, mais elle est cachée</h3>
-        <p>Les boutons « Réserver » sont dans les pages « Nos prestations », et le menu d'onglerie
-          pointe vers <em>/book-online</em>. Personne ne devine qu'on peut réserver là.</p>
-        <p class="fix"><b>Le correctif</b> Un bouton « Réserver » fixe sur chaque écran, branché sur votre outil actuel : aucune nouvelle plateforme à apprendre.</p>
-      </article>
+  <section class="offer">
+    <div class="wrap">
+      <h2>La refonte, concrètement</h2>
+      <p class="intro">
+        Un seul interlocuteur, un périmètre arrêté avant de commencer. Vous gardez vos contenus,
+        votre nom de domaine et vos accès.
+      </p>
+      <div class="offer-grid">
+        <article class="scope">
+          <span class="lab">01</span>
+          <h3>Le site</h3>
+          <ul>
+            <li>Accueil, esthétique, onglerie, galerie, cartes-cadeaux, contact</li>
+            <li>Design sur mesure, mobile d'abord, vos photos mises en scène</li>
+            <li>Textes et tarifs repris, relus, écrits une seule fois</li>
+          </ul>
+        </article>
+        <article class="scope">
+          <span class="lab">02</span>
+          <h3>Le rendez-vous</h3>
+          <ul>
+            <li>Bouton Réserver sur chaque écran, branché sur Wix Bookings</li>
+            <li>Téléphone, adresse et horaires cliquables</li>
+            <li>Rappel de réservation en fin de page</li>
+          </ul>
+        </article>
+        <article class="scope">
+          <span class="lab">03</span>
+          <h3>La visibilité</h3>
+          <ul>
+            <li>Titres et pages pensés pour « ongles Boissy-l'Aillerie »</li>
+            <li>Fiche Google alignée sur le site</li>
+            <li>Mise en ligne et une heure de prise en main</li>
+          </ul>
+        </article>
+      </div>
+      <p class="offer-note">
+        <strong>En option :</strong> une demi-journée de shooting sur place, mains, gestes et lieu,
+        avec des formats prêts pour Instagram et Google. Livraison en 3 à 5 semaines après validation
+        de la maquette. Et pour être clair : personne ne promet la première place sur Google.
+      </p>
     </div>
-
-    <p class="also">
-      <b>Corrigé au passage</b>
-      Titre de l'onglet avec un cheval 🐴 et « Ethéticienne » mal orthographié, tarifs écrits deux fois
-      (« 8,50 euros » puis « 8,50 € »), virgules et points mélangés d'une prestation à l'autre,
-      « CHEQUE / ESPECE » sans accents, mention « ©2020 » jamais mise à jour.
-    </p>
-
-    <div class="proof">
-      <span><b>0</b> adresse et 0 téléphone</span>
-      <span><b>1</b> page blanche en ligne</span>
-      <span><b>147</b> requêtes pour un seul écran</span>
-      <span class="src">Mesuré le 5 novembre 2026 sur alaprunelledemesongles.com</span>
-    </div>
-  </section>
-
-  <section class="offer wrap">
-    <h2>La refonte, concrètement</h2>
-    <p class="intro">
-      Un seul interlocuteur, un périmètre arrêté avant de commencer, et vous gardez vos contenus,
-      votre nom de domaine et vos accès.
-    </p>
-
-    <div class="offer-grid">
-      <article class="scope">
-        <span class="lab">01</span>
-        <h3>Le site</h3>
-        <ul>
-          <li>Accueil, esthétique, onglerie, galerie, cartes-cadeaux, contact</li>
-          <li>Design sur mesure, mobile d'abord, photos de votre travail</li>
-          <li>Textes et tarifs repris, relus, écrits une seule fois</li>
-        </ul>
-      </article>
-
-      <article class="scope">
-        <span class="lab">02</span>
-        <h3>Le rendez-vous</h3>
-        <ul>
-          <li>Bouton Réserver sur chaque écran, branché sur Wix Bookings</li>
-          <li>Téléphone, adresse et horaires cliquables</li>
-          <li>Rappel de réservation en fin de page</li>
-        </ul>
-      </article>
-
-      <article class="scope">
-        <span class="lab">03</span>
-        <h3>La visibilité</h3>
-        <ul>
-          <li>Titres et pages pensés pour « ongles Boissy-l'Aillerie »</li>
-          <li>Fiche Google alignée sur le site</li>
-          <li>Mise en ligne et une heure de prise en main</li>
-        </ul>
-      </article>
-    </div>
-
-    <p class="offer-note">
-      <strong>En option :</strong> une demi-journée de shooting sur place (mains, gestes, lieu),
-      avec des formats prêts pour Instagram et Google. Livraison en 3 à 5 semaines à partir
-      de la validation de la maquette. Et pour être clair : je ne promets pas la première place
-      sur Google, personne ne peut.
-    </p>
   </section>
 </main>
 
 <footer class="wrap">
-  <span>Sujee Design, votre marque de A à Z.<br>
-    <small style="opacity:.72">Consultation mesurée de façon anonyme · données conservées 12 mois</small>
-  </span>
-  <span class="mono">Document de travail · ne pas diffuser</span>
+  <span>Sujee Design, votre marque de A à Z.</span>
+  <span class="mono">Proposition · confidentielle</span>
 </footer>
 
 <script src="/propositions/_cta/cta.js" data-client="À la Prunelle de mes ongle'S" defer></script>
