@@ -231,6 +231,10 @@ def turn(
         if final is not None:
             answer = _clean(final.text) or pending
 
+    if not answer.strip():
+        # Ni chemin serveur ni modèle : on ne laisse jamais le visiteur sans réponse.
+        answer = _fallback_answer(store.get_session(conn, session_id), message)
+
     if answer.strip() and toolbox.final_answer:
         # Phrase déjà rédigée par le moteur : on la diffuse telle quelle.
         for chunk in _chunks(answer):
@@ -260,6 +264,15 @@ def turn(
                 # Le modèle redemande ce qu'il sait déjà (ex. « quel type de projet »
                 # après « identité de marque ») : on reprend la question utile.
                 answer = _question_for(fields)
+            if (
+                row_now
+                and str(row_now["step"] or "") == "moment"
+                and not toolbox.booking
+                and not re.search(r"matin|apr[eè]s-midi|soir", answer, re.IGNORECASE)
+            ):
+                # À l'étape demi-journée, une phrase qui ne propose pas matin/après-midi
+                # laisse le visiteur bloqué : on repose la question utile.
+                answer = "Vous préférez le matin ou l'après-midi ?"
             if not slots_shown:
                 answer = _qualification_question(toolbox, row_now, answer)
             answer = _one_question(answer)
@@ -314,6 +327,35 @@ def _question_for(fields: dict[str, str]) -> str:
         if first == "context":
             return "Pour quelle activité ou quel secteur est-ce ?"
     return "Pouvez-vous préciser votre besoin en une phrase ?"
+
+
+def _fallback_answer(row: Any, message: str) -> str:
+    """Phrase de repli quand ni le serveur ni le modèle n'ont produit de texte.
+
+    Le visiteur ne doit jamais recevoir une bulle vide.
+    """
+    step = str(row["step"] or "") if row is not None else ""
+    fields = store.session_fields(row) if row is not None else {}
+    if step == "moment":
+        return "Vous préférez le matin ou l'après-midi ?"
+    if step == "creneaux":
+        chosen = store.session_chosen(row) if row is not None else None
+        if not chosen:
+            moment = slots.normalize_moment(fields.get("moment", ""))
+            if moment:
+                return f"Voici les créneaux {slots.MOMENTS[moment]}. Lequel vous convient ?"
+            return "Choisissez l'un des créneaux affichés. Lequel vous convient ?"
+        name, email = store.session_contact(row)
+        if not name:
+            return "Quel est votre prénom et nom ?"
+        if not email:
+            return "Quelle est votre adresse email, pour l'invitation ?"
+        return "Quel est votre numéro de téléphone, pour l'appel avec Sujee ?"
+    if step == "qualification":
+        question = _question_for(fields)
+        if question:
+            return question
+    return "Je n'ai pas bien saisi votre message. Pouvez-vous le reformuler en une phrase ?"
 
 
 def _chunks(text: str, size: int = 24) -> list[str]:

@@ -326,6 +326,22 @@ def test_creneau_choisi_est_transmis_au_modele(conn):
     assert "book_meeting" in hint[0]["content"]
 
 
+def test_message_hors_sujet_recoit_toujours_une_phrase(conn):
+    """Un « auto » lache pendant l'etape moment ne doit pas produire une bulle vide."""
+    google = FakeGoogle(available=[slots.candidates()[0]])
+    session_id = engine.prepare_session(conn)
+    store.merge_fields(
+        conn,
+        session_id,
+        {"project_type": "Site web", "branding": "Vaasam", "context": "vente de piece auto"},
+    )
+    store.touch(conn, session_id, step="moment")
+    events = _collect(conn, session_id, "auto", FakeLLM([[]]), google)
+    texte = "".join(e["text"] for e in events if e.get("type") == "delta").strip()
+    assert texte
+    assert "matin" in texte.lower()
+
+
 def test_premiere_reponse_du_visiteur_n_est_pas_jetee(conn):
     """Cas reel : « Site web ou e-commerce » doit etre enregistre, pas rejoue en question."""
     google = FakeGoogle(available=[slots.candidates()[0]])
