@@ -147,37 +147,50 @@
     io.observe(b);
   });
 
-  /* ----- 7. Parallaxe douce : visuels de hero et couvertures des réalisations ----- */
-  const par = [...document.querySelectorAll('.sv-hero__fig, .hero__still, .ab-hero__media, .sp-hero figure')];
+  /* ----- 7. Parallaxe douce : visuels de hero, réalisations, Instagram ----- */
+  /* Tout est relu à chaque frame : React peut monter ou remplacer les nœuds
+     après l'exécution de ce script (hydratation, streaming RSC), une NodeList
+     capturée trop tôt pointerait sur des éléments absents ou détachés. */
+  const PAR_SEL = '.sv-hero__fig, .hero__still, .ab-hero__media, .sp-hero figure';
   /* Les cartes réalisations ont leur photo en fond (overflow:hidden) : on
      translate l'image dans son cadre, avec un léger zoom pour éviter tout
-     bord blanc quand elle remonte. Amplitude plus discrète que le hero.
-     La liste est relue à chaque frame : React peut remplacer les <img>
-     après l'hydratation, une NodeList capturée trop tôt pointerait sur des
-     nœuds détachés. */
+     bord blanc quand elle remonte. */
   const CASE_SEL = '#travaux .case--photo .case__bg img';
-  const cases = () => document.querySelectorAll(CASE_SEL);
-  if (par.length || cases().length) {
-    let ticking = false;
-    const update = () => {
-      const vh = innerHeight;
-      par.forEach((el) => {
-        const r = el.getBoundingClientRect();
-        if (r.bottom < -200 || r.top > vh + 200) return;
-        const p = (r.top + r.height / 2 - vh / 2) / vh; // -1 → 1
-        el.style.transform = 'translate3d(0,' + (p * -24).toFixed(2) + 'px,0)';
-      });
-      cases().forEach((el) => {
-        const r = el.getBoundingClientRect();
-        if (r.bottom < -200 || r.top > vh + 200) return;
-        const p = (r.top + r.height / 2 - vh / 2) / vh;
-        el.style.transform = 'translate3d(0,' + (p * -46).toFixed(2) + 'px,0) scale(1.14)';
-      });
-      ticking = false;
-    };
-    addEventListener('scroll', () => {
-      if (!ticking) { ticking = true; requestAnimationFrame(update); }
-    }, { passive: true });
-    update();
-  }
+  /* Vignettes Instagram : même glissement, plus discret. On passe par la
+     propriété `translate` (indépendante de `transform`) pour ne pas écraser
+     le zoom au survol, qui reste géré en CSS. */
+  const IG_SEL = '.ig__grid .ig__media';
+
+  let ticking = false;
+  const update = () => {
+    const vh = innerHeight;
+    document.querySelectorAll(PAR_SEL).forEach((el) => {
+      const r = el.getBoundingClientRect();
+      if (r.bottom < -200 || r.top > vh + 200) return;
+      const p = (r.top + r.height / 2 - vh / 2) / vh; // -1 → 1
+      el.style.transform = 'translate3d(0,' + (p * -24).toFixed(2) + 'px,0)';
+    });
+    document.querySelectorAll(CASE_SEL).forEach((el) => {
+      const r = el.getBoundingClientRect();
+      if (r.bottom < -200 || r.top > vh + 200) return;
+      const p = (r.top + r.height / 2 - vh / 2) / vh;
+      el.style.transform = 'translate3d(0,' + (p * -46).toFixed(2) + 'px,0) scale(1.14)';
+    });
+    document.querySelectorAll(IG_SEL).forEach((el) => {
+      const r = el.getBoundingClientRect();
+      if (r.bottom < -200 || r.top > vh + 200) return;
+      const p = (r.top + r.height / 2 - vh / 2) / vh;
+      el.style.translate = '0 ' + (p * -18).toFixed(2) + 'px';
+    });
+    ticking = false;
+  };
+  const request = () => {
+    if (!ticking) { ticking = true; requestAnimationFrame(update); }
+  };
+  addEventListener('scroll', request, { passive: true });
+  addEventListener('resize', request, { passive: true });
+  addEventListener('load', request);
+  update();
+  /* Filet de sécurité si les sections arrivent après l'hydratation. */
+  [250, 800, 1600].forEach((ms) => setTimeout(request, ms));
 })();

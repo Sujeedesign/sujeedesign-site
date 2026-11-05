@@ -3685,12 +3685,15 @@ button:focus-visible {
   height: 100%;
   object-fit: cover;
   display: block;
+  /* léger zoom de base : laisse de la marge au glissement parallaxe */
+  transform: scale(1.1);
+  will-change: transform, translate;
   transition:
     transform 0.7s var(--ease),
     opacity 0.4s var(--ease);
 }
 .ig__tile:hover .ig__media {
-  transform: scale(1.04);
+  transform: scale(1.14);
 }
 .ig__veil {
   position: absolute;
