@@ -601,6 +601,15 @@ def _server_qualification_turn(toolbox: ToolBox, message: str) -> str:
         return ""
     fields = store.session_fields(row)
     asked = str(row["pending"] or "")
+    if not asked:
+        # Premier tour : la question d'accueil a été posée par le modèle sans
+        # étiquette `pending`. Sans ce filet, la réponse du visiteur était jetée
+        # et la même question reposée mot pour mot.
+        nxt = next((key for key in store.QUALIFICATION if not fields.get(key)), "")
+        value = _qualification_value(nxt, message) if nxt else ""
+        if value:
+            store.merge_fields(conn, session_id, {nxt: value})
+            fields = store.session_fields(store.get_session(conn, session_id))
     if asked and asked in store.QUALIFICATION and not fields.get(asked):
         value = _qualification_value(asked, message)
         if value:
@@ -643,10 +652,26 @@ def _server_qualification_turn(toolbox: ToolBox, message: str) -> str:
     return _question_for(fields)
 
 
+_GREETING = re.compile(
+    r"(?i)^(?:bonjour|bonsoir|salut|hello|coucou|hey|yo|bjr|slt|bonne\s+journee)\b[\s!.,;:-]*"
+)
+
+
+def _strip_greeting(text: str) -> str:
+    """Retire une salutation d'ouverture : « Bonjour, je veux un site » -> « je veux un site »."""
+    cleaned = str(text or "").strip()
+    for _ in range(3):
+        stripped = _GREETING.sub("", cleaned).strip()
+        if stripped == cleaned:
+            break
+        cleaned = stripped
+    return cleaned
+
+
 def _qualification_value(key: str, message: str) -> str:
     """Valeur exploitable tirée du message pour le champ demandé."""
-    text = " ".join(str(message or "").split())
-    if not text or "?" in text or len(text) > 200:
+    text = _strip_greeting(" ".join(str(message or "").split()))
+    if not text or len(text) < 2 or "?" in text or len(text) > 200:
         return ""
     if key == "branding":
         return store.normalize_branding(text)
@@ -775,7 +800,7 @@ def _server_slot_turn(toolbox: ToolBox, row: Any, message: str) -> str:
         if result.get("ok") and toolbox.booking:
             format_label = "point visio" if mode == store.CALL_MODES["visio"] else "appel téléphonique"
             return (
-                f"C'est réservé : {toolbox.booking['label']}, {format_label} de 30 minutes avec Raj. "
+                f"C'est réservé : {toolbox.booking['label']}, {format_label} de 30 minutes avec Sujee. "
                 f"Une invitation vient de partir sur {email} (référence {toolbox.booking['reference']})."
             )
         if result.get("ok") is False:
@@ -808,7 +833,7 @@ def _server_slot_turn(toolbox: ToolBox, row: Any, message: str) -> str:
             return (
                 f"Merci {prenom_humain}, votre demande est enregistrée{suite}. "
                 "Je n'ai pas pu bloquer le créneau automatiquement : "
-                "Raj vous confirme l'horaire par email."
+                "Sujee vous confirme l'horaire par email."
             )
     if not name or not email:
         if email and not name:
@@ -820,7 +845,7 @@ def _server_slot_turn(toolbox: ToolBox, row: Any, message: str) -> str:
         return f"{lead_in}Quel est votre prénom et nom ?"
     prenom = name.split()[0]
     if not phone:
-        return f"Merci {prenom}. Votre numéro de téléphone, pour l'appel avec Raj ?"
+        return f"Merci {prenom}. Votre numéro de téléphone, pour l'appel avec Sujee ?"
     if not branding:
         return "Quel est le nom du branding à réaliser (marque, produit ou projet) ?"
     if not mode:

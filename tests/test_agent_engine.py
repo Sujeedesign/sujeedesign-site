@@ -116,7 +116,7 @@ def test_parcours_complet_jusqu_au_rendez_vous(conn):
         ]
     )
 
-    first = _collect(conn, session_id, "Bonjour, je veux refaire mon identité", llm, google, notifications.append)
+    first = _collect(conn, session_id, "Bonjour", llm, google, notifications.append)
     assert any(event["type"] == "progress" for event in first)
     assert not any(event["type"] == "slots" for event in first)
     assert llm.calls == 0
@@ -324,6 +324,37 @@ def test_creneau_choisi_est_transmis_au_modele(conn):
     assert len(hint) == 1
     assert slots.slot_id(start) in hint[0]["content"]
     assert "book_meeting" in hint[0]["content"]
+
+
+def test_premiere_reponse_du_visiteur_n_est_pas_jetee(conn):
+    """Cas reel : « Site web ou e-commerce » doit etre enregistre, pas rejoue en question."""
+    google = FakeGoogle(available=[slots.candidates()[0]])
+    session_id = engine.prepare_session(conn)
+    llm = FakeLLM([[]])
+
+    first = _collect(conn, session_id, "Bonjour", llm, google)
+    assert "type de projet" in "".join(e["text"] for e in first if e.get("type") == "delta")
+
+    second = _collect(conn, session_id, "Site web ou e-commerce", llm, google)
+    texte = "".join(e["text"] for e in second if e.get("type") == "delta")
+    assert "type de projet" not in texte
+    assert "branding" in texte.lower()
+    row = store.get_session(conn, session_id)
+    assert row is not None
+    assert store.session_fields(row)["project_type"] == "Site web ou e-commerce"
+
+    third = _collect(conn, session_id, "Branding pas encore trouvé mais ça sera vente de pièce auto", llm, google)
+    assert "activit" in "".join(e["text"] for e in third if e.get("type") == "delta").lower()
+
+
+def test_salutation_seule_ne_remplit_aucun_champ(conn):
+    """« Bonjour » ne doit jamais devenir le type de projet."""
+    google = FakeGoogle(available=[slots.candidates()[0]])
+    session_id = engine.prepare_session(conn)
+    _collect(conn, session_id, "Bonjour !", FakeLLM([[]]), google)
+    row = store.get_session(conn, session_id)
+    assert row is not None
+    assert store.session_fields(row).get("project_type", "") == ""
 
 
 def test_creneaux_deja_reserves_ne_sont_plus_proposes(conn):
@@ -770,7 +801,7 @@ def test_creneaux_caducs_ne_sont_pas_representes(conn):
 
 
 def test_la_question_du_telephone_annonce_l_appel_du_visiteur(conn):
-    """Le CTA doit dire « pour l'appel avec Raj », pas « pour que Raj vous rappelle »."""
+    """Le CTA doit dire « pour l'appel avec Sujee », pas « pour que Sujee vous rappelle »."""
     google = FakeGoogle(available=slots.candidates()[:3])
     session_id = _session_avec_creneaux(conn, google)
     start = _creneau_unique(google.available)
@@ -781,7 +812,7 @@ def test_la_question_du_telephone_annonce_l_appel_du_visiteur(conn):
 
     assert "téléphone" in message.lower()
     assert "rappelle" not in message.lower()
-    assert "appel avec Raj" in message
+    assert "appel avec Sujee" in message
 
 
 def test_faute_telephone_reconnue_comme_appel() -> None:
