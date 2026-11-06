@@ -469,6 +469,7 @@ def defaults_for(slug: str) -> dict[str, Any]:
 
 SECTION_LABELS: dict[str, str] = {
     "hero": "Bandeau de tête",
+    "aeo": "En bref (réponse courte)",
     "prestations": "Prestations",
     "scope": "Périmètre",
     "methode": "Méthode",
@@ -496,6 +497,8 @@ FIELD_LABELS: dict[str, str] = {
     "href": "Lien",
     "q": "Question",
     "a": "Réponse",
+    "question": "Question",
+    "answer": "Réponse",
     "item": "Élément",
     "items": "Éléments",
     "row": "Ligne",

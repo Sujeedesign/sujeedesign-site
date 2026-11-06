@@ -21,6 +21,10 @@
       }
     ]
   },
+  "aeo": {
+    "question": "Quelle est la différence entre un logo et une identité visuelle ?",
+    "answer": "Un logo est une signature : une marque graphique lisible en petit, reconnaissable d’un coup d’œil. Une identité visuelle est le système qui l’entoure : nom, typographies, couleurs, principes de mise en page, traitement photo, déclinaisons et règles d’usage. Concrètement, le logo est un fichier, l’identité est un ensemble de fichiers et de règles qui les font tenir ensemble. C’est ce système qui permet à une devanture, un menu, un colis et un compte social de se ressembler sans se répéter. Un logo seul suffit à une carte de visite ; une identité tient dans la durée, quand la marque grandit, change d’outil ou de support."
+  },
   "scope": {
     "num": "01",
     "title": [

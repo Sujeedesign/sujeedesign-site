@@ -48,7 +48,12 @@ curl -s -X PUT \
 
 * `200` : enregistré, une révision de l'état précédent est créée avant écriture.
 * `422` : validation refusée, rien n'est enregistré, le détail nomme le champ.
-* `404` : slug inconnu (seul `home` est éditable pour l'instant).
+* `404` : slug inconnu. Slugs acceptés : `home`, `services`, `realisations`,
+  `a-propos`, `agents-ia` et les quatre fiches service
+  (`identite-de-marque`, `direction-artistique`, `site-ecommerce`, `contenu-reseaux`).
+  La réponse courte AEO d'une fiche service s'édite via `aeo.question` et
+  `aeo.answer` ; le JSON-LD `FAQPage` lit ces deux champs, donc aucune divergence
+  possible entre le texte affiché et les données structurées.
 
 ## Catalogue des réalisations
 

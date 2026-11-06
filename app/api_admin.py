@@ -30,7 +30,7 @@ from .settings import env
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin-api"])
 
-SLUGS = {"home"}
+SLUGS = {"home"} | set(content_model.SCHEMAS)
 
 
 def _token() -> str:

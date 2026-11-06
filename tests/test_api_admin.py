@@ -76,6 +76,29 @@ def test_refuse_un_slug_inconnu(api: TestClient) -> None:
     assert api.get("/api/v1/admin/content/contact", headers=AUTH).status_code == 404
 
 
+def test_lit_une_fiche_service_et_son_aeo(api: TestClient) -> None:
+    response = api.get("/api/v1/admin/content/identite-de-marque", headers=AUTH)
+    assert response.status_code == 200
+    body = response.json()
+    assert body["slug"] == "identite-de-marque"
+    assert body["data"]["aeo"]["question"]
+    assert any(field["path"] == "aeo.answer" for field in body["fields"])
+
+
+def test_modifie_l_aeo_d_une_fiche_service(api: TestClient) -> None:
+    reponse = api.put(
+        "/api/v1/admin/content/identite-de-marque",
+        headers={**AUTH, "X-Author": "raj"},
+        json={"changes": {"aeo.answer": "Réponse courte modifiée pour la revue."}},
+    )
+    assert reponse.status_code == 200
+    assert reponse.json()["author"] == "raj"
+
+    apres = api.get("/api/v1/admin/content/identite-de-marque", headers=AUTH).json()["data"]
+    assert apres["aeo"]["answer"] == "Réponse courte modifiée pour la revue."
+    assert apres["faq"]["items"], "les questions visibles restent intactes"
+
+
 def test_publication_non_configuree(api: TestClient) -> None:
     response = api.post("/api/v1/admin/publish", headers=AUTH)
     assert response.status_code == 409
