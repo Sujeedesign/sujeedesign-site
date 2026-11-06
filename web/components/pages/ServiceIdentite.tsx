@@ -8,6 +8,25 @@ export const pageMeta = {
 
 type Doc = Record<string, any>;
 
+/**
+ * Réponse courte affichée juste après le hero, et reprise telle quelle dans le
+ * JSON-LD `FAQPage` de la page : une seule source de vérité, donc aucune
+ * donnée structurée qui ne serait pas visible à l'écran.
+ */
+export const aeoEntry = {
+  question: "Quelle est la différence entre un logo et une identité visuelle ?",
+  answer:
+    "Un logo est une signature : une marque graphique lisible en petit, reconnaissable d’un coup d’œil. Une identité visuelle est le système qui l’entoure : nom, typographies, couleurs, principes de mise en page, traitement photo, déclinaisons et règles d’usage. Concrètement, le logo est un fichier, l’identité est un ensemble de fichiers et de règles qui les font tenir ensemble. C’est ce système qui permet à une devanture, un menu, un colis et un compte social de se ressembler sans se répéter. Un logo seul suffit à une carte de visite ; une identité tient dans la durée, quand la marque grandit, change d’outil ou de support.",
+};
+
+/** Entrées `FAQPage` de la page : la réponse courte puis les questions visibles. */
+export function pageFaqEntries(doc: Doc) {
+  const items: Doc[] = doc?.faq?.items ?? [];
+  return [aeoEntry, ...items.map((item) => ({ question: item.q, answer: item.a }))]
+    .filter((entry) => Boolean(entry.question) && Boolean(entry.answer))
+    .map((entry) => ({ question: String(entry.question), answer: String(entry.answer) }));
+}
+
 export function ServiceIdentite({ doc }: { doc: Doc }) {
   const hero = doc.hero ?? {};
   const scope = doc.scope ?? {};
@@ -46,6 +65,18 @@ export function ServiceIdentite({ doc }: { doc: Doc }) {
             <div className="sv-hero__meta">{hero.meta?.map((m: Doc, i: number) => <div key={i}><span data-field={`hero.meta.${i}.label`}>{m.label}</span><p data-field={`hero.meta.${i}.text`}>{m.text}</p></div>)}</div>
           </div>
         </header>
+
+        <section className="section">
+          <div className="wrap">
+            <div className="sec-head rv">
+              <div className="sec-num">En bref</div>
+              <div>
+                <h2>{aeoEntry.question}</h2>
+                <p>{aeoEntry.answer}</p>
+              </div>
+            </div>
+          </div>
+        </section>
 
         <section className="section">
           <div className="wrap">

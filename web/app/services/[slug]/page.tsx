@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
-import { ServiceIdentite, pageMeta as metaIdentite } from "@/components/pages/ServiceIdentite";
+import { ServiceIdentite, pageMeta as metaIdentite, pageFaqEntries as faqIdentite } from "@/components/pages/ServiceIdentite";
 import {
   ServiceDirectionArtistique,
   pageMeta as metaDirection,
@@ -15,7 +15,7 @@ import { PageShell } from "@/components/site/PageShell";
 import { getServiceContent, servicePageSlugs, type ServicePageSlug } from "@/lib/content/live";
 import { pageMetadata } from "@/lib/page-metadata";
 import { routes, serviceHref, servicePath, serviceSlugs, type ServiceSlug } from "@/lib/routes";
-import { breadcrumbNode, pageGraph, serviceCatalog, serviceNode, webPageNode } from "@/lib/structured-data";
+import { breadcrumbNode, faqNode, pageGraph, serviceCatalog, serviceNode, webPageNode } from "@/lib/structured-data";
 
 /**
  * Les pages service du v5, une par slug.
@@ -80,6 +80,11 @@ export default async function Page({ params }: Params) {
         data={pageGraph([
           webPageNode(servicePath(slug as ServiceSlug), meta.title, meta.description),
           serviceNode(slug as ServiceSlug, meta.description),
+          // La page identité affiche une réponse courte et sa FAQ : les deux sont
+          // donc déclarées en `FAQPage`, sans contenu invisible.
+          ...(slug === "identite-de-marque"
+            ? [faqNode(servicePath(slug as ServiceSlug), faqIdentite(doc))]
+            : []),
           breadcrumbNode([
             { name: "Accueil", path: routes.home },
             { name: "Services", path: routes.services },
