@@ -639,13 +639,9 @@ def demandes(request: Request, user: str = Depends(require_admin)) -> Response:
 # ------------------------------------------------------- propositions clients
 
 
-PROPOSITIONS = {
-    "n2e": "N2E Échafaudages",
-    "dimension-nouvelle": "Dimension Nouvelle",
-    "polyresine": "Polyrésine",
-    "sei": "SEI",
-    "prunelle": "À la Prunelle de mes ongle'S",
-}
+# Source unique : le suivi et l'admin lisent la même table. Une proposition
+# ajoutée d'un côté seulement restait invisible côté statistiques.
+PROPOSITIONS = dict(tracking.SLUGS)
 
 
 def _paris_datetime(value: str) -> str:

@@ -40,3 +40,14 @@ def test_slug_declare_cote_serveur(page: Path) -> None:
         f"{page.parent.name} : le slug « {slug} » n'est pas déclaré dans tracking.SLUGS,"
         " le serveur répondrait 404 et aucune vue ne serait comptée"
     )
+
+
+def test_admin_et_suivi_partagent_la_meme_liste() -> None:
+    """Une proposition doit apparaître dans l'admin comme dans le suivi.
+
+    La liste était dupliquée : une proposition ouverte au suivi mais absente de
+    l'admin n'affichait aucune carte, donc aucune vue, même en cas de trafic.
+    """
+    from app import admin
+
+    assert admin.PROPOSITIONS == tracking.SLUGS
