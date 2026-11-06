@@ -9,11 +9,10 @@ export const pageMeta = {
 type Doc = Record<string, any>;
 
 /**
- * Réponse courte affichée juste après le hero, et reprise telle quelle dans le
- * JSON-LD `FAQPage` de la page : une seule source de vérité, donc aucune
- * donnée structurée qui ne serait pas visible à l'écran.
+ * Entrées `FAQPage` de la page : la réponse courte (`doc.aeo`, rendue dans le
+ * bloc « En bref ») puis les questions visibles de `doc.faq.items`. Une seule
+ * source de vérité, donc aucune donnée structurée absente de l'écran.
  */
-/** Entrées `FAQPage` : la réponse courte (doc.aeo) puis les questions visibles. */
 export function pageFaqEntries(doc: Doc) {
   const items: Doc[] = doc?.faq?.items ?? [];
   const aeo = doc?.aeo ?? {};
