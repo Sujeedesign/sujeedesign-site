@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Images du site{% endblock %}
+{% block heading %}Images du site{% endblock %}
+{% block content %}
+  <p class="muted small">
+    Cette page relève les images réellement affichées par la vitrine
+    ({{ public_url }}), puis les compare à la médiathèque et au dossier
+    <code>/medias</code>. Lecture seule : rien n'est modifié ici.
+  </p>
+
+  {% if inv and inv.error %}
+    <p class="card empty">Analyse impossible : {{ inv.error }}</p>
+  {% endif %}
+
+  {% if not inv %}
+    <form class="card" method="get" action="/admin/medias/site">
+      <p>Aucune analyse enregistrée pour le moment.</p>
+      <input type="hidden" name="scan" value="1">
+      <div class="toolbar-actions">
+        <button class="btn btn-accent" type="submit">Analyser le site</button>
+      </div>
+      <p class="muted small">Le scan parcourt le sitemap et les pages publiques, cela prend quelques secondes.</p>
+    </form>
+  {% else %}
+    <div class="card">
+      <div class="toolbar-actions">
+        <form method="get" action="/admin/medias/site">
+          <input type="hidden" name="scan" value="1">
+          <button class="btn btn-ghost btn-sm" type="submit">Relancer l'analyse</button>
+        </form>
+        {% if inv.counts.hors_media %}
+          <form method="post" action="/admin/medias/site" data-confirm="Réintégrer ces fichiers dans la médiathèque ?">
+            <input type="hidden" name="csrf" value="{{ csrf }}">
+            <button class="btn btn-accent btn-sm" type="submit">Réintégrer {{ inv.counts.hors_media }} fichier(s) dans la médiathèque</button>
+          </form>
+        {% endif %}
+      </div>
+      <p class="small">
+        <strong>{{ inv.total }}</strong> images utilisées ·
+        <strong>{{ inv.counts.media }}</strong> dans la médiathèque ·
+        <strong>{{ inv.counts.statique }}</strong> fichiers du dépôt ·
+        <strong>{{ inv.counts.hors_media }}</strong> hors médiathèque ·
+        <strong>{{ inv.counts.manquant }}</strong> introuvables
+        {% if inv.checked_at_label %}· dernière analyse {{ inv.checked_at_label }}{% endif %}
+      </p>
+    </div>
+
+    {% if inv.counts.manquant %}
+      <div class="card">
+        <h2>Images cassées</h2>
+        <p class="small">Ces images sont appelées par une page du site mais le fichier n'existe plus.</p>
+        <ul class="small">
+          {% for item in inv['items'] if item.kind == 'manquant' %}
+            <li><code>{{ item.src }}</code> · {{ item.pages | join(', ') }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    {% if inv.counts.hors_media %}
+      <div class="card">
+        <h2>Fichiers présents mais absents de la médiathèque</h2>
+        <p class="small">Le fichier est bien servi par le site, mais il n'a pas de fiche en base : il n'apparaît donc pas dans Médias.</p>
+        <ul class="small">
+          {% for item in inv['items'] if item.kind == 'hors_media' %}
+            <li><code>{{ item.src }}</code> · {{ item.pages | join(', ') }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <div class="media-grid">
+      {% for item in inv['items'] %}
+        <figure class="card media">
+          <img src="{{ item.src }}" alt="" loading="lazy" width="480" height="360" decoding="async">
+          <figcaption>
+            <span class="muted small">{{ item.label }}</span>
+            <code class="small">{{ item.src }}</code>
+            <span class="muted small">{{ item.pages | join(' · ') }}</span>
+          </figcaption>
+        </figure>
+      {% endfor %}
+    </div>
+
+    <div class="card">
+      <h2>Par page</h2>
+      {% for page in inv.pages %}
+        <details class="small">
+          <summary><strong>{{ page.url }}</strong> · {{ page.images | length }} image(s)</summary>
+          <ul>
+            {% for src in page.images %}<li><code>{{ src }}</code></li>{% endfor %}
+          </ul>
+        </details>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endblock %}

@@ -132,14 +132,37 @@ def _unique_slug(conn: sqlite3.Connection, table: str, slug: str, current_id: in
         index += 1
 
 
+def _existing_rows(conn: sqlite3.Connection, projet_id: int | None, column: str) -> list[Any]:
+    """Lignes déjà enregistrées pour une fiche (protection contre un envoi partiel).
+
+    Le formulaire du back office envoie toujours ses répéteurs ; une écriture
+    partielle (API, script) peut omettre la clé. Dans ce cas on conserve
+    l'existant au lieu de vider les images, sections ou résultats du projet.
+    """
+    if not projet_id:
+        return []
+    row = conn.execute(f"SELECT {column} FROM projets WHERE id = ?", (projet_id,)).fetchone()
+    value = _loads(row[column] if row else "", [])
+    return value if isinstance(value, list) else []
+
+
 def save_projet(conn: sqlite3.Connection, form: dict[str, Any], projet_id: int | None = None) -> int:
     nom = _text(form.get("nom")) or "Projet sans titre"
     slug = _unique_slug(conn, "projets", slugify(form.get("slug") or nom), projet_id)
     ton = form.get("ton") if form.get("ton") in TONS else "paper"
     statut = form.get("statut") if form.get("statut") in STATUTS else "brouillon"
 
+    if "images" in form:
+        image_rows = form.get("images") or []
+    else:
+        image_rows = [
+            (item.get("src", ""), item.get("alt", ""), item.get("width", 0), item.get("height", 0))
+            for item in _existing_rows(conn, projet_id, "images")
+            if isinstance(item, dict)
+        ]
+
     images: list[dict[str, Any]] = []
-    for src, alt, width, height in form.get("images", []):
+    for src, alt, width, height in image_rows:
         if not _text(src):
             continue
         try:
@@ -152,8 +175,23 @@ def save_projet(conn: sqlite3.Connection, form: dict[str, Any], projet_id: int |
             h = 0
         images.append({"src": _text(src), "alt": _text(alt), "width": w, "height": h})
 
+    if "sections" in form:
+        section_rows = form.get("sections") or []
+    else:
+        section_rows = [
+            (
+                item.get("k", ""),
+                item.get("label", ""),
+                item.get("title", ""),
+                "\n\n".join(item.get("paragraphs") or []),
+                "\n".join(item.get("bullets") or []),
+            )
+            for item in _existing_rows(conn, projet_id, "sections")
+            if isinstance(item, dict)
+        ]
+
     sections: list[dict[str, Any]] = []
-    for k, label, title, paragraphs, bullets in form.get("sections", []):
+    for k, label, title, paragraphs, bullets in section_rows:
         item = {
             "k": _text(k) or str(len(sections) + 1).zfill(2),
             "label": _text(label),
@@ -208,8 +246,17 @@ def save_projet(conn: sqlite3.Connection, form: dict[str, Any], projet_id: int |
         if isinstance(saved_portrait, dict) and saved_portrait.get("src"):
             cover_portrait = saved_portrait
 
+    if "results" in form:
+        result_rows = form.get("results") or []
+    else:
+        result_rows = [
+            (item.get("value", ""), item.get("label", ""))
+            for item in _existing_rows(conn, projet_id, "results")
+            if isinstance(item, dict)
+        ]
+
     results: list[dict[str, str]] = []
-    for value, label in form.get("results", []):
+    for value, label in result_rows:
         if _text(value) or _text(label):
             results.append({"value": _text(value), "label": _text(label)})
 

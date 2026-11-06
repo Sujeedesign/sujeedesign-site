@@ -117,6 +117,7 @@
 
       <section class="card">
         <div class="card-head"><h2>Visuels</h2><span class="spacer"></span><button class="btn btn-sm" type="button" data-add>+ Image</button></div>
+        <input type="hidden" name="images_present" value="1">
         <div class="repeat" data-repeat>
           <div data-rows>
             {% for image in projet.images %}{{ image_row(image.src, image.alt, image.width or '', image.height or '') }}{% endfor %}
@@ -128,6 +129,7 @@
 
       <section class="card">
         <div class="card-head"><h2>Sections</h2><span class="spacer"></span><button class="btn btn-sm" type="button" data-add>+ Section</button></div>
+        <input type="hidden" name="sections_present" value="1">
         <div class="repeat" data-repeat>
           <div data-rows>
             {% for section in projet.sections %}{{ section_row(section) }}{% endfor %}
@@ -139,6 +141,7 @@
 
       <section class="card">
         <div class="card-head"><h2>Résultats</h2><span class="spacer"></span><button class="btn btn-sm" type="button" data-add>+ Résultat</button></div>
+        <input type="hidden" name="results_present" value="1">
         <div class="repeat" data-repeat>
           <div data-rows>
             {% for result in projet.results %}{{ result_row(result) }}{% endfor %}
@@ -181,6 +184,20 @@
     <button class="btn btn-accent" type="submit">Enregistrer</button>
   </div>
 </form>
+
+{% if projet.id and revisions %}
+<section class="card" style="margin-top:16px">
+  <div class="card-head"><h2>Versions enregistrées</h2></div>
+  <p class="tiny muted">Chaque enregistrement conserve la version précédente. Restaurer remplace la fiche actuelle par cette version.</p>
+  {% for revision in revisions %}
+  <form method="post" action="/admin/projets/{{ projet.id }}/restaurer/{{ revision.id }}" class="inline-form" style="display:flex;gap:10px;align-items:center;justify-content:space-between;padding:6px 0">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <span class="tiny">{{ revision.created_at }} · {{ revision.author }} · {{ revision.note }}</span>
+    <button class="btn btn-sm" type="submit">Restaurer</button>
+  </form>
+  {% endfor %}
+</section>
+{% endif %}
 
 {% if projet.id %}
 <form method="post" action="/admin/projets/{{ projet.id }}/supprimer" class="inline-form" style="margin-top:12px" data-confirm="Supprimer définitivement ce projet ?">

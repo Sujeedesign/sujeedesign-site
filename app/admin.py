@@ -14,6 +14,7 @@ import sqlite3
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
+from collections.abc import Mapping
 from typing import Any
 from urllib.parse import quote, urlparse
 
@@ -27,6 +28,7 @@ from . import content_model
 from . import repo
 from . import security
 from . import settings as settings_module
+from . import site_assets
 from . import tracking
 from .agent.store import FIELD_LABELS
 from .db import connect, get_meta, set_meta
@@ -108,6 +110,7 @@ NAV_GROUPS: tuple[tuple[str, tuple[tuple[str, str, str], ...]], ...] = (
         "Système",
         (
             ("medias", "Médias", "/admin/medias"),
+            ("medias_site", "Images du site", "/admin/medias/site"),
             ("reglages", "Réglages", "/admin/reglages"),
             ("sauvegarde", "Sauvegarde", "/admin/sauvegarde"),
         ),
@@ -119,6 +122,7 @@ NAV_PREFIXES = {
     "pages": ("/admin/pages", "/admin/contenu"),
     "projets": ("/admin/projets",),
     "prestations": ("/admin/prestations",),
+    "medias_site": ("/admin/medias/site",),
 }
 
 
@@ -917,6 +921,35 @@ def media_supprimer(request: Request, media_id: int, csrf: str = Form("")) -> Re
     return back("/admin/medias", "Média supprimé.")
 
 
+# ------------------------------------------------- images réellement servies par le site
+
+
+@router.get("/admin/medias/site", response_class=HTMLResponse)
+def medias_site(request: Request, scan: int = 0, user: str = Depends(require_admin)) -> Response:
+    conn = get_conn(request)
+    try:
+        inv = site_assets.inventory(conn, force=bool(scan)) if scan else None
+        if inv is None and site_assets.cached() is not None:
+            inv = site_assets.inventory(conn)
+    finally:
+        conn.close()
+    return render(request, "medias_site.html", inv=inv)
+
+
+@router.post("/admin/medias/site")
+def medias_site_reindex(request: Request, csrf: str = Form("")) -> Response:
+    """Réintègre dans la médiathèque les fichiers présents mais sans fiche."""
+    check_csrf(request, csrf)
+    conn = get_conn(request)
+    try:
+        added = site_assets.reindex_orphans(conn)
+    finally:
+        conn.close()
+    if added:
+        return back("/admin/medias/site", f"{added} fichier(s) réintégré(s) dans la médiathèque.")
+    return back("/admin/medias/site", "Rien à réintégrer : tout est déjà en base.")
+
+
 # ------------------------------------------------------------------ reglages
 
 
@@ -1035,6 +1068,14 @@ def projet_editer(request: Request, projet_id: int, user: str = Depends(require_
     conn = get_conn(request)
     try:
         projet = catalogue.get_projet(conn, projet_id)
+        revisions = [
+            row
+            for row in conn.execute(
+                "SELECT id, note, author, created_at FROM revisions"
+                " WHERE entity_type = 'projet' AND entity_id = ? ORDER BY id DESC LIMIT 8",
+                (projet_id,),
+            ).fetchall()
+        ]
     finally:
         conn.close()
     if projet is None:
@@ -1043,10 +1084,30 @@ def projet_editer(request: Request, projet_id: int, user: str = Depends(require_
         request,
         "projet_form.html",
         projet=projet,
+        revisions=revisions,
         medias=_media_picker(request),
         counts=_catalogue_counts(request, "projets"),
         mode="edit",
     )
+
+
+def _repeater_envoye(form: Mapping[str, Any], prefix: str) -> bool:
+    """Un répéteur est considéré envoyé si le formulaire le signale.
+
+    Le gabarit pose un champ caché `<prefix>s_present`. Les clients plus anciens
+    (tests, scripts) n'envoient que les champs `image_*`, `section_*` ou
+    `result_*` : on les détecte aussi. Sans aucune trace, la clé est laissée de
+    côté et l'enregistrement conserve les lignes existantes.
+    """
+    if form.get(f"{prefix}s_present"):
+        return True
+    return any(key == f"{prefix}_" or key.startswith(f"{prefix}_") for key in form)
+
+
+def _snapshot_projet(conn: Any, projet_id: int) -> dict[str, Any] | None:
+    """Photo complète d'une fiche avant écrasement (restauration possible)."""
+    row = conn.execute("SELECT * FROM projets WHERE id = ?", (projet_id,)).fetchone()
+    return dict(row) if row else None
 
 
 @router.post("/admin/projets")
@@ -1054,12 +1115,22 @@ async def projet_save(request: Request, user: str = Depends(require_admin)) -> R
     form = await request.form()
     check_csrf(request, str(form.get("csrf") or ""))
     payload: dict[str, Any] = dict(form)
-    payload["images"] = _rows(form, "image", ("src", "alt", "w", "h"))
-    payload["sections"] = _rows(form, "section", ("k", "label", "title", "body", "bullets"))
-    payload["results"] = _rows(form, "result", ("value", "label"))
+    # Les répéteurs ne sont envoyés que si la section est présente dans le
+    # formulaire : une écriture partielle ne doit jamais vider images,
+    # sections ou résultats déjà enregistrés.
+    if _repeater_envoye(form, "image"):
+        payload["images"] = _rows(form, "image", ("src", "alt", "w", "h"))
+    if _repeater_envoye(form, "section"):
+        payload["sections"] = _rows(form, "section", ("k", "label", "title", "body", "bullets"))
+    if _repeater_envoye(form, "result"):
+        payload["results"] = _rows(form, "result", ("value", "label"))
     raw_id = str(form.get("id") or "").strip()
     conn = get_conn(request)
     try:
+        if raw_id.isdigit():
+            snapshot = _snapshot_projet(conn, int(raw_id))
+            if snapshot:
+                repo.save_revision(conn, "projet", int(raw_id), snapshot, "avant enregistrement", user)
         projet_id = catalogue.save_projet(conn, payload, int(raw_id) if raw_id.isdigit() else None)
     except ValueError as exc:
         target = f"/admin/projets/{raw_id}" if raw_id.isdigit() else "/admin/projets/nouveau"
@@ -1108,6 +1179,38 @@ async def projet_supprimer(request: Request, projet_id: int, user: str = Depends
         conn.close()
     content_store.notify_site("catalogue")
     return back("/admin/projets", "Projet supprimé.")
+
+
+@router.post("/admin/projets/{projet_id}/restaurer/{revision_id}")
+def projet_restaurer(
+    request: Request, projet_id: int, revision_id: int, user: str = Depends(require_admin)
+) -> Response:
+    conn = get_conn(request)
+    try:
+        row = conn.execute(
+            "SELECT * FROM revisions WHERE id = ? AND entity_type = 'projet' AND entity_id = ?",
+            (revision_id, projet_id),
+        ).fetchone()
+        if row is None:
+            return back(f"/admin/projets/{projet_id}", "Version introuvable.", "error")
+        snapshot = repo.revision_snapshot(row)
+        if not isinstance(snapshot, dict) or not snapshot:
+            return back(f"/admin/projets/{projet_id}", "Version illisible.", "error")
+        current = _snapshot_projet(conn, projet_id)
+        if current:
+            repo.save_revision(conn, "projet", projet_id, current, "avant restauration", user)
+        columns = [key for key in snapshot if key != "id"]
+        if not columns:
+            return back(f"/admin/projets/{projet_id}", "Version vide.", "error")
+        conn.execute(
+            f"UPDATE projets SET {', '.join(f'{key} = ?' for key in columns)}, updated_at = datetime('now') WHERE id = ?",
+            (*[snapshot[key] for key in columns], projet_id),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+    content_store.notify_site("catalogue")
+    return back(f"/admin/projets/{projet_id}", "Version restaurée.")
 
 
 # -------------------------------------------------------------- prestations
