@@ -4,12 +4,14 @@ import { ServiceIdentite, pageMeta as metaIdentite, pageFaqEntries as faqIdentit
 import {
   ServiceDirectionArtistique,
   pageMeta as metaDirection,
+  pageFaqEntries as faqDirection,
 } from "@/components/pages/ServiceDirectionArtistique";
 import {
   ServiceSiteEcommerce,
   pageMeta as metaEcommerce,
+  pageFaqEntries as faqEcommerce,
 } from "@/components/pages/ServiceSiteEcommerce";
-import { ServiceContenu, pageMeta as metaContenu } from "@/components/pages/ServiceContenu";
+import { ServiceContenu, pageMeta as metaContenu, pageFaqEntries as faqContenu } from "@/components/pages/ServiceContenu";
 import { JsonLd } from "@/components/site/JsonLd";
 import { PageShell } from "@/components/site/PageShell";
 import { getServiceContent, servicePageSlugs, type ServicePageSlug } from "@/lib/content/live";
@@ -23,11 +25,11 @@ import { breadcrumbNode, faqNode, pageGraph, serviceCatalog, serviceNode, webPag
  * `agents-ia` n'a pas de page sous `/services` : l'offre vit à la racine, on redirige
  * définitivement pour ne pas dupliquer le contenu.
  */
-const services: Record<string, { Component: (props: { doc: Record<string, any> }) => React.JSX.Element; meta: { title: string; description: string } }> = {
-  "identite-de-marque": { Component: ServiceIdentite, meta: metaIdentite },
-  "direction-artistique": { Component: ServiceDirectionArtistique, meta: metaDirection },
-  "site-ecommerce": { Component: ServiceSiteEcommerce, meta: metaEcommerce },
-  "contenu-reseaux": { Component: ServiceContenu, meta: metaContenu },
+const services: Record<string, { Component: (props: { doc: Record<string, any> }) => React.JSX.Element; meta: { title: string; description: string }; faq?: (doc: Record<string, any>) => { question: string; answer: string }[] }> = {
+  "identite-de-marque": { Component: ServiceIdentite, meta: metaIdentite, faq: faqIdentite },
+  "direction-artistique": { Component: ServiceDirectionArtistique, meta: metaDirection, faq: faqDirection },
+  "site-ecommerce": { Component: ServiceSiteEcommerce, meta: metaEcommerce, faq: faqEcommerce },
+  "contenu-reseaux": { Component: ServiceContenu, meta: metaContenu, faq: faqContenu },
 };
 
 type Params = { params: Promise<{ slug: string }> };
@@ -69,7 +71,7 @@ export default async function Page({ params }: Params) {
   const entry = services[slug];
   if (!entry) notFound();
 
-  const { Component, meta } = entry;
+  const { Component, meta, faq } = entry;
   const doc = servicePageSlugs.includes(slug as ServicePageSlug)
     ? await getServiceContent(slug as ServicePageSlug)
     : {};
@@ -80,11 +82,9 @@ export default async function Page({ params }: Params) {
         data={pageGraph([
           webPageNode(servicePath(slug as ServiceSlug), meta.title, meta.description),
           serviceNode(slug as ServiceSlug, meta.description),
-          // La page identité affiche une réponse courte et sa FAQ : les deux sont
-          // donc déclarées en `FAQPage`, sans contenu invisible.
-          ...(slug === "identite-de-marque"
-            ? [faqNode(servicePath(slug as ServiceSlug), faqIdentite(doc))]
-            : []),
+          // Chaque fiche affiche sa réponse courte et sa FAQ : les deux sont
+          // déclarées en `FAQPage`, sans contenu invisible.
+          ...(faq ? [faqNode(servicePath(slug as ServiceSlug), faq(doc))] : []),
           breadcrumbNode([
             { name: "Accueil", path: routes.home },
             { name: "Services", path: routes.services },

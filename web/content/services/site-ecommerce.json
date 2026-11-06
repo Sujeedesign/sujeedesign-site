@@ -21,6 +21,10 @@
       }
     ]
   },
+  "aeo": {
+    "question": "Combien de temps pour un site, et qui le gère après ?",
+    "answer": "Un site vitrine ou une boutique demande trois à six semaines, contenu et recette compris. Vous repartez avec les accès à votre nom, une documentation écrite et deux heures de formation : vous modifiez textes, photos et produits sans appeler personne. WordPress pour le contenu, Shopify pour vendre avec stock et paiement."
+  },
   "scope": {
     "num": "01",
     "title": [

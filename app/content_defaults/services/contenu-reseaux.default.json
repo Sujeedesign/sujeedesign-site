@@ -21,6 +21,10 @@
       }
     ]
   },
+  "aeo": {
+    "question": "Faut-il publier tous les jours pour que ça marche ?",
+    "answer": "Non. Deux publications utiles par semaine tiennent mieux dans la durée que sept posts vides. Je pose trois piliers éditoriaux, des gabarits réutilisables et trois mois de sujets datés : la publication tient ensuite dans une heure par semaine, sans dépendre de l’inspiration du jour."
+  },
   "scope": {
     "num": "01",
     "title": [

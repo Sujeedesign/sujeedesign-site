@@ -99,6 +99,29 @@ def test_modifie_l_aeo_d_une_fiche_service(api: TestClient) -> None:
     assert apres["faq"]["items"], "les questions visibles restent intactes"
 
 
+@pytest.mark.parametrize(
+    "slug", ["direction-artistique", "site-ecommerce", "contenu-reseaux"]
+)
+def test_aeo_editable_sur_les_autres_fiches_service(api: TestClient, slug: str) -> None:
+    """Chaque fiche service expose et accepte sa réponse courte (bloc « En bref »)."""
+    body = api.get(f"/api/v1/admin/content/{slug}", headers=AUTH).json()
+    assert body["data"]["aeo"]["question"]
+    assert body["data"]["aeo"]["answer"]
+    assert any(field["path"] == "aeo.answer" for field in body["fields"])
+
+    texte = f"Réponse courte modifiée ({slug})."
+    reponse = api.put(
+        f"/api/v1/admin/content/{slug}",
+        headers={**AUTH, "X-Author": "sita"},
+        json={"changes": {"aeo.answer": texte}},
+    )
+    assert reponse.status_code == 200
+
+    apres = api.get(f"/api/v1/admin/content/{slug}", headers=AUTH).json()["data"]
+    assert apres["aeo"]["answer"] == texte
+    assert apres["faq"]["items"], "les questions visibles restent intactes"
+
+
 def test_publication_non_configuree(api: TestClient) -> None:
     response = api.post("/api/v1/admin/publish", headers=AUTH)
     assert response.status_code == 409

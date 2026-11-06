@@ -8,8 +8,22 @@ export const pageMeta = {
 
 type Doc = Record<string, any>;
 
+/**
+ * Entrées `FAQPage` de la page : la réponse courte (`doc.aeo`, rendue dans le
+ * bloc « En bref ») puis les questions visibles de `doc.faq.items`. Une seule
+ * source de vérité, donc aucune donnée structurée absente de l'écran.
+ */
+export function pageFaqEntries(doc: Doc) {
+  const items: Doc[] = doc?.faq?.items ?? [];
+  const aeo = doc?.aeo ?? {};
+  return [{ question: aeo.question, answer: aeo.answer }, ...items.map((item) => ({ question: item.q, answer: item.a }))]
+    .filter((entry) => Boolean(entry.question) && Boolean(entry.answer))
+    .map((entry) => ({ question: String(entry.question), answer: String(entry.answer) }));
+}
+
 export function ServiceDirectionArtistique({ doc }: { doc: Doc }) {
   const hero = doc.hero ?? {};
+  const aeo = doc.aeo ?? {};
   const scope = doc.scope ?? {};
   const methode = doc.methode ?? {};
   const livrables = doc.livrables ?? {};
@@ -44,6 +58,18 @@ export function ServiceDirectionArtistique({ doc }: { doc: Doc }) {
             <div className="sv-hero__meta">{hero.meta?.map((m: Doc, i: number) => <div key={i}><span data-field={`hero.meta.${i}.label`}>{m.label}</span><p data-field={`hero.meta.${i}.text`}>{m.text}</p></div>)}</div>
           </div>
         </header>
+
+        <section className="section">
+          <div className="wrap">
+            <div className="sec-head rv">
+              <div className="sec-num">En bref</div>
+              <div>
+                <h2 data-field="aeo.question">{aeo.question}</h2>
+                <p data-field="aeo.answer">{aeo.answer}</p>
+              </div>
+            </div>
+          </div>
+        </section>
 
         <section className="section">
           <div className="wrap">
