@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import sitemap from "@/app/sitemap";
 import { site } from "@/content/site";
@@ -7,6 +7,7 @@ import {
   PROJECTS_UPDATED,
   SERVICE_UPDATED,
   contentUpdated,
+  projectUpdated,
   projectsUpdated,
 } from "@/lib/content/freshness";
 import { realisationPath, routes, serviceHref, serviceSlugs } from "@/lib/routes";
@@ -66,16 +67,74 @@ describe("signaux SEO du plan de site et du nom de site", () => {
     }
   });
 
-  it("date les fiches réalisations depuis le catalogue, à midi UTC", async () => {
-    const entries = await sitemap();
-    const projects = entries.filter((entry) => entry.url.includes(realisationPath("").slice(0, -1) + "/"));
-    expect(projects.length).toBeGreaterThan(0);
+  it("date les fiches réalisations à midi UTC, et retombe sur le repli sans updated_at", async () => {
+    // Sans back office joignable, le plan de site lit la graine du dépôt : aucune
+    // fiche n'a d'`updated_at`, toutes prennent donc la date de repli.
+    const previous = process.env.CONTENT_API_URL;
+    delete process.env.CONTENT_API_URL;
+    try {
+      const entries = await sitemap();
+      const projects = entries.filter((entry) => entry.url.includes(realisationPath("").slice(0, -1) + "/"));
+      expect(projects.length).toBeGreaterThan(0);
 
-    const expected = projectsUpdated().toISOString();
-    for (const entry of projects) {
-      expect(asIso(entry.lastModified)).toBe(expected);
+      const expected = projectsUpdated().toISOString();
+      for (const entry of projects) {
+        expect(asIso(entry.lastModified)).toBe(expected);
+      }
+      expect(PROJECTS_UPDATED).toMatch(ISO_DAY);
+    } finally {
+      if (previous === undefined) delete process.env.CONTENT_API_URL;
+      else process.env.CONTENT_API_URL = previous;
     }
-    expect(PROJECTS_UPDATED).toMatch(ISO_DAY);
+  });
+
+  it("prend le lastmod de chaque fiche dans l'updated_at du catalogue", async () => {
+    // Deux fiches datées différemment et une fiche sans date : le plan de site
+    // doit suivre la donnée du back office, fiche par fiche.
+    const previous = process.env.CONTENT_API_URL;
+    process.env.CONTENT_API_URL = "https://admin.exemple";
+    vi.stubGlobal("fetch", async () =>
+      ({
+        ok: true,
+        json: async () => ({
+          projects: [
+            { slug: "club-med", name: "Club Med — TEd", updated_at: "2026-10-02" },
+            { slug: "dekra", name: "Dekra", updated_at: "2026-10-21" },
+            { slug: "logofolio", name: "Logofolio" },
+          ],
+        }),
+      }) as unknown as Response,
+    );
+
+    try {
+      const entries = await sitemap();
+      const lastmodOf = (slug: string) =>
+        asIso(entries.find((entry) => new URL(entry.url).pathname === realisationPath(slug))?.lastModified);
+
+      const attendu = (day: string) => new Date(`${day}${NOON_UTC}`).toISOString();
+      expect(lastmodOf("club-med")).toBe(attendu("2026-10-02"));
+      expect(lastmodOf("dekra")).toBe(attendu("2026-10-21"));
+      // Fiche sans date : repli, inchangé.
+      expect(lastmodOf("logofolio")).toBe(projectsUpdated().toISOString());
+    } finally {
+      vi.unstubAllGlobals();
+      if (previous === undefined) delete process.env.CONTENT_API_URL;
+      else process.env.CONTENT_API_URL = previous;
+    }
+  });
+
+  it("plafonne une date éditoriale future et ignore une date illisible", () => {
+    const future = projectUpdated({ updatedAt: "2999-01-01" });
+    expect(future.getTime()).toBeLessThanOrEqual(Date.now());
+    expect(future.toISOString().endsWith(NOON_UTC)).toBe(true);
+
+    expect(projectUpdated({ updatedAt: "2026-13-45" }).toISOString()).toBe(projectsUpdated().toISOString());
+    expect(projectUpdated({}).toISOString()).toBe(projectsUpdated().toISOString());
+  });
+
+  it("ne publie aucune URL en double, notamment /agents-ia", async () => {
+    const entries = await sitemap();
+    expect(new Set(entries.map((e) => e.url)).size).toBe(entries.length);
   });
 
   it("garde toutes les dates déclarées au format ISO et jamais dans le futur", () => {

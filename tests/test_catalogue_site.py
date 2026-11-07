@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
+from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi.testclient import TestClient
@@ -242,3 +244,54 @@ def test_route_catalogue_sert_le_portrait_et_replie_sur_le_paysage(
     assert "american-steak-house" in projets
     assert "coverPortrait" not in projets["american-steak-house"]
     assert projets["american-steak-house"]["cover"]["src"].endswith("cover.jpg")
+
+
+def test_route_catalogue_expose_updated_at_pour_le_plan_de_site(client: TestClient) -> None:
+    """Le `lastmod` des fiches dépend de cette clé : jour ISO, un par projet."""
+    reponse = client.get("/api/v1/catalogue")
+
+    assert reponse.status_code == 200
+    projets = reponse.json()["projects"]
+    assert projets
+    for projet in projets:
+        assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", projet.get("updated_at") or ""), projet["slug"]
+
+
+def test_updated_at_suit_une_edition_de_fiche(tmp_path: Path) -> None:
+    """Une modification enregistrée dans l'admin doit dater la fiche à ce jour."""
+    conn = _connect(tmp_path)
+    catalogue.seed_from_file(conn)
+    conn.execute("UPDATE projets SET updated_at = '2026-10-01 08:30:00' WHERE slug = 'club-med'")
+    conn.commit()
+
+    avant = catalogue.get_projet_by_slug(conn, "club-med")
+    assert avant is not None
+    avant_dekra = {p["slug"]: p for p in catalogue.export_site(conn)["projects"]}["dekra"]["updated_at"]
+    assert avant["updated_at"].startswith("2026-10-01")
+
+    catalogue.save_projet(
+        conn,
+        {
+            "nom": avant["nom"],
+            "slug": avant["slug"],
+            "client": avant["client"],
+            "annee": avant["annee"],
+            "ville": avant["ville"],
+            "pitch": "Présentation réécrite dans l'admin, sans changer le reste.",
+            "scope": avant["scope"],
+            "duree": avant["duree"],
+            "ton": avant["ton"],
+            "statut": avant["statut"],
+            "disciplines": "\n".join(avant["disciplines"]),
+            "tags": "\n".join(avant["tags"]),
+            "images": avant["images"],
+        },
+        int(avant["id"]),
+    )
+
+    projets = {p["slug"]: p for p in catalogue.export_site(conn)["projects"]}
+    aujourdhui = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+    # La fiche éditée bouge, les autres gardent leur date.
+    assert projets["club-med"]["updated_at"] == aujourdhui
+    assert projets["dekra"]["updated_at"] == avant_dekra

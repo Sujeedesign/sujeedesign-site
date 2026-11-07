@@ -68,6 +68,19 @@ def _loads(value: Any, default: Any) -> Any:
     return parsed if parsed else default
 
 
+def _iso_day(value: Any) -> str:
+    """Jour `AAAA-MM-JJ` d'un horodatage SQLite, ou chaîne vide s'il est illisible.
+
+    `updated_at` est écrit par `datetime('now')`, donc en UTC et à la seconde.
+    On n'expose que le jour : c'est la granularité de `lastmod` et cela évite de
+    faire croire à une précision que la donnée n'a pas.
+    """
+    head = str(value or "").strip()[:10]
+    if len(head) == 10 and head[4] == "-" and head[7] == "-" and head.replace("-", "").isdigit():
+        return head
+    return ""
+
+
 def _int_or_zero(value: Any) -> int:
     try:
         return int(str(value or "0").strip() or 0)
@@ -433,6 +446,13 @@ def export_site(conn: sqlite3.Connection) -> dict[str, Any]:
             "tags": item["tags"],
             "tone": item["ton"],
         }
+        # Date éditoriale de la fiche : `updated_at`, réécrit à chaque
+        # enregistrement depuis l'admin. La vitrine en fait le `lastmod` du plan
+        # de site ; clé absente (fiche importée sans horodatage), elle retombe
+        # sur sa propre date de repli.
+        updated = _iso_day(item.get("updated_at"))
+        if updated:
+            projet["updated_at"] = updated
         for source, target in (("annee", "year"), ("ville", "city"), ("duree", "duration")):
             if item[source]:
                 projet[target] = item[source]

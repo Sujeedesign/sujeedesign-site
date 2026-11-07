@@ -28,6 +28,14 @@ export type Project = {
   index: string;
   name: string;
   client: string;
+  /**
+   * Jour `AAAA-MM-JJ` du dernier enregistrement de la fiche dans l'admin.
+   *
+   * Fourni par le catalogue (`updated_at`), absent des fiches de la graine
+   * `content/projects.ts`. `lastmod` du plan de site en dépend : le plan de site
+   * retombe sur `PROJECTS_UPDATED` quand la clé manque.
+   */
+  updatedAt?: string;
   year?: string;
   city?: string;
   disciplines: string[];

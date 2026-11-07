@@ -58,6 +58,9 @@ const results = (value: unknown): Project["results"] =>
       })
     : undefined;
 
+/** Jour ISO strict, seule forme acceptée pour une date éditoriale. */
+const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
+
 /** Fiche normalisée depuis la réponse publique. `null` si elle est inexploitable. */
 export function toProject(value: unknown): Project | null {
   if (!isObject(value)) return null;
@@ -71,12 +74,16 @@ export function toProject(value: unknown): Project | null {
   const coverPortrait = image(value.coverPortrait ?? value.cover_portrait) ?? undefined;
   const list = images(value.images);
   const res = results(value.results);
+  // `updated_at` vient de la base ; une valeur illisible est ignorée, la fiche
+  // garde alors la date de repli du plan de site.
+  const updatedAt = text(value.updated_at ?? value.updatedAt);
 
   return {
     slug,
     index: text(value.index) || "00",
     name,
     client: text(value.client),
+    ...(ISO_DAY.test(updatedAt) ? { updatedAt } : {}),
     ...(text(value.year) ? { year: text(value.year) } : {}),
     ...(text(value.city) ? { city: text(value.city) } : {}),
     disciplines: Array.isArray(value.disciplines) ? value.disciplines.map(text).filter(Boolean) : [],

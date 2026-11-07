@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { routes, realisationPath, serviceHref, serviceSlugs } from "@/lib/routes";
 import { getProjects } from "@/lib/content/catalogue";
-import { pageUpdated, projectsUpdated, serviceUpdated } from "@/lib/content/freshness";
+import { projectUpdated, pageUpdated, serviceUpdated } from "@/lib/content/freshness";
 
 const SITE_URL = "https://sujeedesign.com";
 
@@ -14,7 +14,8 @@ const SITE_URL = "https://sujeedesign.com";
  *
  * `lastModified` n'est jamais `new Date()` : chaque entrée prend la date
  * éditoriale de sa propre page (`pageUpdated`), de sa propre fiche service
- * (`serviceUpdated`) ou du catalogue de réalisations (`projectsUpdated`).
+ * (`serviceUpdated`) ou de la fiche réalisation elle-même (`projectUpdated`,
+ * alimenté par l'`updated_at` du catalogue).
  * Voir `lib/content/freshness.ts`.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -110,7 +111,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const projectPages: MetadataRoute.Sitemap = projects.map((project) => ({
     url: `${SITE_URL}${realisationPath(project.slug)}`,
-    lastModified: projectsUpdated(),
+    lastModified: projectUpdated(project),
     changeFrequency: "yearly",
     priority: 0.7,
   }));
