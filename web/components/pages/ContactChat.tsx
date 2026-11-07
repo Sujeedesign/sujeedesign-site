@@ -528,8 +528,23 @@ export default function ContactChat() {
           </form>
 
           <div className={styles.panelFoot}>
-            <button type="button" className={styles.linkish} onClick={() => setShowForm((value) => !value)}>
-              {showForm ? "Masquer le formulaire" : "Je préfère écrire un message"}
+            <button
+              type="button"
+              className={styles.writeBtn}
+              aria-expanded={showForm}
+              aria-controls="contact-handoff"
+              onClick={() => setShowForm((value) => !value)}
+            >
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M4 20h4l10-10a2.5 2.5 0 0 0-3.5-3.5L4.5 16.5 4 20Z"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span>{showForm ? "Masquer le formulaire" : "Je préfère écrire un message"}</span>
             </button>
             {messages.length > 1 && (
               <button type="button" className={styles.linkish} onClick={reset}>
@@ -539,7 +554,7 @@ export default function ContactChat() {
           </div>
 
           {showForm && (
-            <form className={styles.handoff} onSubmit={submitLead} noValidate>
+            <form id="contact-handoff" className={styles.handoff} onSubmit={submitLead} noValidate>
               {leadRef && leadState === "sent" ? (
                 <div className={styles.leadDone} role="status">
                   <span className={styles.confirmTag}>Demande enregistrée</span>
