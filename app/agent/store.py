@@ -50,7 +50,7 @@ def normalize_branding(value: str) -> str:
 FIELD_LABELS = {
     "project_type": "type de projet",
     "context": "activité / secteur",
-    "branding": "branding à réaliser",
+    "branding": "marque / nom du projet",
     "phone": "téléphone",
     "call_mode": "point visio ou téléphonique",
     "moment": "moment préféré (matin / après-midi)",

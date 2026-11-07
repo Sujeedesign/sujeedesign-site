@@ -397,7 +397,9 @@ def test_premiere_reponse_du_visiteur_n_est_pas_jetee(conn):
     second = _collect(conn, session_id, "Site web ou e-commerce", llm, google)
     texte = "".join(e["text"] for e in second if e.get("type") == "delta")
     assert "type de projet" not in texte
-    assert "branding" in texte.lower()
+    assert "marque" in texte.lower()
+    # La question accuse réception du projet avant de demander le nom.
+    assert "site web ou e-commerce" in texte.lower()
     row = store.get_session(conn, session_id)
     assert row is not None
     assert store.session_fields(row)["project_type"] == "Site web ou e-commerce"

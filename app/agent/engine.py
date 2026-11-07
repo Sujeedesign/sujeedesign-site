@@ -328,7 +328,11 @@ def _question_for(fields: dict[str, str]) -> str:
         if first == "project_type":
             return "Quel type de projet avez-vous en tête ?"
         if first == "branding":
-            return "Quel est le nom du branding à réaliser (marque, produit ou projet) ?"
+            projet = " ".join(str(fields.get("project_type") or "").split())[:80]
+            if projet:
+                dit = projet[0].lower() + projet[1:]
+                return f"Bien reçu, {dit}. Et quel est le nom de la marque ?"
+            return "Quel est le nom de la marque ?"
         if first == "context":
             return "Pour quelle activité ou quel secteur est-ce ?"
     return "Pouvez-vous préciser votre besoin en une phrase ?"
@@ -762,8 +766,14 @@ def _server_qualification_turn(toolbox: ToolBox, message: str) -> str:
                 if precision and not _already_known(fields, "project_type", precision):
                     store.merge_fields(conn, session_id, {"project_type": precision})
                     fields = store.session_fields(store.get_session(conn, session_id))
-            # Réponse inexploitable : on repose la même question.
-            return _question_for(fields)
+            # Réponse inexploitable : une relance reformulée plutôt que la même
+            # question recopiée. Si elle a déjà eu lieu, on avance pour ne
+            # jamais tourner en rond.
+            if _relance_deja_faite(conn, session_id, asked):
+                store.merge_fields(conn, session_id, {asked: _FALLBACK_VALUE[asked]})
+                fields = store.session_fields(store.get_session(conn, session_id))
+            else:
+                return _RELANCE.get(asked) or _question_for(fields)
     missing = [key for key in store.QUALIFICATION if not fields.get(key)]
     if not missing:
         if asked:
@@ -828,6 +838,23 @@ _PURE_MODE = re.compile(
     r"(?i)^\s*(?:t[ée]l\w*|phone|appel|visio\w*|zoom|meet|téléphone)\s*$"
 )
 _BRAND_MARK = re.compile(r"(?i)(marque|branding|nom|appel\w*|s'appelle|soci[eé]t[eé])")
+# Un vrai nom de marque est court et ne commence pas par une formule de phrase :
+# « C'est pour une marque de vêtement » décrit le projet, ce n'est pas un nom.
+_BRAND_NAME_MARK = re.compile(r"(?i)(s'appelle|se nomme|s'intitule|nomm[ée]e?\b|nom\s*[:=])")
+_BRAND_FIRST_STOP = re.compile(
+    r"(?i)^\s*(?:c'est|c[’']est|ce\s+sont|je|j'ai|nous|on|pour|de|du|des|d[’']|"
+    r"une|un|avec|dans|il|elle|mon|ma|mes|notre|nos|votre|vos)\b"
+)
+_BRAND_PREFIX = re.compile(
+    r"(?i)^(?:.*?\b(?:s'appelle|se nomme|s'intitule)\s+|"
+    r"(?:le\s+)?nom(?:\s+de\s+la\s+marque)?\s*(?:c'est|est)\s*:?\s*|c[’']est\s+)"
+)
+
+
+def _strip_brand_prefix(text: str) -> str:
+    """« Ma marque s'appelle Vaasam » -> « Vaasam »."""
+    cleaned = _BRAND_PREFIX.sub("", text).strip(" :,-")
+    return cleaned or text
 
 
 def _qualification_value(key: str, message: str) -> str:
@@ -842,11 +869,21 @@ def _qualification_value(key: str, message: str) -> str:
     if _PURE_MOMENT.match(text) or _PURE_MODE.match(text) or _EMAIL.search(text) or _PHONE.search(text):
         return ""
     if key == "branding":
-        if not _BRAND_MARK.search(text) and _ANY_PROJECT.search(text):
-            # « Création d'un site ecommerce » répond au type de projet, pas au
-            # nom du branding : on ne l'enregistre pas comme marque.
+        normalized = store.normalize_branding(text)
+        if normalized == store.BRANDING_UNKNOWN:
+            return normalized
+        if not normalized:
             return ""
-        return store.normalize_branding(text)
+        cleaned = _strip_brand_prefix(normalized) or normalized
+        if not _BRAND_NAME_MARK.search(normalized):
+            words = cleaned.split()
+            # « C'est pour une marque de vêtement », « de vêtement », « création
+            # d'un site ecommerce » : le projet redit, pas un nom de marque.
+            if _BRAND_FIRST_STOP.search(cleaned) or len(words) > 5:
+                return ""
+            if _ANY_PROJECT.search(cleaned) and len(words) > 2:
+                return ""
+        return cleaned
     if key == "project_type":
         if store._BRANDING_NOISE.match(text.lower()):
             return ""
@@ -896,6 +933,39 @@ def _asks_field(answer: str, key: str) -> bool:
         return False
     pattern = _ASKS_FIELD.get(key)
     return bool(pattern and pattern.search(answer))
+
+
+# Relance d'une question dont la réponse n'était pas exploitable : phrase
+# différente de la question initiale, sinon le visiteur croit qu'on ne l'écoute pas.
+_RELANCE = {
+    "project_type": "Pardon, pour quel type de projet me contactez-vous ?",
+    "branding": "Pas de souci, c'est bien le nom de la marque que je note. Comment s'appelle-t-elle ?",
+    "context": "Et pour quelle activité ou quel secteur, concrètement ?",
+}
+_FALLBACK_VALUE = {
+    "project_type": "à préciser",
+    "branding": store.BRANDING_UNKNOWN,
+    "context": "à préciser",
+}
+_RELANCE_MARK = {
+    "project_type": "type de projet",
+    "branding": "nom de la marque",
+    "context": "activité",
+}
+
+
+def _relance_deja_faite(conn: Any, session_id: str, key: str) -> bool:
+    """Vrai si la question de ce champ a déjà été reposée une fois.
+
+    Deux messages de l'assistant mentionnent le champ : la question initiale
+    puis la relance. Au troisième essai on avance, quitte à marquer le champ
+    « à préciser » : mieux vaut un rendez-vous qu'une boucle.
+    """
+    marker = _RELANCE_MARK.get(key, "")
+    if not marker:
+        return False
+    recent = store.messages(conn, session_id, limit=10)
+    return sum(1 for m in recent if m["role"] == "assistant" and marker in (m["content"] or "")) >= 2
 
 
 def _server_moment_turn(toolbox: ToolBox, row: Any, message: str) -> str:
