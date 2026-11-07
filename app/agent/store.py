@@ -33,6 +33,29 @@ _UNKNOWN_BRANDING = re.compile(
 )
 
 
+_CONTEXT_HINTS: tuple[tuple[re.Pattern[str], str], ...] = (
+    (re.compile(r"(?i)cosm[eé]ti|soin|beaut[eé]|maquillage|parfum|skincare"), "beauté et cosmétique"),
+    (re.compile(r"(?i)mode|v[eê]tement|fringue|pr[eê]t-?-?porter|fashion|bijou"), "mode et textile"),
+    (re.compile(r"(?i)resto|restaurant|cuisine|traiteur|caf[eé]|p[aâ]tisserie"), "restauration"),
+    (re.compile(r"(?i)immobili|agence immo"), "immobilier"),
+    (re.compile(r"(?i)startup|saas|logiciel|appli|tech"), "tech"),
+    (re.compile(r"(?i)yoga|coach|th[eé]rap|sant[eé]|bien-[eê]tre"), "santé et bien-être"),
+)
+
+
+def infer_context(*textes: str) -> str:
+    """Déduit le secteur d'un projet quand le visiteur le dit déjà.
+
+    « Créer une marque de cosmétique » : le secteur est la beauté, inutile de
+    le redemander. On ne devine rien de plus fin que ces grandes familles.
+    """
+    joined = " ".join(str(t or "") for t in textes)
+    for pattern, label in _CONTEXT_HINTS:
+        if pattern.search(joined):
+            return label
+    return ""
+
+
 def normalize_branding(value: str) -> str:
     """Un branding encore inconnu ne doit pas bloquer la qualification."""
     text = " ".join(str(value or "").split())

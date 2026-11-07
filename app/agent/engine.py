@@ -761,26 +761,36 @@ def _server_qualification_turn(toolbox: ToolBox, message: str) -> str:
         if not fields.get(asked):
             # Le visiteur précise son projet alors qu'on demande la marque :
             # on garde la précision et on repose la question du branding.
+            precision = ""
             if asked != "project_type":
                 precision = _qualification_value("project_type", message)
                 if precision and not _already_known(fields, "project_type", precision):
                     store.merge_fields(conn, session_id, {"project_type": precision})
                     fields = store.session_fields(store.get_session(conn, session_id))
             # Réponse inexploitable : une relance reformulée plutôt que la même
-            # question recopiée. Si elle a déjà eu lieu, on avance pour ne
-            # jamais tourner en rond.
-            if _relance_deja_faite(conn, session_id, asked):
+            # question recopiée. Redire son projet n'est pas une réponse ratée :
+            # on laisse un essai de plus avant de marquer le champ « à préciser ».
+            redite = bool(precision or store.infer_context(message))
+            if _relance_deja_faite(conn, session_id, asked, seuil=3 if redite else 2):
                 store.merge_fields(conn, session_id, {asked: _FALLBACK_VALUE[asked]})
                 fields = store.session_fields(store.get_session(conn, session_id))
             else:
-                return _RELANCE.get(asked) or _question_for(fields)
+                return _relance_for(asked, message, fields)
     missing = [key for key in store.QUALIFICATION if not fields.get(key)]
+    if missing and all(key == "context" for key in missing):
+        # Le secteur se déduit du projet : « cosmétique » = beauté, inutile de
+        # poser une question dont la réponse est déjà dans la demande.
+        inferred = store.infer_context(fields.get("project_type", ""))
+        if inferred:
+            store.merge_fields(conn, session_id, {"context": inferred})
+            fields = store.session_fields(store.get_session(conn, session_id))
+            missing = [key for key in store.QUALIFICATION if not fields.get(key)]
     if not missing:
         if asked:
             store.touch(conn, session_id, pending="")
         fresh = store.get_session(conn, session_id)
         if (
-            asked == store.QUALIFICATION[-1]
+            asked
             and fresh is not None
             and str(fresh["status"] or "") == store.STATUS_OPEN
             and str(fresh["step"] or "") not in ("moment", "creneaux", "confirme")
@@ -831,7 +841,10 @@ _ANY_PROJECT = re.compile(
     r"identit\w*|charte|applica\w*|appli|mobile|refonte|print|[eé]dition|affiche|"
     r"flyer|brochure|packaging|photo|vid[eé]o|motion|3d|anim\w*|illustration|"
     r"r[eé]seaux sociaux|social|seo|campagne|ads|ui|ux|maquette|portfolio|"
-    r"vitrine|crm|erp|logiciel|automatisation|chatbot)\b"
+    r"vitrine|crm|erp|logiciel|automatisation|chatbot|"
+    r"direction\s+artistique|da\b|cr[eé]ation\s+de\s+marque|"
+    r"lancement\s+de\s+marque|cosm[eé]ti\w*|parfum|soin|"
+    r"menu|restaurant|traiteur|d[eé]coration|papeterie)\b"
 )
 _PURE_MOMENT = re.compile(r"(?i)^\s*(?:le\s+|l')?(matin|apr[eè]s[- ]?midi|soir)\s*$")
 _PURE_MODE = re.compile(
@@ -881,7 +894,7 @@ def _qualification_value(key: str, message: str) -> str:
             # d'un site ecommerce » : le projet redit, pas un nom de marque.
             if _BRAND_FIRST_STOP.search(cleaned) or len(words) > 5:
                 return ""
-            if _ANY_PROJECT.search(cleaned) and len(words) > 2:
+            if _ANY_PROJECT.search(cleaned) or store.infer_context(cleaned):
                 return ""
         return cleaned
     if key == "project_type":
@@ -935,37 +948,76 @@ def _asks_field(answer: str, key: str) -> bool:
     return bool(pattern and pattern.search(answer))
 
 
-# Relance d'une question dont la réponse n'était pas exploitable : phrase
-# différente de la question initiale, sinon le visiteur croit qu'on ne l'écoute pas.
-_RELANCE = {
-    "project_type": "Pardon, pour quel type de projet me contactez-vous ?",
-    "branding": "Pas de souci, c'est bien le nom de la marque que je note. Comment s'appelle-t-elle ?",
-    "context": "Et pour quelle activité ou quel secteur, concrètement ?",
-}
+# Relance d'une question dont la réponse n'était pas exploitable : la phrase
+# est construite à partir de ce que le visiteur vient de dire (_relance_for),
+# jamais recopiée de la question précédente.
+
+
+def _echo(message: str, limit: int = 8) -> str:
+    """Reprend les mots du visiteur, courts, pour montrer qu'on l'a lu."""
+    words = " ".join(str(message or "").split())
+    if not words:
+        return ""
+    parts = words.split()[:limit]
+    said = " ".join(parts).strip(" .,;:!?…\"'")
+    return said[:80]
+
+
+def _relance_for(asked: str, message: str, fields: dict[str, str]) -> str:
+    """Relance qui s'appuie sur la réponse reçue : on n'accuse pas sans écouter.
+
+    La relance ne recopie jamais la question précédente : elle nomme ce que le
+    visiteur vient de dire, puis pose la question autrement.
+    """
+    said = _echo(message)
+    if asked == "project_type":
+        if said:
+            return (
+                f"Je note « {said} ». Pour bien cadrer : c'est une création de marque, "
+                "une direction artistique, un site, du packaging ?"
+            )
+        return "Pour bien vous orienter : création de marque, direction artistique, site, packaging ?"
+    if asked == "branding":
+        if said and len(said.split()) <= 3 and not _ANY_PROJECT.search(said):
+            return f"Bien noté pour {said}. Comment s'appelle-t-elle, cette marque ?"
+        return "Bien noté. Comment s'appelle-t-elle, cette marque ? Même un nom provisoire me va."
+    if asked == "context":
+        if said:
+            return f"D'accord, {said}. Et dans quel secteur ou pour quelle activité, concrètement ?"
+        return "Et dans quel secteur ou pour quelle activité, concrètement ?"
+    return _question_for(fields)
 _FALLBACK_VALUE = {
     "project_type": "à préciser",
     "branding": store.BRANDING_UNKNOWN,
     "context": "à préciser",
 }
 _RELANCE_MARK = {
-    "project_type": "type de projet",
-    "branding": "nom de la marque",
-    "context": "activité",
+    "project_type": ("type de projet", "création de marque", "direction artistique", "packaging"),
+    "branding": ("nom de la marque", "s'appelle-t-elle", "s'appelle-t-il"),
+    "context": ("activité", "secteur"),
 }
 
 
-def _relance_deja_faite(conn: Any, session_id: str, key: str) -> bool:
+def _relance_deja_faite(
+    conn: Any, session_id: str, key: str, seuil: int = 2
+) -> bool:
     """Vrai si la question de ce champ a déjà été reposée une fois.
 
     Deux messages de l'assistant mentionnent le champ : la question initiale
     puis la relance. Au troisième essai on avance, quitte à marquer le champ
-    « à préciser » : mieux vaut un rendez-vous qu'une boucle.
+    « à préciser » : mieux vaut un rendez-vous qu'une boucle. `seuil` laisse un
+    essai de plus quand le visiteur redit son projet au lieu de répondre.
     """
-    marker = _RELANCE_MARK.get(key, "")
-    if not marker:
+    markers = _RELANCE_MARK.get(key, ())
+    if not markers:
         return False
     recent = store.messages(conn, session_id, limit=10)
-    return sum(1 for m in recent if m["role"] == "assistant" and marker in (m["content"] or "")) >= 2
+
+    def _parle_du_champ(m: Any) -> bool:
+        contenu = (m["content"] or "").lower()
+        return m["role"] == "assistant" and any(marker in contenu for marker in markers)
+
+    return sum(1 for m in recent if _parle_du_champ(m)) >= seuil
 
 
 def _server_moment_turn(toolbox: ToolBox, row: Any, message: str) -> str:
