@@ -940,3 +940,71 @@ def test_aucun_autre_prenom_n_atteint_le_visiteur() -> None:
     assert engine._sans_autre_prenom("Votre numéro, pour l'appel avec Sujee ?") == (
         "Votre numéro, pour l'appel avec Sujee ?"
     )
+
+
+def test_question_qui_es_tu_recoit_une_vraie_reponse(conn):
+    """Cas signalé : « Qui es tu ? » ne doit pas être remplacé par la question de qualification."""
+    google = FakeGoogle(available=[slots.candidates()[0]])
+    session_id = engine.prepare_session(conn)
+    llm = FakeLLM([])
+
+    _collect(conn, session_id, "Bonjour", llm, google)
+    events = _collect(conn, session_id, "Qui es tu ?", llm, google)
+    texte = "".join(event["text"] for event in events if event.get("type") == "delta").strip()
+
+    assert "assistant" in texte.lower()
+    assert "sujee" in texte.lower()
+    # On répond à la question, on ne repose pas le questionnaire.
+    assert "type de projet" not in texte.lower()
+
+    row = store.get_session(conn, session_id)
+    assert row is not None
+    assert store.session_fields(row).get("project_type", "") == ""
+    assert row["pending"] == "project_type"
+
+
+def test_question_meta_puis_reponse_normale(conn):
+    """Après une réponse sur l'assistant, le tour suivant enregistre bien le projet."""
+    google = FakeGoogle(available=[slots.candidates()[0]])
+    session_id = engine.prepare_session(conn)
+    llm = FakeLLM([])
+
+    _collect(conn, session_id, "Bonjour", llm, google)
+    _collect(conn, session_id, "Qui es tu ?", llm, google)
+    _collect(conn, session_id, "Un site vitrine pour ma marque", llm, google)
+
+    row = store.get_session(conn, session_id)
+    assert row is not None
+    assert store.session_fields(row)["project_type"] == "Un site vitrine pour ma marque"
+
+
+def test_question_sur_sujee_et_sur_le_deroule(conn):
+    google = FakeGoogle(available=[slots.candidates()[0]])
+    session_id = engine.prepare_session(conn)
+    llm = FakeLLM([])
+
+    _collect(conn, session_id, "Bonjour", llm, google)
+
+    sujee = _collect(conn, session_id, "Qui est Sujee ?", llm, google)
+    texte = "".join(event["text"] for event in sujee if event.get("type") == "delta")
+    assert "Sujeepan" in texte
+
+    deroule = _collect(conn, session_id, "Comment ça marche ?", llm, google)
+    texte = "".join(event["text"] for event in deroule if event.get("type") == "delta")
+    assert "30 minutes" in texte
+
+    row = store.get_session(conn, session_id)
+    assert row is not None
+    assert store.session_fields(row).get("project_type", "") == ""
+
+
+def test_salutation_recue_rend_la_politesse(conn):
+    """« Hello » seul mérite un bonjour, même si le modèle répond par la question sèche."""
+    google = FakeGoogle(available=[slots.candidates()[0]])
+    session_id = engine.prepare_session(conn)
+    llm = FakeLLM([[TurnOutput(text="Quel type de projet avez-vous en tête ?")]])
+
+    events = _collect(conn, session_id, "Hello", llm, google)
+    texte = "".join(event["text"] for event in events if event.get("type") == "delta").strip()
+    assert texte.lower().startswith("bonjour")
+    assert texte.count("?") == 1

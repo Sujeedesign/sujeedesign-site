@@ -92,8 +92,17 @@ def turn(
     messages.extend(pre)
     answer = ""
     pending = ""
+    side_turn = False
+    # Une question sur l'assistant, sur Sujee ou sur le déroulé n'est pas une
+    # réponse de qualification : elle passe avant les chemins serveur, qui
+    # sinon reposeraient la question en cours.
+    side = _side_answer(store.get_session(conn, session_id), message)
+    if side:
+        answer = side
+        side_turn = True
     # Demi-journée puis choix du créneau : chemins serveur déterministes.
-    answer = _server_qualification_turn(toolbox, message)
+    if not answer:
+        answer = _server_qualification_turn(toolbox, message)
     if not answer:
         answer = _server_moment_turn(toolbox, store.get_session(conn, session_id), message)
     if not answer:
@@ -278,8 +287,9 @@ def turn(
                 # À l'étape demi-journée, une phrase qui ne propose pas matin/après-midi
                 # laisse le visiteur bloqué : on repose la question utile.
                 answer = "Vous préférez le matin ou l'après-midi ?"
-            if not slots_shown:
+            if not slots_shown and not side_turn:
                 answer = _qualification_question(toolbox, row_now, answer)
+            answer = _greet_back(message, answer)
             answer = _one_question(answer)
         for chunk in _chunks(answer):
             yield {"type": "delta", "text": chunk}
@@ -832,6 +842,85 @@ def _strip_greeting(text: str) -> str:
             break
         cleaned = stripped
     return cleaned
+
+
+# « Bonjour » seul : le visiteur salue, il ne répond pas encore au questionnaire.
+_GREETING_ONLY = re.compile(
+    r"(?i)^\s*(bonjour|bonsoir|salut|hello|coucou|hey|yo|bjr|slt)\b[\s!.,;:-]*$"
+)
+_GREETING_WORD = re.compile(r"(?i)\b(bonjour|bonsoir|salut|hello|coucou|hey|yo|bjr|slt)\b")
+
+# Questions sur l'assistant, sur Sujee ou sur le déroulé. Un petit modèle les
+# ignore et repose sa question de qualification : on répond ici, sûrement.
+_IDENTITY_Q = re.compile(
+    r"(?i)(qui\s+(?:es|est|êtes)[- ]?(?:tu|vous)|tu\s+es\s+qui|c'?est\s+qui\s+(?:toi|vous)|"
+    r"qui\s+me\s+r[ée]pond|tu\s+es\s+(?:un|une)\s+(?:robot|bot|ia|intelligence\s+artificielle|humain)|"
+    r"es[- ]?tu\s+(?:un\s+|une\s+)?(?:robot|bot|humain|ia)|"
+    r"(?:un\s+)?(?:robot|chatbot)\s*\?|tu\s+es\s+une\s+machine)"
+)
+_ABOUT_SUJEE_Q = re.compile(
+    r"(?i)(qui\s+est\s+sujee|qui\s+est\s+sujeepan|c'?est\s+qui\s+sujee|sujee\s*,?\s*c'?est\s+qui)"
+)
+_HOW_Q = re.compile(
+    r"(?i)(comment\s+[çc]a\s+(?:marche|se\s+passe)|[àa]\s+quoi\s+[çc]a\s+sert|"
+    r"tu\s+sers\s+[àa]\s+quoi|que\s+fais[- ]tu)\b"
+)
+
+_SIDE_ANSWERS = {
+    "identity": (
+        "Je suis l'assistant IA de Sujeedesign : je comprends votre besoin en trois questions, "
+        "puis je vous ouvre un appel de 30 minutes avec Sujee. Un humain relit chaque échange, "
+        "rien ne part automatiquement."
+    ),
+    "sujee": (
+        "Sujee, c'est Sujeepan SABESAN, le fondateur de Sujeedesign, studio de design graphique "
+        "et digital à Paris depuis 2013. L'appel de 30 minutes se fait directement avec lui, "
+        "sans intermédiaire."
+    ),
+    "how": (
+        "Je vous pose trois questions sur votre besoin, puis je vous propose un créneau d'appel "
+        "de 30 minutes avec Sujee. Vous choisissez l'horaire qui vous arrange, la réservation "
+        "se fait en ligne."
+    ),
+}
+
+
+def _side_answer(row: Any, message: str) -> str:
+    """Réponse directe aux questions qui ne sont pas des réponses de qualification.
+
+    Le modèle, surtout un petit, préfère reposer sa question plutôt que de
+    répondre à « Qui es-tu ? ». Une question sur l'assistant, sur Sujee ou sur
+    le déroulé reçoit donc une réponse serveur, polie et exacte, et aucune
+    question de qualification n'est ajoutée pendant ce tour.
+    """
+    if row is None:
+        return ""
+    if str(row["status"] or "") != store.STATUS_OPEN:
+        return ""
+    if str(row["step"] or "") in ("creneaux", "confirme") or store.session_proposals(row):
+        return ""
+    text = " ".join(str(message or "").split())
+    if not text or len(text) > 200:
+        return ""
+    if _IDENTITY_Q.search(text):
+        return _SIDE_ANSWERS["identity"]
+    if _ABOUT_SUJEE_Q.search(text):
+        return _SIDE_ANSWERS["sujee"]
+    if _HOW_Q.search(text):
+        return _SIDE_ANSWERS["how"]
+    return ""
+
+
+def _greet_back(message: str, answer: str) -> str:
+    """Rend la politesse quand le visiteur salue et que le modèle l'oublie."""
+    text = (answer or "").strip()
+    said = str(message or "").strip()
+    if not text or not _GREETING_ONLY.match(said):
+        return text
+    if _GREETING_WORD.search(text.split("?")[0]):
+        return text
+    hello = "Bonsoir" if said.lower().startswith("bonsoir") else "Bonjour"
+    return f"{hello} ! {text}"
 
 
 # Un message ne vaut pour le type de projet que s'il nomme un type de projet :
