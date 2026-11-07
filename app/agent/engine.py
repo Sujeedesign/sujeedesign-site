@@ -80,6 +80,10 @@ def turn(
 
     toolbox = ToolBox(conn, session_id, google, notify=notify)
     messages = _history(conn, session_id)
+    # Tout ce que le message contient déjà (projet, prénom, demi-journée, email)
+    # est enregistré avant les chemins serveur : sans ça, l'agent reposait des
+    # questions dont la réponse était dans la première phrase.
+    _harvest(toolbox, message)
     # Certaines transitions clés (validation du récap, choix d'un créneau) sont
     # pilotées côté serveur : un petit modèle les oublie trop souvent.
     pre = _preflight(toolbox, store.get_session(conn, session_id), message)
@@ -715,6 +719,8 @@ def _guess_branding(message: str) -> str:
 def _guess_mode(message: str) -> str:
     """Déduit le format souhaité : visio ou appel téléphonique."""
     text = _flat(message)
+    # « je m'appel Ramm » n'est pas une demande d'appel téléphonique.
+    text = re.sub(r"(?i)\bm'?\s?ap{1,2}e?l{1,2}e?\b[^,.;]*", " ", text)
     # "télphone", "telephon", "tlphone", "tel" : on tolère la faute et l'abrégé.
     text = _MODE_PHONE_TYPOS.sub("telephone ", text)
     visio = bool(_MODE_VISIO.search(text))
@@ -821,6 +827,23 @@ def _server_qualification_turn(toolbox: ToolBox, message: str) -> str:
                 }
             )
             return "Vous préférez le matin ou l'après-midi ?"
+        # La demi-journée est déjà connue (dite dans la même phrase que le
+        # projet) : on ouvre les créneaux au lieu de la redemander.
+        moment_now = (
+            slots.normalize_moment(store.session_fields(fresh).get("moment", ""))
+            if fresh is not None
+            else ""
+        )
+        if (
+            fresh is not None
+            and moment_now
+            and str(fresh["status"] or "") == store.STATUS_OPEN
+            and str(fresh["step"] or "") not in ("creneaux", "confirme")
+            and not store.session_proposals(fresh)
+        ):
+            opened = toolbox.call("request_slots", {"moment": moment_now})
+            if opened.get("ok") and opened.get("creneaux"):
+                return f"Parfait, voici les créneaux {slots.MOMENTS[moment_now]}. Lequel vous convient ?"
         return ""
     nxt = missing[0]
     if nxt != asked:
@@ -959,6 +982,145 @@ def _strip_brand_prefix(text: str) -> str:
     return cleaned or text
 
 
+_PROJECT_FILLER = re.compile(
+    r"(?i)\b(?:rdv|rendez[- ]?vous|je\s+veux|je\s+voudrais|j'?aimerais|je\s+souhaite|"
+    r"je\s+cherche|je\s+m'?\s?ap{1,2}e?l{1,2}e?|mon\s+nom\s+est|bonjour|bonsoir|salut|hello|"
+    r"tr[eè]s\s+bien|d'?accord|parfait|lundi|mardi|mercredi|jeudi|vendredi)\b"
+)
+_PROJECT_LEAD_CUT = re.compile(
+    r"(?i)^\s*(?:pour\s+|sur\s+|de\s+|du\s+|d'|au\s+sujet\s+de\s+|concernant\s+|avec\s+)*"
+)
+_PROJECT_ART = re.compile(r"(?i)^\s*(?:un|une|le|la|les|des|l'|d')\s+")
+# « je veux RDV avec sujee », « je m'appelle Ramm » : du bruit autour du projet.
+_PROJECT_NOISE = re.compile(
+    r"(?i)\b(?:je\s+veux|je\s+voudrais|j'?aimerais|je\s+souhaite|je\s+cherche|prendre)\b"
+)
+_PROJECT_RDV = re.compile(r"(?i)\b(?:un\s+)?(?:rdv|rendez[- ]?vous)\b(?:\s+avec\s+sujee)?")
+_PROJECT_SELF = re.compile(
+    r"(?i)\b(?:je\s+m'?\s?ap{1,2}e?l{1,2}e?|mon\s+nom\s+est)\b[^,.;]*"
+)
+
+
+def _project_phrase(text: str) -> str:
+    """Garde la prestation demandée, pas la phrase entière du visiteur.
+
+    « très bien. je veux RDV avec sujee pour lundi matin, sur une conception de
+    logo. Je m'appelle Ramm » -> « conception de logo ». Recopier le message
+    donnait l'impression que l'agent n'avait rien lu.
+    """
+    raw = " ".join(str(text or "").split())
+    if not raw or not _PROJECT_FILLER.search(raw):
+        return raw
+    best = ""
+    for chunk in re.split(r"[,;]|\.(?=\s|$)|\bet\b", raw):
+        if not _ANY_PROJECT.search(chunk):
+            continue
+        part = _PROJECT_NOISE.sub(" ", chunk)
+        part = _PROJECT_RDV.sub(" ", part)
+        part = _PROJECT_SELF.sub(" ", part)
+        part = re.sub(r"(?i)\bavec\s+sujee\b", " ", part)
+        part = re.sub(
+            r"(?i)\b(?:le\s+|ce\s+)?(?:lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\b"
+            r"(?:\s+(?:prochain|matin|apr[eè]s[- ]?midi))?",
+            " ",
+            part,
+        )
+        part = re.sub(r"(?i)\b(?:le\s+)?(?:matin|matin[eé]e|apr[eè]s[- ]?midi|aprem)\b", " ", part)
+        part = _PROJECT_LEAD_CUT.sub("", " ".join(part.split()))
+        for _ in range(3):
+            before = part
+            part = re.sub(
+                r"(?i)^\s*(?:bonjour|bonsoir|salut|hello|coucou|tr[eè]s\s+bien|ok|"
+                r"d'?accord|parfait)\b[\s,.;:!-]*",
+                "",
+                part,
+            )
+            part = _PROJECT_LEAD_CUT.sub("", part)
+            part = _PROJECT_ART.sub("", part)
+            if part == before:
+                break
+        part = part.strip(" .,:;!-'’")
+        if part and (not best or len(part) < len(best)):
+            best = part
+    return best or raw
+
+
+_SELF_NAME = re.compile(
+    r"(?i)\b(?:je\s+m'?\s?ap{1,2}e?l{1,2}e?|mon\s+nom\s+est|moi\s+c'?est)\s+"
+    r"([A-Za-zÀ-ÖØ-öø-ÿ][\w'’-]{1,24}(?:\s+[A-Za-zÀ-ÖØ-öø-ÿ][\w'’-]{1,24})?)"
+)
+
+
+def _self_name(text: str) -> str:
+    """« je m'appel Ramm » -> « Ramm » : le prénom ne se redemande pas ensuite."""
+    match = _SELF_NAME.search(text or "")
+    if not match:
+        return ""
+    nom = " ".join(match.group(1).split()).strip(" .,;:!?-")
+    # « Ramm et je veux un logo » : on ne garde pas la conjonction.
+    nom = re.sub(r"(?i)\s+(?:et|mais|pour|sur|puis|donc)\b.*$", "", nom).strip()
+    if len(nom) < 2 or _ANY_PROJECT.search(nom) or _flat(nom) in _MODE_WORDS:
+        return ""
+    return nom
+
+
+def _harvest(toolbox: ToolBox, message: str) -> None:
+    """Lit tout ce que le message contient déjà, au lieu de le redemander.
+
+    Un visiteur qui écrit « je veux un RDV lundi matin pour une conception de
+    logo, je m'appelle Ramm » a déjà donné quatre informations : l'agent ne doit
+    poser ensuite que les questions réellement sans réponse.
+    """
+    conn, session_id = toolbox.conn, toolbox.session_id
+    row = store.get_session(conn, session_id)
+    if row is None or toolbox.booking or toolbox.handed_off:
+        return
+    if str(row["status"] or "") != store.STATUS_OPEN:
+        return
+    fields = store.session_fields(row)
+    learned: dict[str, str] = {}
+    if not fields.get("project_type"):
+        project = _qualification_value("project_type", message)
+        if project:
+            learned["project_type"] = project
+            if not fields.get("context"):
+                context = store.infer_context(message)
+                if context:
+                    learned["context"] = context
+    if not fields.get("branding") and _BRAND_NAME_MARK.search(_flat(message)):
+        branding = _qualification_value("branding", message)
+        if branding and branding != store.BRANDING_UNKNOWN:
+            learned["branding"] = branding
+    if learned:
+        store.merge_fields(conn, session_id, learned)
+        fields = store.session_fields(store.get_session(conn, session_id))
+
+    details: dict[str, str] = {}
+    if not fields.get("moment"):
+        moment = slots.normalize_moment(message)
+        if moment:
+            details["moment"] = slots.MOMENT_LABELS[moment]
+    if not fields.get("call_mode"):
+        mode = _guess_mode(message)
+        if mode:
+            details["call_mode"] = mode
+    tel = _PHONE.search(message)
+    if tel and not fields.get("phone"):
+        details["phone"] = " ".join(tel.group(0).split())
+    if details:
+        store.set_details(conn, session_id, details)
+
+    name, email = store.session_contact(store.get_session(conn, session_id))
+    if not name:
+        found_name = _self_name(message)
+        if found_name:
+            store.set_contact(conn, session_id, name=found_name)
+    if not email:
+        mail = _EMAIL.search(message)
+        if mail:
+            store.set_contact(conn, session_id, email=mail.group(0))
+
+
 def _qualification_value(key: str, message: str) -> str:
     """Valeur exploitable tirée du message pour le champ demandé.
 
@@ -991,7 +1153,7 @@ def _qualification_value(key: str, message: str) -> str:
             return ""
         if re.search(r"(?i)(pas encore|pas trouv|aucun|à définir|a definir)", text):
             return ""
-        return text if _ANY_PROJECT.search(text) else ""
+        return _project_phrase(text) if _ANY_PROJECT.search(text) else ""
     return text
 
 

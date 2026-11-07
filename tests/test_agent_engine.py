@@ -1008,3 +1008,42 @@ def test_salutation_recue_rend_la_politesse(conn):
     texte = "".join(event["text"] for event in events if event.get("type") == "delta").strip()
     assert texte.lower().startswith("bonjour")
     assert texte.count("?") == 1
+
+
+def test_message_riche_ne_recopie_pas_la_phrase(conn):
+    """Cas signalé : le message donne projet, demi-journée et prénom d'un coup.
+
+    L'agent recopiait la phrase entière comme « type de projet », puis redemandait
+    le matin/après-midi et le prénom déjà écrits.
+    """
+    google = FakeGoogle(available=[slots.candidates()[0]])
+    session_id = engine.prepare_session(conn)
+    llm = FakeLLM([])
+    _collect(conn, session_id, "Bonjour", llm, google)
+
+    dit = (
+        "tres bien. je veux RDV avec sujee pour le Lundi matin, sur un conception "
+        "de logo. Je m'appel Ramm"
+    )
+    events = _collect(conn, session_id, dit, llm, google)
+    texte = "".join(event["text"] for event in events if event.get("type") == "delta")
+
+    row = store.get_session(conn, session_id)
+    fields = store.session_fields(row)
+    assert fields["project_type"] == "conception de logo"
+    assert fields["moment"] == "Matin"
+    assert store.session_contact(row)[0] == "Ramm"
+
+    # Ni la phrase recopiée, ni les questions dont la réponse était dedans.
+    assert "je veux rdv" not in texte.lower()
+    assert "après-midi" not in texte.lower()
+    assert "prénom" not in texte.lower()
+
+
+def test_projet_et_prenom_extraits_du_message(monkeypatch):
+    """Extraction pure : le bruit autour de la prestation ne finit pas dans les champs."""
+    dit = "Salut, je voudrais un RDV mardi après-midi pour une refonte de site web, je m'appelle Jean Dupont."
+    assert engine._project_phrase(dit) == "refonte de site web"
+    assert engine._self_name(dit) == "Jean Dupont"
+    # Un message déjà propre n'est pas retouché.
+    assert engine._project_phrase("Un site vitrine pour ma marque") == "Un site vitrine pour ma marque"
