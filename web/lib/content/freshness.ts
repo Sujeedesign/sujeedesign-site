@@ -41,7 +41,7 @@ export const PAGE_UPDATED = {
   [routes.mentionsLegales]: "2026-11-02",
   [routes.ressources]: "2026-11-03",
   [routes.calculateurBudgetIdentite]: "2026-11-03",
-  [routes.guidePrixLogo]: "2026-11-05",
+  [routes.guidePrixLogo]: "2026-11-08",
   [routes.guideTendances2027]: "2026-11-05",
   [routes.generateurBriefIdentite]: "2026-11-03",
   [routes.testerSonLogo]: "2026-11-03",

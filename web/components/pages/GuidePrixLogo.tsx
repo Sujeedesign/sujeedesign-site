@@ -9,6 +9,17 @@ export const pageMeta = {
     "Prix d'un logo en 2026 : les fourchettes réelles de 40 à 6 000 €, ce que change chaque palier, et la différence avec une identité visuelle complète.",
 };
 
+/**
+ * Réponse courte servie en haut de page (bloc « En bref ») et première entrée
+ * du `FAQPage`. Les chiffres sont ceux des tableaux de la page : ne jamais en
+ * introduire un nouveau ici sans le faire apparaître plus bas.
+ */
+export const aeo = {
+  question: "Combien coûte un logo en 2026 ?",
+  answer:
+    "Sur le marché français, un logo se paie entre 40 et 6 000 € selon ce qui est réellement livré. Un dessin acheté sur une place de marché reste sous 200 €, un logo d'indépendant se situe entre 300 et 800 €. Un logo dessiné, décliné et remis avec ses sources et une cession de droits se situe entre 650 et 1 800 €. Une identité visuelle complète, avec palette, typographies, supports et guide d'usage, va de 2 500 à 3 500 €. Le repère le plus fiable reste le temps de conception : dix à vingt heures pour un logo, trente à cinquante-deux heures pour une identité.",
+};
+
 export const faqItems = [
   {
     question: "Pourquoi un logo coûte-t-il plus cher qu'un dessin ?",
@@ -204,6 +215,18 @@ export function GuidePrixLogo() {
           </div>
         </div>
       </header>
+
+      <section className="section">
+        <div className="wrap">
+          <div className="sec-head rv">
+            <div className="sec-num">En bref</div>
+            <div>
+              <h2>{aeo.question}</h2>
+              <p>{aeo.answer}</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section className="section">
         <div className="wrap">
