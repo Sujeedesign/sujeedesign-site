@@ -18,6 +18,33 @@ const NOON_UTC = "T12:00:00.000Z";
 
 const asIso = (value: unknown): string => new Date(value as Date).toISOString();
 
+/**
+ * Jour calendaire d'un instant, vu de Paris.
+ *
+ * Les dates éditoriales sont ancrées à midi UTC : elles désignent un *jour*,
+ * pas un instant. Comparer `stamp <= Date.now()` revient donc à exiger midi
+ * déjà passé, et faisait échouer la suite chaque matin où une date du jour est
+ * publiée. On compare désormais le jour de Paris de la date déclarée à celui de
+ * l'horloge : une date du jour est valide dès 00:00 à Paris, et rien de
+ * strictement postérieur au jour courant ne passe.
+ */
+const PARIS_DAY = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Europe/Paris",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+const parisDay = (value: Date | number | string): string =>
+  PARIS_DAY.format(value instanceof Date ? value : new Date(value));
+
+/** Jour courant à Paris, `AAAA-MM-JJ` (comparable lexicographiquement). */
+const todayInParis = (): string => parisDay(Date.now());
+
+/** Vrai si la date n'annonce aucun jour postérieur à aujourd'hui (Paris). */
+const isNotAfterToday = (value: Date | number | string, today = todayInParis()): boolean =>
+  parisDay(value) <= today;
+
 describe("signaux SEO du plan de site et du nom de site", () => {
   it("date chaque URL séparément, avec des lastmod réellement distincts", async () => {
     const entries = await sitemap();
@@ -40,9 +67,11 @@ describe("signaux SEO du plan de site et du nom de site", () => {
     const second = (await sitemap()).map((entry) => asIso(entry.lastModified));
     expect(second).toEqual(first);
 
-    const now = Date.now();
+    // Comparaison au jour près : une date du jour reste valide avant midi UTC,
+    // aucune date d'un jour ultérieur ne passe.
+    const today = todayInParis();
     for (const stamp of first) {
-      expect(new Date(stamp).getTime()).toBeLessThanOrEqual(now);
+      expect(isNotAfterToday(stamp, today)).toBe(true);
     }
   });
 
@@ -125,7 +154,7 @@ describe("signaux SEO du plan de site et du nom de site", () => {
 
   it("plafonne une date éditoriale future et ignore une date illisible", () => {
     const future = projectUpdated({ updatedAt: "2999-01-01" });
-    expect(future.getTime()).toBeLessThanOrEqual(Date.now());
+    expect(isNotAfterToday(future)).toBe(true);
     expect(future.toISOString().endsWith(NOON_UTC)).toBe(true);
 
     expect(projectUpdated({ updatedAt: "2026-13-45" }).toISOString()).toBe(projectsUpdated().toISOString());
@@ -138,7 +167,7 @@ describe("signaux SEO du plan de site et du nom de site", () => {
   });
 
   it("garde toutes les dates déclarées au format ISO et jamais dans le futur", () => {
-    const now = Date.now();
+    const today = todayInParis();
     const all = [
       ...Object.values(PAGE_UPDATED),
       ...Object.values(SERVICE_UPDATED),
@@ -148,13 +177,41 @@ describe("signaux SEO du plan de site et du nom de site", () => {
 
     for (const day of all) {
       expect(day).toMatch(ISO_DAY);
-      const at = new Date(`${day}${NOON_UTC}`).getTime();
-      expect(Number.isNaN(at)).toBe(false);
-      expect(at).toBeLessThanOrEqual(now);
+      // La date déclarée désigne un jour : c'est ce jour, et pas son midi,
+      // qu'on compare au jour courant à Paris.
+      const noonUtc = new Date(`${day}${NOON_UTC}`);
+      expect(Number.isNaN(noonUtc.getTime())).toBe(false);
+      expect(parisDay(noonUtc)).toBe(day);
+      expect(isNotAfterToday(noonUtc, today)).toBe(true);
     }
 
-    // La date figée dans le code ne suit pas l'horloge.
-    expect(Date.now() - contentUpdated().getTime()).toBeGreaterThan(60_000);
+    // La date figée dans le code ne suit pas l'horloge : elle ne coïncide pas
+    // avec l'instant présent (comparaison en valeur absolue, pour rester juste
+    // aussi le matin avant midi UTC le jour même).
+    expect(Math.abs(Date.now() - contentUpdated().getTime())).toBeGreaterThan(60_000);
+  });
+
+  it("compare les dates au jour près pour rester verte avant midi UTC", () => {
+    // Instant de référence : 08/11/2026 07:32 UTC, la fenêtre qui cassait la CI.
+    const matin = new Date("2026-11-08T07:32:00.000Z");
+    // Date du jour publiée, ancrée à midi UTC par `freshness.ts`.
+    const dateDuJour = new Date(`2026-11-08${NOON_UTC}`);
+
+    // L'ancienne assertion instantanée échouait ici : midi n'était pas passé.
+    expect(dateDuJour.getTime()).toBeGreaterThan(matin.getTime());
+    // La nouvelle comparaison au jour près l'accepte.
+    expect(parisDay(dateDuJour)).toBe("2026-11-08");
+    expect(isNotAfterToday(dateDuJour, parisDay(matin))).toBe(true);
+
+    // Elle refuse toujours un jour ultérieur, matin ou après-midi.
+    const demain = new Date(`2026-11-09${NOON_UTC}`);
+    expect(isNotAfterToday(demain, parisDay(matin))).toBe(false);
+
+    // Et elle tient à cheval sur minuit : 23:30 UTC le 08/11, il est déjà le 09
+    // à Paris, donc le 09 n'est plus « futur » mais le 10 le reste.
+    const tardLeSoir = new Date("2026-11-08T23:30:00.000Z");
+    expect(isNotAfterToday(demain, parisDay(tardLeSoir))).toBe(true);
+    expect(isNotAfterToday(new Date(`2026-11-10${NOON_UTC}`), parisDay(tardLeSoir))).toBe(false);
   });
 
   it("nomme le site et déclare ses variantes dans le graphe JSON-LD", () => {
