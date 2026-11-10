@@ -593,39 +593,42 @@ export function GuideTendances2027() {
                   performance du web. Ils suffisent à trier la moitié des tendances.
                 </p>
                 <div className={styles.tableWrap}>
-                  <table>
+                  <table className={styles.table}>
+                    <caption className={styles.caption}>
+                      Mesures publiées en octobre 2026, et seuils Core Web Vitals.
+                    </caption>
                     <thead>
                       <tr>
-                        <th>Mesure</th>
-                        <th>Valeur</th>
-                        <th>Ce que ça dit</th>
+                        <th scope="col">Mesure</th>
+                        <th scope="col">Valeur</th>
+                        <th scope="col">Ce que ça dit</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
-                        <td>Sites à une seule famille typographique</td>
-                        <td>60 %</td>
-                        <td>La hiérarchie passe par l&apos;échelle, pas par le nombre de polices.</td>
+                        <th scope="row">Sites à une seule famille typographique</th>
+                        <td className={styles.price}>60 %</td>
+                        <td data-label="Ce que ça dit">La hiérarchie passe par l&apos;échelle, pas par le nombre de polices.</td>
                       </tr>
                       <tr>
-                        <td>Part d&apos;Inter sur les sites Framer</td>
-                        <td>24 %</td>
-                        <td>Le défaut d&apos;un outil devient le style d&apos;une époque.</td>
+                        <th scope="row">Part d&apos;Inter sur les sites Framer</th>
+                        <td className={styles.price}>24 %</td>
+                        <td data-label="Ce que ça dit">Le défaut d&apos;un outil devient le style d&apos;une époque.</td>
                       </tr>
                       <tr>
-                        <td>Paires de sites quasi identiques, 2025&#8209;2026</td>
-                        <td>1 sur 200</td>
-                        <td>Contre 1 sur 1 100 en 2021 : l&apos;uniformisation est mesurable.</td>
+                        <th scope="row">Paires de sites quasi identiques, 2025&#8209;2026</th>
+                        <td className={styles.price}>1 sur 200</td>
+                        <td data-label="Ce que ça dit">Contre 1 sur 1 100 en 2021 : l&apos;uniformisation est mesurable.</td>
                       </tr>
                       <tr>
-                        <td>Seuil d&apos;affichage principal (LCP)</td>
-                        <td>2,5 s</td>
-                        <td>La tendance la plus rentable reste la vitesse.</td>
+                        <th scope="row">Seuil d&apos;affichage principal (LCP)</th>
+                        <td className={styles.price}>2,5 s</td>
+                        <td data-label="Ce que ça dit">La tendance la plus rentable reste la vitesse.</td>
                       </tr>
                       <tr>
-                        <td>Réactivité aux interactions (INP)</td>
-                        <td>200 ms</td>
-                        <td>Une animation lourde se paie ici, pas dans la maquette.</td>
+                        <th scope="row">Réactivité aux interactions (INP)</th>
+                        <td className={styles.price}>200 ms</td>
+                        <td data-label="Ce que ça dit">Une animation lourde se paie ici, pas dans la maquette.</td>
                       </tr>
                     </tbody>
                   </table>
@@ -693,49 +696,52 @@ export function GuideTendances2027() {
                   d&apos;une moyenne d&apos;agence.
                 </p>
                 <div className={styles.tableWrap}>
-                  <table>
+                  <table className={styles.table}>
+                    <caption className={styles.caption}>
+                      Effort exprimé en jours-homme, pour un site vitrine de PME.
+                    </caption>
                     <thead>
                       <tr>
-                        <th>Chantier</th>
-                        <th>Effort</th>
-                        <th>Effet attendu</th>
+                        <th scope="col">Chantier</th>
+                        <th scope="col">Effort</th>
+                        <th scope="col">Effet attendu</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
-                        <td>Échelle typographique et une seule famille</td>
-                        <td>1 à 2 jours</td>
-                        <td>Lisibilité, cohérence, page plus légère</td>
+                        <th scope="row">Échelle typographique et une seule famille</th>
+                        <td className={styles.price}>1 à 2 jours</td>
+                        <td data-label="Effet attendu">Lisibilité, cohérence, page plus légère</td>
                       </tr>
                       <tr>
-                        <td>Couleur d&apos;accent et contrastes</td>
-                        <td>1 jour</td>
-                        <td>Mémorisation, accessibilité</td>
+                        <th scope="row">Couleur d&apos;accent et contrastes</th>
+                        <td className={styles.price}>1 jour</td>
+                        <td data-label="Effet attendu">Mémorisation, accessibilité</td>
                       </tr>
                       <tr>
-                        <td>Images, polices, scripts tiers</td>
-                        <td>2 à 5 jours</td>
-                        <td>LCP et INP, donc conversion mobile</td>
+                        <th scope="row">Images, polices, scripts tiers</th>
+                        <td className={styles.price}>2 à 5 jours</td>
+                        <td data-label="Effet attendu">LCP et INP, donc conversion mobile</td>
                       </tr>
                       <tr>
-                        <td>Design system à tokens</td>
-                        <td>5 à 15 jours</td>
-                        <td>Cohérence, coût des supports suivants</td>
+                        <th scope="row">Design system à tokens</th>
+                        <td className={styles.price}>5 à 15 jours</td>
+                        <td data-label="Effet attendu">Cohérence, coût des supports suivants</td>
                       </tr>
                       <tr>
-                        <td>Motion scénarisé</td>
-                        <td>2 à 5 jours</td>
-                        <td>Perception de qualité, si le contenu suit</td>
+                        <th scope="row">Motion scénarisé</th>
+                        <td className={styles.price}>2 à 5 jours</td>
+                        <td data-label="Effet attendu">Perception de qualité, si le contenu suit</td>
                       </tr>
                       <tr>
-                        <td>3D ou WebGL</td>
-                        <td>10 jours et plus</td>
-                        <td>Différenciation, seulement si le produit s&apos;y prête</td>
+                        <th scope="row">3D ou WebGL</th>
+                        <td className={styles.price}>10 jours et plus</td>
+                        <td data-label="Effet attendu">Différenciation, seulement si le produit s&apos;y prête</td>
                       </tr>
                       <tr>
-                        <td>Photo et preuve de terrain</td>
-                        <td>0,5 à 2 jours</td>
-                        <td>Confiance, différenciation durable</td>
+                        <th scope="row">Photo et preuve de terrain</th>
+                        <td className={styles.price}>0,5 à 2 jours</td>
+                        <td data-label="Effet attendu">Confiance, différenciation durable</td>
                       </tr>
                     </tbody>
                   </table>
