@@ -9,6 +9,7 @@
   --bone:#0A0A0B;          /* l'encre remplace l'os */
   --ink:#0A0A0B;
   --paper:#FFFFFF;
+  --sand:#F4F1E8;         /* beige d'origine, pour les sections en contraste */
   --muted:#5C5C5E;
   --muted-2:#2E2E30;
   --line:rgba(10,10,11,.16);
@@ -254,7 +255,7 @@ body > .readrail{background:none;border:0;padding:0}
 /* ============ RYTHME ET DIFFÉRENCIATION DES SECTIONS ============ */
 /* Plus d'air entre les blocs : la lecture sépare d'elle-même les sections */
 .section{padding-block:clamp(104px,13vh,188px)}
-.section--tint{background:#EFEFEC}
+.section--tint{background:var(--sand)}
 .sec-head{margin-bottom:clamp(48px,6.2vw,88px)}
 .sec-head p{margin-top:20px;max-width:48ch}
 .sec-num{font-size:10.5px;letter-spacing:.14em}
