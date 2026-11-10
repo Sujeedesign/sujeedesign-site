@@ -9,6 +9,17 @@ export const pageMeta = {
     "Onze tendances web design 2027 passées au filtre du réel : ce qui change pour votre site, ce que ça coûte, et ce qu'il vaut mieux ignorer.",
 };
 
+/**
+ * Réponse courte servie en haut de page (bloc « En bref ») et première entrée
+ * du `FAQPage`. Elle ne fait que résumer la section « Ce qu'on garde » : ne
+ * jamais y introduire un chiffre ou une promesse absente du texte plus bas.
+ */
+export const aeo = {
+  question: "Que retenir des tendances web design 2027 ?",
+  answer:
+    "Trois choses passent le filtre du réel : une typographie forte et lisible, une couleur qui sert de signal plutôt que de décor, et des pages rapides et accessibles. Le reste, glassmorphism, motion, palettes franches, s'utilise quand il sert le projet. Une tendance ne justifie jamais une refonte si le site convertit encore.",
+};
+
 export const faqItems = [
   {
     question: "Faut-il refaire son site en 2027 ?",
@@ -99,6 +110,18 @@ export function GuideTendances2027() {
           </div>
         </div>
       </header>
+
+      <section className="section">
+        <div className="wrap">
+          <div className="sec-head rv">
+            <div className="sec-num">En bref</div>
+            <div>
+              <h2>{aeo.question}</h2>
+              <p>{aeo.answer}</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section className="section">
         <div className="wrap">
