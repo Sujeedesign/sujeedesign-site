@@ -592,9 +592,9 @@ export function GuideTendances2027() {
                   Ils viennent de deux études publiées en octobre 2026 et des seuils de
                   performance du web. Ils suffisent à trier la moitié des tendances.
                 </p>
-                <div className={styles.tableWrap}>
-                  <table className={styles.table}>
-                    <caption className={styles.caption}>
+                <div className="tableWrap">
+                  <table>
+                    <caption>
                       Mesures publiées en octobre 2026, et seuils Core Web Vitals.
                     </caption>
                     <thead>
@@ -695,9 +695,9 @@ export function GuideTendances2027() {
                   <Link href={routes.guidePrixSite}>guide des prix d&apos;un site</Link>, pas
                   d&apos;une moyenne d&apos;agence.
                 </p>
-                <div className={styles.tableWrap}>
-                  <table className={styles.table}>
-                    <caption className={styles.caption}>
+                <div className="tableWrap">
+                  <table>
+                    <caption>
                       Effort exprimé en jours-homme, pour un site vitrine de PME.
                     </caption>
                     <thead>
