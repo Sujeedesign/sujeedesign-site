@@ -287,3 +287,10 @@
     background: var(--paper, #fff);
   }
 }
+
+/* Ancres des pages ressources : l'en-tête est fixe, un titre cliqué dans le
+   sommaire doit rester visible sous lui. */
+.prose h2[id],
+.prose h3[id] {
+  scroll-margin-top: 108px;
+}

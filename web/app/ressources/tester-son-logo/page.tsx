@@ -22,7 +22,15 @@ export default function Page() {
       <JsonLd
         data={pageGraph([
           webPageNode(PATH, pageMeta.title, pageMeta.description),
-          webApplicationNode(PATH, pageMeta.title, pageMeta.description),
+          {
+            ...webApplicationNode(PATH, pageMeta.title, pageMeta.description),
+            featureList: [
+              "Test de lisibilité à 16 pixels, en gris et en un seul ton",
+              "Générateur de favicon : .ico, PNG 16 à 512 px, apple-touch-icon, icônes Android",
+              "Export d'un pack favicon zippé avec site.webmanifest",
+              "Analyse traitée dans le navigateur, sans téléversement du logo",
+            ],
+          },
           faqNode(PATH, faqItems),
           breadcrumbNode([
             { name: "Accueil", path: routes.home },

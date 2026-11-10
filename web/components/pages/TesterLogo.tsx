@@ -6,12 +6,22 @@ import styles from "./TesterLogo.module.css";
 import { CoverFigure } from "./CoverFigure";
 
 export const pageMeta = {
-  title: "Tester son logo : lisibilité et contraste",
+  title: "Générateur de favicon et test de logo",
   description:
-    "Déposez votre logo, voyez-le à 16 px, en gris et en un ton. Cinq mesures, un verdict par critère, rien qui quitte votre navigateur.",
+    "Transformez votre logo en favicon prêt à installer : .ico, PNG de 16 à 512 px, apple-touch et manifest, dans un zip. Gratuit, sans envoi de fichier.",
 };
 
 export const faqItems = [
+  {
+    question: "Comment créer un favicon à partir de mon logo ?",
+    answer:
+      "Déposez le fichier, recadrez le carré qui restera lisible à seize pixels, vérifiez le rendu dans l'onglet, puis téléchargez le zip. Il contient favicon.ico, les PNG 16, 32 et 48 px, l'apple-touch-icon en 180 px, les icônes Android 192 et 512 px et le site.webmanifest. Il ne reste qu'à déposer ces fichiers à la racine du site et à les déclarer dans l'en-tête des pages.",
+  },
+  {
+    question: "Le générateur de favicon est-il gratuit ?",
+    answer:
+      "Oui, sans compte, sans email et sans version payante. Le logo est décodé et les fichiers sont encodés par le navigateur : rien n'est téléversé, il n'y a donc ni stockage ni quota à financer. Vous pouvez retélécharger le pack autant de fois que nécessaire.",
+  },
   {
     question: "Mon fichier est-il envoyé sur un serveur ?",
     answer:
@@ -46,6 +56,7 @@ export const faqItems = [
 
 const SOMMAIRE = [
   { href: "#outil", label: "L'outil" },
+  { href: "#favicon", label: "Générateur de favicon" },
   { href: "#tests", label: "Les trois tests" },
   { href: "#mesures", label: "Les cinq mesures" },
   { href: "#limites", label: "Ce que ça ne dit pas" },
@@ -61,14 +72,15 @@ export function TesterLogo() {
           <div className="page-head">
             <p className="kick">Ressources</p>
             <h1 className={styles.titre}>
-              Votre logo
+              Votre logo{" "}
               <br />
               tient-il <span className={styles.accent}>vraiment</span> ?
             </h1>
             <p className="intro">
               Un logo se juge en situation, pas sur une planche de présentation. Déposez le
               fichier : il s&apos;affiche à 16 pixels, en gris, en un seul ton, sur fond clair et
-              sur fond sombre. Rien ne quitte votre navigateur.
+              sur fond sombre. L&apos;outil en tire ensuite le pack favicon complet, prêt à
+              installer. Rien ne quitte votre navigateur.
             </p>
           </div>
         </div>
@@ -94,6 +106,67 @@ export function TesterLogo() {
                   alt="Tablette et téléphone affichant un diagnostic de logo, sur un bureau."
                   caption="Un logo doit tenir à 16 pixels, en une seule couleur et en favicon. Le test se fait dans le navigateur, sans envoyer de fichier."
                 />
+                <h2 id="favicon">Générateur de favicon : le pack complet depuis votre logo</h2>
+                <p>
+                  La page fait deux choses. Elle mesure la tenue du logo, puis elle en fait une
+                  icône : recadrage carré, aperçu dans un onglet de navigateur, et génération du
+                  pack de favicons attendu par les navigateurs, iOS et Android. Le calcul se fait
+                  dans votre navigateur, sans compte, et le zip est prêt en quelques secondes.
+                </p>
+
+                <h3>Ce que contient le zip</h3>
+                <ul>
+                  <li>
+                    <strong>favicon.ico</strong>, avec les trois tailles historiques de 16, 32 et
+                    48 pixels dans un seul fichier, pour les navigateurs et les raccourcis qui le
+                    réclament encore.
+                  </li>
+                  <li>
+                    <strong>favicon-16x16.png, 32x32 et 48x48</strong>, les tailles lues par les
+                    onglets, les favoris et la barre des tâches.
+                  </li>
+                  <li>
+                    <strong>apple-touch-icon.png</strong> en 180 pixels, l&apos;icône ajoutée à
+                    l&apos;écran d&apos;accueil d&apos;un iPhone ou d&apos;un iPad.
+                  </li>
+                  <li>
+                    <strong>android-chrome-192x192.png et 512x512.png</strong>, les icônes
+                    d&apos;application Android et du manifeste.
+                  </li>
+                  <li>
+                    <strong>site.webmanifest</strong>, le fichier qui déclare le nom, les icônes
+                    et la couleur de thème du site.
+                  </li>
+                </ul>
+
+                <h3>Comment créer un favicon à partir de son logo</h3>
+                <ol>
+                  <li>
+                    Déposez le logo en PNG ou en SVG, 512 pixels de large au minimum. En dessous,
+                    les grandes tailles seront floues.
+                  </li>
+                  <li>
+                    Recadrez le carré. Un favicon n&apos;est pas le logo entier réduit : c&apos;est
+                    la partie du dessin qui reste identifiable à 16 pixels.
+                  </li>
+                  <li>
+                    Regardez le résultat dans l&apos;onglet, sur fond clair puis sur fond sombre.
+                    C&apos;est là que se voient les traits trop fins et les contrastes trop faibles.
+                  </li>
+                  <li>
+                    Téléchargez le zip, déposez les fichiers à la racine du site et déclarez-les
+                    dans l&apos;en-tête des pages. Videz le cache du navigateur pour voir la
+                    nouvelle icône.
+                  </li>
+                </ol>
+
+                <p>
+                  Une icône réussie tient en trois qualités : un dessin simplifié, un fond
+                  transparent ou plein, et un contraste franc avec l&apos;onglet clair comme avec
+                  l&apos;onglet sombre. Si le logo ne passe pas ce filtre, aucune taille de fichier
+                  ne le sauvera : c&apos;est le dessin qu&apos;il faut reprendre.
+                </p>
+
                 <h2 id="tests">Les trois tests qui comptent</h2>
                 <p>
                   Un logo doit survivre à trois situations qu&apos;on oublie au moment de le

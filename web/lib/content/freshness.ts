@@ -46,7 +46,7 @@ export const PAGE_UPDATED = {
   [routes.modeleCahierDesCharges]: "2026-11-10",
   [routes.guideTendances2027]: "2026-11-10",
   [routes.generateurBriefIdentite]: "2026-11-03",
-  [routes.testerSonLogo]: "2026-11-03",
+  [routes.testerSonLogo]: "2026-11-10",
 } satisfies Record<(typeof routes)[keyof typeof routes], IsoDay>;
 
 /** Slug de service qui possède sa propre fiche dans `/services/`. */

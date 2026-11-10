@@ -164,8 +164,8 @@ export function ServiceIdentite({ doc }: { doc: Doc }) {
                   <span className="res-links__kind">Diagnostic</span>
                   <span className="res-links__title">Tester son logo</span>
                   <span className="res-links__text">
-                    Lisibilité à 16 px, contraste, tenue en un seul ton. Le fichier reste dans
-                    votre navigateur.
+                    Lisibilité à 16 px, contraste, tenue en un seul ton, et le générateur de
+                    favicon qui va avec. Le fichier reste dans votre navigateur.
                   </span>
                 </a>
               </li>

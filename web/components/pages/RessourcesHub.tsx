@@ -70,9 +70,9 @@ const PREPARER: Entree[] = [
     href: routes.testerSonLogo,
     num: "04",
     kind: "Diagnostic",
-    title: "Tester son logo",
+    title: "Tester son logo et générer son favicon",
     text:
-      "Votre logo en petit, en gris, en un seul ton. Le fichier reste dans votre navigateur.",
+      "Votre logo à 16 px, en gris, en un seul ton, puis son favicon prêt à télécharger. Le fichier reste dans votre navigateur.",
     more: "Tester le logo",
     cover: "testeur-de-logo",
     alt: "Tablette et téléphone affichant un diagnostic de logo, sur un bureau.",

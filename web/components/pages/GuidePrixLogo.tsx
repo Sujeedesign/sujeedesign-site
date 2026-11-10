@@ -494,7 +494,9 @@ export function GuidePrixLogo() {
                   ce qui est livré, sources et accès à votre nom compris. Si vous partez d&apos;un
                   brief encore flou, le{" "}
                   <Link href={routes.generateurBriefIdentite}>générateur de brief</Link> le met en
-                  forme avant le premier rendez-vous.
+                  forme avant le premier rendez-vous. Et si vous doutez du logo actuel, le{" "}
+                  <Link href={routes.testerSonLogo}>test de logo et générateur de favicon</Link>{" "}
+                  le mesure à 16 px et produit les fichiers d&apos;icône.
                 </p>
 
                 <Faq items={faqItems} />
