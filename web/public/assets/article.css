@@ -1,0 +1,207 @@
+/* ============================================================
+   Modèle conteneur des articles (guides, ressources)
+   Chargé après ds.css : il ne touche qu'aux pages qui portent
+   .legal / .prose, donc aucune autre page du site n'est affectée.
+
+   Trois règles :
+   1. une colonne de lecture étroite et centrée (≈ 68 signes) ;
+   2. un rythme vertical explicite (chapeau, paragraphes, listes) ;
+   3. des tableaux autorisés à sortir du texte, symétriquement,
+      mais jamais du conteneur, et toujours alignés à gauche.
+
+   Les noms de classes des composants sont hachés par CSS Modules :
+   d'où les sélecteurs [class*="…"] pour tableWrap / note / caption.
+   ============================================================ */
+
+/* ---------- 1. Le conteneur ---------- */
+.legal {
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: clamp(28px, 4vw, 64px);
+  align-items: start;
+}
+
+.legal .toc {
+  font-size: 10px;
+  line-height: 2.1;
+}
+
+@media (min-width: 901px) {
+  .legal .toc {
+    position: sticky;
+    top: 120px;
+  }
+}
+
+/* La colonne de lecture : 676 px, centrée dans le couloir de droite. */
+.prose {
+  max-width: 676px;
+  min-width: 0;
+  margin-inline: auto;
+  position: relative;
+}
+
+/* ---------- 2. Le rythme du texte ---------- */
+.prose p,
+.prose li {
+  font-size: 16.5px;
+  line-height: 1.72;
+  max-width: none;
+  margin: 0 0 1.05em;
+  color: var(--muted-2);
+}
+
+.prose > p:first-of-type {
+  font-size: 18.5px;
+  line-height: 1.62;
+  margin-bottom: 1.3em;
+  color: var(--ink);
+}
+
+.prose h2 + p,
+.prose h3 + p {
+  margin-top: 0;
+}
+
+.prose ul,
+.prose ol {
+  margin: 0 0 1.2em;
+  padding-left: 20px;
+}
+
+.prose li {
+  margin-bottom: 0.5em;
+}
+
+.prose strong {
+  font-weight: 500;
+}
+
+.prose a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--line);
+}
+
+.prose a:hover {
+  text-decoration-color: var(--accent);
+}
+
+/* ---------- 3. Les tableaux ---------- */
+/* Le wrapper sort de la colonne de 88 px de chaque côté : 676 + 176 = 852 px,
+   sans jamais dépasser le couloir du conteneur. */
+.prose [class*="tableWrap"] {
+  --bleed: clamp(0px, 5.2vw, 88px);
+  width: calc(100% + 2 * var(--bleed));
+  margin: 1.6em calc(-1 * var(--bleed)) 1.4em;
+  overflow-x: auto;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  scrollbar-width: thin;
+}
+
+.prose table {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+/* Tout le contenu du tableau est aligné à gauche, sans exception,
+   y compris les colonnes de prix qui étaient en text-align: right. */
+.prose table caption,
+.prose table th,
+.prose table td,
+.prose table td.price,
+.prose table th.price {
+  text-align: left !important;
+}
+
+.prose table caption {
+  caption-side: top;
+  padding: 0 0 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.prose table th,
+.prose table td {
+  padding: 15px 20px 15px 0;
+  vertical-align: top;
+  border-bottom: 1px solid var(--line-2);
+}
+
+.prose table thead th {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+  border-bottom: 1px solid var(--line);
+}
+
+.prose table tbody th {
+  font-weight: 500;
+  color: var(--ink);
+  white-space: nowrap;
+  width: 1%;
+}
+
+.prose table tbody tr:last-child th,
+.prose table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* ---------- 4. Mobile : plus de tableau coupé ---------- */
+@media (max-width: 760px) {
+  /* minmax(0,1fr) et non 1fr : sinon la colonne s'élargit à la largeur
+     mini-content du tableau et fait déborder la page. */
+  .legal {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .legal .toc {
+    position: static;
+    top: auto;
+  }
+
+  .prose {
+    width: 100%;
+    max-width: none;
+  }
+
+  .prose p,
+  .prose li {
+    font-size: 16px;
+    line-height: 1.68;
+  }
+
+  .prose > p:first-of-type {
+    font-size: 17.5px;
+  }
+
+  .prose [class*="tableWrap"] {
+    --bleed: 0px;
+    width: auto;
+    max-width: 100%;
+    margin-inline: 0;
+  }
+
+  .prose table {
+    min-width: 540px;
+    font-size: 14px;
+  }
+
+  /* La première colonne reste visible pendant le défilement horizontal. */
+  .prose table th:first-child,
+  .prose table td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    padding-right: 16px;
+    background: var(--paper, #fff);
+  }
+}

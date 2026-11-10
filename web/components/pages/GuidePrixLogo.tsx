@@ -17,7 +17,7 @@ export const pageMeta = {
 export const aeo = {
   question: "Combien coûte un logo en 2026 ?",
   answer:
-    "Sur le marché français, un logo se paie entre 40 et 6 000 € selon ce qui est réellement livré. Un dessin acheté sur une place de marché reste sous 200 €, un logo d'indépendant se situe entre 300 et 800 €. Un logo dessiné, décliné et remis avec ses sources et une cession de droits se situe le plus souvent entre 800 et 1 500 €, et un travail de positionnement avec direction artistique monte à 1 500 ou 2 500 €. Une identité complète chez un studio démarre autour de 3 500 €. Ici, un logo démarre à 800 € et l'identité complète coûte 2 200 €. Le repère le plus fiable reste le temps de conception : dix à vingt heures pour un logo, trente à cinquante-deux heures pour une identité.",
+    "Sur le marché français, un logo se paie entre 40 et 6 000 € selon ce qui est réellement livré. Un dessin acheté sur une place de marché reste sous 200 €, un logo d'indépendant se situe entre 300 et 800 €. Un logo dessiné, décliné et remis avec ses sources et une cession de droits tourne autour de 1 100 € en moyenne, et un travail de positionnement avec direction artistique autour de 2 000 €. Une identité complète se situe autour de 4 000 € chez un studio. Ici, un logo démarre à 800 € et l'identité complète coûte 2 200 €. Le repère le plus fiable reste le temps de conception : dix à vingt heures pour un logo, trente à cinquante-deux heures pour une identité.",
 };
 
 export const faqItems = [
@@ -195,17 +195,36 @@ const FOURCHETTES = [
 ];
 
 /**
- * Relevé de marché de novembre 2026, bornes publiées par les comparateurs et les
- * grilles de prestataires. Sert de contexte, jamais d'argument de vente : ce sont
- * des fourchettes observées, pas des prix garantis.
+ * Ordres de grandeur moyens du marché, novembre 2026. Moyennes arrondies des
+ * fourchettes publiques par segment, sans citer de concurrent : la page donne un
+ * repère de prix, pas un palmarès de tarifs.
  */
-const MARCHE = [
-  { prestation: "Logo seul, indépendant qui démarre", bas: "300 €", haut: "800 €", source: "Grilles publiques de graphistes indépendants" },
-  { prestation: "Logo sur mesure avec recherche et déclinaisons", bas: "800 €", haut: "1 500 €", source: "Relevé de grilles publiées (La Fabrique du Net, novembre 2026)" },
-  { prestation: "Logo avec positionnement et direction artistique", bas: "1 500 €", haut: "2 500 €", source: "Grilles de graphistes indépendants, 2026" },
-  { prestation: "Identité visuelle complète, studio", bas: "3 500 €", haut: "6 000 €", source: "Guides tarifaires d'agences et de studios, 2026" },
-  { prestation: "Refonte de marque", bas: "3 000 €", haut: "15 000 €", source: "Guide tarifaire d'agence, 2026" },
-  { prestation: "Journée de designer (TJM), freelance", bas: "340 €", haut: "460 €", source: "Baromètres Malt, Freeland et TJMètre, octobre 2026" },
+const MARCHES = [
+  {
+    prestation: "Logo, recherche et déclinaisons",
+    moyen: "1 100 €",
+    repere: "la plupart des projets entre 800 et 1 500 €",
+  },
+  {
+    prestation: "Logo avec positionnement et direction artistique",
+    moyen: "2 000 €",
+    repere: "entre 1 500 et 2 500 €",
+  },
+  {
+    prestation: "Charte graphique seule",
+    moyen: "900 €",
+    repere: "de 400 à 1 500 € selon la densité du guide",
+  },
+  {
+    prestation: "Identité visuelle complète",
+    moyen: "4 000 €",
+    repere: "de 3 500 à 6 000 € chez un studio, bien plus en agence",
+  },
+  {
+    prestation: "Journée de designer (TJM)",
+    moyen: "400 €",
+    repere: "de 340 à 460 € pour un profil confirmé",
+  },
 ];
 
 export function GuidePrixLogo() {
@@ -366,49 +385,45 @@ export function GuidePrixLogo() {
                   je garde cette marque ».
                 </p>
 
-                <h2 id="marche">Ce que pratiquent les autres</h2>
+                <h2 id="marche">Les prix moyens du marché</h2>
                 <p>
-                  Avant de parler de nos prix, voici ce que publient les comparateurs et les
-                  prestataires français. Ce sont des fourchettes observées en novembre 2026, hors
-                  taxes, tous périmètres confondus : un logo livré sans sources et une identité
-                  complète n&apos;y pèsent pas le même prix.
+                  Avant nos tarifs, un repère simple : ce que coûte en moyenne chaque prestation
+                  sur le marché français, en novembre 2026, hors taxes. Ce sont des moyennes
+                  arrondies, tous prestataires confondus, pas des prix de concurrents en
+                  particulier.
                 </p>
                 <div className={styles.tableWrap}>
                   <table className={styles.table}>
                     <caption className={styles.caption}>
-                      Relevé de marché, France, novembre 2026, hors taxes.
+                      Prix moyens observés, France, novembre 2026, hors taxes.
                     </caption>
                     <thead>
                       <tr>
                         <th scope="col">Prestation</th>
                         <th scope="col" className={styles.price}>
-                          Bas
+                          Prix moyen
                         </th>
-                        <th scope="col" className={styles.price}>
-                          Haut
-                        </th>
-                        <th scope="col">Source</th>
+                        <th scope="col">Repère</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {MARCHE.map((ligne) => (
+                      {MARCHES.map((ligne) => (
                         <tr key={ligne.prestation}>
                           <th scope="row">{ligne.prestation}</th>
-                          <td className={styles.price}>{ligne.bas}</td>
-                          <td className={styles.price}>{ligne.haut}</td>
-                          <td>{ligne.source}</td>
+                          <td className={styles.price}>{ligne.moyen}</td>
+                          <td>{ligne.repere}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
                 <p>
-                  Deux constats ressortent de ce relevé. Le prix d&apos;un logo avec recherche,
-                  déclinaisons et cession de droits se situe le plus souvent entre 800 et 1 500 €,
-                  ce qui laisse peu de marge sous 500 €. Et l&apos;écart entre un indépendant et
-                  un studio ne se joue pas sur le dessin mais sur ce qui l&apos;entoure :
-                  positionnement, direction artistique, nombre de supports. C&apos;est exactement
-                  la frontière entre nos offres.
+                  Deux constats. Un logo avec recherche, déclinaisons et cession de droits tourne
+                  autour de 1 100 € : sous 500 €, il n&apos;y a pas de recherche, seulement de
+                  l&apos;exécution. Et l&apos;écart entre un indépendant et un studio ne se joue
+                  pas sur le dessin mais sur ce qui l&apos;entoure : positionnement, direction
+                  artistique, nombre de supports. C&apos;est exactement la frontière entre nos
+                  offres.
                 </p>
 
                 <h2 id="fourchettes">Nos prix</h2>

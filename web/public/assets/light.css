@@ -4,8 +4,8 @@
    ============================================================ */
 
 :root{
-  --bg:#F7F7F5;            /* blanc froid, sans beige */
-  --bg-2:#EFEFEC;
+  --bg:#FFFFFF;            /* blanc franc : le papier du site */
+  --bg-2:#F7F7F5;          /* gris de surface, pour les blocs */
   --bone:#0A0A0B;          /* l'encre remplace l'os */
   --ink:#0A0A0B;
   --paper:#FFFFFF;
@@ -32,9 +32,9 @@ body::after{opacity:.028}
 
 /* ---------- Navigation ---------- */
 .nav{background:transparent}
-.nav.solid,.nav.scrolled{background:rgba(247,247,245,.88);border-bottom:1px solid var(--line-2)}
+.nav.solid,.nav.scrolled{background:rgba(255,255,255,.9);border-bottom:1px solid var(--line-2)}
 @supports (backdrop-filter:blur(1px)){
-  .nav.solid,.nav.scrolled{backdrop-filter:blur(18px) saturate(120%);background:rgba(247,247,245,.74)}
+  .nav.solid,.nav.scrolled{backdrop-filter:blur(18px) saturate(120%);background:rgba(255,255,255,.78)}
 }
 .brand b{color:var(--ink)}
 .nav-mid a{color:var(--muted)}

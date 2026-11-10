@@ -78,6 +78,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="stylesheet" href={assetHref("light.css")} />
         <link rel="stylesheet" href={assetHref("ds.css")} />
         <link rel="stylesheet" href={assetHref("anim.css")} />
+        {/* Modèle conteneur des articles : mesure de lecture + tableaux.
+            Chargé en dernier pour l'emporter sur site.css / light.css / ds.css. */}
+        <link rel="stylesheet" href={assetHref("article.css")} />
       </head>
       <body id="top" suppressHydrationWarning>
         <script dangerouslySetInnerHTML={{ __html: bodyClassScript }} />

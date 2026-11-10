@@ -32,10 +32,11 @@ describe("guide prix du logo", () => {
     for (const prix of ["800 €", "1 100 €", "1 200 €", "1 900 €", "2 200 €", "3 200 €", "3 500 €"]) {
       expect(container).toHaveTextContent(prix);
     }
-    // Repères de marché issus du relevé de novembre 2026.
-    for (const range of ["300 €", "1 500 €", "6 000 €", "15 000 €"]) {
-      expect(container).toHaveTextContent(range);
+    // Prix moyens du marché, novembre 2026, sans citer de concurrent.
+    for (const moyenne of ["1 100 €", "2 000 €", "900 €", "4 000 €"]) {
+      expect(container).toHaveTextContent(moyenne);
     }
+    expect(container).not.toHaveTextContent("La Fabrique du Net");
   });
 
   it("renvoie vers le calculateur et vers l'offre identité", () => {
