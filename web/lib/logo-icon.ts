@@ -33,6 +33,22 @@ export type IconReport = {
   needsRedesign: boolean;
 };
 
+export type SupportVerdict = {
+  id: string;
+  label: string;
+  size: number;
+  context: string;
+  state: IconMetricState;
+  note: string;
+};
+
+export type IconScore = {
+  /** Note sur 100, dérivée des supports réellement testés. */
+  value: number;
+  grade: string;
+  label: string;
+};
+
 const ALPHA_FLOOR = 16;
 const BG_TOLERANCE = 26;
 const CORNER_TOLERANCE = 14;
@@ -581,4 +597,96 @@ export function downsample(px: Pixels, targetWidth: number, targetHeight: number
     }
   }
   return { data: out, width: targetWidth, height: targetHeight };
+}
+
+/** Les six contextes réels dans lesquels l'icône sera vue. */
+const SUPPORTS: { id: string; label: string; size: number; context: string }[] = [
+  { id: "onglet", label: "Onglet du navigateur", size: 16, context: "16 px" },
+  { id: "favoris", label: "Barre de favoris", size: 32, context: "32 px" },
+  { id: "raccourci", label: "Raccourci Windows", size: 48, context: "48 px" },
+  { id: "ios", label: "Écran d'accueil iOS", size: 180, context: "180 px" },
+  { id: "android", label: "Android et PWA", size: 192, context: "192 px" },
+  { id: "store", label: "Store et fichier source", size: 512, context: "512 px" },
+];
+
+/** Lisibilité de l'icône une fois réduite à la taille d'un support donné. */
+function legibilityAt(icon: Pixels, size: number): { coverage: number; blobs: number; state: IconMetricState } {
+  const small = downsample(icon, size, size);
+  const total = size * size;
+  let ink = 0;
+  const mask = new Uint8Array(total);
+  for (let p = 0; p < total; p += 1) {
+    const alpha = small.data[p * 4 + 3] ?? 0;
+    if (alpha > ALPHA_FLOOR) {
+      ink += 1;
+      mask[p] = 1;
+    }
+  }
+  const coverage = total > 0 ? ink / total : 0;
+  const blobs = countBlobs(mask, size, size);
+  // Plus la taille est grande, plus l'œil tolère de détails séparés.
+  const blobKo = size <= 24 ? 5 : size <= 48 ? 8 : 14;
+  let state: IconMetricState = "ok";
+  if (coverage < 0.04 || coverage > 0.92 || blobs > blobKo) state = "ko";
+  else if (coverage < 0.08 || coverage > 0.85 || blobs > Math.max(2, Math.round(blobKo * 0.6))) {
+    state = "watch";
+  }
+  return { coverage, blobs, state };
+}
+
+/**
+ * Verdict support par support : un logo peut passer en 512 px et disparaître
+ * dans un onglet de 16 px. On le dit contexte par contexte.
+ */
+export function supportVerdicts(icon: Pixels, report: IconReport): SupportVerdict[] {
+  const zone = report.metrics.find((metric) => metric.id === "zone-maskable");
+  const contrast = report.metrics.find((metric) => metric.id === "contraste-onglet");
+  const worst = (...states: IconMetricState[]): IconMetricState =>
+    states.includes("ko") ? "ko" : states.includes("watch") ? "watch" : "ok";
+
+  return SUPPORTS.map((support) => {
+    const read = legibilityAt(icon, support.size);
+    let state = read.state;
+    if (support.id === "onglet") state = worst(read.state, contrast?.state ?? "ok");
+    if (support.id === "android") state = worst(read.state, zone?.state ?? "ok");
+    const ink = `${Math.round(read.coverage * 100)} % d'encre, ${read.blobs} tache${read.blobs > 1 ? "s" : ""}`;
+    let note =
+      state === "ok"
+        ? `Passe : ${ink}.`
+        : state === "watch"
+          ? `Fragile : ${ink}.`
+          : `Échec : ${ink}.`;
+    // Le débordement maskable ne casse pas l'icône par défaut d'Android,
+    // il la rogne seulement si elle est déclarée en maskable : on nuance.
+    if (support.id === "android" && zone?.state === "ko" && read.state === "ok") {
+      state = "watch";
+      note = `Fragile : le dessin déborde de la zone maskable, Android rognera les bords de l'icône d'application.`;
+    }
+    return { ...support, state, note };
+  });
+}
+
+/**
+ * Note sur 100 : chaque support qui échoue ou qui fragilise coûte des points.
+ * Si le rapport global conclut à une refonte, la note ne peut pas rester haute :
+ * une note contredite par le verdict ne sert personne.
+ */
+export function scoreIcon(supports: SupportVerdict[], report?: IconReport): IconScore {
+  let penalty = 0;
+  for (const support of supports) {
+    penalty += support.state === "ko" ? 21 : support.state === "watch" ? 8 : 0;
+  }
+  const value = Math.max(0, Math.min(100, Math.round(100 - penalty)));
+  if (report?.needsRedesign) {
+    return {
+      value: Math.min(44, value),
+      grade: "D",
+      label: "Refonte de l'icône nécessaire avant déploiement",
+    };
+  }
+  if (value >= 85) return { value, grade: "A", label: "Prêt à déployer partout" };
+  if (value >= 70) return { value, grade: "B", label: "Utilisable, quelques retouches" };
+  if (value >= 55) return { value, grade: "C", label: "Fragile selon les supports" };
+  if (value >= 40) return { value, grade: "D", label: "À retravailler" };
+  return { value, grade: "E", label: "Refonte de l'icône nécessaire" };
 }

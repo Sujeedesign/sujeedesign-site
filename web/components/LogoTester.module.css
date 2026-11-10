@@ -686,3 +686,235 @@
   background: var(--ink);
   color: var(--paper);
 }
+
+/* Note du logo : le bloc le plus visible de la page, avant les réglages. */
+.scorePanel {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(18px, 3vw, 40px);
+  align-items: center;
+  padding: clamp(20px, 3vw, 30px);
+  border-radius: var(--ds-radius);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.scoreLeft {
+  display: grid;
+  gap: 4px;
+}
+
+.scoreKick {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.scoreValue {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  font-size: clamp(46px, 7vw, 64px);
+  line-height: 0.95;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.scoreMax {
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.scoreGrade {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin-left: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.scoreVerdict {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.scoreList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.scoreItem {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-left-width: 3px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.scoreItemName {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.scoreItemSize {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.scoreItemState {
+  flex: none;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.scoreOk {
+  border-left-color: #4ea17a;
+}
+
+.scoreOk .scoreItemState {
+  color: #7bc9a4;
+}
+
+.scoreWatch {
+  border-left-color: #d8a331;
+}
+
+.scoreWatch .scoreItemState {
+  color: #e8bf62;
+}
+
+.scoreKo {
+  border-left-color: #d4604f;
+}
+
+.scoreKo .scoreItemState {
+  color: #f0897a;
+}
+
+/* Nom du site pour l'onglet simulé */
+.siteNameField {
+  display: grid;
+  gap: 4px;
+  max-width: 420px;
+  margin: 0 0 4px;
+}
+
+.siteNameLabel {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted, #6b6b66);
+}
+
+.siteNameField input {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper);
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.siteNameField input:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
+
+.siteNameHint {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted, #6b6b66);
+}
+
+/* Bouton PDF, à côté du pack */
+.pdfButton {
+  padding: 11px 18px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.pdfButton:hover:not(:disabled) {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.pdfButton:disabled {
+  opacity: 0.5;
+  cursor: progress;
+}
+
+/* Supports en échec, dans le rapport */
+.failBox {
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-left: 3px solid #b3261e;
+  border-radius: 6px;
+  background: var(--paper);
+}
+
+.failTitle {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.failList {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.failItem {
+  display: grid;
+  gap: 1px;
+  font-size: 12.5px;
+}
+
+.failItem span {
+  color: var(--muted, #6b6b66);
+}
+
+.failItem em {
+  font-style: normal;
+  color: var(--muted, #6b6b66);
+}
+
+@media (max-width: 760px) {
+  .scorePanel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .scoreList {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

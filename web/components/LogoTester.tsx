@@ -5,11 +5,17 @@ import { analyseLogo, readPixels, type LogoAnalysis } from "@/lib/logo-test";
 import {
   detectIcon,
   reportIcon,
+  scoreIcon,
+  supportVerdicts,
   type IconDetection,
   type IconMetric,
+  type IconScore,
   type IconReport,
+  type Pixels,
   type Rect,
+  type SupportVerdict,
 } from "@/lib/logo-icon";
+import { buildReportPdf } from "@/lib/report-pdf";
 import { buildIco, buildManifest, buildZip } from "@/lib/favicon-pack";
 import styles from "./LogoTester.module.css";
 
@@ -53,6 +59,9 @@ export function LogoTester() {
   const [plate, setPlate] = useState<PlateKind>("none");
   const [iconUrl, setIconUrl] = useState("");
   const [iconReport, setIconReport] = useState<IconReport | null>(null);
+  const [iconPixels, setIconPixels] = useState<Pixels | null>(null);
+  const [siteName, setSiteName] = useState("");
+  const [exporting, setExporting] = useState(false);
   const [sizePreviews, setSizePreviews] = useState<SizePreview[]>([]);
   const [previews, setPreviews] = useState<Preview[]>([]);
   const [analysis, setAnalysis] = useState<LogoAnalysis | null>(null);
@@ -70,6 +79,8 @@ export function LogoTester() {
     setCrop(null);
     setIconUrl("");
     setIconReport(null);
+    setIconPixels(null);
+    setSiteName("");
     setSizePreviews([]);
     sourceRef.current = null;
     iconRef.current = null;
@@ -89,6 +100,7 @@ export function LogoTester() {
 
     setBusy(true);
     setFileName(file.name);
+    setSiteName(siteNameFromFile(file.name));
 
     try {
       const url = URL.createObjectURL(file);
@@ -142,13 +154,25 @@ export function LogoTester() {
       const square = cropSquare(source, crop, ICON_SIZE, plate);
       iconRef.current = square;
       setIconUrl(square.toDataURL("image/png"));
-      setIconReport(reportIcon(readPixels(square)));
+      const iconPixels = readPixels(square);
+      setIconPixels(iconPixels);
+      setIconReport(reportIcon(iconPixels));
       setSizePreviews(
         FAVICON_SIZES.map(({ size }) => ({ size, url: resized(square, size).toDataURL("image/png") })),
       );
     }, 70);
     return () => window.clearTimeout(timer);
   }, [crop, sourceUrl, plate]);
+
+  const supports = useMemo<SupportVerdict[]>(
+    () => (iconPixels && iconReport ? supportVerdicts(iconPixels, iconReport) : []),
+    [iconPixels, iconReport],
+  );
+  const score = useMemo<IconScore | null>(
+    () => (supports.length > 0 ? scoreIcon(supports, iconReport ?? undefined) : null),
+    [supports, iconReport],
+  );
+  const failures = useMemo(() => supports.filter((item) => item.state !== "ok"), [supports]);
 
   const maxSide = useMemo(
     () => Math.max(8, Math.min(sourceSize.width, sourceSize.height)),
@@ -246,6 +270,60 @@ export function LogoTester() {
     }
   }
 
+  async function downloadReportPdf() {
+    const icon = iconRef.current;
+    if (!icon || !iconReport || supports.length === 0) return;
+    setExporting(true);
+    try {
+      const background = exportBackground(icon);
+      const icons = await Promise.all(
+        [16, 32, 48, 512].map(async (size) => {
+          const canvas = flattened(resized(icon, size * 2), background);
+          return {
+            label: `${size} px`,
+            jpeg: await canvasJpeg(canvas),
+            width: size * 2,
+            height: size * 2,
+            // 512 sert de preuve de définition, pas de poster : on le garde petit.
+            draw: Math.min(size, 96),
+          };
+        }),
+      );
+      const pdf = buildReportPdf({
+        fileName,
+        siteName: siteName || siteNameFromFile(fileName),
+        date: new Date().toLocaleDateString("fr-FR", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        }),
+        score: score ?? { value: 0, grade: "E", label: "Refonte de l'icône nécessaire" },
+        verdict: iconReport.verdict,
+        supports: supports.map((item) => ({
+          label: item.label,
+          context: item.context,
+          state: item.state,
+          note: item.note,
+        })),
+        metrics: iconReport.metrics.map((metric) => ({
+          label: metric.label,
+          value: metric.value,
+          state: metric.state,
+          detail: metric.detail,
+        })),
+        icons,
+      });
+      downloadBlob(
+        new Blob([pdf.buffer as ArrayBuffer], { type: "application/pdf" }),
+        `analyse-logo-${baseName}.pdf`,
+      );
+    } catch {
+      setError("Le PDF n'a pas pu être généré. Réessaie avec un autre fichier.");
+    } finally {
+      setExporting(false);
+    }
+  }
+
   function downloadIcon() {
     const icon = iconRef.current;
     if (!icon) return;
@@ -311,6 +389,49 @@ export function LogoTester() {
               Tester un autre fichier
             </button>
           </div>
+
+          {score ? (
+            <section
+              className={styles.scorePanel}
+              aria-label={`Note du logo : ${score.value} sur 100`}
+            >
+              <div className={styles.scoreLeft}>
+                <p className={styles.scoreKick}>Note du logo</p>
+                <p className={styles.scoreValue}>
+                  {score.value}
+                  <span className={styles.scoreMax}>/100</span>
+                  <span className={styles.scoreGrade}>{score.grade}</span>
+                </p>
+                <p className={styles.scoreVerdict}>{score.label}</p>
+              </div>
+              <ul className={styles.scoreList}>
+                {supports.map((support) => (
+                  <li
+                    key={support.id}
+                    className={`${styles.scoreItem} ${
+                      support.state === "ko"
+                        ? styles.scoreKo
+                        : support.state === "watch"
+                          ? styles.scoreWatch
+                          : styles.scoreOk
+                    }`}
+                  >
+                    <span className={styles.scoreItemName}>
+                      {support.label}
+                      <span className={styles.scoreItemSize}>{support.context}</span>
+                    </span>
+                    <span className={styles.scoreItemState}>
+                      {support.state === "ko"
+                        ? "échoue"
+                        : support.state === "watch"
+                          ? "fragile"
+                          : "passe"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
 
           {/* 1. Extraction de l'icône */}
           <section className={styles.block}>
@@ -444,7 +565,7 @@ export function LogoTester() {
                       height={16}
                       className={styles.tabIcon}
                     />
-                    Sujee Design
+                    {siteName || "Votre site"}
                   </span>
                   <span className={styles.tabClose} aria-hidden="true">
                     ×
@@ -452,6 +573,21 @@ export function LogoTester() {
                 </div>
               ))}
             </div>
+
+            <label className={styles.siteNameField}>
+              <span className={styles.siteNameLabel}>Nom affiché dans l&apos;onglet</span>
+              <input
+                type="text"
+                value={siteName}
+                maxLength={34}
+                placeholder="Votre site"
+                onChange={(event) => setSiteName(event.target.value)}
+              />
+              <span className={styles.siteNameHint}>
+                Les deux onglets ci-dessus simulent votre navigateur : le favicon y est vu à sa
+                taille réelle, avec le titre de votre site.
+              </span>
+            </label>
 
             <div className={styles.faviconGrid}>
               {FAVICON_SIZES.map(({ size, label, use }) => {
@@ -500,15 +636,44 @@ export function LogoTester() {
               <button type="button" className="btn-fill" onClick={() => void downloadPack()} disabled={packing}>
                 {packing ? "Préparation du pack…" : "Télécharger le pack favicon (.zip)"}
               </button>
+              <button
+                type="button"
+                className={styles.pdfButton}
+                onClick={() => void downloadReportPdf()}
+                disabled={exporting || !score}
+              >
+                {exporting ? "Rédaction du PDF…" : "Télécharger l'analyse (.pdf)"}
+              </button>
               <p className={styles.downloadNote}>
-                ICO 16/32/48, PNG 16 à 512, manifeste et mode d&apos;emploi. Généré dans votre
-                navigateur.
+                ICO 16/32/48, PNG 16 à 512, manifeste et mode d&apos;emploi. Le PDF reprend la note,
+                le verdict support par support et l&apos;icône aux quatre tailles clés. Tout est
+                généré dans votre navigateur.
               </p>
             </div>
 
             {iconReport ? (
               <div className={styles.report}>
                 <p className={styles.verdict}>{iconReport.verdict}</p>
+                {failures.length > 0 ? (
+                  <div className={styles.failBox}>
+                    <p className={styles.failTitle}>
+                      {failures.length === 1
+                        ? "Un support ne passe pas"
+                        : `${failures.length} supports ne passent pas`}
+                    </p>
+                    <ul className={styles.failList}>
+                      {failures.map((support) => (
+                        <li key={support.id} className={styles.failItem}>
+                          <strong>{support.label}</strong>
+                          <span>{support.context}</span>
+                          <em>
+                            {support.state === "ko" ? "Échec" : "À surveiller"} · {support.note}
+                          </em>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
                 <ul className={styles.metrics}>
                   {iconReport.metrics.map((metric) => (
                     <MetricRow key={metric.id} metric={metric} />
@@ -746,6 +911,71 @@ function readme(base: string): string {
     `Cadre choisi : ${base}.`,
     "",
   ].join("\n");
+}
+
+/** Nom de site proposé pour l'onglet simulé, tiré du nom de fichier. */
+function siteNameFromFile(file: string): string {
+  const words = file
+    .replace(/\.[^.]+$/, "")
+    .replace(/[_-]+/g, " ")
+    .replace(/\b(logo|lockup|final|vector|vectoriel|svg|png|jpg|jpeg|webp|v\d+|copy|copie|1|2|3)\b/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!words) return "Votre site";
+  const nice = words
+    .split(" ")
+    .slice(0, 4)
+    .map((word) => (word.length > 2 ? word[0]?.toUpperCase() + word.slice(1) : word))
+    .join(" ");
+  return nice.slice(0, 34);
+}
+
+/** Aplatit l'icône sur un fond choisi pour l'export JPEG (le JPEG n'a pas d'alpha). */
+function flattened(source: HTMLCanvasElement, background: string): HTMLCanvasElement {
+  const canvas = document.createElement("canvas");
+  canvas.width = source.width;
+  canvas.height = source.height;
+  const context = canvas.getContext("2d");
+  if (context) {
+    context.fillStyle = background;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(source, 0, 0);
+  }
+  return canvas;
+}
+
+/** Fond de l'export : papier pour un logo sombre, encre pour un logo clair. */
+function exportBackground(canvas: HTMLCanvasElement): string {
+  const context = canvas.getContext("2d");
+  if (!context) return "#F7F7F5";
+  const { data } = context.getImageData(0, 0, canvas.width, canvas.height);
+  let luma = 0;
+  let n = 0;
+  for (let i = 0; i < data.length; i += 4) {
+    if ((data[i + 3] ?? 0) < 64) continue;
+    luma += ((data[i] ?? 0) * 0.299 + (data[i + 1] ?? 0) * 0.587 + (data[i + 2] ?? 0) * 0.114) / 255;
+    n += 1;
+  }
+  return n > 0 && luma / n > 0.6 ? "#0A0A0B" : "#F7F7F5";
+}
+
+function canvasJpeg(canvas: HTMLCanvasElement, quality = 0.92): Promise<Uint8Array> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          reject(new Error("JPEG indisponible"));
+          return;
+        }
+        blob
+          .arrayBuffer()
+          .then((buffer) => resolve(new Uint8Array(buffer)))
+          .catch(reject);
+      },
+      "image/jpeg",
+      quality,
+    );
+  });
 }
 
 function clamp(value: number, min: number, max: number): number {

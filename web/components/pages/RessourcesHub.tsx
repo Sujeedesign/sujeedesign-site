@@ -198,6 +198,43 @@ export function RessourcesHub() {
             </div>
           </div>
 
+          <div className={styles.bloc}>
+            <div className={styles.blocHead}>
+              <h2 className={styles.blocTitle}>Comprendre ce qui vient</h2>
+              <p className={styles.blocText}>
+                Les outils servent à décider maintenant. Cette analyse sert à décider pour les
+                deux prochaines années : ce qui change vraiment dans un site, et ce qui n'est
+                qu'une mode.
+              </p>
+            </div>
+            <Link href={routes.guideTendances2027} className={styles.wide}>
+              <span className={styles.wideMedia}>
+                <img
+                  src="/assets/img/guides/tendances-2027-ouverture.webp"
+                  alt="Visuel de couverture du guide : grand titre 2027 et maquette de navigateur illustrant une identité de marque."
+                  width={1600}
+                  height={900}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </span>
+              <span className={styles.wideBody}>
+                <span className={styles.cardHead}>
+                  <span className={styles.kind}>Analyse</span>
+                  <span className={styles.num}>1 800 mots</span>
+                </span>
+                <h3 className={styles.wideTitle}>Tendances web design 2027</h3>
+                <p className={styles.cardText}>
+                  Quatre tendances passées au filtre du réel : ce qui change pour un site de PME,
+                  de commerce ou d'indépendant, et ce qui ne tiendra pas deux ans.
+                </p>
+                <span className={styles.cta}>
+                  Lire l&apos;analyse <span aria-hidden="true">↗</span>
+                </span>
+              </span>
+            </Link>
+          </div>
+
           <p className={styles.note}>
             Ces pages complètent les services du studio : elles servent à savoir où vous mettez
             les pieds avant de parler budget. Aucune ne demande votre e-mail, aucune ne renvoie

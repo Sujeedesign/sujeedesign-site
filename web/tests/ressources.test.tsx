@@ -62,14 +62,14 @@ describe("hub ressources", () => {
     expect(hrefs).toContain(routes.modeleCahierDesCharges);
     expect(container.querySelectorAll("h1")).toHaveLength(1);
     expect(screen.getByText("Budget d'une identité visuelle")).toBeInTheDocument();
-    expect(container.querySelectorAll("h2")).toHaveLength(2);
+    expect(container.querySelectorAll("h2")).toHaveLength(3);
   });
 
   it("affiche six cartes, chacune avec sa cover", () => {
     const { container } = render(<RessourcesHub />);
     const cartes = container.querySelectorAll("a[class*=card]");
     expect(cartes).toHaveLength(6);
-    const images = [...container.querySelectorAll("img")];
+    const images = [...container.querySelectorAll("img[src*=\"/covers/\"]")];
     expect(images).toHaveLength(6);
     for (const img of images) {
       expect(img.getAttribute("src")).toMatch(/^\/assets\/img\/covers\/.+-800\.webp$/);
@@ -84,6 +84,14 @@ describe("hub ressources", () => {
     const { container } = render(<RessourcesHub />);
     expect(container).toHaveTextContent("6 pages");
     expect(container).not.toHaveTextContent("Quatre pages");
+  });
+
+  it("met l'analyse des tendances en avant dans le hub", () => {
+    const { container } = render(<RessourcesHub />);
+    const liens = [...container.querySelectorAll("a")].map((a) => a.getAttribute("href"));
+    expect(liens).toContain(routes.guideTendances2027);
+    expect(container).toHaveTextContent("Comprendre ce qui vient");
+    expect(container).toHaveTextContent("Tendances web design 2027");
   });
 });
 
