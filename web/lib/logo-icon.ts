@@ -456,23 +456,14 @@ export function countBlobs(mask: Uint8Array, width: number, height: number): num
 export function reportIcon(icon: Pixels): IconReport {
   const { width, height } = icon;
   const size = Math.min(width, height);
-  const scale = size / 512;
-  const at16 = Math.max(8, Math.round(16 * (size / 512)) || 16);
 
-  // Rééchantillonnage 16 px pour juger de la finesse réelle.
-  const small = downsample(icon, at16, at16);
-  let ink = 0;
-  for (let i = 3; i < small.data.length; i += 4) if ((small.data[i] ?? 0) > 64) ink += 1;
-  const total = at16 * at16;
-  const coverage = total > 0 ? ink / total : 0;
-  const smallMask = new Uint8Array(total);
-  for (let p = 0; p < total; p += 1) smallMask[p] = (small.data[p * 4 + 3] ?? 0) > 64 ? 1 : 0;
-  const blobs = countBlobs(smallMask, at16, at16);
+  // Même mesure que le verdict d'onglet : lisibilité réelle à 16 px.
+  const read = legibilityAt(icon, 16);
+  const { coverage, blobs } = read;
 
   const metrics: IconMetric[] = [];
 
-  const readState: IconMetricState =
-    coverage < 0.05 || coverage > 0.9 ? "ko" : blobs > 8 ? "ko" : coverage < 0.09 || blobs > 4 ? "watch" : "ok";
+  const readState: IconMetricState = read.state;
   metrics.push({
     id: "lisibilite",
     label: "Lisibilité à 16 px",
@@ -483,33 +474,57 @@ export function reportIcon(icon: Pixels): IconReport {
         ? "À la taille d'un onglet, la forme reste identifiable et les détails ne se mélangent pas."
         : readState === "watch"
           ? "À 16 px, la lecture devient fragile : détails fins ou trop de petites taches. Simplifie le dessin."
-          : coverage < 0.05
+          : coverage < 0.04
             ? "À 16 px, il ne reste presque rien : les traits sont trop fins pour un favicon."
-            : coverage > 0.9
+            : coverage > 0.92
               ? "À 16 px, la forme devient un pâté plein : le dessin manque de vide autour."
               : "À 16 px, les éléments se transforment en confettis : trop de détails distincts pour un favicon.",
   });
 
   // Contraste de la couleur dominante sur les deux fonds d'onglet.
   const dominant = dominantInkColor(icon);
+  const plate = detectBackground(icon);
   if (dominant) {
     const lum = luminance(dominant.r, dominant.g, dominant.b);
     const onLight = contrast(LIGHT_BG, lum);
     const onDark = contrast(DARK_BG, lum);
+    // Une icône opaque porte sa propre plaque : le thème de l'onglet ne passe
+    // pas derrière, donc c'est le contraste encre/plaque qui décide de la lecture.
+    const plateLum = plate ? luminance(plate.r, plate.g, plate.b) : null;
+    const plateContrast = plateLum === null ? null : contrast(plateLum, lum);
+    // Si le fond détecté se confond avec l'encre, le cadrage est entré dans le
+    // symbole : il n'y a pas de plaque, on juge sur le thème de l'onglet.
+    const onPlate = plateContrast !== null && plateContrast >= 1.2 ? plateContrast : null;
     const best = Math.max(onLight, onDark);
     const both = Math.min(onLight, onDark);
-    const state: IconMetricState = both >= 3 ? "ok" : best >= 3 ? "watch" : "ko";
+    const state: IconMetricState =
+      onPlate !== null
+        ? onPlate >= 3
+          ? "ok"
+          : onPlate >= 2
+            ? "watch"
+            : "ko"
+        : both >= 3
+          ? "ok"
+          : best >= 3
+            ? "watch"
+            : "ko";
     metrics.push({
       id: "contraste-onglet",
       label: "Contraste sur les onglets clair et sombre",
       state,
-      value: `${onLight.toFixed(1)} : 1 clair · ${onDark.toFixed(1)} : 1 sombre`,
+      value:
+        onPlate !== null
+          ? `${onPlate.toFixed(1)} : 1 encre sur plaque`
+          : `${onLight.toFixed(1)} : 1 clair · ${onDark.toFixed(1)} : 1 sombre`,
       detail:
         state === "ok"
-          ? "La couleur dominante se détache sur les deux thèmes d'onglet."
+          ? onPlate !== null
+            ? "Le dessin se détache de sa propre plaque : le thème de l'onglet n'entre pas en jeu."
+            : "La couleur dominante se détache sur les deux thèmes d'onglet."
           : state === "watch"
-            ? "L'icône tient sur un thème mais se confond avec l'autre : prévois une variante claire ou sombre."
-            : "La couleur dominante se confond avec le fond dans les deux thèmes : l'icône disparaît de l'onglet.",
+            ? "Le contraste est juste : le dessin reste lisible mais pâlit sur un des fonds. Renforce l'écart encre/plaque."
+            : "Le dessin se confond avec son fond : l'icône disparaît de l'onglet.",
     });
   }
 
@@ -613,15 +628,12 @@ const SUPPORTS: { id: string; label: string; size: number; context: string }[] =
 function legibilityAt(icon: Pixels, size: number): { coverage: number; blobs: number; state: IconMetricState } {
   const small = downsample(icon, size, size);
   const total = size * size;
+  // Le fond uni (opaque) ne compte pas comme de l'encre : on le retire par
+  // différence de couleur, sinon une icône sur plaque blanche paraît pleine.
+  // Mesuré sur l'icône pleine taille, comme dans reportIcon.
+  const mask = buildInkMask(small, detectBackground(icon));
   let ink = 0;
-  const mask = new Uint8Array(total);
-  for (let p = 0; p < total; p += 1) {
-    const alpha = small.data[p * 4 + 3] ?? 0;
-    if (alpha > ALPHA_FLOOR) {
-      ink += 1;
-      mask[p] = 1;
-    }
-  }
+  for (let p = 0; p < total; p += 1) if (mask[p]) ink += 1;
   const coverage = total > 0 ? ink / total : 0;
   const blobs = countBlobs(mask, size, size);
   // Plus la taille est grande, plus l'œil tolère de détails séparés.

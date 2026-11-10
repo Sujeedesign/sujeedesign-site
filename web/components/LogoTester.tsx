@@ -32,6 +32,14 @@ type SizePreview = {
 
 type PlateKind = "none" | "ink" | "paper";
 
+/** "Libre" laisse régler largeur et hauteur, "Carré" verrouille le rapport 1:1. */
+type CropFormat = "free" | "square";
+
+type DragMode = "move" | "nw" | "ne" | "sw" | "se";
+
+type AnalysisShot = { crop: Rect; plate: PlateKind };
+
+
 const WORK_MAX = 1400;
 const ICON_SIZE = 512;
 
@@ -49,14 +57,16 @@ export function LogoTester() {
   const stageRef = useRef<HTMLDivElement>(null);
   const sourceRef = useRef<HTMLCanvasElement | null>(null);
   const iconRef = useRef<HTMLCanvasElement | null>(null);
-  const dragRef = useRef<{ x: number; y: number; origin: Rect } | null>(null);
+  const dragRef = useRef<{ mode: DragMode; x: number; y: number; origin: Rect } | null>(null);
 
   const [fileName, setFileName] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
   const [sourceSize, setSourceSize] = useState({ width: 1, height: 1 });
   const [detection, setDetection] = useState<IconDetection | null>(null);
   const [crop, setCrop] = useState<Rect | null>(null);
+  const [format, setFormat] = useState<CropFormat>("free");
   const [plate, setPlate] = useState<PlateKind>("none");
+  const [analysisShot, setAnalysisShot] = useState<AnalysisShot | null>(null);
   const [iconUrl, setIconUrl] = useState("");
   const [iconReport, setIconReport] = useState<IconReport | null>(null);
   const [iconPixels, setIconPixels] = useState<Pixels | null>(null);
@@ -77,6 +87,8 @@ export function LogoTester() {
     setSourceUrl("");
     setDetection(null);
     setCrop(null);
+    setFormat("free");
+    setAnalysisShot(null);
     setIconUrl("");
     setIconReport(null);
     setIconPixels(null);
@@ -146,7 +158,8 @@ export function LogoTester() {
     }
   }
 
-  // Recalcul de l'icône et des aperçus, légèrement différé pour garder le glisser fluide.
+  // Aperçu de l'icône et des favicons : il suit le cadre en direct, mais la note
+  // n'est calculée qu'au clic sur « Lancer l'analyse ».
   useEffect(() => {
     const source = sourceRef.current;
     if (!source || !crop) return;
@@ -154,15 +167,41 @@ export function LogoTester() {
       const square = cropSquare(source, crop, ICON_SIZE, plate);
       iconRef.current = square;
       setIconUrl(square.toDataURL("image/png"));
-      const iconPixels = readPixels(square);
-      setIconPixels(iconPixels);
-      setIconReport(reportIcon(iconPixels));
       setSizePreviews(
         FAVICON_SIZES.map(({ size }) => ({ size, url: resized(square, size).toDataURL("image/png") })),
       );
     }, 70);
     return () => window.clearTimeout(timer);
   }, [crop, sourceUrl, plate]);
+
+  /** Calcule la note sur le cadre tel qu'il est réglé à cet instant. */
+  function runAnalysis() {
+    const source = sourceRef.current;
+    if (!source || !crop) return;
+    const square = cropSquare(source, crop, ICON_SIZE, plate);
+    iconRef.current = square;
+    setIconUrl(square.toDataURL("image/png"));
+    const pixels = readPixels(square);
+    setIconPixels(pixels);
+    setIconReport(reportIcon(pixels));
+    setSizePreviews(
+      FAVICON_SIZES.map(({ size }) => ({ size, url: resized(square, size).toDataURL("image/png") })),
+    );
+    setAnalysisShot({ crop: { ...crop }, plate });
+  }
+
+  // Vrai dès que le cadre ou le fond a bougé depuis le dernier calcul : la note
+  // affichée ne correspond plus à ce que l'utilisateur voit.
+  const stale = useMemo(() => {
+    if (!analysisShot || !crop) return false;
+    return (
+      analysisShot.crop.x !== crop.x ||
+      analysisShot.crop.y !== crop.y ||
+      analysisShot.crop.w !== crop.w ||
+      analysisShot.crop.h !== crop.h ||
+      analysisShot.plate !== plate
+    );
+  }, [analysisShot, crop, plate]);
 
   const supports = useMemo<SupportVerdict[]>(
     () => (iconPixels && iconReport ? supportVerdicts(iconPixels, iconReport) : []),
@@ -175,8 +214,14 @@ export function LogoTester() {
   const failures = useMemo(() => supports.filter((item) => item.state !== "ok"), [supports]);
 
   const maxSide = useMemo(
-    () => Math.max(8, Math.min(sourceSize.width, sourceSize.height)),
-    [sourceSize],
+    () =>
+      Math.max(
+        16,
+        format === "square"
+          ? Math.min(sourceSize.width, sourceSize.height)
+          : sourceSize.width,
+      ),
+    [format, sourceSize],
   );
 
   const baseName = useMemo(() => {
@@ -191,9 +236,11 @@ export function LogoTester() {
 
   function moveTo(side: number) {
     if (!crop) return;
-    const factor = clamp(side, 8, maxSide) / crop.w;
-    const w = Math.round(clamp(crop.w * factor, 8, sourceSize.width));
-    const h = Math.round(clamp(crop.h * factor, 8, sourceSize.height));
+    const w = Math.round(clamp(side, 16, maxSide));
+    const h =
+      format === "square"
+        ? w
+        : Math.round(clamp((crop.h / crop.w) * w, 16, sourceSize.height));
     const cx = crop.x + crop.w / 2;
     const cy = crop.y + crop.h / 2;
     setCrop({
@@ -204,10 +251,30 @@ export function LogoTester() {
     });
   }
 
+  /** Change le format du cadre. Passage en carré : on garde le centre et on recadre. */
+  function changeFormat(next: CropFormat) {
+    setFormat(next);
+    if (next !== "square" || !crop) return;
+    const side = Math.round(Math.min(crop.w, crop.h, sourceSize.width, sourceSize.height));
+    setCrop({
+      x: Math.round(clamp(crop.x + (crop.w - side) / 2, 0, sourceSize.width - side)),
+      y: Math.round(clamp(crop.y + (crop.h - side) / 2, 0, sourceSize.height - side)),
+      w: side,
+      h: side,
+    });
+  }
+
   function onPointerDown(event: React.PointerEvent<HTMLDivElement>) {
     if (!crop) return;
+    const handle = (event.target as HTMLElement).dataset.handle as DragMode | undefined;
+    if (handle) event.stopPropagation();
     event.currentTarget.setPointerCapture(event.pointerId);
-    dragRef.current = { x: event.clientX, y: event.clientY, origin: crop };
+    dragRef.current = {
+      mode: handle ?? "move",
+      x: event.clientX,
+      y: event.clientY,
+      origin: crop,
+    };
   }
 
   function onPointerMove(event: React.PointerEvent<HTMLDivElement>) {
@@ -217,9 +284,63 @@ export function LogoTester() {
     const rect = stage.getBoundingClientRect();
     const scaleX = sourceSize.width / rect.width;
     const scaleY = sourceSize.height / rect.height;
-    const x = clamp(drag.origin.x + (event.clientX - drag.x) * scaleX, 0, sourceSize.width - drag.origin.w);
-    const y = clamp(drag.origin.y + (event.clientY - drag.y) * scaleY, 0, sourceSize.height - drag.origin.h);
-    setCrop({ ...drag.origin, x: Math.round(x), y: Math.round(y) });
+    const dx = (event.clientX - drag.x) * scaleX;
+    const dy = (event.clientY - drag.y) * scaleY;
+
+    if (drag.mode === "move") {
+      const x = clamp(drag.origin.x + dx, 0, sourceSize.width - drag.origin.w);
+      const y = clamp(drag.origin.y + dy, 0, sourceSize.height - drag.origin.h);
+      setCrop({ ...drag.origin, x: Math.round(x), y: Math.round(y) });
+      return;
+    }
+
+    const o = drag.origin;
+    const MIN = 16;
+    const maxW = sourceSize.width;
+    const maxH = sourceSize.height;
+    let x = o.x;
+    let y = o.y;
+    let w = o.w;
+    let h = o.h;
+
+    if (format === "square") {
+      // Un seul côté pilote les deux dimensions.
+      let side = o.w;
+      if (drag.mode === "se") side = o.w + Math.max(dx, dy);
+      else if (drag.mode === "nw") side = o.w - Math.min(dx, dy);
+      else if (drag.mode === "ne") side = o.w + Math.max(dx, -dy);
+      else side = o.w + Math.max(-dx, dy);
+      w = h = Math.round(
+        clamp(
+          side,
+          MIN,
+          Math.min(
+            drag.mode === "se" || drag.mode === "ne" ? maxW - o.x : o.x + o.w,
+            drag.mode === "se" || drag.mode === "sw" ? maxH - o.y : o.y + o.h,
+          ),
+        ),
+      );
+      if (drag.mode === "nw" || drag.mode === "sw") x = o.x + o.w - w;
+      if (drag.mode === "nw" || drag.mode === "ne") y = o.y + o.h - h;
+    } else if (drag.mode === "se") {
+      w = Math.round(clamp(o.w + dx, MIN, maxW - o.x));
+      h = Math.round(clamp(o.h + dy, MIN, maxH - o.y));
+    } else if (drag.mode === "nw") {
+      w = Math.round(clamp(o.w - dx, MIN, o.x + o.w));
+      h = Math.round(clamp(o.h - dy, MIN, o.y + o.h));
+      x = o.x + o.w - w;
+      y = o.y + o.h - h;
+    } else if (drag.mode === "ne") {
+      w = Math.round(clamp(o.w + dx, MIN, maxW - o.x));
+      h = Math.round(clamp(o.h - dy, MIN, o.y + o.h));
+      y = o.y + o.h - h;
+    } else {
+      w = Math.round(clamp(o.w - dx, MIN, o.x + o.w));
+      h = Math.round(clamp(o.h + dy, MIN, maxH - o.y));
+      x = o.x + o.w - w;
+    }
+
+    setCrop({ x, y, w, h });
   }
 
   function onPointerUp() {
@@ -390,49 +511,6 @@ export function LogoTester() {
             </button>
           </div>
 
-          {score ? (
-            <section
-              className={styles.scorePanel}
-              aria-label={`Note du logo : ${score.value} sur 100`}
-            >
-              <div className={styles.scoreLeft}>
-                <p className={styles.scoreKick}>Note du logo</p>
-                <p className={styles.scoreValue}>
-                  {score.value}
-                  <span className={styles.scoreMax}>/100</span>
-                  <span className={styles.scoreGrade}>{score.grade}</span>
-                </p>
-                <p className={styles.scoreVerdict}>{score.label}</p>
-              </div>
-              <ul className={styles.scoreList}>
-                {supports.map((support) => (
-                  <li
-                    key={support.id}
-                    className={`${styles.scoreItem} ${
-                      support.state === "ko"
-                        ? styles.scoreKo
-                        : support.state === "watch"
-                          ? styles.scoreWatch
-                          : styles.scoreOk
-                    }`}
-                  >
-                    <span className={styles.scoreItemName}>
-                      {support.label}
-                      <span className={styles.scoreItemSize}>{support.context}</span>
-                    </span>
-                    <span className={styles.scoreItemState}>
-                      {support.state === "ko"
-                        ? "échoue"
-                        : support.state === "watch"
-                          ? "fragile"
-                          : "passe"}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-
           {/* 1. Extraction de l'icône */}
           <section className={styles.block}>
             <div className={styles.blockHead}>
@@ -470,7 +548,14 @@ export function LogoTester() {
                     role="presentation"
                   >
                     <span className={styles.safeZone} aria-hidden="true" />
-                    <span className={styles.cropHandle} aria-hidden="true" />
+                    {(["nw", "ne", "sw", "se"] as DragMode[]).map((handle) => (
+                      <span
+                        key={handle}
+                        className={`${styles.cropHandle} ${styles[`handle_${handle}`]}`}
+                        data-handle={handle}
+                        aria-hidden="true"
+                      />
+                    ))}
                   </div>
                 ) : null}
               </div>
@@ -500,31 +585,55 @@ export function LogoTester() {
                   ))}
                 </div>
 
+                <div className={styles.plateRow} role="group" aria-label="Format du cadre">
+                  <span className={styles.plateLabel}>Format</span>
+                  {(
+                    [
+                      { id: "free", name: "Libre" },
+                      { id: "square", name: "Carré" },
+                    ] as { id: CropFormat; name: string }[]
+                  ).map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className={format === item.id ? styles.plateChipOn : styles.plateChip}
+                      onClick={() => changeFormat(item.id)}
+                      aria-pressed={format === item.id}
+                    >
+                      {item.name}
+                    </button>
+                  ))}
+                </div>
+
                 <label className={styles.slider}>
                   <span>
-                    Taille du cadre <span className={styles.sliderValue}>{crop ? `${crop.w} px` : "—"}</span>
+                    Largeur du cadre{" "}
+                    <span className={styles.sliderValue}>
+                      {crop ? `${crop.w} × ${crop.h} px` : "—"}
+                    </span>
                   </span>
                   <input
                     type="range"
-                    min={8}
+                    min={16}
                     max={maxSide}
                     step={1}
-                    value={crop?.w ?? 8}
+                    value={crop?.w ?? 16}
                     onChange={(event) => moveTo(Number(event.target.value))}
                   />
                 </label>
 
                 <p className={styles.hint}>
-                  Glisse le carré pour le déplacer, règle la taille si le fichier contient aussi du
-                  texte. Rien n&apos;est envoyé.
+                  Glisse le cadre pour le déplacer, attrape un coin pour le redimensionner. En
+                  « Libre », largeur et hauteur se règlent séparément ; en « Carré », le rapport
+                  reste 1:1. Rien n&apos;est envoyé.
                 </p>
 
                 <div className={styles.actions}>
                   <button
                     type="button"
                     className={styles.ghost}
-                    onClick={() => detection?.ink && setCrop(detection.region)}
-                    disabled={!detection?.ink}
+                    onClick={() => detection?.region && setCrop(detection.region)}
+                    disabled={!detection?.region}
                   >
                     Revenir au cadre auto
                   </button>
@@ -535,6 +644,77 @@ export function LogoTester() {
               </div>
             </div>
           </section>
+
+          {/* 2. Note du logo, calculée seulement à la demande */}
+          {analysisShot && score && !stale ? (
+            <section
+              className={styles.analysisBlock}
+              aria-label={`Note du logo : ${score.value} sur 100`}
+            >
+              <div className={styles.scorePanel}>
+                <div className={styles.scoreLeft}>
+                  <p className={styles.scoreKick}>Note du logo</p>
+                  <p className={styles.scoreValue}>
+                    {score.value}
+                    <span className={styles.scoreMax}>/100</span>
+                    <span className={styles.scoreGrade}>{score.grade}</span>
+                  </p>
+                  <p className={styles.scoreVerdict}>{score.label}</p>
+                </div>
+                <ul className={styles.scoreList}>
+                  {supports.map((support) => (
+                    <li
+                      key={support.id}
+                      className={`${styles.scoreItem} ${
+                        support.state === "ko"
+                          ? styles.scoreKo
+                          : support.state === "watch"
+                            ? styles.scoreWatch
+                            : styles.scoreOk
+                      }`}
+                    >
+                      <span className={styles.scoreItemName}>
+                        {support.label}
+                        <span className={styles.scoreItemSize}>{support.context}</span>
+                      </span>
+                      <span className={styles.scoreItemState}>
+                        {support.state === "ko"
+                          ? "échoue"
+                          : support.state === "watch"
+                            ? "fragile"
+                            : "passe"}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className={styles.analysisFoot}>
+                <p>
+                  Analyse du cadre {analysisShot.crop.w} × {analysisShot.crop.h} px, fond{" "}
+                  {analysisShot.plate === "none"
+                    ? "aucun"
+                    : analysisShot.plate === "ink"
+                      ? "encre"
+                      : "papier"}
+                  .
+                </p>
+                <button type="button" className={styles.ghost} onClick={runAnalysis}>
+                  Régénérer l&apos;analyse
+                </button>
+              </div>
+            </section>
+          ) : (
+            <section className={styles.analysisPrompt} aria-live="polite">
+              <p>
+                {stale
+                  ? "Le cadre a changé depuis le dernier calcul : la note ne correspond plus à l'icône affichée."
+                  : "Pas encore de note. Règle le cadre de l'icône, puis lance l'analyse du score."}
+              </p>
+              <button type="button" className={styles.run} onClick={runAnalysis}>
+                {stale ? "Régénérer l'analyse" : "Lancer l'analyse du score"}
+              </button>
+            </section>
+          )}
 
           {/* 2. Aperçus favicon */}
           <section className={styles.block}>
@@ -640,7 +820,7 @@ export function LogoTester() {
                 type="button"
                 className={styles.pdfButton}
                 onClick={() => void downloadReportPdf()}
-                disabled={exporting || !score}
+                disabled={exporting || !score || stale}
               >
                 {exporting ? "Rédaction du PDF…" : "Télécharger l'analyse (.pdf)"}
               </button>
@@ -651,7 +831,7 @@ export function LogoTester() {
               </p>
             </div>
 
-            {iconReport ? (
+            {iconReport && !stale ? (
               <div className={styles.report}>
                 <p className={styles.verdict}>{iconReport.verdict}</p>
                 {failures.length > 0 ? (
@@ -680,7 +860,13 @@ export function LogoTester() {
                   ))}
                 </ul>
               </div>
-            ) : null}
+            ) : (
+              <p className={styles.reportPending}>
+                {stale
+                  ? "Le cadre a changé : relance l'analyse pour actualiser le verdict."
+                  : "Le verdict arrive après le calcul de la note, à l'étape 1."}
+              </p>
+            )}
           </section>
 
           {/* 3. Qualité du fichier */}
