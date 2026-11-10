@@ -195,7 +195,7 @@ export function ModeleCahierDesCharges() {
               <a className="btn-line" href="/assets/ressources/cahier-des-charges-site-2026.pdf" download>
                 Télécharger le PDF <span aria-hidden="true">↓</span>
               </a>
-              <span className={styles.dlMeta}>10 pages · 41 Ko · novembre 2026</span>
+              <span className={styles.dlMeta}>10 pages · 41 Ko · novembre 2026</span>
             </div>
           </div>
         </div>
