@@ -15,9 +15,14 @@
 
 /* ---------- 1. Le conteneur ---------- */
 .legal {
-  grid-template-columns: 200px minmax(0, 1fr);
-  gap: clamp(28px, 4vw, 64px);
+  /* 190 (sommaire) + 26 (gouttière) + 824 (texte) = 1040 : le bloc reste
+     compact même sur un écran de 1920 px, au lieu de s'étirer. */
+  grid-template-columns: 190px minmax(0, 1fr);
+  gap: clamp(18px, 1.8vw, 26px);
   align-items: start;
+  max-width: 1040px;
+  margin-inline: auto;
+  padding-block: clamp(24px, 3vw, 40px);
 }
 
 .legal .toc {
@@ -32,27 +37,28 @@
   }
 }
 
-/* La colonne de lecture : 676 px, centrée dans le couloir de droite. */
+/* La colonne de lecture prend toute la largeur du couloir : le texte et
+   le tableau partagent exactement le même bord gauche et le même bord droit. */
 .prose {
-  max-width: 676px;
+  max-width: none;
   min-width: 0;
-  margin-inline: auto;
+  margin-inline: 0;
   position: relative;
 }
 
 /* ---------- 2. Le rythme du texte ---------- */
 .prose p,
 .prose li {
-  font-size: 16.5px;
-  line-height: 1.72;
+  font-size: 17px;
+  line-height: 1.7;
   max-width: none;
   margin: 0 0 1.05em;
   color: var(--muted-2);
 }
 
 .prose > p:first-of-type {
-  font-size: 18.5px;
-  line-height: 1.62;
+  font-size: 19px;
+  line-height: 1.6;
   margin-bottom: 1.3em;
   color: var(--ink);
 }
@@ -86,13 +92,32 @@
   text-decoration-color: var(--accent);
 }
 
+/* ---------- 2 bis. Moins d'air sur les grands écrans ---------- */
+@media (min-width: 1100px) {
+  .legal {
+    padding-block: 32px;
+  }
+
+  .prose h2 {
+    margin: 1.9em 0 0.5em;
+  }
+
+  .prose h3 {
+    margin-top: 1.7em;
+  }
+
+  .prose [class*="note"] {
+    margin-block: 1.5em;
+  }
+}
+
 /* ---------- 3. Les tableaux ---------- */
-/* Le wrapper sort de la colonne de 88 px de chaque côté : 676 + 176 = 852 px,
-   sans jamais dépasser le couloir du conteneur. */
+/* Le tableau occupe la colonne entière, comme le texte : plus de saillie,
+   donc plus de décalage entre le bord du paragraphe et le bord du tableau. */
 .prose [class*="tableWrap"] {
-  --bleed: clamp(0px, 5.2vw, 88px);
-  width: calc(100% + 2 * var(--bleed));
-  margin: 1.6em calc(-1 * var(--bleed)) 1.4em;
+  --bleed: 0px;
+  width: 100%;
+  margin: 1.5em 0 1.3em;
   overflow-x: auto;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
