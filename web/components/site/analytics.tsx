@@ -62,7 +62,7 @@ gtag('js',new Date());gtag('config','${GA_MEASUREMENT_ID}',{anonymize_ip:true});
             alignItems: "center",
             gap: "18px 24px",
             padding: "20px 22px",
-            background: "#F4F1E8",
+            background: "var(--sand, #F8F5EE)",
             color: "#0A0A0B",
             border: "1px solid rgba(10,10,11,.22)",
             borderRadius: "2px",
