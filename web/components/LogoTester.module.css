@@ -709,7 +709,7 @@
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.62);
+  color: rgba(255, 255, 255, 0.74);
 }
 
 .scoreValue {
@@ -727,7 +727,7 @@
   font-size: 15px;
   font-weight: 400;
   letter-spacing: 0;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .scoreGrade {
@@ -778,7 +778,7 @@
 
 .scoreItemSize {
   font-size: 10.5px;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.66);
 }
 
 .scoreItemState {

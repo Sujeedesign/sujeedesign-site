@@ -296,15 +296,20 @@ export function buildReportPdf(doc: ReportDoc): Uint8Array {
   // Les vignettes sont alignées sur une même ligne de base, sinon les légendes
   // flottent et la comparaison des tailles ne veut plus rien dire.
   const maxBox = doc.icons.reduce((max, image) => Math.max(max, image.draw), 0);
-  const cell = maxBox + 20;
+  const count = Math.max(1, doc.icons.length);
+  const gap = 12;
+  // La grille doit tenir dans la largeur imprimable, sinon la dernière vignette
+  // sort de la marge.
+  const cell = Math.min(maxBox + 22, (CONTENT_W - gap * (count - 1)) / count);
   const cellY = y - cell - 6;
   ensure(cell + 34);
   for (let index = 0; index < doc.icons.length; index += 1) {
     const image = doc.icons[index];
     if (!image) continue;
     const box = image.draw;
-    const cellX = MARGIN + index * (cell + 14);
+    const cellX = MARGIN + index * (cell + gap);
     ops.push(`q ${color(PAPER)} ${cellX.toFixed(2)} ${cellY.toFixed(2)} ${cell.toFixed(2)} ${cell.toFixed(2)} re f Q`);
+    ops.push(`q ${color(LINE, true)} 0.6 w ${cellX.toFixed(2)} ${cellY.toFixed(2)} ${cell.toFixed(2)} ${cell.toFixed(2)} re S Q`);
     ops.push(
       `q ${box.toFixed(2)} 0 0 ${box.toFixed(2)} ${(cellX + (cell - box) / 2).toFixed(2)} ${(cellY + (cell - box) / 2).toFixed(2)} cm /Im${imageIds[index]} Do Q`,
     );
