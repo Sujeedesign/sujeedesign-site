@@ -39,7 +39,7 @@ export const faqItems = [
   {
     question: "Que faire si le résultat est mauvais ?",
     answer:
-      "Trois issues : faire redessiner les déclinaisons manquantes, moderniser le logo en gardant sa reconnaissance, ou repartir sur une identité. Les fourchettes correspondantes vont de 800 à 1 500 € pour une refonte, 650 à 900 € pour un logo simple.",
+      "Trois issues : faire redessiner les déclinaisons manquantes, moderniser le logo en gardant sa reconnaissance, ou repartir sur une identité. Comptez 800 € pour un logo seul, 1 100 € avec ses déclinaisons et 3 500 € pour un rebranding complet.",
   },
 ];
 
@@ -160,9 +160,9 @@ export function TesterLogo() {
                   ce qui est reconnaissable et corrige le reste, sans repartir de zéro.
                 </p>
                 <p>
-                  Pour situer le budget, la refonte de logo se situe entre{" "}
-                  <strong>800 et 1 500 €</strong> selon l&apos;état des fichiers et le nombre de
-                  déclinaisons. Une création complète démarre à 650 € pour un logo simple. Le{" "}
+                  Pour situer le budget, une création de logo démarre à{" "}
+                  <strong>800 €</strong>, un logo décliné coûte 1 100 €, et un rebranding complet
+                  se situe à 3 500 €. Le{" "}
                   <Link href={routes.guidePrixLogo}>guide des prix</Link> détaille chaque palier,
                   et le <Link href={routes.calculateurBudgetIdentite}>calculateur</Link> ajoute les
                   options.

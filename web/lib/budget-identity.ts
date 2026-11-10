@@ -1,18 +1,26 @@
 /**
  * Calculateur de budget identité visuelle — données et règles.
  *
- * Source unique : grille tarifaire validée par Sujee
- * (`/opt/data/shared/briefs/grille-tarifaire-logo-identite-visuelle.md`).
- * Aucun prix n'est inventé ici : les fourchettes sont recopiées telles quelles.
+ * Source unique : grille tarifaire appliquée par Sujee, relevée dans le CRM le
+ * 10 novembre 2026 (prestations actives, `tarif_ref` et fourchette de marché).
+ * Aucun prix n'est inventé ici : la borne basse est le prix de départ affiché,
+ * la borne haute le haut de la fourchette de marché constatée.
  * Les bornes basses s'additionnent entre elles, les bornes hautes aussi, sans
  * arrondi : un visiteur qui recompte à la main retrouve exactement le même total.
  */
 
 export type Range = { low: number; high: number };
 
-export type BaseId = "essentiel" | "refonte" | "signature" | "starter" | "complete" | "avance";
+export type BaseId =
+  | "logo"
+  | "logo-declinaisons"
+  | "charte"
+  | "essentiel"
+  | "complete"
+  | "complet"
+  | "rebranding";
 
-export type OptionId = "carte" | "email" | "post" | "brochure" | "picto" | "piste";
+export type OptionId = "carte" | "flyer" | "post" | "affiche" | "plaquette" | "menu";
 
 export type Base = {
   id: BaseId;
@@ -36,103 +44,118 @@ export type Option = {
 };
 
 /**
- * Six points de départ, classés par borne basse croissante : la progression de
- * prix reste lisible d'un bout à l'autre de la liste, y compris pour la refonte,
- * qui repart d'un logo existant et coûte donc moins qu'une création complète.
+ * Sept points de départ, classés par prix de départ croissant. Chaque niveau
+ * reprend le travail du précédent : un logo décliné contient le logo, le pack
+ * complet contient l'identité complète.
+ *
+ * La borne basse est le prix affiché par le studio, la borne haute le haut de
+ * la fourchette de marché relevée pour le même périmètre (grille du 10 novembre
+ * 2026). Un projet simple reste donc au prix affiché, un périmètre étendu monte
+ * dans la fourchette, sans mauvaise surprise au devis.
  */
 export const BASES: readonly Base[] = [
   {
-    id: "essentiel",
-    label: "J'ai besoin d'un logo simple",
-    shortLabel: "Logo Essentiel",
-    note: "brief, 2 pistes, fichiers",
+    id: "logo",
+    label: "J'ai besoin d'un logo",
+    shortLabel: "Logo, 3 pistes",
+    note: "brief, 3 pistes, 2 séries de retouches",
     includes:
-      "Brief, deux pistes créatives, deux séries de retours, logo finalisé, fichiers AI, SVG, PNG et PDF, versions couleur, noir et blanc et fond transparent.",
-    range: { low: 650, high: 900 },
-  },
-  {
-    id: "refonte",
-    label: "Je refais mon logo existant",
-    shortLabel: "Refonte de logo",
-    note: "reprise de l'existant, mise à niveau",
-    includes:
-      "Reprise du logo existant, nettoyage des tracés, remise à niveau des fichiers et des déclinaisons, sans repartir de zéro.",
+      "Brief, trois pistes créatives, deux séries de retouches, logo finalisé, fichiers AI, SVG, PNG et PDF, versions couleur, noir et blanc et fond transparent, cession de droits écrite.",
     range: { low: 800, high: 1500 },
   },
   {
-    id: "signature",
-    label: "Je veux un logo durable et polyvalent",
-    shortLabel: "Logo Signature",
-    note: "3 pistes, déclinaisons, favicon",
+    id: "logo-declinaisons",
+    label: "Je veux un logo déjà décliné",
+    shortLabel: "Logo + déclinaisons",
+    note: "déclinaisons horizontal, vertical, icône",
     includes:
-      "Brief approfondi, recherche concurrentielle, trois pistes, trois séries de retours, déclinaisons horizontale, verticale et icône, favicon, mini-guide PDF.",
-    range: { low: 1200, high: 1800 },
+      "Le logo et ses déclinaisons principales : version horizontale, verticale, icône, favicon, une couleur et fond sombre, avec les exports correspondants.",
+    range: { low: 1100, high: 1500 },
   },
   {
-    id: "starter",
-    label: "Je lance mon activité",
-    shortLabel: "Identité Starter",
-    note: "logo, couleurs, typographies",
+    id: "charte",
+    label: "J'ai mon logo, il me faut la charte",
+    shortLabel: "Charte graphique",
+    note: "palette, typographies, règles d'usage",
     includes:
-      "Logo Signature, palette de couleurs, typographies, règles d'usage de base et mini brand book PDF.",
-    range: { low: 1500, high: 2200 },
+      "Reprise du logo existant, palette de couleurs, typographies, règles d'usage et guide de la charte en PDF, prêt à transmettre à un imprimeur ou à un développeur.",
+    range: { low: 1200, high: 2500 },
+  },
+  {
+    id: "essentiel",
+    label: "Je veux l'identité et ses premiers supports",
+    shortLabel: "Pack Identité Essentiel",
+    note: "logo décliné, charte, deux supports",
+    includes:
+      "Logo et déclinaisons, charte graphique et deux supports au choix parmi carte de visite, papier en-tête, signature e-mail ou modèle de post.",
+    range: { low: 1900, high: 3000 },
   },
   {
     id: "complete",
-    label: "Je veux l'identité et ses supports",
-    shortLabel: "Identité Complète",
-    note: "logo décliné, modèles, guidelines",
+    label: "Je veux une identité visuelle complète",
+    shortLabel: "Identité visuelle complète",
+    note: "logo, charte et déclinaisons principales",
     includes:
-      "Identité Starter, logo décliné sur plusieurs supports, modèles réseaux sociaux, carte de visite, signature e-mail et guidelines détaillées.",
-    range: { low: 2500, high: 3500 },
+      "Logo, charte graphique et déclinaisons principales sur les supports courants, avec les fichiers sources et le guide d'usage.",
+    range: { low: 2200, high: 4000 },
   },
   {
-    id: "avance",
-    label: "Je repositionne ma marque",
-    shortLabel: "Branding Avancé",
-    note: "positionnement, direction artistique, brand book",
+    id: "complet",
+    label: "Je veux une identité étendue",
+    shortLabel: "Pack Identité Complet",
+    note: "charte étendue, quatre supports, réseaux",
     includes:
-      "Atelier de positionnement, moodboard, direction artistique, univers graphique, pictogrammes, maquettes des supports clés et brand book complet.",
-    range: { low: 4000, high: 6000 },
+      "Identité complète, charte étendue, quatre supports au choix et déclinaisons réseaux sociaux, avec les fichiers sources et la cession de droits.",
+    range: { low: 3200, high: 5000 },
+  },
+  {
+    id: "rebranding",
+    label: "Je repositionne ma marque",
+    shortLabel: "Rebranding",
+    note: "refonte de l'identité existante",
+    includes:
+      "Audit de l'identité existante, repositionnement, refonte du logo et de la charte, déclinaisons et plan de déploiement des supports.",
+    range: { low: 3500, high: 6000 },
   },
 ] as const;
 
+/** Options chiffrées, ajoutées au niveau retenu. Bornes issues de la grille du 10/11/2026. */
 export const OPTIONS: readonly Option[] = [
   {
     id: "carte",
-    label: "Carte de visite",
+    label: "Carte de visite recto-verso",
     shortLabel: "carte de visite",
-    range: { low: 250, high: 450 },
+    range: { low: 180, high: 350 },
   },
   {
-    id: "email",
-    label: "Signature e-mail",
-    shortLabel: "signature e-mail",
-    range: { low: 150, high: 300 },
+    id: "flyer",
+    label: "Flyer A5 ou A6 recto-verso",
+    shortLabel: "flyer",
+    range: { low: 220, high: 450 },
   },
   {
     id: "post",
-    label: "Modèle de post réseaux sociaux",
-    shortLabel: "modèle de post réseaux sociaux",
-    range: { low: 150, high: 350 },
+    label: "Post réseaux sociaux",
+    shortLabel: "post réseaux sociaux",
+    range: { low: 40, high: 80 },
   },
   {
-    id: "brochure",
-    label: "Plaquette ou brochure",
-    shortLabel: "plaquette ou brochure",
-    range: { low: 600, high: 1500 },
+    id: "affiche",
+    label: "Affiche A2",
+    shortLabel: "affiche A2",
+    range: { low: 320, high: 500 },
   },
   {
-    id: "picto",
-    label: "Pictogramme ou illustration",
-    shortLabel: "pictogramme ou illustration",
-    range: { low: 150, high: 400 },
+    id: "plaquette",
+    label: "Plaquette commerciale 4 à 8 pages",
+    shortLabel: "plaquette commerciale",
+    range: { low: 710, high: 1500 },
   },
   {
-    id: "piste",
-    label: "Piste créative supplémentaire",
-    shortLabel: "piste créative supplémentaire",
-    range: { low: 250, high: 450 },
+    id: "menu",
+    label: "Menu ou carte de restaurant",
+    shortLabel: "menu de restaurant",
+    range: { low: 180, high: 350 },
   },
 ] as const;
 

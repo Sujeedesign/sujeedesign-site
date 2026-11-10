@@ -15,28 +15,25 @@ import { routes } from "@/lib/routes";
 import sitemap from "@/app/sitemap";
 
 describe("guide prix du logo", () => {
-  it("rend un seul h1, les trois tableaux et la FAQ en clair", () => {
+  it("rend un seul h1, les quatre tableaux et la FAQ en clair", () => {
     const { container } = render(<GuidePrixLogo />);
 
     expect(container.querySelectorAll("h1")).toHaveLength(1);
     const tables = container.querySelectorAll("table");
-    expect(tables).toHaveLength(3);
+    expect(tables).toHaveLength(4);
     expect(container.querySelectorAll("details")).toHaveLength(faqItems.length);
     expect(faqItems).toHaveLength(7);
     expect(container).toHaveTextContent("Combien coûte");
     expect(container).toHaveTextContent("Ce qui manque dans un devis à 200 €");
   });
 
-  it("affiche les fourchettes de la grille 2026", () => {
+  it("affiche les prix de la grille appliquée et les repères de marché", () => {
     const { container } = render(<GuidePrixLogo />);
-    for (const range of [
-      "650 à 900 €",
-      "800 à 1 500 €",
-      "1 200 à 1 800 €",
-      "1 500 à 2 200 €",
-      "2 500 à 3 500 €",
-      "4 000 à 6 000 €",
-    ]) {
+    for (const prix of ["800 €", "1 100 €", "1 200 €", "1 900 €", "2 200 €", "3 200 €", "3 500 €"]) {
+      expect(container).toHaveTextContent(prix);
+    }
+    // Repères de marché issus du relevé de novembre 2026.
+    for (const range of ["300 €", "1 500 €", "6 000 €", "15 000 €"]) {
       expect(container).toHaveTextContent(range);
     }
   });

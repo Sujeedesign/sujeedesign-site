@@ -17,7 +17,7 @@ export const pageMeta = {
 export const aeo = {
   question: "Combien coûte un logo en 2026 ?",
   answer:
-    "Sur le marché français, un logo se paie entre 40 et 6 000 € selon ce qui est réellement livré. Un dessin acheté sur une place de marché reste sous 200 €, un logo d'indépendant se situe entre 300 et 800 €. Un logo dessiné, décliné et remis avec ses sources et une cession de droits se situe entre 650 et 1 800 €. Une identité visuelle complète, avec palette, typographies, supports et guide d'usage, va de 2 500 à 3 500 €. Le repère le plus fiable reste le temps de conception : dix à vingt heures pour un logo, trente à cinquante-deux heures pour une identité.",
+    "Sur le marché français, un logo se paie entre 40 et 6 000 € selon ce qui est réellement livré. Un dessin acheté sur une place de marché reste sous 200 €, un logo d'indépendant se situe entre 300 et 800 €. Un logo dessiné, décliné et remis avec ses sources et une cession de droits se situe le plus souvent entre 800 et 1 500 €, et un travail de positionnement avec direction artistique monte à 1 500 ou 2 500 €. Une identité complète chez un studio démarre autour de 3 500 €. Ici, un logo démarre à 800 € et l'identité complète coûte 2 200 €. Le repère le plus fiable reste le temps de conception : dix à vingt heures pour un logo, trente à cinquante-deux heures pour une identité.",
 };
 
 export const faqItems = [
@@ -54,7 +54,7 @@ export const faqItems = [
   {
     question: "Un logo et une identité visuelle, est-ce le même prix ?",
     answer:
-      "Non. Un logo règle la question du signe, une identité visuelle ajoute les couleurs, les typographies secondaires, les déclinaisons et le guide d'usage. Dans nos fourchettes, le logo seul démarre à 650 € et l'identité complète se situe entre 2 500 et 3 500 €.",
+      "Non. Un logo règle la question du signe, une identité visuelle ajoute les couleurs, les typographies secondaires, les déclinaisons et le guide d'usage. Ici, le logo seul démarre à 800 € et l'identité complète se situe à 2 200 €, contre 3 500 € et plus chez un studio pour une identité de même périmètre.",
   },
 ];
 
@@ -64,7 +64,8 @@ const SOMMAIRE = [
   { href: "#temps", label: "Le temps de travail" },
   { href: "#devis-200", label: "Ce qui manque à 200 €" },
   { href: "#refait", label: "Le coût d'un logo refait" },
-  { href: "#fourchettes", label: "Nos fourchettes" },
+  { href: "#marche", label: "Les prix du marché" },
+  { href: "#fourchettes", label: "Nos prix" },
   { href: "#identite", label: "Logo ou identité visuelle" },
   { href: "#faq", label: "Questions" },
 ];
@@ -85,16 +86,16 @@ const PALIERS = [
       "La recherche et la veille concurrentielle, les déclinaisons complètes, un cadre écrit.",
   },
   {
-    fourchette: "650 à 1 800 €",
+    fourchette: "800 à 2 500 €",
     produit:
-      "Un brief, une recherche, deux ou trois pistes argumentées, des ajustements suivis, les déclinaisons et les fichiers nommés.",
+      "Un brief, une recherche, deux ou trois pistes argumentées, des ajustements suivis, les déclinaisons et les fichiers nommés. C'est le segment des indépendants confirmés et des petits studios, et celui où se situe la plus grande partie des projets de TPE.",
     manque:
-      "Rien d'essentiel. C'est le socle d'un logo qui tient dix ans et qui passe partout.",
+      "Rien d'essentiel. C'est le socle d'un logo qui tient dix ans et qui passe partout. Au-dessus de 1 500 €, on paie en plus un travail de positionnement ou de direction artistique.",
   },
   {
-    fourchette: "2 500 à 6 000 €",
+    fourchette: "3 500 € et plus",
     produit:
-      "Une identité, pas seulement un logo : typographies, palette, règles d'usage, supports déclinés, parfois un travail de positionnement.",
+      "Une identité, pas seulement un logo : typographies, palette, règles d'usage, supports déclinés, parfois un travail de positionnement complet. Chez un studio affichant ses prix, l'identité démarre vers 3 500 €, et une refonte de marque se situe entre 3 000 et 15 000 €.",
     manque:
       "Rien, mais ce n'est plus le même projet : on ne dessine pas un signe, on construit un système.",
   },
@@ -171,28 +172,40 @@ const MANQUES = [
 ];
 
 const FOURCHETTES = [
-  { offre: "Logo Essentiel", range: "650 à 900 €", contenu: "Brief, 2 pistes, fichiers" },
-  { offre: "Refonte de logo", range: "800 à 1 500 €", contenu: "Reprise de l'existant" },
+  { offre: "Logo, 3 pistes", range: "800 €", contenu: "Brief, trois pistes, deux séries de retouches, fichiers sources" },
+  { offre: "Logo + déclinaisons", range: "1 100 €", contenu: "Déclinaisons horizontale, verticale, icône, favicon, fond sombre" },
+  { offre: "Charte graphique", range: "1 200 €", contenu: "Palette, typographies, règles d'usage, guide PDF" },
+  { offre: "Pack Lancement", range: "1 200 €", contenu: "Logo, mini-charte et carte de visite" },
+  { offre: "Pack Identité Essentiel", range: "1 900 €", contenu: "Logo décliné, charte et deux supports au choix" },
   {
-    offre: "Logo Signature",
-    range: "1 200 à 1 800 €",
-    contenu: "3 pistes, déclinaisons, favicon",
+    offre: "Identité visuelle complète",
+    range: "2 200 €",
+    contenu: "Logo, charte et déclinaisons principales sur les supports courants",
   },
   {
-    offre: "Identité Starter",
-    range: "1 500 à 2 200 €",
-    contenu: "Logo, couleurs, typographies",
+    offre: "Pack Identité Complet",
+    range: "3 200 €",
+    contenu: "Charte étendue, quatre supports, déclinaisons réseaux",
   },
   {
-    offre: "Identité Complète",
-    range: "2 500 à 3 500 €",
-    contenu: "Logo décliné, supports, guidelines",
+    offre: "Rebranding",
+    range: "3 500 €",
+    contenu: "Audit, repositionnement, refonte du logo et de la charte",
   },
-  {
-    offre: "Branding Avancé",
-    range: "4 000 à 6 000 €",
-    contenu: "Positionnement, direction artistique",
-  },
+];
+
+/**
+ * Relevé de marché de novembre 2026, bornes publiées par les comparateurs et les
+ * grilles de prestataires. Sert de contexte, jamais d'argument de vente : ce sont
+ * des fourchettes observées, pas des prix garantis.
+ */
+const MARCHE = [
+  { prestation: "Logo seul, indépendant qui démarre", bas: "300 €", haut: "800 €", source: "Grilles publiques de graphistes indépendants" },
+  { prestation: "Logo sur mesure avec recherche et déclinaisons", bas: "800 €", haut: "1 500 €", source: "Relevé de grilles publiées (La Fabrique du Net, novembre 2026)" },
+  { prestation: "Logo avec positionnement et direction artistique", bas: "1 500 €", haut: "2 500 €", source: "Grilles de graphistes indépendants, 2026" },
+  { prestation: "Identité visuelle complète, studio", bas: "3 500 €", haut: "6 000 €", source: "Guides tarifaires d'agences et de studios, 2026" },
+  { prestation: "Refonte de marque", bas: "3 000 €", haut: "15 000 €", source: "Guide tarifaire d'agence, 2026" },
+  { prestation: "Journée de designer (TJM), freelance", bas: "340 €", haut: "460 €", source: "Baromètres Malt, Freeland et TJMètre, octobre 2026" },
 ];
 
 export function GuidePrixLogo() {
@@ -209,8 +222,9 @@ export function GuidePrixLogo() {
             </h1>
             <p className="intro">
               Un logo se vend entre 40 € et 6 000 €. Ce n&apos;est pas le même produit, ni le
-              même travail, ni le même usage. Voici les paliers réels, ce qu&apos;on y trouve,
-              et ce qui manque en bas de l&apos;échelle.
+              même travail, ni le même usage. Voici les paliers observés sur le marché français
+              en novembre 2026, ce qu&apos;on y trouve, ce qui manque en bas de l&apos;échelle,
+              et les prix pratiqués ici.
             </p>
           </div>
         </div>
@@ -322,9 +336,11 @@ export function GuidePrixLogo() {
                   </table>
                 </div>
                 <p className={styles.note}>
-                  À un taux horaire de 60 à 80 €, dix à vingt heures donnent 600 à 1 600 €, et
-                  trente à cinquante-deux heures donnent 1 800 à 4 160 €. Les fourchettes
-                  affichées plus bas tombent dans ces ordres de grandeur.
+                  À 62,50 € de l&apos;heure, soit 500 € la journée, dix à vingt heures donnent
+                  625 à 1 250 €, et trente à cinquante-deux heures donnent 1 875 à 3 250 €. Les
+                  prix affichés plus bas tombent dans ces ordres de grandeur : un logo à 800 €
+                  correspond à environ treize heures de travail, une identité à 2 200 € à
+                  trente-cinq heures.
                 </p>
 
                 <h2 id="devis-200">Ce qui manque dans un devis à 200 €</h2>
@@ -350,21 +366,67 @@ export function GuidePrixLogo() {
                   je garde cette marque ».
                 </p>
 
-                <h2 id="fourchettes">Nos fourchettes</h2>
+                <h2 id="marche">Ce que pratiquent les autres</h2>
                 <p>
-                  Voici les tarifs du studio, hors taxes. Ils sont classés du plus simple au plus
-                  complet, et chaque niveau reprend le travail du précédent.
+                  Avant de parler de nos prix, voici ce que publient les comparateurs et les
+                  prestataires français. Ce sont des fourchettes observées en novembre 2026, hors
+                  taxes, tous périmètres confondus : un logo livré sans sources et une identité
+                  complète n&apos;y pèsent pas le même prix.
                 </p>
                 <div className={styles.tableWrap}>
                   <table className={styles.table}>
                     <caption className={styles.caption}>
-                      Fourchettes indicatives, hors taxes, avant devis.
+                      Relevé de marché, France, novembre 2026, hors taxes.
+                    </caption>
+                    <thead>
+                      <tr>
+                        <th scope="col">Prestation</th>
+                        <th scope="col" className={styles.price}>
+                          Bas
+                        </th>
+                        <th scope="col" className={styles.price}>
+                          Haut
+                        </th>
+                        <th scope="col">Source</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {MARCHE.map((ligne) => (
+                        <tr key={ligne.prestation}>
+                          <th scope="row">{ligne.prestation}</th>
+                          <td className={styles.price}>{ligne.bas}</td>
+                          <td className={styles.price}>{ligne.haut}</td>
+                          <td>{ligne.source}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p>
+                  Deux constats ressortent de ce relevé. Le prix d&apos;un logo avec recherche,
+                  déclinaisons et cession de droits se situe le plus souvent entre 800 et 1 500 €,
+                  ce qui laisse peu de marge sous 500 €. Et l&apos;écart entre un indépendant et
+                  un studio ne se joue pas sur le dessin mais sur ce qui l&apos;entoure :
+                  positionnement, direction artistique, nombre de supports. C&apos;est exactement
+                  la frontière entre nos offres.
+                </p>
+
+                <h2 id="fourchettes">Nos prix</h2>
+                <p>
+                  Voici les tarifs du studio, hors taxes, en novembre 2026. Ce sont des prix de
+                  départ : le devis les précise selon le périmètre, et chaque niveau reprend le
+                  travail du précédent.
+                </p>
+                <div className={styles.tableWrap}>
+                  <table className={styles.table}>
+                    <caption className={styles.caption}>
+                      Prix de départ, hors taxes, avant devis.
                     </caption>
                     <thead>
                       <tr>
                         <th scope="col">Offre</th>
                         <th scope="col" className={styles.price}>
-                          Fourchette
+                          Prix de départ
                         </th>
                         <th scope="col">Ce qui est inclus</th>
                       </tr>
@@ -381,8 +443,11 @@ export function GuidePrixLogo() {
                   </table>
                 </div>
                 <p className={styles.note}>
-                  Ces fourchettes situent le budget. Le devis se construit ensuite sur votre
-                  périmètre : nombre de déclinaisons, supports, délais et contenus fournis.
+                  Ces prix situent le budget. Le devis se construit ensuite sur votre périmètre :
+                  nombre de déclinaisons, supports, délais et contenus fournis. Les options
+                  courantes (carte de visite, flyer, affiche, plaquette, post) sont chiffrées
+                  séparément dans le{" "}
+                  <Link href={routes.calculateurBudgetIdentite}>calculateur de budget</Link>.
                 </p>
 
                 <h2 id="identite">Prix d&apos;un logo ou prix d&apos;une identité visuelle</h2>
@@ -394,10 +459,11 @@ export function GuidePrixLogo() {
                   paient pas le même travail.
                 </p>
                 <p>
-                  Dans nos fourchettes, le logo seul démarre à 650 € et l&apos;identité complète
-                  se situe entre 2 500 et 3 500 €. L&apos;écart ne paie pas un dessin plus beau :
-                  il paie les déclinaisons et le guide d&apos;usage qui évitent de refaire carte,
-                  enseigne et signature dans les dix-huit mois.
+                  Ici, le logo seul démarre à 800 € et l&apos;identité visuelle complète coûte
+                  2 200 €, là où un studio affichant ses prix démarre autour de 3 500 €.
+                  L&apos;écart ne paie pas un dessin plus beau : il paie les déclinaisons et le
+                  guide d&apos;usage qui évitent de refaire carte, enseigne et signature dans les
+                  dix-huit mois.
                 </p>
                 <p>
                   Pour situer votre cas, le{" "}

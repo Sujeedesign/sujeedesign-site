@@ -174,7 +174,7 @@ export function CalculateurBudget() {
               <div className={styles.tableWrap}>
                 <table className={styles.table}>
                   <caption className={styles.caption}>
-                    Contenu des six niveaux et fourchettes associées, hors taxes.
+                    Contenu des sept niveaux et fourchettes associées, hors taxes.
                   </caption>
                   <thead>
                     <tr>
@@ -280,10 +280,10 @@ export function CalculateurBudget() {
                 <Link href={routes.guidePrixLogo}>combien coûte un logo en 2026</Link>.
               </p>
               <p className={styles.note}>
-                Ordre de grandeur sur nos projets. À un taux horaire de 60 à 80 €, on retrouve
-                exactement les fourchettes affichées plus haut : 650 à 1 800 € pour un logo, 1 500
-                à 3 500 € pour une identité complète. Le prix n&apos;est pas une humeur, c&apos;est
-                du temps plus une méthode.
+                Ordre de grandeur sur nos projets. À 500 € la journée, soit 62,50 € de
+                l&apos;heure, on retrouve exactement les fourchettes affichées plus haut :
+                800 à 1 500 € pour un logo, 2 200 à 4 000 € pour une identité complète. Le prix
+                n&apos;est pas une humeur, c&apos;est du temps plus une méthode.
               </p>
 
               <h3>Ce que ça change pour vous</h3>

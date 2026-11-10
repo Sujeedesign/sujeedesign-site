@@ -96,9 +96,9 @@ describe("brief identité : contenu", () => {
     expect(new Set(STEPS.map((step) => step.num)).size).toBe(10);
   });
 
-  it("propose les six fourchettes du studio plus « à définir »", () => {
-    expect(BUDGETS).toHaveLength(7);
-    expect(BUDGETS).toContain("650 € à 900 €");
+  it("propose les sept fourchettes du studio plus « à définir »", () => {
+    expect(BUDGETS).toHaveLength(8);
+    expect(BUDGETS).toContain("800 € à 1\u202f500 €");
     expect(BUDGETS).toContain("Je ne sais pas encore");
   });
 

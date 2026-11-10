@@ -21,9 +21,9 @@ describe("règles de calcul du budget identité", () => {
   });
 
   it("additionne les bornes sans les arrondir", () => {
-    // 2 500 + 250 = 2 750 exactement ; 3 500 + 450 = 3 950.
+    // 2 200 + 180 = 2 380 exactement ; 4 000 + 350 = 4 350.
     const result = computeBudget("complete", ["carte"]);
-    expect(result?.range).toEqual({ low: 2750, high: 3950 });
+    expect(result?.range).toEqual({ low: 2380, high: 4350 });
   });
 
   it("ne renvoie aucun résultat tant qu'aucun point de départ n'est choisi", () => {
@@ -39,51 +39,52 @@ describe("règles de calcul du budget identité", () => {
 
   it("cumule toutes les options", () => {
     const result = computeBudget("essentiel", OPTIONS.map((option) => option.id));
-    // 650 + 250 + 150 + 150 + 600 + 150 + 250 = 2 200
-    // 900 + 450 + 300 + 350 + 1 500 + 400 + 450 = 4 350
-    expect(result?.range).toEqual({ low: 2200, high: 4350 });
+    // 1 900 + 180 + 220 + 40 + 320 + 710 + 180 = 3 550
+    // 3 000 + 350 + 450 + 80 + 500 + 1 500 + 350 = 6 230
+    expect(result?.range).toEqual({ low: 3550, high: 6230 });
     expect(result?.options).toHaveLength(OPTIONS.length);
   });
 
   it("produit un récapitulatif copiable et trois postes principaux", () => {
     const result = computeBudget("essentiel", ["carte"]);
     expect(result?.recap).toBe(
-      "Logo Essentiel (650 € à 900 €) + carte de visite (250 € à 450 €) : total estimé entre 900 € et 1\u202f350 €.",
+      "Pack Identité Essentiel (1\u202f900 € à 3\u202f000 €) + carte de visite (180 € à 350 €) : total estimé entre 2\u202f080 € et 3\u202f350 €.",
     );
     expect(result?.top).toHaveLength(2);
     expect(
-      computeBudget("essentiel", ["carte", "brochure", "picto"])?.top,
+      computeBudget("essentiel", ["carte", "plaquette", "affiche"])?.top,
     ).toHaveLength(3);
   });
 
   it("garde les fourchettes de la grille validée, sans chevauchement incohérent", () => {
     expect(BASES.map((base) => [base.id, base.range.low, base.range.high])).toEqual([
-      ["essentiel", 650, 900],
-      ["refonte", 800, 1500],
-      ["signature", 1200, 1800],
-      ["starter", 1500, 2200],
-      ["complete", 2500, 3500],
-      ["avance", 4000, 6000],
+      ["logo", 800, 1500],
+      ["logo-declinaisons", 1100, 1500],
+      ["charte", 1200, 2500],
+      ["essentiel", 1900, 3000],
+      ["complete", 2200, 4000],
+      ["complet", 3200, 5000],
+      ["rebranding", 3500, 6000],
     ]);
     expect(OPTIONS.map((option) => [option.id, option.range.low, option.range.high])).toEqual([
-      ["carte", 250, 450],
-      ["email", 150, 300],
-      ["post", 150, 350],
-      ["brochure", 600, 1500],
-      ["picto", 150, 400],
-      ["piste", 250, 450],
+      ["carte", 180, 350],
+      ["flyer", 220, 450],
+      ["post", 40, 80],
+      ["affiche", 320, 500],
+      ["plaquette", 710, 1500],
+      ["menu", 180, 350],
     ]);
   });
 
   it("classe les offres par prix croissant", () => {
-    // Garde-fou : la refonte repart d'un logo existant, elle ne peut pas coûter
-    // plus cher qu'une création complète placée au-dessus d'elle dans la liste.
+    // Garde-fou : chaque niveau reprend le travail du précédent, la liste doit
+    // donc rester croissante à la lecture.
     const lows = BASES.map((base) => base.range.low);
     const highs = BASES.map((base) => base.range.high);
     expect([...lows].sort((a, b) => a - b)).toEqual(lows);
     expect([...highs].sort((a, b) => a - b)).toEqual(highs);
-    expect(BASES[0]?.id).toBe("essentiel");
-    expect(BASES[BASES.length - 1]?.id).toBe("avance");
+    expect(BASES[0]?.id).toBe("logo");
+    expect(BASES[BASES.length - 1]?.id).toBe("rebranding");
   });
 });
 
@@ -103,17 +104,17 @@ describe("composant calculateur", () => {
     if (!complete) throw new Error("radio « identité complète » absente");
     fireEvent.click(complete);
 
-    expect(screen.getByRole("status")).toHaveTextContent("2 500 €");
-    expect(screen.getByRole("status")).toHaveTextContent("3 500 €");
+    expect(screen.getByRole("status")).toHaveTextContent("2 200 €");
+    expect(screen.getByRole("status")).toHaveTextContent("4 000 €");
 
     const carte = container.querySelector<HTMLInputElement>('input[value="carte"]');
     if (!carte) throw new Error("case « carte de visite » absente");
     fireEvent.click(carte);
 
-    expect(screen.getByRole("status")).toHaveTextContent("2 750 €");
-    expect(screen.getByRole("status")).toHaveTextContent("3 950 €");
+    expect(screen.getByRole("status")).toHaveTextContent("2 380 €");
+    expect(screen.getByRole("status")).toHaveTextContent("4 350 €");
     expect(screen.getByRole("status")).toHaveTextContent(
-      "Les deux postes qui pèsent le plus dans ce budget : Identité Complète et carte de visite.",
+      "Les deux postes qui pèsent le plus dans ce budget : Identité visuelle complète et carte de visite.",
     );
     expect(screen.getByText("Copier le récapitulatif")).toBeInTheDocument();
   });
@@ -126,7 +127,7 @@ describe("composant calculateur", () => {
     fireEvent.click(complete);
 
     expect(screen.getByRole("status")).toHaveTextContent(
-      "Le poste qui pèse le plus dans ce budget : Identité Complète.",
+      "Le poste qui pèse le plus dans ce budget : Identité visuelle complète.",
     );
   });
 });
