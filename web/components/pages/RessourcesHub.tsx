@@ -11,7 +11,7 @@ import styles from "./RessourcesHub.module.css";
 export const pageMeta = {
   title: "Ressources : outils et guides de prix",
   description:
-    "Un calculateur de budget, un guide des prix du logo, un test de logo et un générateur de brief. Quatre pages pour situer un projet avant de demander un devis.",
+    "Un calculateur de budget, deux guides de prix, un test de logo et un générateur de brief. Cinq pages pour situer un projet avant de demander un devis.",
 };
 
 const PRINCIPAL = {
@@ -20,7 +20,7 @@ const PRINCIPAL = {
   kind: "Outil",
   title: "Calculateur de budget identité visuelle",
   text:
-    "Six points de départ, six options, une fourchette en trente secondes. Le détail du calcul s'affiche ligne par ligne, sans email à laisser.",
+    "Sept points de départ, six options, une fourchette en trente secondes. Le détail du calcul s'affiche ligne par ligne, sans email à laisser.",
   more: "Estimer un budget",
 };
 
@@ -36,8 +36,18 @@ const AUTRES = [
     preview: <GuidePreview />,
   },
   {
-    href: routes.testerSonLogo,
+    href: routes.guidePrixSite,
     num: "03",
+    kind: "Guide",
+    title: "Combien coûte un site internet en 2026 ?",
+    text:
+      "Les quatre paliers de prix, les coûts récurrents que personne n'annonce, et le prix réel d'un site vitrine.",
+    more: "Lire le guide",
+    preview: <GuidePreview />,
+  },
+  {
+    href: routes.testerSonLogo,
+    num: "04",
     kind: "Diagnostic",
     title: "Tester son logo",
     text:
@@ -47,7 +57,7 @@ const AUTRES = [
   },
   {
     href: routes.generateurBriefIdentite,
-    num: "04",
+    num: "05",
     kind: "Outil",
     title: "Générateur de brief identité",
     text:

@@ -20,6 +20,7 @@ import CalculateurPage from "@/app/ressources/calculateur-budget-identite/page";
 import BriefPage from "@/app/ressources/generateur-brief-identite/page";
 import TesterLogoPage from "@/app/ressources/tester-son-logo/page";
 import PrixLogoPage from "@/app/guides/prix-logo/page";
+import PrixSitePage from "@/app/guides/prix-site-internet/page";
 import TendancesPage from "@/app/guides/tendances-web-design-2027/page";
 import ServicePage from "@/app/services/[slug]/page";
 import sitemap from "@/app/sitemap";
@@ -117,6 +118,12 @@ const PAGES: PageCase[] = [
     path: routes.guidePrixLogo,
     aeo: true,
     load: () => PrixLogoPage(),
+  },
+  {
+    label: "guide prix d'un site",
+    path: routes.guidePrixSite,
+    aeo: true,
+    load: () => PrixSitePage(),
   },
   {
     label: "guide tendances web design 2027",

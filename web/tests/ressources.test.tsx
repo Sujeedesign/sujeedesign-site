@@ -53,11 +53,12 @@ describe("guide prix du logo", () => {
 });
 
 describe("hub ressources", () => {
-  it("liste les deux pages existantes, et seulement elles", () => {
+  it("liste les pages existantes du hub", () => {
     const { container } = render(<RessourcesHub />);
     const hrefs = Array.from(container.querySelectorAll("a")).map((link) => link.getAttribute("href"));
     expect(hrefs).toContain(routes.calculateurBudgetIdentite);
     expect(hrefs).toContain(routes.guidePrixLogo);
+    expect(hrefs).toContain(routes.guidePrixSite);
     expect(container.querySelectorAll("h1")).toHaveLength(1);
     expect(screen.getByText("Calculateur de budget identité visuelle")).toBeInTheDocument();
   });
@@ -69,5 +70,6 @@ describe("indexation des pages ressources", () => {
     const urls = entries.map((entry) => entry.url);
     expect(urls).toContain(`https://sujeedesign.com${routes.ressources}`);
     expect(urls).toContain(`https://sujeedesign.com${routes.guidePrixLogo}`);
+    expect(urls).toContain(`https://sujeedesign.com${routes.guidePrixSite}`);
   });
 });

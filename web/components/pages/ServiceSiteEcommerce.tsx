@@ -121,6 +121,42 @@ export function ServiceSiteEcommerce({ doc }: { doc: Doc }) {
           </div>
         </section>
 
+        <section className="section">
+          <div className="wrap">
+            <div className="sec-head rv">
+              <div className="sec-num">05</div>
+              <div>
+                <h2>Pour aller plus loin</h2>
+                <p>
+                  Deux pages pour situer le budget avant d&apos;en parler : le prix réel d&apos;un
+                  site, coûts récurrents compris, et le prix d&apos;un logo si votre identité
+                  n&apos;est pas encore posée.
+                </p>
+              </div>
+            </div>
+            <ul className="res-links rv">
+              <li>
+                <a href={routes.guidePrixSite}>
+                  <span className="res-links__kind">Guide</span>
+                  <span className="res-links__title">Combien coûte un site internet en 2026</span>
+                  <span className="res-links__text">
+                    Les quatre paliers, les coûts récurrents et ce qu&apos;un devis doit contenir.
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href={routes.guidePrixLogo}>
+                  <span className="res-links__kind">Guide</span>
+                  <span className="res-links__title">Combien coûte un logo en 2026</span>
+                  <span className="res-links__text">
+                    Les quatre paliers de prix, le temps de travail réel, ce qui manque à 200 €.
+                  </span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </section>
+
         <section className="cta-section">
           <div className="wrap">
             <div className="bandcta bandcta--dark cta-glow">
