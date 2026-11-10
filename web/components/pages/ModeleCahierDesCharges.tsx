@@ -229,7 +229,7 @@ export function ModeleCahierDesCharges() {
               <div className="prose">
                 <CoverFigure
                   slug="cahier-des-charges"
-                  alt="Ordinateur portable affichant un cahier des charges de site internet, dans un bureau."
+                  alt="Ordinateur portable affichant la couverture d'un cahier des charges de site internet, dans un bureau."
                   caption="Le modèle se remplit à l'écran ou à l'impression, puis s'envoie tel quel avec la demande de devis."
                 />
                 <h2 id="utilite">À quoi ça sert vraiment</h2>

@@ -38,7 +38,7 @@ const BUDGET: Entree[] = [
       "Sept points de départ, six options, une fourchette en trente secondes, calculée ligne par ligne.",
     more: "Estimer un budget",
     cover: "identite-visuelle",
-    alt: "Écran de calculateur de budget posé sur un bureau, à côté d'un nuancier et d'un carnet.",
+    alt: "Planche de construction d'un logo annotée sur un bureau de studio, avec nuancier, tablette graphique et carnet de croquis.",
   },
   {
     href: routes.guidePrixLogo,
@@ -49,7 +49,7 @@ const BUDGET: Entree[] = [
       "Quatre paliers de prix, le temps de travail réel et ce qui manque dans un devis à 200 €.",
     more: "Lire le guide",
     cover: "creer-un-logo",
-    alt: "Graphiste dessinant un logo sur une tablette, entourée de recherches imprimées.",
+    alt: "Graphiste dessinant un logo sur une tablette, devant un écran de création vectorielle.",
   },
   {
     href: routes.guidePrixSite,
@@ -60,7 +60,7 @@ const BUDGET: Entree[] = [
       "Les paliers du marché, les coûts récurrents que personne n'annonce et le prix réel d'un site vitrine.",
     more: "Lire le guide",
     cover: "site-internet",
-    alt: "Ordinateur portable ouvert sur un site web, sur un bureau clair.",
+    alt: "Ordinateur portable ouvert sur la page d'accueil d'un site, sur un bureau clair.",
   },
 ];
 
@@ -86,7 +86,7 @@ const PREPARER: Entree[] = [
       "Dix questions pour écrire un brief propre, avec ce qui bloque un projet. Export en PDF.",
     more: "Rédiger un brief",
     cover: "brief-identite",
-    alt: "Carnet de brief ouvert sur un bureau, avec échantillons de couleur et croquis.",
+    alt: "Ordinateur portable affichant un formulaire de brief identité avec export PDF, sur un bureau.",
   },
   {
     href: routes.modeleCahierDesCharges,
@@ -97,7 +97,7 @@ const PREPARER: Entree[] = [
       "Douze blocs à remplir avant de demander un devis. DOCX et PDF, sans inscription.",
     more: "Télécharger le modèle",
     cover: "cahier-des-charges",
-    alt: "Ordinateur portable affichant un cahier des charges de site internet, dans un bureau.",
+    alt: "Ordinateur portable affichant la couverture d'un cahier des charges de site internet, dans un bureau.",
   },
 ];
 

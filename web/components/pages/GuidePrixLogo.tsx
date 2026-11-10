@@ -277,7 +277,7 @@ export function GuidePrixLogo() {
               <div className="prose">
                 <CoverFigure
                   slug="creer-un-logo"
-                  alt="Graphiste dessinant un logo sur une tablette, entourée de recherches imprimées."
+                  alt="Graphiste dessinant un logo sur une tablette, devant un écran de création vectorielle."
                   caption="Un logo se dessine et se teste avant d'être livré. C'est ce temps de recherche qui explique l'écart entre un devis à 200 € et un devis à 1 500 €."
                 />
                 <h2 id="paliers">Les quatre paliers</h2>

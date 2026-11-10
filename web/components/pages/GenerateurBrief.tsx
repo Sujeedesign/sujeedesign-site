@@ -114,7 +114,7 @@ export function GenerateurBrief() {
               <div className="prose">
                 <CoverFigure
                   slug="brief-identite"
-                  alt="Carnet de brief ouvert sur un bureau, avec échantillons de couleur et croquis."
+                  alt="Ordinateur portable affichant un formulaire de brief identité avec export PDF, sur un bureau."
                   caption="Dix questions, un document, et le brief est écrit. L'export PDF se fait depuis la page, sans compte à créer."
                 />
                 <h2 id="questions">Les dix questions, et pourquoi elles existent</h2>

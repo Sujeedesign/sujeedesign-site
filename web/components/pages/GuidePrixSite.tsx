@@ -308,7 +308,7 @@ export function GuidePrixSite() {
               <div className="prose">
                 <CoverFigure
                   slug="site-internet"
-                  alt="Ordinateur portable ouvert sur un site web, sur un bureau clair."
+                  alt="Ordinateur portable ouvert sur la page d'accueil d'un site, sur un bureau clair."
                   caption="Un site se juge sur mobile, sur ce qu'il permet de faire, et sur ce qu'il coûte chaque mois une fois en ligne."
                 />
                 <h2 id="paliers">Les quatre paliers</h2>

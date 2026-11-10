@@ -153,7 +153,7 @@ export function CalculateurBudget() {
               <div className="prose">
                 <CoverFigure
                   slug="identite-visuelle"
-                  alt="Écran de calculateur de budget posé sur un bureau, à côté d'un nuancier et d'un carnet."
+                  alt="Planche de construction d'un logo annotée sur un bureau de studio, avec nuancier, tablette graphique et carnet de croquis."
                   caption="La fourchette se construit poste par poste : logo, déclinaisons, charte, options. Rien n'est ajouté au doigt mouillé."
                 />
               <h2 id="principe">Ce que calcule cet outil</h2>
