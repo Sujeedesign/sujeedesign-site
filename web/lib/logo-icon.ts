@@ -104,13 +104,52 @@ export function detectBackground(px: Pixels): Rgb | null {
       Math.max(max, Math.abs(color.r - first.r), Math.abs(color.g - first.g), Math.abs(color.b - first.b)),
     0,
   );
-  if (spread > CORNER_TOLERANCE) return null;
+  // Coins occupés par le dessin (cadrage serré, mot-symbole qui touche les
+  // bords) : on retombe sur le fond dominant du bord. Sans ce repli, toute
+  // image opaque sans coins vides passe pour 100 % d'encre et coule la note.
+  if (spread > CORNER_TOLERANCE) return borderBackground(px);
 
   const mean = samples.reduce(
     (acc, color) => ({ r: acc.r + color.r / samples.length, g: acc.g + color.g / samples.length, b: acc.b + color.b / samples.length }),
     { r: 0, g: 0, b: 0 },
   );
   return mean;
+}
+
+/** Couleur dominante du bord (2 px), si elle couvre au moins 60 % du contour. */
+function borderBackground(px: Pixels): Rgb | null {
+  const { width, height } = px;
+  const counts = new Map<number, { n: number; r: number; g: number; b: number }>();
+  let opaque = 0;
+  const visit = (x: number, y: number) => {
+    const [r, g, b, a] = pixel(px, x, y);
+    if (a < 200) return;
+    opaque += 1;
+    const key = ((r >> 4) << 8) | ((g >> 4) << 4) | (b >> 4);
+    const slot = counts.get(key) ?? { n: 0, r: 0, g: 0, b: 0 };
+    slot.n += 1;
+    slot.r += r;
+    slot.g += g;
+    slot.b += b;
+    counts.set(key, slot);
+  };
+  for (let x = 0; x < width; x += 1) {
+    for (let d = 0; d < 2; d += 1) {
+      visit(x, d);
+      visit(x, height - 1 - d);
+    }
+  }
+  for (let y = 0; y < height; y += 1) {
+    for (let d = 0; d < 2; d += 1) {
+      visit(d, y);
+      visit(width - 1 - d, y);
+    }
+  }
+  if (opaque === 0) return null;
+  let best: { n: number; r: number; g: number; b: number } | null = null;
+  for (const slot of counts.values()) if (!best || slot.n > best.n) best = slot;
+  if (!best || best.n / opaque < 0.6) return null;
+  return { r: best.r / best.n, g: best.g / best.n, b: best.b / best.n };
 }
 
 /** Masque des pixels qui portent du dessin (hors fond uni et hors transparence). */
@@ -529,10 +568,9 @@ export function reportIcon(icon: Pixels): IconReport {
   }
 
   // Zone de sécurité maskable : le contenu utile doit tenir dans 80 % du carré.
-  let minX = width;
-  let minY = height;
-  let maxX = -1;
-  let maxY = -1;
+  // On mesure le dessin, jamais la plaque : un fond plein occupe forcément les
+  // coins du carré, ce n'est pas du contenu rogné pour autant.
+  const zoneMask = buildInkMask(icon, plate);
   let outside = 0;
   let inked = 0;
   const cx = width / 2;
@@ -540,12 +578,8 @@ export function reportIcon(icon: Pixels): IconReport {
   const radius = size * 0.4;
   for (let y = 0; y < height; y += 1) {
     for (let x = 0; x < width; x += 1) {
-      if ((icon.data[(y * width + x) * 4 + 3] ?? 0) < 64) continue;
+      if (!zoneMask[y * width + x]) continue;
       inked += 1;
-      if (x < minX) minX = x;
-      if (x > maxX) maxX = x;
-      if (y < minY) minY = y;
-      if (y > maxY) maxY = y;
       if (Math.hypot(x - cx, y - cy) > radius) outside += 1;
     }
   }
@@ -566,13 +600,20 @@ export function reportIcon(icon: Pixels): IconReport {
 
   const counts: Record<IconMetricState, number> = { ok: 0, watch: 0, ko: 0 };
   for (const metric of metrics) counts[metric.state] += 1;
-  const needsRedesign = counts.ko > 0;
+  // Le débordement maskable n'invalide pas le favicon : c'est une contrainte de
+  // l'icône Android/PWA déclarée en maskable, pas du dessin illisible. Il reste
+  // affiché en échec, mais il ne déclenche pas à lui seul une refonte, sinon
+  // toute icône pleine cadre est condamnée d'office.
+  const zoneKo = metrics.some((metric) => metric.id === "zone-maskable" && metric.state === "ko");
+  const needsRedesign = metrics.some((metric) => metric.id !== "zone-maskable" && metric.state === "ko");
 
   const verdict = needsRedesign
     ? "Cette icône ne tient pas en favicon : une refonte de l'icône est nécessaire avant de la déployer sur un site, un onglet ou une app."
-    : counts.watch > 0
-      ? "L'icône passe, mais un point mérite d'être retravaillé pour tenir sur tous les supports."
-      : "L'icône tient à toutes les tailles testées : onglet, favoris, écran d'accueil et icône masquée.";
+    : zoneKo
+      ? "L'icône tient en favicon, mais le dessin déborde du cercle de sécurité maskable : Android et la PWA rogneront ses bords si elle est déclarée en maskable."
+      : counts.watch > 0
+        ? "L'icône passe, mais un point mérite d'être retravaillé pour tenir sur tous les supports."
+        : "L'icône tient à toutes les tailles testées : onglet, favoris, écran d'accueil et icône masquée.";
 
   return { metrics, verdict, counts, needsRedesign };
 }
@@ -690,8 +731,11 @@ export function scoreIcon(supports: SupportVerdict[], report?: IconReport): Icon
   }
   const value = Math.max(0, Math.min(100, Math.round(100 - penalty)));
   if (report?.needsRedesign) {
+    // Une faille bloque le déploiement, mais la note doit encore distinguer
+    // une icône limite d'une icône qui échoue partout : on compresse la note
+    // au lieu de l'écraser sur 44 pour tout le monde.
     return {
-      value: Math.min(44, value),
+      value: Math.min(44, Math.round(value * 0.55)),
       grade: "D",
       label: "Refonte de l'icône nécessaire avant déploiement",
     };
