@@ -21,6 +21,35 @@
   color: var(--accent);
 }
 
+.byline {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.headMeta {
+  grid-column: 9/13;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-self: end;
+}
+
+.headMeta :global(.intro) {
+  margin: 0;
+}
+
+@media (max-width: 1024px) {
+  .headMeta {
+    grid-column: 1/13;
+    margin-top: 14px;
+  }
+}
+
 .legalInner > * {
   min-width: 0;
 }
@@ -42,6 +71,12 @@
   margin-top: 0;
 }
 
+/* Les ancres du sommaire doivent s'arrêter sous l'en-tête fixe. */
+.conteneur :global(.prose) h2[id],
+.conteneur :global(.prose) [id="sources"] {
+  scroll-margin-top: 108px;
+}
+
 .figure {
   margin: 26px 0 30px;
   border: 1px solid var(--line);
@@ -59,17 +94,119 @@
 .figure figcaption {
   padding: 10px 14px;
   font-family: var(--mono);
-  font-size: 9.5px;
-  letter-spacing: 0.06em;
-  line-height: 1.6;
-  color: var(--muted-2);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  line-height: 1.7;
+  color: #3f3f41;
   border-top: 1px solid var(--line);
+}
+
+.figure figcaption a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.figure figcaption strong {
+  color: var(--ink);
+  font-weight: 500;
 }
 
 .lead {
   font-size: clamp(17px, 2.2vw, 21px) !important;
   line-height: 1.5 !important;
   color: var(--ink);
+}
+
+/* Synthèse en six points, façon TL;DR : lisible en dix secondes. */
+.tldr {
+  margin: 28px 0 30px;
+  padding: 20px 22px 18px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--ds-radius);
+  background: var(--paper-2, #f8f5ef);
+}
+
+.tldrTitle {
+  margin: 0 0 10px !important;
+  font-family: var(--mono);
+  font-size: 10px !important;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.tldr ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.tldr li {
+  font-size: 14.5px;
+  line-height: 1.55;
+  margin-bottom: 7px;
+}
+
+.tldr li:last-child {
+  margin-bottom: 0;
+}
+
+.tldr a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Tableaux de chiffres : plus légers qu'une image, lisibles au lecteur d'écran. */
+.tableWrap {
+  margin: 24px 0 18px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--ds-radius);
+}
+
+.tableWrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.tableWrap th {
+  text-align: left;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--paper-2, #f8f5ef);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.tableWrap td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+.tableWrap tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.tableWrap td:nth-child(2) {
+  font-weight: 600;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.source {
+  font-family: var(--mono);
+  font-size: 9.5px !important;
+  letter-spacing: 0.04em;
+  color: var(--muted-2);
+  line-height: 1.6;
 }
 
 .note {
@@ -115,6 +252,10 @@
     margin-right: -6px;
   }
 
+  .tableWrap {
+    font-size: 13px;
+  }
+
   .ctaLinks {
     width: 100%;
   }
@@ -136,14 +277,8 @@
 }
 
 @media (max-width: 1024px) {
-  
-
   .tocLabel {
     grid-column: 1 / -1;
     margin-bottom: 4px;
   }
-}
-
-@media (max-width: 560px) {
-  
 }
