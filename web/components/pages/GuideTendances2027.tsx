@@ -423,6 +423,15 @@ export function GuideTendances2027() {
                   démonstrations. L&apos;animation sert la démonstration du produit. Elle ne
                   décore pas.
                 </p>
+
+                <Figure
+                  src="/assets/img/guides/muzli/animejs.webp"
+                  width={800}
+                  height={500}
+                  alt="Page d'accueil d'Anime.js : titre blanc sur fond anthracite et grand cadran circulaire néon, vert, rouge et orange."
+                  caption={<>Projet : <strong>Anime.js</strong> par Julian Garnier. Une bibliothèque réduite à une idée : déplacer les choses avec précision. Le cadran ne décore pas, il démontre.<br />
+                  <a href="https://animejs.com/" target="_blank" rel="noopener noreferrer">Voir le site</a> · Repéré via Awwwards.</>}
+                />
                 <p>
                   Ce que ça change : la question n&apos;est plus « quelle animation ? » mais
                   « quel moment mérite d&apos;être mis en scène ? ». Un changement de
@@ -499,6 +508,15 @@ export function GuideTendances2027() {
                   process, on payait le coût de l&apos;erreur. Quand une exploration coûte
                   moins d&apos;un euro, on en demande trois au lieu d&apos;une.
                 </p>
+
+                <Figure
+                  src="/assets/img/guides/muzli/diamond-ring.webp"
+                  width={1200}
+                  height={1200}
+                  alt="Schéma : un petit diamant posé sur une boucle de sept étapes numérotées, cadrer, générer, choisir, construire, lancer, mesurer, apprendre, avec le goût au centre."
+                  caption={<>Schéma : d&apos;après <strong>« The Diamond Ring »</strong> de Muzli (octobre 2026). Redessiné en français : le tunnel devient une boucle de sept étapes, et le goût reste au centre.<br />
+                  <a href="https://muz.li/blog/design-process-vs-ai-workflow/" target="_blank" rel="noopener noreferrer">Lire l&apos;étude</a> · Repéré dans Muzli.</>}
+                />
                 <p>
                   Ce que ça change pour un studio ou une PME : le brief devient le livrable
                   clé. Une IA exécute vite ce qu&apos;on décrit bien. Elle ne choisit pas la
@@ -786,8 +804,9 @@ export function GuideTendances2027() {
                         Muzli Picks, avril 2026
                       </a>
                       . Images de Studio Namma, Grilli Type (GT Mechanik), Obys, basement.studio
-                      (Looper), THE UNKNOWN et Loli Laboureau, utilisées en illustration avec
-                      crédit et lien vers chaque création.
+                      (Looper), THE UNKNOWN et Loli Laboureau, plus une capture d&apos;Anime.js
+                      (Julian Garnier) et un schéma redessiné d&apos;après Muzli, utilisés avec
+                      crédit et lien vers chaque source.
                     </li>
                     <li>
                       Prix :{" "}
