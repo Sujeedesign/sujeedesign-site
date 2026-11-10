@@ -220,3 +220,19 @@
     border: 0;
   }
 }
+
+/* Rangée de téléchargement des pages outil (modèle de cahier des charges). */
+.dlRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.dlMeta {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--muted-2);
+}

@@ -59,6 +59,7 @@ describe("hub ressources", () => {
     expect(hrefs).toContain(routes.calculateurBudgetIdentite);
     expect(hrefs).toContain(routes.guidePrixLogo);
     expect(hrefs).toContain(routes.guidePrixSite);
+    expect(hrefs).toContain(routes.modeleCahierDesCharges);
     expect(container.querySelectorAll("h1")).toHaveLength(1);
     expect(screen.getByText("Calculateur de budget identité visuelle")).toBeInTheDocument();
   });
@@ -71,5 +72,6 @@ describe("indexation des pages ressources", () => {
     expect(urls).toContain(`https://sujeedesign.com${routes.ressources}`);
     expect(urls).toContain(`https://sujeedesign.com${routes.guidePrixLogo}`);
     expect(urls).toContain(`https://sujeedesign.com${routes.guidePrixSite}`);
+    expect(urls).toContain(`https://sujeedesign.com${routes.modeleCahierDesCharges}`);
   });
 });

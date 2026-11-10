@@ -523,7 +523,9 @@ export function GuidePrixSite() {
                   ))}
                 </ul>
                 <p>
-                  Pour préparer la discussion, la page{" "}
+                  Pour préparer la discussion, le{" "}
+                  <Link href={routes.modeleCahierDesCharges}>modèle de cahier des charges</Link>{" "}
+                  liste les douze blocs à remplir avant de demander un devis. La page{" "}
                   <Link href={serviceHref("site-ecommerce")}>sites et e-commerce</Link> détaille
                   ce qui est livré, et le{" "}
                   <Link href={routes.guidePrixLogo}>guide des prix du logo</Link> applique la

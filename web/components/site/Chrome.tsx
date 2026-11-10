@@ -243,6 +243,7 @@ export function SiteFooter() {
           <a href={routes.calculateurBudgetIdentite}>Calculateur de budget</a>
           <a href={routes.guidePrixLogo}>Combien coûte un logo</a>
           <a href={routes.guidePrixSite}>Combien coûte un site</a>
+          <a href={routes.modeleCahierDesCharges}>Cahier des charges</a>
           <a href={routes.guideTendances2027}>Tendances web design 2027</a>
           <a href={routes.generateurBriefIdentite}>Générateur de brief</a>
           <a href={routes.testerSonLogo}>Tester son logo</a>

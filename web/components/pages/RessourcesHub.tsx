@@ -11,7 +11,7 @@ import styles from "./RessourcesHub.module.css";
 export const pageMeta = {
   title: "Ressources : outils et guides de prix",
   description:
-    "Un calculateur de budget, deux guides de prix, un test de logo et un générateur de brief. Cinq pages pour situer un projet avant de demander un devis.",
+    "Un calculateur de budget, deux guides de prix, un modèle de cahier des charges, un test de logo et un générateur de brief. Six pages pour situer un projet avant de demander un devis.",
 };
 
 const PRINCIPAL = {
@@ -56,8 +56,18 @@ const AUTRES = [
     preview: <LogoPreview />,
   },
   {
-    href: routes.generateurBriefIdentite,
+    href: routes.modeleCahierDesCharges,
     num: "05",
+    kind: "Modèle",
+    title: "Cahier des charges de site",
+    text:
+      "Douze blocs à remplir avant de demander un devis. DOCX et PDF, sans inscription.",
+    more: "Télécharger le modèle",
+    preview: <BriefPreview />,
+  },
+  {
+    href: routes.generateurBriefIdentite,
+    num: "06",
     kind: "Outil",
     title: "Générateur de brief identité",
     text:

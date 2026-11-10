@@ -23,6 +23,8 @@ export const routes = {
   guidePrixSite: "/guides/prix-site-internet",
   /** Guide des tendances web design 2027. */
   guideTendances2027: "/guides/tendances-web-design-2027",
+  /** Modèle de cahier des charges de site, DOCX et PDF. */
+  modeleCahierDesCharges: "/ressources/modele-cahier-des-charges-site",
   /** Générateur de brief identité, avec export PDF. */
   generateurBriefIdentite: "/ressources/generateur-brief-identite",
   /** Test de logo : lisibilité, contraste, un seul ton. */

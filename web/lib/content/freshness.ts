@@ -43,6 +43,7 @@ export const PAGE_UPDATED = {
   [routes.calculateurBudgetIdentite]: "2026-11-03",
   [routes.guidePrixLogo]: "2026-11-08",
   [routes.guidePrixSite]: "2026-11-10",
+  [routes.modeleCahierDesCharges]: "2026-11-10",
   [routes.guideTendances2027]: "2026-11-10",
   [routes.generateurBriefIdentite]: "2026-11-03",
   [routes.testerSonLogo]: "2026-11-03",
