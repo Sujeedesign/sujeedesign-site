@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import Faq from "@/components/Faq";
+import { GuideVideo } from "./GuideVideo";
 import { routes, serviceHref } from "@/lib/routes";
 import styles from "./GuideTendances2027.module.css";
 
@@ -225,9 +226,11 @@ export function GuideTendances2027() {
                   Un titre trois à quatre fois plus gros que le texte, voilà la vraie
                   tendance. Pas la troisième police.
                 </p>
-                <Figure
-                  src="/assets/img/guides/muzli/namma.webp"
-                  width={800}
+                <GuideVideo
+                  src="/assets/img/guides/muzli/namma.mp4"
+                  webm="/assets/img/guides/muzli/namma.webm"
+                  poster="/assets/img/guides/muzli/namma-poster.webp"
+                  width={960}
                   height={600}
                   alt="Page d'accueil de Studio Namma : phrase manifeste en très grandes capitales noires, interrompue par un carrousel de projets colorés."
                   caption={<>Projet : <strong>Studio Namma</strong>, agence de design à Paris. Une famille display à l&apos;échelle monumentale, un mono réservé aux libellés.<br />
@@ -285,9 +288,11 @@ export function GuideTendances2027() {
                   couleurs, zéro ambiguïté, une identité immédiatement reconnaissable.
                 </p>
 
-                <Figure
-                  src="/assets/img/guides/muzli/mechanik.webp"
-                  width={800}
+                <GuideVideo
+                  src="/assets/img/guides/muzli/mechanik.mp4"
+                  webm="/assets/img/guides/muzli/mechanik.webm"
+                  poster="/assets/img/guides/muzli/mechanik-poster.webp"
+                  width={960}
                   height={600}
                   alt="Spécimen GT Mechanik de Grilli Type : grand mot MCNK en magenta, modules vert menthe, cercles jaunes et lignes techniques sur fond blanc."
                   caption={<>Autre registre : <strong>GT Mechanik</strong>, spécimen de la fonderie <strong>Grilli Type</strong>. Trois aplats francs, une grille technique, zéro dégradé.<br />
@@ -339,9 +344,11 @@ export function GuideTendances2027() {
                   arcs et des couches d&apos;images. Dans les deux cas, la structure raconte
                   quelque chose avant même qu&apos;on lise.
                 </p>
-                <Figure
-                  src="/assets/img/guides/muzli/obys.webp"
-                  width={800}
+                <GuideVideo
+                  src="/assets/img/guides/muzli/obys.mp4"
+                  webm="/assets/img/guides/muzli/obys.webm"
+                  poster="/assets/img/guides/muzli/obys-poster.webp"
+                  width={960}
                   height={600}
                   alt="Page d'accueil d'Obys : panneau blanc posé sur une photo de feuillage floue, logo en haut à gauche, colonne de vignettes encadrée de parenthèses et notes en petits corps."
                   caption={<>Projet : <strong>Obys</strong>, agence de design. Grille, notes de marge, vignettes et parenthèses : la page se lit comme une double page.<br />
@@ -377,9 +384,11 @@ export function GuideTendances2027() {
                   tokens sémantiques plutôt que des couleurs codées en dur, un texte
                   off-white entre #E0E0E0 et #F0F0F0, jamais du blanc pur sur du noir pur.
                 </p>
-                <Figure
-                  src="/assets/img/guides/muzli/looper.webp"
-                  width={800}
+                <GuideVideo
+                  src="/assets/img/guides/muzli/looper.mp4"
+                  webm="/assets/img/guides/muzli/looper.webm"
+                  poster="/assets/img/guides/muzli/looper-poster.webp"
+                  width={960}
                   height={600}
                   alt="Visuel du projet Looper par basement.studio : silhouette casquée à visière lumineuse entourée d'écrans cathodiques, néons rouges et orange sur fond noir."
                   caption={<>Projet : <strong>Looper</strong> par <strong>basement.studio</strong>. Noir profond, néons et 3D traités comme un système, pas comme un filtre.<br />
@@ -424,9 +433,11 @@ export function GuideTendances2027() {
                   décore pas.
                 </p>
 
-                <Figure
-                  src="/assets/img/guides/muzli/animejs.webp"
-                  width={800}
+                <GuideVideo
+                  src="/assets/img/guides/muzli/anime.mp4"
+                  webm="/assets/img/guides/muzli/anime.webm"
+                  poster="/assets/img/guides/muzli/anime-poster.webp"
+                  width={960}
                   height={500}
                   alt="Page d'accueil d'Anime.js : titre blanc sur fond anthracite et grand cadran circulaire néon, vert, rouge et orange."
                   caption={<>Projet : <strong>Anime.js</strong> par Julian Garnier. Une bibliothèque réduite à une idée : déplacer les choses avec précision. Le cadran ne décore pas, il démontre.<br />
@@ -472,9 +483,11 @@ export function GuideTendances2027() {
                   Un effet peut s&apos;appliquer à un vrai titre sans le transformer en image,
                   donc sans perdre le référencement.
                 </p>
-                <Figure
-                  src="/assets/img/guides/muzli/unknown.webp"
-                  width={800}
+                <GuideVideo
+                  src="/assets/img/guides/muzli/unknown.mp4"
+                  webm="/assets/img/guides/muzli/unknown.webm"
+                  poster="/assets/img/guides/muzli/unknown-poster.webp"
+                  width={960}
                   height={600}
                   alt="Page d'accueil de l'agence THE UNKNOWN : titre blanc sur une sphère lumineuse, vague 3D cyan et paysage montagneux dans un dégradé rose et violet."
                   caption={<>Projet : <strong>THE UNKNOWN</strong>, agence de Montréal. Une scène 3D en ouverture, un titre qui reste du texte.<br />
@@ -553,9 +566,11 @@ export function GuideTendances2027() {
                   produire. Pour un artisan, un commerce ou un indépendant, c&apos;est souvent
                   la piste la plus rentable de la liste, et la moins chère.
                 </p>
-                <Figure
-                  src="/assets/img/guides/muzli/loli.webp"
-                  width={800}
+                <GuideVideo
+                  src="/assets/img/guides/muzli/loli.mp4"
+                  webm="/assets/img/guides/muzli/loli.webm"
+                  poster="/assets/img/guides/muzli/loli-poster.webp"
+                  width={960}
                   height={600}
                   alt="Page d'accueil du portfolio de Loli Laboureau : collage avec portrait noir et blanc, téléphone-banane jaune, bloc typographique bleu et affiche pastel."
                   caption={<>Projet : <strong>Loli Laboureau</strong>. Photo, collage, typographie rétro : une voix qu&apos;aucun modèle ne produit à l&apos;identique.<br />
@@ -803,10 +818,13 @@ export function GuideTendances2027() {
                       >
                         Muzli Picks, avril 2026
                       </a>
-                      . Images de Studio Namma, Grilli Type (GT Mechanik), Obys, basement.studio
-                      (Looper), THE UNKNOWN et Loli Laboureau, plus une capture d&apos;Anime.js
-                      (Julian Garnier) et un schéma redessiné d&apos;après Muzli, utilisés avec
-                      crédit et lien vers chaque source.
+                      . Sept séquences de six secondes, sans son, capturées sur les sites de Studio
+                      Namma, Grilli Type (GT Mechanik), Obys, basement.studio (Looper),
+                      THE UNKNOWN, Anime.js (Julian Garnier) et Loli Laboureau, plus un
+                      schéma redessiné d&apos;après Muzli. Elles se lancent à l&apos;entrée
+                      dans l&apos;écran, se mettent en pause en dehors, et restent immobiles
+                      si le système demande moins d&apos;animation. Chaque visuel est crédité
+                      et lié à sa source.
                     </li>
                     <li>
                       Prix :{" "}
