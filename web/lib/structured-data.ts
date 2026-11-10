@@ -262,6 +262,33 @@ export function webApplicationNode(
   };
 }
 
+export type ListEntry = { name: string; path: string };
+
+/**
+ * Liste ordonnée de pages (hub de ressources) : `ItemList` avec un `ListItem`
+ * par entrée, dans l'ordre affiché à l'écran.
+ */
+export function itemListNode(
+  path: string,
+  name: string,
+  entries: readonly ListEntry[],
+) {
+  const url = absoluteUrl(path);
+  return {
+    "@type": "ItemList",
+    "@id": `${url}#liste`,
+    name,
+    numberOfItems: entries.length,
+    itemListOrder: "https://schema.org/ItemListOrderAscending",
+    itemListElement: entries.map((entry, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: entry.name,
+      url: absoluteUrl(entry.path),
+    })),
+  };
+}
+
 export type FaqEntry = { question: string; answer: string };
 
 /** FAQ d'une page : `FAQPage` avec une `Question` par entrée. */

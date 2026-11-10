@@ -61,7 +61,29 @@ describe("hub ressources", () => {
     expect(hrefs).toContain(routes.guidePrixSite);
     expect(hrefs).toContain(routes.modeleCahierDesCharges);
     expect(container.querySelectorAll("h1")).toHaveLength(1);
-    expect(screen.getByText("Calculateur de budget identité visuelle")).toBeInTheDocument();
+    expect(screen.getByText("Budget d'une identité visuelle")).toBeInTheDocument();
+    expect(container.querySelectorAll("h2")).toHaveLength(2);
+  });
+
+  it("affiche six cartes, chacune avec sa cover", () => {
+    const { container } = render(<RessourcesHub />);
+    const cartes = container.querySelectorAll("a[class*=card]");
+    expect(cartes).toHaveLength(6);
+    const images = [...container.querySelectorAll("img")];
+    expect(images).toHaveLength(6);
+    for (const img of images) {
+      expect(img.getAttribute("src")).toMatch(/^\/assets\/img\/covers\/.+-800\.webp$/);
+      expect(img.getAttribute("srcset")).toContain("-1200.webp 1200w");
+      expect(img.getAttribute("alt")).toBeTruthy();
+      expect(img.getAttribute("width")).toBe("1200");
+      expect(img.getAttribute("height")).toBe("896");
+    }
+  });
+
+  it("annonce le bon nombre de pages", () => {
+    const { container } = render(<RessourcesHub />);
+    expect(container).toHaveTextContent("6 pages");
+    expect(container).not.toHaveTextContent("Quatre pages");
   });
 });
 

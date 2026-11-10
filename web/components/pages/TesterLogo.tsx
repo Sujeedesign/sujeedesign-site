@@ -3,6 +3,7 @@ import Faq from "@/components/Faq";
 import { LogoTester } from "@/components/LogoTester";
 import { routes, serviceHref } from "@/lib/routes";
 import styles from "./TesterLogo.module.css";
+import { CoverFigure } from "./CoverFigure";
 
 export const pageMeta = {
   title: "Tester son logo : lisibilité et contraste",
@@ -88,6 +89,11 @@ export function TesterLogo() {
               </nav>
 
               <div className="prose">
+                <CoverFigure
+                  slug="testeur-de-logo"
+                  alt="Tablette et téléphone affichant un diagnostic de logo, sur un bureau."
+                  caption="Un logo doit tenir à 16 pixels, en une seule couleur et en favicon. Le test se fait dans le navigateur, sans envoyer de fichier."
+                />
                 <h2 id="tests">Les trois tests qui comptent</h2>
                 <p>
                   Un logo doit survivre à trois situations qu&apos;on oublie au moment de le

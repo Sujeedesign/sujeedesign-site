@@ -2,6 +2,7 @@ import Link from "next/link";
 import Faq from "@/components/Faq";
 import { routes, serviceHref } from "@/lib/routes";
 import styles from "./GuidePrixLogo.module.css";
+import { CoverFigure } from "./CoverFigure";
 
 /**
  * Page /guides/prix-site-internet (P7).
@@ -305,6 +306,11 @@ export function GuidePrixSite() {
               </nav>
 
               <div className="prose">
+                <CoverFigure
+                  slug="site-internet"
+                  alt="Ordinateur portable ouvert sur un site web, sur un bureau clair."
+                  caption="Un site se juge sur mobile, sur ce qu'il permet de faire, et sur ce qu'il coûte chaque mois une fois en ligne."
+                />
                 <h2 id="paliers">Les quatre paliers</h2>
                 <p>
                   Le prix d&apos;un site ne monte pas avec le nombre de pages, il monte avec

@@ -2,7 +2,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 14px;
-  margin-top: 14px;
+  margin: 0;
   font-family: var(--mono);
   font-size: 11px;
   letter-spacing: 0.08em;
@@ -10,31 +10,83 @@
   color: var(--muted-2);
 }
 
-/* --- Carte principale --- */
-.featured {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr);
-  gap: clamp(20px, 3.4vw, 48px);
+/* Rangée sous le hero : à qui la rubrique s'adresse, et les repères. */
+.sousHead {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  padding: clamp(20px, 3vw, 34px);
-  border: 1px solid var(--ink);
+  justify-content: space-between;
+  gap: 12px 32px;
+  padding-top: 18px;
+}
+
+.pourQui {
+  margin: 0;
+  padding-left: 14px;
+  border-left: 2px solid var(--accent);
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--muted);
+  max-width: 62ch;
+}
+
+/* --- Bloc de trois cartes --- */
+.bloc + .bloc {
+  margin-top: clamp(34px, 5vw, 58px);
+}
+
+.blocHead {
+  display: grid;
+  gap: 6px;
+  margin-bottom: clamp(14px, 2vw, 20px);
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.blocTitle {
+  margin: 0;
+  font-family: var(--display);
+  font-size: var(--ds-h3) !important;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+}
+
+.blocText {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--muted-2);
+  max-width: 68ch;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(12px, 1.8vw, 20px);
+}
+
+.card {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
   border-radius: var(--ds-radius);
   background: var(--paper);
-  margin-bottom: clamp(14px, 2vw, 20px);
   text-decoration: none;
   color: inherit;
+  transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
-.featuredBody {
-  display: grid;
-  gap: 12px;
-  align-content: start;
+.card:hover {
+  border-color: var(--ink);
+  transform: translateY(-2px);
 }
 
-.featuredTop {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }
 
 .num {
@@ -52,22 +104,56 @@
   color: var(--accent);
 }
 
-.featuredTitle {
+/* Visuel 4:3, sans déformation : le ratio est porté par width/height. */
+.cover {
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--paper-2, #f4f2ee);
+  border-bottom: 1px solid var(--line);
+}
+
+.cover img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.45s ease;
+}
+
+.card:hover .cover img {
+  transform: scale(1.03);
+}
+
+.body {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 9px;
+  padding: clamp(14px, 1.8vw, 18px);
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cardTitle {
   margin: 0;
   font-family: var(--display);
-  font-size: var(--ds-h2) !important;
-  font-weight: 700;
-  line-height: 1.04;
-  letter-spacing: var(--ds-track);
+  font-size: 19px !important;
+  font-weight: 600;
+  line-height: 1.22;
+  letter-spacing: -0.012em;
   color: var(--ink);
 }
 
-.text {
+.cardText {
   margin: 0;
-  font-size: 15.5px;
-  line-height: 1.65;
+  font-size: 14px;
+  line-height: 1.6;
   color: var(--muted);
-  max-width: 46ch;
 }
 
 .cta {
@@ -75,6 +161,7 @@
   align-items: center;
   gap: 8px;
   margin-top: 4px;
+  justify-self: start;
   font-family: var(--mono);
   font-size: 11px;
   letter-spacing: 0.08em;
@@ -88,71 +175,10 @@
 }
 
 .card:hover .cta,
-.card:focus-visible .cta,
-.featured:hover .cta,
-.featured:focus-visible .cta {
+.card:focus-visible .cta {
   gap: 14px;
   color: var(--accent);
   border-bottom-color: var(--accent);
-}
-
-/* --- Grille des trois autres --- */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(12px, 1.8vw, 20px);
-}
-
-.card {
-  display: grid;
-  grid-template-rows: auto auto auto 1fr auto;
-  gap: 10px;
-  padding: clamp(14px, 1.8vw, 18px);
-  border: 1px solid var(--line);
-  border-radius: var(--ds-radius);
-  background: var(--paper);
-  text-decoration: none;
-  color: inherit;
-  transition: border-color 0.2s ease, transform 0.2s ease;
-}
-
-.card:hover {
-  border-color: var(--ink);
-  transform: translateY(-2px);
-}
-
-.cardHead {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.cardTitle {
-  margin: 0;
-  font-family: var(--display);
-  font-size: var(--ds-h3) !important;
-  font-weight: 600;
-  line-height: 1.2;
-  letter-spacing: -0.012em;
-  color: var(--ink);
-}
-
-.cardText {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.65;
-  color: var(--muted);
-}
-
-.previewSlot {
-  display: grid;
-  min-height: 124px;
-  margin-bottom: 2px;
-}
-
-.previewSlot > * {
-  height: 100%;
 }
 
 .note {
@@ -166,10 +192,6 @@
 }
 
 @media (max-width: 980px) {
-  .featured {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -178,5 +200,9 @@
 @media (max-width: 640px) {
   .grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pourQui {
+    font-size: 14.5px;
   }
 }

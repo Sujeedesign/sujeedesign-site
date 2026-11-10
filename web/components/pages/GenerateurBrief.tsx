@@ -4,6 +4,7 @@ import { IdentiteBriefGenerator } from "@/components/IdentiteBriefGenerator";
 import { routes, serviceHref } from "@/lib/routes";
 import { STEPS } from "@/lib/logo-brief";
 import styles from "./GenerateurBrief.module.css";
+import { CoverFigure } from "./CoverFigure";
 
 export const pageMeta = {
   title: "Générateur de brief logo et identité",
@@ -111,6 +112,11 @@ export function GenerateurBrief() {
               </nav>
 
               <div className="prose">
+                <CoverFigure
+                  slug="brief-identite"
+                  alt="Carnet de brief ouvert sur un bureau, avec échantillons de couleur et croquis."
+                  caption="Dix questions, un document, et le brief est écrit. L'export PDF se fait depuis la page, sans compte à créer."
+                />
                 <h2 id="questions">Les dix questions, et pourquoi elles existent</h2>
                 <p>
                   Un brief n&apos;est pas un formulaire administratif. Chaque question ferme une

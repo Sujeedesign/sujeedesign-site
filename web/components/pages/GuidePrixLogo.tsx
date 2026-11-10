@@ -2,6 +2,7 @@ import Link from "next/link";
 import Faq from "@/components/Faq";
 import { routes, serviceHref } from "@/lib/routes";
 import styles from "./GuidePrixLogo.module.css";
+import { CoverFigure } from "./CoverFigure";
 
 export const pageMeta = {
   title: "Combien coûte un logo en 2026 ? Prix et tarifs",
@@ -274,6 +275,11 @@ export function GuidePrixLogo() {
               </nav>
 
               <div className="prose">
+                <CoverFigure
+                  slug="creer-un-logo"
+                  alt="Graphiste dessinant un logo sur une tablette, entourée de recherches imprimées."
+                  caption="Un logo se dessine et se teste avant d'être livré. C'est ce temps de recherche qui explique l'écart entre un devis à 200 € et un devis à 1 500 €."
+                />
                 <h2 id="paliers">Les quatre paliers</h2>
                 <p>
                   Le prix d&apos;un logo ne monte pas par goût du luxe, il monte parce que le

@@ -1,81 +1,136 @@
 import Link from "next/link";
 import { routes } from "@/lib/routes";
-import {
-  BriefPreview,
-  CalculateurPreview,
-  GuidePreview,
-  LogoPreview,
-} from "./RessourcesPreviews";
 import styles from "./RessourcesHub.module.css";
 
 export const pageMeta = {
-  title: "Ressources : outils et guides de prix",
+  title: "Ressources gratuites : guides de prix et outils",
   description:
-    "Un calculateur de budget, deux guides de prix, un modèle de cahier des charges, un test de logo et un générateur de brief. Six pages pour situer un projet avant de demander un devis.",
+    "Six outils gratuits pour cadrer un projet avant le devis : guides de prix, calculateur, test de logo, brief et cahier des charges. Sans inscription.",
 };
 
-const PRINCIPAL = {
-  href: routes.calculateurBudgetIdentite,
-  num: "01",
-  kind: "Outil",
-  title: "Calculateur de budget identité visuelle",
-  text:
-    "Sept points de départ, six options, une fourchette en trente secondes. Le détail du calcul s'affiche ligne par ligne, sans email à laisser.",
-  more: "Estimer un budget",
+type Cover =
+  | "cahier-des-charges"
+  | "creer-un-logo"
+  | "identite-visuelle"
+  | "site-internet"
+  | "brief-identite"
+  | "testeur-de-logo";
+
+type Entree = {
+  href: string;
+  num: string;
+  kind: string;
+  title: string;
+  text: string;
+  more: string;
+  cover: Cover;
+  alt: string;
 };
 
-const AUTRES = [
+/** Trois pages pour situer un budget. */
+const BUDGET: Entree[] = [
+  {
+    href: routes.calculateurBudgetIdentite,
+    num: "01",
+    kind: "Calculateur",
+    title: "Budget d'une identité visuelle",
+    text:
+      "Sept points de départ, six options, une fourchette en trente secondes, calculée ligne par ligne.",
+    more: "Estimer un budget",
+    cover: "identite-visuelle",
+    alt: "Écran de calculateur de budget posé sur un bureau, à côté d'un nuancier et d'un carnet.",
+  },
   {
     href: routes.guidePrixLogo,
     num: "02",
     kind: "Guide",
     title: "Combien coûte un logo en 2026 ?",
     text:
-      "Les quatre paliers de prix, le temps de travail réel, et ce qui manque dans un devis à 200 €.",
+      "Quatre paliers de prix, le temps de travail réel et ce qui manque dans un devis à 200 €.",
     more: "Lire le guide",
-    preview: <GuidePreview />,
+    cover: "creer-un-logo",
+    alt: "Graphiste dessinant un logo sur une tablette, entourée de recherches imprimées.",
   },
   {
     href: routes.guidePrixSite,
     num: "03",
     kind: "Guide",
-    title: "Combien coûte un site internet en 2026 ?",
+    title: "Combien coûte un site internet ?",
     text:
-      "Les quatre paliers de prix, les coûts récurrents que personne n'annonce, et le prix réel d'un site vitrine.",
+      "Les paliers du marché, les coûts récurrents que personne n'annonce et le prix réel d'un site vitrine.",
     more: "Lire le guide",
-    preview: <GuidePreview />,
+    cover: "site-internet",
+    alt: "Ordinateur portable ouvert sur un site web, sur un bureau clair.",
   },
+];
+
+/** Trois pages pour préparer et vérifier. */
+const PREPARER: Entree[] = [
   {
     href: routes.testerSonLogo,
     num: "04",
     kind: "Diagnostic",
     title: "Tester son logo",
     text:
-      "Votre logo à 16 pixels, en gris, en un seul ton. Le fichier reste dans votre navigateur.",
+      "Votre logo en petit, en gris, en un seul ton. Le fichier reste dans votre navigateur.",
     more: "Tester le logo",
-    preview: <LogoPreview />,
-  },
-  {
-    href: routes.modeleCahierDesCharges,
-    num: "05",
-    kind: "Modèle",
-    title: "Cahier des charges de site",
-    text:
-      "Douze blocs à remplir avant de demander un devis. DOCX et PDF, sans inscription.",
-    more: "Télécharger le modèle",
-    preview: <BriefPreview />,
+    cover: "testeur-de-logo",
+    alt: "Tablette et téléphone affichant un diagnostic de logo, sur un bureau.",
   },
   {
     href: routes.generateurBriefIdentite,
-    num: "06",
+    num: "05",
     kind: "Outil",
     title: "Générateur de brief identité",
     text:
       "Dix questions pour écrire un brief propre, avec ce qui bloque un projet. Export en PDF.",
     more: "Rédiger un brief",
-    preview: <BriefPreview />,
+    cover: "brief-identite",
+    alt: "Carnet de brief ouvert sur un bureau, avec échantillons de couleur et croquis.",
+  },
+  {
+    href: routes.modeleCahierDesCharges,
+    num: "06",
+    kind: "Modèle",
+    title: "Cahier des charges de site",
+    text:
+      "Douze blocs à remplir avant de demander un devis. DOCX et PDF, sans inscription.",
+    more: "Télécharger le modèle",
+    cover: "cahier-des-charges",
+    alt: "Ordinateur portable affichant un cahier des charges de site internet, dans un bureau.",
   },
 ];
+
+function Carte({ entree }: { entree: Entree }) {
+  const base = `/assets/img/covers/${entree.cover}`;
+  return (
+    <Link href={entree.href} className={styles.card}>
+      <span className={styles.cover}>
+        <img
+          src={`${base}-800.webp`}
+          srcSet={`${base}-480.webp 480w, ${base}-800.webp 800w, ${base}-1200.webp 1200w`}
+          sizes="(max-width: 640px) 92vw, (max-width: 980px) 46vw, 30vw"
+          alt={entree.alt}
+          width={1200}
+          height={896}
+          loading="lazy"
+          decoding="async"
+        />
+      </span>
+      <span className={styles.body}>
+        <span className={styles.cardHead}>
+          <span className={styles.num}>{entree.num}</span>
+          <span className={styles.kind}>{entree.kind}</span>
+        </span>
+        <h3 className={styles.cardTitle}>{entree.title}</h3>
+        <p className={styles.cardText}>{entree.text}</p>
+        <span className={styles.cta}>
+          {entree.more} <span aria-hidden="true">↗</span>
+        </span>
+      </span>
+    </Link>
+  );
+}
 
 export function RessourcesHub() {
   return (
@@ -85,18 +140,27 @@ export function RessourcesHub() {
           <div className="page-head">
             <p className="kick">Ressources</p>
             <h1>
-              Outils et repères
+              Six outils gratuits
               <br />
-              pour un <span style={{ color: "var(--accent)" }}>projet</span>
+              pour <span style={{ color: "var(--accent)" }}>cadrer</span> votre projet
             </h1>
             <p className="intro">
-              Quatre pages pour situer un budget, tester un logo et écrire un brief. Rien à
-              laisser en échange, aucun formulaire avant le devis.
+              Ici, pas d&apos;articles de blog. Deux guides de prix, un calculateur de budget,
+              un test de logo, un générateur de brief et un modèle de cahier des charges. Vous
+              en sortez avec un budget situé et un document prêt à envoyer, avant même de
+              demander un devis.
+            </p>
+          </div>
+          <div className={styles.sousHead}>
+            <p className={styles.pourQui}>
+              Pour un dirigeant de TPE, un artisan ou une association qui doit lancer ou refaire
+              son logo, son site ou son identité, et qui veut savoir où il met les pieds avant
+              de signer.
             </p>
             <p className={styles.meta}>
-              <span>4 pages</span>
+              <span>6 pages</span>
               <span>Gratuit</span>
-              <span>Sans inscription</span>
+              <span>Sans inscription ni e-mail</span>
             </p>
           </div>
         </div>
@@ -104,44 +168,41 @@ export function RessourcesHub() {
 
       <section className="section">
         <div className="wrap">
-          <Link href={PRINCIPAL.href} className={styles.featured}>
-            <div className={styles.featuredBody}>
-              <div className={styles.featuredTop}>
-                <span className={styles.num}>{PRINCIPAL.num}</span>
-                <span className={styles.kind}>{PRINCIPAL.kind}</span>
-              </div>
-              <h2 className={styles.featuredTitle}>{PRINCIPAL.title}</h2>
-              <p className={styles.text}>{PRINCIPAL.text}</p>
-              <span className={styles.cta}>
-                {PRINCIPAL.more} <span aria-hidden="true">↗</span>
-              </span>
+          <div className={styles.bloc}>
+            <div className={styles.blocHead}>
+              <h2 className={styles.blocTitle}>Situer le budget</h2>
+              <p className={styles.blocText}>
+                Trois pages pour savoir ce que coûte réellement ce que vous voulez faire, et
+                pourquoi les prix affichés ailleurs ne veulent pas dire grand-chose.
+              </p>
             </div>
-            <div className={styles.previewSlot}>
-              <CalculateurPreview />
+            <div className={styles.grid}>
+              {BUDGET.map((entree) => (
+                <Carte key={entree.href} entree={entree} />
+              ))}
             </div>
-          </Link>
+          </div>
 
-          <div className={styles.grid}>
-            {AUTRES.map((entree) => (
-              <Link key={entree.href} href={entree.href} className={styles.card}>
-                <div className={styles.previewSlot}>{entree.preview}</div>
-                <div className={styles.cardHead}>
-                  <span className={styles.num}>{entree.num}</span>
-                  <span className={styles.kind}>{entree.kind}</span>
-                </div>
-                <h2 className={styles.cardTitle}>{entree.title}</h2>
-                <p className={styles.cardText}>{entree.text}</p>
-                <span className={styles.cta}>
-                  {entree.more} <span aria-hidden="true">↗</span>
-                </span>
-              </Link>
-            ))}
+          <div className={styles.bloc}>
+            <div className={styles.blocHead}>
+              <h2 className={styles.blocTitle}>Préparer et vérifier</h2>
+              <p className={styles.blocText}>
+                Trois pages pour tester ce que vous avez déjà et écrire ce que vous voulez,
+                avec des documents que vous pouvez envoyer tels quels.
+              </p>
+            </div>
+            <div className={styles.grid}>
+              {PREPARER.map((entree) => (
+                <Carte key={entree.href} entree={entree} />
+              ))}
+            </div>
           </div>
 
           <p className={styles.note}>
             Ces pages complètent les services du studio : elles servent à savoir où vous mettez
-            les pieds avant de parler budget. Si votre cas ne rentre dans aucune fourchette,
-            écrivez-moi, le devis se construit sur votre périmètre.
+            les pieds avant de parler budget. Aucune ne demande votre e-mail, aucune ne renvoie
+            vers un formulaire pour obtenir un chiffre. Si votre cas ne rentre dans aucune
+            fourchette, écrivez-moi, le devis se construit sur votre périmètre.
           </p>
         </div>
       </section>

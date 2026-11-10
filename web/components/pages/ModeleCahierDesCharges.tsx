@@ -2,6 +2,7 @@ import Link from "next/link";
 import Faq from "@/components/Faq";
 import { routes, serviceHref } from "@/lib/routes";
 import styles from "./GuidePrixLogo.module.css";
+import { CoverFigure } from "./CoverFigure";
 
 /**
  * Page /ressources/modele-cahier-des-charges-site (P8).
@@ -226,6 +227,11 @@ export function ModeleCahierDesCharges() {
               </nav>
 
               <div className="prose">
+                <CoverFigure
+                  slug="cahier-des-charges"
+                  alt="Ordinateur portable affichant un cahier des charges de site internet, dans un bureau."
+                  caption="Le modèle se remplit à l'écran ou à l'impression, puis s'envoie tel quel avec la demande de devis."
+                />
                 <h2 id="utilite">À quoi ça sert vraiment</h2>
                 <p>
                   Un cahier des charges n&apos;est pas un document administratif à joindre à

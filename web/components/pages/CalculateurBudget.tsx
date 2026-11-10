@@ -22,6 +22,7 @@ import {
 import { BASES, OPTIONS, formatRange } from "@/lib/budget-identity";
 import { routes, serviceHref } from "@/lib/routes";
 import styles from "./CalculateurBudget.module.css";
+import { CoverFigure } from "./CoverFigure";
 
 export const pageMeta = {
   title: "Calculateur de budget identité visuelle",
@@ -150,6 +151,11 @@ export function CalculateurBudget() {
               </nav>
 
               <div className="prose">
+                <CoverFigure
+                  slug="identite-visuelle"
+                  alt="Écran de calculateur de budget posé sur un bureau, à côté d'un nuancier et d'un carnet."
+                  caption="La fourchette se construit poste par poste : logo, déclinaisons, charte, options. Rien n'est ajouté au doigt mouillé."
+                />
               <h2 id="principe">Ce que calcule cet outil</h2>
               <p>
                 Trois minutes suffisent pour comprendre l&apos;essentiel : un logo seul ne coûte
