@@ -298,8 +298,8 @@ export function GuidePrixLogo() {
                           <th scope="row" className={styles.price}>
                             {palier.fourchette}
                           </th>
-                          <td>{palier.produit}</td>
-                          <td>{palier.manque}</td>
+                          <td data-label="Ce qu'on achète">{palier.produit}</td>
+                          <td data-label="Souvent absent">{palier.manque}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -342,14 +342,14 @@ export function GuidePrixLogo() {
                       {TEMPS.map((ligne) => (
                         <tr key={ligne.etape}>
                           <th scope="row">{ligne.etape}</th>
-                          <td className={styles.price}>{ligne.logo}</td>
-                          <td className={styles.price}>{ligne.identite}</td>
+                          <td data-label="Logo seul" className={styles.price}>{ligne.logo}</td>
+                          <td data-label="Identité complète" className={styles.price}>{ligne.identite}</td>
                         </tr>
                       ))}
                       <tr>
                         <th scope="row">Total</th>
-                        <td className={styles.price}>10 à 20 h</td>
-                        <td className={styles.price}>30 à 52 h</td>
+                        <td data-label="Logo seul" className={styles.price}>10 à 20 h</td>
+                        <td data-label="Identité complète" className={styles.price}>30 à 52 h</td>
                       </tr>
                     </tbody>
                   </table>
@@ -410,8 +410,8 @@ export function GuidePrixLogo() {
                       {MARCHES.map((ligne) => (
                         <tr key={ligne.prestation}>
                           <th scope="row">{ligne.prestation}</th>
-                          <td className={styles.price}>{ligne.moyen}</td>
-                          <td>{ligne.repere}</td>
+                          <td data-label="Prix moyen" className={styles.price}>{ligne.moyen}</td>
+                          <td data-label="Repère">{ligne.repere}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -450,8 +450,8 @@ export function GuidePrixLogo() {
                       {FOURCHETTES.map((ligne) => (
                         <tr key={ligne.offre}>
                           <th scope="row">{ligne.offre}</th>
-                          <td className={styles.price}>{ligne.range}</td>
-                          <td>{ligne.contenu}</td>
+                          <td data-label="Prix de départ" className={styles.price}>{ligne.range}</td>
+                          <td data-label="Ce qui est inclus">{ligne.contenu}</td>
                         </tr>
                       ))}
                     </tbody>

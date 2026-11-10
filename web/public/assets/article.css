@@ -216,13 +216,70 @@
   }
 
   .prose table {
-    min-width: 540px;
+    min-width: 0;
     font-size: 14px;
   }
 
+  /* Les tableaux des guides portent un data-label sur chaque cellule : ils se
+     lisent en fiches empilées, sans défilement latéral. Les tableaux sans
+     libellé (markdown) gardent la première colonne collée au bord. */
+  .prose table:not(:has(td[data-label])) {
+    min-width: 540px;
+  }
+
+  .prose table:has(td[data-label]) {
+    display: block;
+    border-collapse: separate;
+  }
+
+  .prose table:has(td[data-label]) thead {
+    display: none;
+  }
+
+  .prose table:has(td[data-label]) tbody,
+  .prose table:has(td[data-label]) tr,
+  .prose table:has(td[data-label]) th,
+  .prose table:has(td[data-label]) td {
+    display: block;
+    width: auto;
+    border: 0;
+  }
+
+  .prose table:has(td[data-label]) tbody tr {
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    margin-bottom: 10px;
+  }
+
+  .prose table:has(td[data-label]) tbody tr:last-child {
+    margin-bottom: 0;
+  }
+
+  .prose table:has(td[data-label]) th,
+  .prose table:has(td[data-label]) td {
+    padding: 0;
+    white-space: normal;
+  }
+
+  .prose table:has(td[data-label]) td {
+    margin-top: 9px;
+  }
+
+  .prose table:has(td[data-label]) td::before {
+    content: attr(data-label);
+    display: block;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    margin-bottom: 3px;
+  }
+
   /* La première colonne reste visible pendant le défilement horizontal. */
-  .prose table th:first-child,
-  .prose table td:first-child {
+  .prose table:not(:has(td[data-label])) th:first-child,
+  .prose table:not(:has(td[data-label])) td:first-child {
     position: sticky;
     left: 0;
     z-index: 1;

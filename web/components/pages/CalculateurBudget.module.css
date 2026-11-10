@@ -255,3 +255,86 @@
   align-items: center;
   gap: 12px;
 }
+
+/* Mobile : chaque ligne devient une fiche empilée, sans scroll latéral.
+   Les libellés de colonnes disparaissent en tête et reviennent devant chaque
+   valeur via data-label, pour garder le sens de lecture sans balayer la page. */
+@media (max-width: 700px) {
+  .tableWrap {
+    overflow-x: visible;
+  }
+
+  .table {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .table caption {
+    display: block;
+    padding: 0 0 10px;
+  }
+
+  .table thead {
+    display: none;
+  }
+
+  .table tbody {
+    display: block;
+  }
+
+  .table tbody tr {
+    display: block;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    margin-bottom: 10px;
+  }
+
+  .table tbody tr:last-child {
+    margin-bottom: 0;
+  }
+
+  .table th,
+  .table td {
+    display: block;
+    width: auto;
+    padding: 0;
+    border: 0;
+    text-align: left;
+    white-space: normal;
+  }
+
+  .table tbody th {
+    margin-bottom: 2px;
+    font-size: 14px;
+  }
+
+  .table td {
+    margin-top: 9px;
+  }
+
+  .table td::before {
+    content: attr(data-label);
+    display: block;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    margin-bottom: 3px;
+  }
+
+  .table td:not([data-label])::before {
+    display: none;
+  }
+
+  .table td.price {
+    font-size: 15px;
+  }
+
+  .table tbody tr:last-child th,
+  .table tbody tr:last-child td {
+    border: 0;
+  }
+}

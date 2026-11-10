@@ -187,8 +187,8 @@ export function CalculateurBudget() {
                     {BASES.map((base) => (
                       <tr key={base.id}>
                         <th scope="row">{base.shortLabel}</th>
-                        <td className={styles.price}>{formatRange(base.range)}</td>
-                        <td>{base.includes}</td>
+                        <td data-label="Fourchette" className={styles.price}>{formatRange(base.range)}</td>
+                        <td data-label="Ce qui est inclus">{base.includes}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -211,7 +211,7 @@ export function CalculateurBudget() {
                     {OPTIONS.map((option) => (
                       <tr key={option.id}>
                         <th scope="row">{option.label}</th>
-                        <td className={styles.price}>{formatRange(option.range)}</td>
+                        <td data-label="Fourchette" className={styles.price}>{formatRange(option.range)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -258,16 +258,16 @@ export function CalculateurBudget() {
                     {TEMPS.map((ligne) => (
                       <tr key={ligne.etape}>
                         <th scope="row">{ligne.etape}</th>
-                        <td className={styles.price}>{ligne.logo}</td>
-                        <td className={styles.price}>{ligne.identite}</td>
+                        <td data-label="Logo seul" className={styles.price}>{ligne.logo}</td>
+                        <td data-label="Identité complète" className={styles.price}>{ligne.identite}</td>
                       </tr>
                     ))}
                     <tr className={styles.total}>
                       <th scope="row">Total</th>
-                      <td className={styles.price}>
+                      <td data-label="Logo seul" className={styles.price}>
                         <strong>10 à 20 h</strong>
                       </td>
-                      <td className={styles.price}>
+                      <td data-label="Identité complète" className={styles.price}>
                         <strong>30 à 52 h</strong>
                       </td>
                     </tr>
