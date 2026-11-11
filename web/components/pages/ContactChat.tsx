@@ -99,6 +99,10 @@ export default function ContactChat() {
   const [moments, setMoments] = useState<string[]>([]);
   const [booking, setBooking] = useState<Booking | null>(null);
   const [showForm, setShowForm] = useState(false);
+  // "checking" tant qu'on ignore l'état du service : on n'affiche ni chat ni
+  // formulaire pour éviter un clignotement. "form" = formulaire par défaut,
+  // piloté par AGENT_CHAT_ENABLED côté serveur ou par une panne constatée.
+  const [mode, setMode] = useState<"checking" | "chat" | "form">("checking");
   const [handoffOpen, setHandoffOpen] = useState(false);
   const [lead, setLead] = useState<LeadField>({ name: "", email: "", phone: "", project_type: "", budget: "" });
   const [leadState, setLeadState] = useState<"idle" | "sending" | "sent">("idle");
@@ -112,6 +116,29 @@ export default function ContactChat() {
   const amorceRef = useRef(false);
 
   // Reprise de la conversation après un rechargement de page.
+  useEffect(() => {
+    let annule = false;
+    void (async () => {
+      try {
+        const response = await fetch("/api/agent/health", { cache: "no-store" });
+        const body = (await response.json()) as { chat_enabled?: boolean };
+        if (annule) return;
+        if (body.chat_enabled === false) {
+          setMode("form");
+          setShowForm(true);
+        } else {
+          setMode("chat");
+        }
+      } catch {
+        // Sonde muette : on garde la conversation, le formulaire reste accessible.
+        if (!annule) setMode("chat");
+      }
+    })();
+    return () => {
+      annule = true;
+    };
+  }, []);
+
   useEffect(() => {
     try {
       const raw = sessionStorage.getItem(STORAGE_KEY);
@@ -303,7 +330,9 @@ export default function ContactChat() {
       } catch (caught) {
         if ((caught as Error).name === "AbortError") return;
         setPhase("offline");
-        setError("L'assistant ne répond pas pour le moment. Le formulaire reste disponible juste en dessous.");
+        setMode("form");
+        setShowForm(true);
+        setError("L'assistant ne répond pas pour le moment. Écrivez directement, Sujee vous répond sous 24 h ouvrées.");
       } finally {
         abortRef.current = null;
       }
@@ -463,7 +492,7 @@ export default function ContactChat() {
               <span className={styles.pulse} aria-hidden="true" />
               <span className={styles.identText}>
                 <strong>Assistant Sujee</strong>
-                <span>{busy ? "écrit…" : "en ligne"}</span>
+                <span>{busy ? "écrit…" : mode === "form" ? "formulaire direct" : mode === "checking" ? "…" : "en ligne"}</span>
               </span>
             </div>
             <div className={styles.meter} aria-hidden="true">
@@ -474,6 +503,17 @@ export default function ContactChat() {
             </div>
           </header>
 
+          {mode === "form" && (
+            <div className={styles.notice} role="status">
+              <strong>Le formulaire direct</strong>
+              <p>
+                L'assistant prend une pause technique. Laissez vos coordonnées : Sujee vous répond
+                personnellement sous 24 h ouvrées.
+              </p>
+            </div>
+          )}
+
+          {mode !== "form" && (
           <div className={styles.log} ref={logRef} aria-live="polite" aria-busy={busy}>
             {messages.map((message) => (
               <div key={message.id} className={message.role === "user" ? styles.turnUser : styles.turnAgent}>
@@ -540,12 +580,14 @@ export default function ContactChat() {
             )}
           </div>
 
+          )}
           {error && (
             <p className={styles.error} role="alert">
               {error}
             </p>
           )}
 
+          {mode !== "form" && (
           <form className={styles.composer} onSubmit={onSubmit}>
             <textarea
               id="contact-message"
@@ -566,7 +608,9 @@ export default function ContactChat() {
             </button>
           </form>
 
+          )}
           <div className={styles.panelFoot}>
+            {mode !== "form" && (
             <button
               type="button"
               className={styles.writeBtn}
@@ -585,6 +629,7 @@ export default function ContactChat() {
               </svg>
               <span>{showForm ? "Masquer le formulaire" : "Je préfère écrire un message"}</span>
             </button>
+            )}
             {messages.length > 1 && (
               <button type="button" className={styles.linkish} onClick={reset}>
                 Recommencer
@@ -592,7 +637,7 @@ export default function ContactChat() {
             )}
           </div>
 
-          {showForm && (
+          {(mode === "form" || showForm) && (
             <form id="contact-handoff" className={styles.handoff} onSubmit={submitLead} noValidate>
               {leadRef && leadState === "sent" ? (
                 <div className={styles.leadDone} role="status">
@@ -603,9 +648,11 @@ export default function ContactChat() {
               ) : (
                 <>
                   <p className={styles.handoffIntro}>
-                    {handoffOpen
-                      ? "On continue par écrit : laissez vos coordonnées, Sujee reprend la conversation."
-                      : "Laissez vos coordonnées et votre besoin, Sujee vous répond personnellement."}
+                    {mode === "form"
+                      ? "Décrivez votre projet ci-dessous, Sujee vous répond personnellement sous 24 h ouvrées."
+                      : handoffOpen
+                        ? "On continue par écrit : laissez vos coordonnées, Sujee reprend la conversation."
+                        : "Laissez vos coordonnées et votre besoin, Sujee vous répond personnellement."}
                   </p>
                   <div className={styles.row}>
                     <label className={styles.field}>

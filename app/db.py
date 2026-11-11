@@ -205,12 +205,12 @@ CREATE TABLE IF NOT EXISTS _meta (
 """
 
 
-def connect(path: str | Path) -> sqlite3.Connection:
+def connect(path: str | Path, *, check_same_thread: bool = True) -> sqlite3.Connection:
     """Ouvre une connexion SQLite configurée (WAL, clés étrangères, Row)."""
     target = Path(path)
     if target.parent and str(target.parent) not in ("", "."):
         target.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(str(target), timeout=15)
+    conn = sqlite3.connect(str(target), timeout=15, check_same_thread=check_same_thread)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     conn.execute("PRAGMA journal_mode = WAL")

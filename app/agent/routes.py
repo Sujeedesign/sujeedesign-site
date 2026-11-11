@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import sqlite3
 import time
 from typing import Any, Iterator
@@ -44,7 +45,9 @@ def _limiter(request: Request, name: str) -> security.RateLimiter:
 
 
 def _conn(request: Request) -> sqlite3.Connection:
-    return connect(request.app.state.db_path)
+    # Le flux SSE change de thread entre deux morceaux : la connexion doit
+    # pouvoir suivre le générateur sans lever ProgrammingError.
+    return connect(request.app.state.db_path, check_same_thread=False)
 
 
 def _allowed_session(request: Request) -> bool:
@@ -81,6 +84,10 @@ def health() -> JSONResponse:
             "calendar": load_config().configured,
             "model": client.model,
             "llm_host": host,
+            # Interrupteur d'exploitation : la page contact affiche le
+            # formulaire par défaut tant que la valeur n'est pas explicitement
+            # active, pour ne jamais exposer une conversation sans modèle.
+            "chat_enabled": os.environ.get("AGENT_CHAT_ENABLED", "0").strip().lower() in {"1", "true", "on", "oui"},
         }
     )
 
@@ -133,7 +140,10 @@ async def chat(request: Request) -> StreamingResponse:
             yield _sse({"type": "error", "message": "Une erreur est survenue. Vous pouvez continuer ou écrire via le formulaire."})
             print(f"agent: erreur de tour · {type(error).__name__}: {error}")
         finally:
-            conn.close()
+            try:
+                conn.close()
+            except sqlite3.Error:
+                pass
             yield "data: [DONE]\n\n"
 
     return StreamingResponse(

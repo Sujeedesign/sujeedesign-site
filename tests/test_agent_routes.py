@@ -172,3 +172,35 @@ def test_formulaire_de_secours_exige_le_consentement(client: TestClient) -> None
     )
     assert response.status_code == 422
     assert "cf-consent" in response.json()["detail"]["errors"]
+
+
+def test_une_panne_en_cours_de_flux_termine_proprement(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Un générateur qui casse ne doit pas laisser un flux ouvert ni une 500."""
+    created = client.post("/api/agent/session")
+    session_id = created.json()["session_id"]
+
+    monkeypatch.setattr(agent_routes, "MistralClient", lambda: object())
+    monkeypatch.setattr(agent_routes, "CalendarClient", lambda: object())
+
+    def broken_turn(conn, sid, message, llm, google):
+        yield {"type": "delta", "text": "Je regarde"}
+        raise RuntimeError("fournisseur muet")
+
+    monkeypatch.setattr(agent_engine, "turn", broken_turn)
+
+    response = client.post("/api/agent/chat", json={"session_id": session_id, "message": "Bonjour"})
+    assert response.status_code == 200
+    events = _events(response)
+    assert [event["type"] for event in events] == ["delta", "error"]
+    assert response.text.rstrip().endswith("data: [DONE]")
+
+
+def test_le_chat_est_ferme_par_defaut(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Sans interrupteur explicite, la page doit servir le formulaire direct."""
+    monkeypatch.delenv("AGENT_CHAT_ENABLED", raising=False)
+    assert client.get("/api/agent/health").json()["chat_enabled"] is False
+
+
+def test_le_chat_se_rouvre_avec_l_interrupteur(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("AGENT_CHAT_ENABLED", "1")
+    assert client.get("/api/agent/health").json()["chat_enabled"] is True

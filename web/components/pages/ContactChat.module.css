@@ -673,6 +673,28 @@
   color: var(--muted-2);
 }
 
+.notice {
+  margin: 18px 20px 4px;
+  padding: 14px 16px;
+  border: 1px solid rgba(10, 10, 11, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.notice strong {
+  display: block;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.notice p {
+  margin: 6px 0 0;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--muted-2);
+}
+
 .error {
   margin: 0 20px 10px;
   padding: 9px 12px;
