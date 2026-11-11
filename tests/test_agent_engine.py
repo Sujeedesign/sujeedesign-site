@@ -978,3 +978,31 @@ def test_projet_et_prenom_extraits_du_message(monkeypatch):
     assert engine._self_name(dit) == "Jean Dupont"
     # Un message déjà propre n'est pas retouché.
     assert engine._project_phrase("Un site vitrine pour ma marque") == "Un site vitrine pour ma marque"
+
+
+def test_aucun_montant_invente_n_atteint_le_visiteur():
+    """Le modèle arrondit : la fourchette annoncée doit rester celle du site."""
+    dit = "Franchement, un logo c'est entre 500 € et 2 500 € selon le périmètre."
+    sortie = engine._price_guard(dit, "je veux un logo pour ma marque de thé")
+    assert "entre 500" not in sortie
+    assert "800 à 1 500 €" in sortie
+
+
+def test_les_fourchettes_du_site_passent_sans_retouche():
+    """Une réponse déjà conforme ne doit pas être réécrite."""
+    for dit in (
+        "Logo seul, c'est 800 à 1 500 €, et la charte complète 1 200 à 2 500 €.",
+        "Avec 1 200 € de budget, on tient un logo seul.",
+        "Un site vitrine sur mesure, c'est à partir de 2 000 €.",
+    ):
+        assert engine._price_guard(dit, "budget serré") == dit
+
+
+def test_le_remplacement_reste_dans_le_sujet_du_visiteur():
+    """Le repère injecté parle du besoin réel, pas d'une grille au hasard."""
+    sortie = engine._price_guard(
+        "Les paquets, c'est entre 500 et 1 500 € de plus.",
+        "je veux aussi les paquets et les étiquettes",
+    )
+    assert "packaging" in sortie.lower()
+    assert "3 200 à 5 000 €" in sortie

@@ -14,7 +14,7 @@ import time
 from datetime import datetime
 from typing import Any, Iterator
 
-from . import slots, store
+from . import offer, slots, store
 from .google import CalendarClient
 from .llm import LLMError, MistralClient, TurnOutput, assistant_message
 from .prompt import build_system_prompt, reminder
@@ -194,6 +194,8 @@ def turn(
     # Le studio, c'est Sujee : même si le modèle dérape, aucun autre prénom
     # n'atteint le visiteur.
     answer = _sans_autre_prenom(answer)
+    # Aucun montant hors grille publique ne sort non plus.
+    answer = _price_guard(answer, message)
 
     if answer.strip() and toolbox.final_answer:
         # Phrase déjà rédigée par le moteur : on la diffuse telle quelle.
@@ -238,6 +240,91 @@ def turn(
         "status": final["status"] if final else store.STATUS_OPEN,
         "reference": (final["reference"] if final else "") or "",
     }
+
+
+_MONTANT = r"(\d{1,3}(?:[\s\u00a0\u202f]\d{3})+|\d+)"
+_PRIX = re.compile(_MONTANT + r"\s*(?:€|euros?\b)", re.IGNORECASE)
+_PAIRE = re.compile(
+    _MONTANT + r"\s*(?:€|euros?)?\s*(?:à|a|-|–|et)\s*" + _MONTANT + r"\s*(?:€|euros?\b)",
+    re.IGNORECASE,
+)
+
+
+def _nombre(brut: str) -> int:
+    return int(re.sub(r"\D", "", brut))
+
+
+def _fourchettes() -> set[tuple[int, int]]:
+    """Paires (bas, haut) réellement publiées dans la grille."""
+    return {
+        (_nombre(match.group(1)), _nombre(match.group(2)))
+        for match in _PAIRE.finditer(offer.GRILLE)
+    }
+
+
+def _sommes() -> set[int]:
+    """Montants publiés, seuls ou comme borne d'une fourchette."""
+    sommes = {_nombre(match.group(1)) for match in _PRIX.finditer(offer.GRILLE)}
+    for bas, haut in _FOURCHETTES:
+        sommes.update((bas, haut))
+    return sommes
+
+
+_FOURCHETTES = _fourchettes()
+_SOMMES = _sommes()
+
+
+# Prestations dont le site ne publie aucun prix : le packaging se chiffre au cas
+# par cas, donc le moindre montant annoncé sur ce sujet est une invention.
+_SANS_TARIF = re.compile(r"packaging|paquet|étiquette|etiquette|coffret", re.IGNORECASE)
+
+
+def _frauduleuse(phrase: str) -> bool:
+    """Vrai si la phrase annonce un montant ou une fourchette inventés."""
+    if _SANS_TARIF.search(phrase) and _PRIX.search(phrase):
+        return True
+    for match in _PAIRE.finditer(phrase):
+        if (_nombre(match.group(1)), _nombre(match.group(2))) not in _FOURCHETTES:
+            return True
+    return any(_nombre(match.group(1)) not in _SOMMES for match in _PRIX.finditer(phrase))
+
+
+def _official_price_line(text: str) -> str:
+    """Repère officiel le plus proche du sujet évoqué."""
+    lowered = text.lower()
+    if re.search(r"\bsite\b|wordpress|shopify|boutique en ligne|maquette web", lowered):
+        return "Pour un site, comptez à partir de 2 000 € pour un vitrine sur mesure."
+    if re.search(r"packaging|paquet|étiquette|etiquette|coffret|boîte|boite", lowered):
+        return (
+            "Le packaging dépend du nombre de références : logo seul 800 à 1 500 €, "
+            "et le pack complet avec supports de lancement 3 200 à 5 000 €."
+        )
+    if re.search(r"carte de visite|flyer|affiche|plaquette|papeterie", lowered):
+        return "Carte de visite 180 à 350 €, flyer 220 à 450 €, affiche A2 320 à 500 €."
+    return (
+        "Les repères du site : logo seul 800 à 1 500 €, charte graphique complète "
+        "1 200 à 2 500 €, identité complète 2 200 à 4 000 €."
+    )
+
+
+def _price_guard(text: str, message: str = "") -> str:
+    """Retire tout montant absent de la grille publique.
+
+    Le modèle arrondit volontiers (« entre 500 et 2 500 € ») alors que la page
+    prix ne dit pas ça. On supprime la phrase fautive et on la remplace par le
+    repère officiel, pour ne jamais annoncer un prix qui n'existe pas.
+    """
+    if not text.strip():
+        return text
+    phrases = re.split(r"(?<=[.!?])\s+", text.strip())
+    gardees = [phrase for phrase in phrases if not _frauduleuse(phrase)]
+    if len(gardees) == len(phrases):
+        return text
+    base = " ".join(gardees).strip()
+    if base and base[-1] not in ".!?":
+        base += "."
+    ligne = _official_price_line(f"{message} {text}")
+    return f"{base} {ligne}".strip()
 
 
 def _fake_slots(text: str) -> bool:
