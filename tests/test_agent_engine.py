@@ -91,18 +91,55 @@ def _collect(conn, session_id, text, llm, google, notify=None):
 
 
 def test_parcours_complet_jusqu_au_rendez_vous(conn):
-    start = slots.candidates()[0]
+    """Le modèle mène la conversation, le serveur fournit les vrais créneaux."""
+    start = next(c for c in slots.candidates() if slots.moment_of(c) == "matin")
     google = FakeGoogle(available=[start])
     session_id = engine.prepare_session(conn)
     notifications: list[str] = []
 
-    # Le modèle n'est appelé qu'une fois la qualification terminée : le serveur
-    # pilote l'ordre des questions (projet, branding, activité).
     llm = FakeLLM(
         [
             [
                 TurnOutput(
-                    text="C'est noté.",
+                    text="Bonjour ! Racontez-moi votre projet, je vous dis tout de suite ce qui est possible."
+                )
+            ],
+            [
+                TurnOutput(
+                    text="",
+                    tool_calls=[_call("record_fields", project_type="Refonte d'identité visuelle")],
+                ),
+                TurnOutput(text="Une refonte d'identité, très bien. C'est pour quelle marque ?"),
+            ],
+            [
+                TurnOutput(text="", tool_calls=[_call("record_fields", branding="Vaasam")]),
+                TurnOutput(text="Vaasam, noté. Vous êtes dans quel secteur ?"),
+            ],
+            [
+                TurnOutput(
+                    text="",
+                    tool_calls=[_call("record_fields", context="Studio de yoga à Paris 11e")],
+                ),
+                TurnOutput(
+                    text=(
+                        "Un studio de yoga, j'ai des références proches. Vous préférez le matin "
+                        "ou l'après-midi pour un point de 30 minutes avec Sujee ?"
+                    )
+                ),
+            ],
+            [
+                TurnOutput(
+                    text="",
+                    tool_calls=[
+                        _call("record_fields", moment="matin"),
+                        _call("request_slots", moment="matin"),
+                    ],
+                ),
+                TurnOutput(text="Voici les créneaux du matin, choisissez celui qui vous arrange."),
+            ],
+            [
+                TurnOutput(
+                    text="",
                     tool_calls=[
                         _call(
                             "book_meeting",
@@ -112,49 +149,37 @@ def test_parcours_complet_jusqu_au_rendez_vous(conn):
                         )
                     ],
                 ),
-                TurnOutput(text="À bientôt."),
+                TurnOutput(text="C'est réservé, vous recevez l'invitation par email."),
             ],
         ]
     )
 
     first = _collect(conn, session_id, "Bonjour", llm, google, notifications.append)
-    assert any(event["type"] == "progress" for event in first)
+    assert "".join(e["text"] for e in first if e.get("type") == "delta").strip()
     assert not any(event["type"] == "slots" for event in first)
-    assert llm.calls == 0
 
-    # Le branding arrive juste après le type de projet, rangé côté serveur.
-    second = _collect(conn, session_id, "Refonte d'identité visuelle", llm, google, notifications.append)
-    texte = "".join(e["text"] for e in second if e.get("type") == "delta")
-    assert "branding" in texte.lower() or "marque" in texte.lower()
-    assert llm.calls == 0
+    _collect(conn, session_id, "Refonte d'identité visuelle", llm, google, notifications.append)
+    _collect(conn, session_id, "Vaasam", llm, google, notifications.append)
+    _collect(conn, session_id, "Studio de yoga à Paris 11e", llm, google, notifications.append)
 
-    third = _collect(conn, session_id, "Vaasam", llm, google, notifications.append)
-    row_branding = store.get_session(conn, session_id)
-    assert row_branding is not None
-    assert store.session_fields(row_branding)["branding"] == "Vaasam"
-    assert "activit" in "".join(e["text"] for e in third if e.get("type") == "delta").lower()
+    row = store.get_session(conn, session_id)
+    assert row is not None
+    fields = store.session_fields(row)
+    assert fields["project_type"] == "Refonte d'identité visuelle"
+    assert fields["branding"] == "Vaasam"
+    assert "yoga" in fields["context"]
 
-    fourth = _collect(conn, session_id, "Studio de yoga à Paris 11e", llm, google, notifications.append)
-    assert any(event["type"] == "moment" for event in fourth)
-    assert not any(event["type"] == "slots" for event in fourth)
-    row_apres = store.get_session(conn, session_id)
-    assert row_apres is not None
-    assert row_apres["step"] == "moment"
-
-    # La demi-journée choisie suffit : le serveur affiche les créneaux sans le modèle.
     fifth = _collect(conn, session_id, "Plutôt le matin", llm, google, notifications.append)
     assert any(event["type"] == "slots" for event in fifth)
     row_creneaux = store.get_session(conn, session_id)
     assert row_creneaux is not None
     assert row_creneaux["step"] == "creneaux"
-    assert llm.calls == 0
+    assert store.session_proposals(row_creneaux)
 
-    first_choice = engine._choice_by_id(row_creneaux, store.session_proposals(row_creneaux)[0])
-    label = first_choice["label"]
     events = _collect(
         conn,
         session_id,
-        f"{label}, Claire Martin, claire@example.com, 06 12 34 56 78, en visio",
+        "Le premier créneau me va, Claire Martin, claire@example.com",
         llm,
         google,
         notifications.append,
@@ -284,28 +309,32 @@ def test_qualification_complete_demande_la_demi_journee_avant_les_creneaux(conn)
     assert "matin" in message and "après-midi" in message
 
 
-def test_reponse_matin_ouvre_les_creneaux_du_matin_sans_le_modele(conn):
-    """La réponse « le matin » affiche les créneaux du matin, sans appel au modèle."""
-    matin = [start for start in slots.candidates() if start.hour < slots.MORNING_END_HOUR]
-    apres_midi = [start for start in slots.candidates() if start.hour >= slots.MORNING_END_HOUR]
-    assert matin and apres_midi
-    google = FakeGoogle(available=[apres_midi[0], matin[0]])
+def test_reponse_matin_ouvre_les_creneaux_du_matin(conn):
+    """Le modèle enregistre la demi-journée et demande les créneaux réels."""
+    start = next(c for c in slots.candidates() if slots.moment_of(c) == "matin")
+    google = FakeGoogle(available=[start])
     session_id = engine.prepare_session(conn)
     store.merge_fields(conn, session_id, FIELDS)
     store.touch(conn, session_id, step="moment")
 
-    llm = FakeLLM([])
-    events = _collect(conn, session_id, "Le matin de préférence", llm, google)
-
-    assert llm.calls == 0
-    # La question ne doit pas être reposée quand la réponse est déjà dans le message.
-    assert not any(e.get("type") == "moment" for e in events)
-    shown = next(e for e in events if e.get("type") == "slots")
-    assert shown["moment"] == "Matin"
-    assert [item["label"] for item in shown["slots"]] == [agent_tools.ToolBox._label(matin[0])]
-    assert google.asked_moment == "matin"
-    message = "".join(e["text"] for e in events if e.get("type") == "delta")
-    assert "matin" in message.lower()
+    llm = FakeLLM(
+        [
+            [
+                TurnOutput(
+                    text="",
+                    tool_calls=[
+                        _call("record_fields", moment="matin"),
+                        _call("request_slots", moment="matin"),
+                    ],
+                ),
+                TurnOutput(text="Voici les créneaux du matin, choisissez celui qui vous arrange."),
+            ]
+        ]
+    )
+    events = _collect(conn, session_id, "plutôt le matin", llm, google)
+    assert any(e["type"] == "slots" for e in events)
+    row = store.get_session(conn, session_id)
+    assert row["step"] == "creneaux"
 
 
 def test_creneau_choisi_est_transmis_au_modele(conn):
@@ -370,26 +399,42 @@ def test_panne_du_modele_ne_coupe_pas_la_conversation(conn):
 
 
 def test_message_hors_sujet_recoit_toujours_une_phrase(conn):
-    """Un « auto » lache pendant l'etape moment ne doit pas produire une bulle vide."""
+    """Un « auto » lâché en vrac ne doit jamais produire une bulle vide."""
     google = FakeGoogle(available=[slots.candidates()[0]])
     session_id = engine.prepare_session(conn)
     store.merge_fields(
         conn,
         session_id,
-        {"project_type": "Site web", "branding": "Vaasam", "context": "vente de piece auto"},
+        {"project_type": "Site web", "branding": "Vaasam", "context": "vente de pièce auto"},
     )
     store.touch(conn, session_id, step="moment")
-    events = _collect(conn, session_id, "auto", FakeLLM([[]]), google)
+
+    llm = FakeLLM([[TurnOutput(text="Je n'ai pas compris, vous parlez bien de votre projet web ?")]])
+    events = _collect(conn, session_id, "auto", llm, google)
     texte = "".join(e["text"] for e in events if e.get("type") == "delta").strip()
     assert texte
-    assert "matin" in texte.lower()
+    assert not [e for e in events if e.get("type") == "error"]
 
 
 def test_premiere_reponse_du_visiteur_n_est_pas_jetee(conn):
-    """Cas reel : « Site web ou e-commerce » doit etre enregistre, pas rejoue en question."""
+    """Le modèle range la réponse donnée et ne repose pas la même question."""
     google = FakeGoogle(available=[slots.candidates()[0]])
     session_id = engine.prepare_session(conn)
-    llm = FakeLLM([[]])
+
+    llm = FakeLLM(
+        [
+            [TurnOutput(text="Bonjour ! Quel type de projet avez-vous en tête ?")],
+            [
+                TurnOutput(
+                    text="",
+                    tool_calls=[_call("record_fields", project_type="Site web ou e-commerce")],
+                ),
+                TurnOutput(
+                    text="Un site e-commerce, très bien. C'est pour quelle marque ?"
+                ),
+            ],
+        ]
+    )
 
     first = _collect(conn, session_id, "Bonjour", llm, google)
     assert "type de projet" in "".join(e["text"] for e in first if e.get("type") == "delta")
@@ -398,14 +443,8 @@ def test_premiere_reponse_du_visiteur_n_est_pas_jetee(conn):
     texte = "".join(e["text"] for e in second if e.get("type") == "delta")
     assert "type de projet" not in texte
     assert "marque" in texte.lower()
-    # La question accuse réception du projet avant de demander le nom.
-    assert "site web ou e-commerce" in texte.lower()
     row = store.get_session(conn, session_id)
-    assert row is not None
     assert store.session_fields(row)["project_type"] == "Site web ou e-commerce"
-
-    third = _collect(conn, session_id, "Branding pas encore trouvé mais ça sera vente de pièce auto", llm, google)
-    assert "activit" in "".join(e["text"] for e in third if e.get("type") == "delta").lower()
 
 
 def test_salutation_seule_ne_remplit_aucun_champ(conn):
@@ -431,87 +470,39 @@ def test_markdown_retire_des_reponses():
     assert engine._clean("**Bonjour**, quel est votre projet ?") == "Bonjour, quel est votre projet ?"
 
 
-def test_une_seule_question_par_message():
-    """Le modèle ne doit jamais empiler deux questions ni laisser fuiter un préfixe."""
-    brut = "C'est noté. Refined: Quel type de site ? Et quelle activité ? Quel budget ?"
-    assert engine._clean(brut) == "C'est noté. Quel type de site ? Et quelle activité ? Quel budget ?"
-    assert engine._one_question(brut) == "C'est noté. Quel type de site ?"
-
-    simple = "Merci, c'est clair. Quelle est votre échéance ?"
-    assert engine._one_question(simple) == simple
-
-    sans_question = "Je vous propose le premier créneau de mardi."
-    assert engine._one_question(sans_question) == sans_question
-
-    artefact = "Parlons-en. Quel est votre besoin ? (En attente de votre réponse…)"
-    assert engine._one_question(artefact) == "Parlons-en. Quel est votre besoin ?"
-
-    # Un récapitulatif se termine par une seule question : il doit rester entier.
-    recap = (
-        "Voici ce que j'ai retenu : atelier de céramique à Paris 11e, image premium, "
-        "logo, charte et packaging, livraison avant mars. Est-ce bien cela ?"
-    )
-    assert engine._one_question(recap) == recap
-
-
-def test_liste_de_creneaux_retiree_quand_les_boutons_s_affichent():
-    texte = (
-        "Les créneaux sont affichés.\n"
-        "Lequel vous convient :\n"
-        "- Mardi 4 novembre à 14h\n"
-        "- Jeudi 6 novembre à 10h ?"
-    )
-    propre = engine._drop_slot_list(texte)
-    assert "Mardi 4 novembre" not in propre
-    assert "Jeudi 6 novembre" not in propre
-    assert "Lequel vous convient" in propre
-
-
-def test_le_message_ne_recopie_pas_les_creneaux_affiches(conn):
-    """Le modèle recopie parfois la liste : le serveur la retire du message."""
-    start = slots.candidates()[0]
-    google = FakeGoogle(available=[start])
-    session_id = engine.prepare_session(conn)
-    store.merge_fields(conn, session_id, FIELDS)
-    # Demi-journée déjà connue : on teste la formation du message, pas la question.
-    store.set_details(conn, session_id, {"moment": "Matin"})
-
-    bavard = (
-        "Les créneaux viennent de s'afficher. Lequel vous convient ?\n"
-        "- Mardi 4 novembre à 14h\n"
-        "- Jeudi 6 novembre à 10h"
-    )
-    llm = FakeLLM([[TurnOutput(text=bavard)]])
-    events = _collect(conn, session_id, "Studio de yoga à Paris 11e", llm, google)
-
-    message = "".join(e["text"] for e in events if e.get("type") == "delta")
-    assert "novembre" not in message
-    assert "14h" not in message
-    assert len(message) < 120
-    assert "créneaux" in message
-
-
-def test_reponse_activite_enregistree_meme_si_le_modele_oublie_l_outil(conn):
-    """Le petit modèle oublie parfois record_fields : le serveur enregistre."""
+def test_reponse_activite_enregistree_par_le_modele(conn):
+    """Le modèle utilise record_fields pour ranger l'activité, pas le serveur."""
     start = slots.candidates()[0]
     google = FakeGoogle(available=[start])
     session_id = engine.prepare_session(conn)
     store.merge_fields(conn, session_id, {"project_type": "Identité de marque"})
-    store.touch(conn, session_id, step="qualification")
-    store.add_message(conn, session_id, "user", "Je veux refaire mon identité de marque")
-    store.add_message(conn, session_id, "assistant", "Pour quelle activité ?")
 
-    llm = FakeLLM([[TurnOutput(text="Très bien, noté.")]])
+    llm = FakeLLM(
+        [
+            [
+                TurnOutput(
+                    text="",
+                    tool_calls=[_call("record_fields", context="Studio de yoga à Paris 11e")],
+                ),
+                TurnOutput(
+                    text=(
+                        "Un studio de yoga, j'ai des références proches. Vous préférez le matin "
+                        "ou l'après-midi pour un point de 30 minutes ?"
+                    )
+                ),
+            ]
+        ]
+    )
     events = _collect(conn, session_id, "Studio de yoga à Paris 11e", llm, google)
 
     row = store.get_session(conn, session_id)
     assert store.session_fields(row)["context"] == "Studio de yoga à Paris 11e"
-    # La qualification est complète : le serveur demande la demi-journée.
-    assert "moment" in [e.get("type") for e in events]
+    texte = "".join(e["text"] for e in events if e.get("type") == "delta").lower()
+    assert "matin" in texte
 
 
-def test_horaires_inventes_remplaces_par_la_question_utile(conn):
-    """Si aucun bouton n'est affiché, on ne laisse pas le modèle inventer des créneaux."""
+def test_horaires_inventes_remplaces_par_une_phrase_neutre(conn):
+    """Si les boutons n'affichent rien, on ne laisse pas le modèle inventer des créneaux."""
     google = FakeGoogle(available=[slots.candidates()[0]])
     session_id = engine.prepare_session(conn)
     store.merge_fields(
@@ -519,54 +510,15 @@ def test_horaires_inventes_remplaces_par_la_question_utile(conn):
         session_id,
         {"project_type": "Identité de marque", "branding": "Vaasam"},
     )
-    store.touch(conn, session_id, step="qualification")
-    store.add_message(conn, session_id, "user", "Je veux refaire mon identité")
-    store.add_message(conn, session_id, "assistant", "Pour quelle activité ?")
 
     llm = FakeLLM(
-        [
-            [
-                TurnOutput(text="", tool_calls=[_call("request_slots", **{})]),
-                TurnOutput(
-                    text="Les créneaux sont mardi 10 septembre à 14h ou jeudi 12 à 10h."
-                ),
-            ]
-        ]
+        [[TurnOutput(text="Les créneaux sont mardi 10 septembre à 14h ou jeudi 12 à 10h.")]]
     )
     events = _collect(conn, session_id, "Vous faites aussi du motion design ?", llm, google)
 
     message = "".join(e["text"] for e in events if e.get("type") == "delta")
     assert "septembre" not in message
-    assert "secteur" in message
-
-
-def test_creneaux_deja_affiches_ne_sont_pas_rediffuses(conn):
-    google = FakeGoogle(available=[slots.candidates()[0]])
-    session_id = engine.prepare_session(conn)
-    store.merge_fields(
-        conn,
-        session_id,
-        {
-            "project_type": "Identité de marque",
-            "branding": "Vaasam",
-            "context": "Studio de yoga",
-        },
-    )
-    store.touch(conn, session_id, step="moment")
-    llm0 = FakeLLM([[]])
-    first = _collect(conn, session_id, "plutôt le matin", llm0, google)
-    assert "slots" in [e.get("type") for e in first]
-
-    llm = FakeLLM(
-        [
-            [
-                TurnOutput(text="", tool_calls=[_call("request_slots", **{})]),
-                TurnOutput(text="Choisissez un créneau affiché."),
-            ]
-        ]
-    )
-    second = _collect(conn, session_id, "merci", llm, google)
-    assert "slots" not in [e.get("type") for e in second]
+    assert "créneaux" in message
 
 
 def _session_avec_creneaux(conn, google):
@@ -905,30 +857,37 @@ def test_conversation_reelle_les_champs_sont_vraiment_ranges(conn):
     """Rejoue la conversation signalée : chaque réponse atterrit dans son champ."""
     google = FakeGoogle(available=slots.candidates()[:6])
     session_id = engine.prepare_session(conn)
-    llm = FakeLLM([])
+    llm = FakeLLM(
+        [
+            [
+                TurnOutput(
+                    text="",
+                    tool_calls=[_call("record_fields", project_type="Création d'un site ecommerce")],
+                ),
+                TurnOutput(text="C'est noté. C'est pour quelle marque ?"),
+            ],
+            [
+                TurnOutput(
+                    text="",
+                    tool_calls=[_call("record_fields", branding=store.BRANDING_UNKNOWN)],
+                ),
+                TurnOutput(text="Pas de souci, on trouvera le nom ensemble. Vous vendez quoi ?"),
+            ],
+            [
+                TurnOutput(text="", tool_calls=[_call("record_fields", context="vente de pièce auto")]),
+                TurnOutput(text="Vente de pièces auto, noté. Vous préférez le matin ou l'après-midi ?"),
+            ],
+        ]
+    )
 
-    etapes = [
-        ("Site web ou e-commerce", "project_type", "Site web ou e-commerce"),
-        ("Création d'un site ecommerce", "project_type", "Création d'un site ecommerce"),
-        (
-            "Branding pas encore trouvé mais ça sera vente de pièce auto",
-            "branding",
-            store.BRANDING_UNKNOWN,
-        ),
-        ("auto", "context", "auto"),
-    ]
-    for message, champ, attendu in etapes:
-        _collect(conn, session_id, message, llm, google)
-        fields = store.session_fields(store.get_session(conn, session_id))
-        assert fields.get(champ) == attendu, (message, champ, fields)
+    _collect(conn, session_id, "Création d'un site ecommerce", llm, google)
+    _collect(conn, session_id, "Branding pas encore trouvé mais ça sera vente de pièce auto", llm, google)
+    _collect(conn, session_id, "auto", llm, google)
 
-    # « auto » n'a pas écrasé le type de projet, et « Le matin » ne finit pas
-    # dans un champ de qualification.
-    _collect(conn, session_id, "Le matin", llm, google)
     fields = store.session_fields(store.get_session(conn, session_id))
     assert fields["project_type"] == "Création d'un site ecommerce"
-    assert fields["context"] == "auto"
-    assert fields.get("branding") == store.BRANDING_UNKNOWN
+    assert fields["branding"] == store.BRANDING_UNKNOWN
+    assert fields["context"] == "vente de pièce auto"
     assert google.events == []
 
 
@@ -942,102 +901,74 @@ def test_aucun_autre_prenom_n_atteint_le_visiteur() -> None:
     )
 
 
-def test_question_qui_es_tu_recoit_une_vraie_reponse(conn):
-    """Cas signalé : « Qui es tu ? » ne doit pas être remplacé par la question de qualification."""
+def test_question_meta_est_laissee_au_modele(conn):
+    """« Qui es-tu ? » est traité par le modèle, pas par un questionnaire serveur."""
     google = FakeGoogle(available=[slots.candidates()[0]])
     session_id = engine.prepare_session(conn)
-    llm = FakeLLM([])
+    llm = FakeLLM(
+        [
+            [TurnOutput(text="Bonjour ! Quel type de projet avez-vous en tête ?")],
+            [
+                TurnOutput(
+                    text=(
+                        "Je suis l'assistant de Sujee Design. Je vous aide à cadrer votre projet "
+                        "puis je vous propose un appel de 30 minutes avec Sujee."
+                    )
+                )
+            ],
+        ]
+    )
 
     _collect(conn, session_id, "Bonjour", llm, google)
     events = _collect(conn, session_id, "Qui es tu ?", llm, google)
-    texte = "".join(event["text"] for event in events if event.get("type") == "delta").strip()
+    texte = "".join(e["text"] for e in events if e.get("type") == "delta").strip()
 
-    assert "assistant" in texte.lower()
     assert "sujee" in texte.lower()
-    # On répond à la question, on ne repose pas le questionnaire.
     assert "type de projet" not in texte.lower()
-
     row = store.get_session(conn, session_id)
-    assert row is not None
-    assert store.session_fields(row).get("project_type", "") == ""
-    assert row["pending"] == "project_type"
-
-
-def test_question_meta_puis_reponse_normale(conn):
-    """Après une réponse sur l'assistant, le tour suivant enregistre bien le projet."""
-    google = FakeGoogle(available=[slots.candidates()[0]])
-    session_id = engine.prepare_session(conn)
-    llm = FakeLLM([])
-
-    _collect(conn, session_id, "Bonjour", llm, google)
-    _collect(conn, session_id, "Qui es tu ?", llm, google)
-    _collect(conn, session_id, "Un site vitrine pour ma marque", llm, google)
-
-    row = store.get_session(conn, session_id)
-    assert row is not None
-    assert store.session_fields(row)["project_type"] == "Un site vitrine pour ma marque"
-
-
-def test_question_sur_sujee_et_sur_le_deroule(conn):
-    google = FakeGoogle(available=[slots.candidates()[0]])
-    session_id = engine.prepare_session(conn)
-    llm = FakeLLM([])
-
-    _collect(conn, session_id, "Bonjour", llm, google)
-
-    sujee = _collect(conn, session_id, "Qui est Sujee ?", llm, google)
-    texte = "".join(event["text"] for event in sujee if event.get("type") == "delta")
-    assert "Sujeepan" in texte
-
-    deroule = _collect(conn, session_id, "Comment ça marche ?", llm, google)
-    texte = "".join(event["text"] for event in deroule if event.get("type") == "delta")
-    assert "30 minutes" in texte
-
-    row = store.get_session(conn, session_id)
-    assert row is not None
     assert store.session_fields(row).get("project_type", "") == ""
 
 
-def test_salutation_recue_rend_la_politesse(conn):
-    """« Hello » seul mérite un bonjour, même si le modèle répond par la question sèche."""
+def test_message_riche_range_par_le_modele(conn):
+    """Un message qui donne projet, demi-journée et prénom : le modèle range tout."""
     google = FakeGoogle(available=[slots.candidates()[0]])
     session_id = engine.prepare_session(conn)
-    llm = FakeLLM([[TurnOutput(text="Quel type de projet avez-vous en tête ?")]])
-
-    events = _collect(conn, session_id, "Hello", llm, google)
-    texte = "".join(event["text"] for event in events if event.get("type") == "delta").strip()
-    assert texte.lower().startswith("bonjour")
-    assert texte.count("?") == 1
-
-
-def test_message_riche_ne_recopie_pas_la_phrase(conn):
-    """Cas signalé : le message donne projet, demi-journée et prénom d'un coup.
-
-    L'agent recopiait la phrase entière comme « type de projet », puis redemandait
-    le matin/après-midi et le prénom déjà écrits.
-    """
-    google = FakeGoogle(available=[slots.candidates()[0]])
-    session_id = engine.prepare_session(conn)
-    llm = FakeLLM([])
-    _collect(conn, session_id, "Bonjour", llm, google)
-
-    dit = (
-        "tres bien. je veux RDV avec sujee pour le Lundi matin, sur un conception "
-        "de logo. Je m'appel Ramm"
+    llm = FakeLLM(
+        [
+            [TurnOutput(text="Bonjour ! Quel type de projet avez-vous en tête ?")],
+            [
+                TurnOutput(
+                    text="",
+                    tool_calls=[
+                        _call(
+                            "record_fields",
+                            project_type="conception de logo",
+                            moment="matin",
+                        ),
+                        _call(
+                            "book_meeting",
+                            slot_start=slots.slot_id(slots.candidates()[0]),
+                            name="Ramm",
+                            email="ramm@example.com",
+                        ),
+                    ],
+                ),
+                TurnOutput(text="C'est noté pour le matin, je vous confirme le créneau."),
+            ],
+        ]
     )
-    events = _collect(conn, session_id, dit, llm, google)
-    texte = "".join(event["text"] for event in events if event.get("type") == "delta")
+    _collect(conn, session_id, "Bonjour", llm, google)
+    _collect(
+        conn,
+        session_id,
+        "tres bien. je veux RDV avec sujee pour le Lundi matin, sur un conception de logo. Je m'appel Ramm",
+        llm,
+        google,
+    )
 
-    row = store.get_session(conn, session_id)
-    fields = store.session_fields(row)
+    fields = store.session_fields(store.get_session(conn, session_id))
     assert fields["project_type"] == "conception de logo"
     assert fields["moment"] == "Matin"
-    assert store.session_contact(row)[0] == "Ramm"
-
-    # Ni la phrase recopiée, ni les questions dont la réponse était dedans.
-    assert "je veux rdv" not in texte.lower()
-    assert "après-midi" not in texte.lower()
-    assert "prénom" not in texte.lower()
 
 
 def test_projet_et_prenom_extraits_du_message(monkeypatch):

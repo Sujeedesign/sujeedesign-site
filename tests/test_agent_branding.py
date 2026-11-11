@@ -6,7 +6,7 @@ import pytest
 
 from app.agent import engine, store
 
-from test_agent_engine import FakeGoogle, FakeLLM, _collect
+from test_agent_engine import FakeGoogle, FakeLLM, TurnOutput, _call, _collect
 
 
 def _texte(events) -> str:
@@ -33,94 +33,83 @@ def test_valeur_branding(dit, attendu):
     assert engine._qualification_value("branding", dit) == attendu
 
 
-def test_pas_de_boucle_sur_le_nom_de_la_marque(conn):
-    """Le transcript qui a fait tourner en rond : projet redit deux fois."""
+def test_redire_son_projet_n_est_pas_un_nom_de_marque(conn):
+    """Le visiteur qui redit son projet ne doit pas voir son projet devenir le nom."""
     google = FakeGoogle()
-    llm = FakeLLM([])
+    llm = FakeLLM(
+        [
+            [TurnOutput(text="Bonjour ! Quel type de projet avez-vous en tête ?")],
+            [
+                TurnOutput(text="", tool_calls=[_call("record_fields", project_type="Site web")]),
+                TurnOutput(text="Un site web, très bien. Comment s'appelle la marque ?"),
+            ],
+            [TurnOutput(text="Je note le projet. Il a déjà un nom, ou on le trouve ensemble ?")],
+        ]
+    )
     session_id = engine.prepare_session(conn)
 
     _collect(conn, session_id, "Bonjour", llm, google)
-    premier = _collect(conn, session_id, "Site web pour une marque de vetement", llm, google)
-    # La question suivante accuse réception du projet avant de demander la marque.
-    assert "nom de la marque" in _texte(premier)
-    assert "site web pour une marque de vetement" in _texte(premier).lower()
+    _collect(conn, session_id, "Site web pour une marque de vetement", llm, google)
+    relance = _texte(_collect(conn, session_id, "C'est pour une marque de vetement", llm, google))
 
-    # Le visiteur redit son projet : ce n'est pas un nom, on ne l'enregistre pas.
-    relance = _collect(conn, session_id, "C'est pour une marque de vetement", llm, google)
     fields = store.session_fields(store.get_session(conn, session_id))
     assert not fields.get("branding")
-    # Et la relance est formulée autrement que la question initiale.
-    assert "Comment s'appelle-t-elle" in _texte(relance)
-    assert _texte(relance) != _texte(premier)
-
-    # Il redit son projet encore une fois : on lui laisse un essai de plus
-    # avant d'avancer, sans recopier la même phrase.
-    suite = _collect(conn, session_id, "de vetement", llm, google)
-    fields = store.session_fields(store.get_session(conn, session_id))
-    assert not fields.get("branding")
-    assert "s'appelle-t-elle" in _texte(suite).lower()
-
-    # Troisième redite : on avance au lieu de tourner en rond.
-    fin = _collect(conn, session_id, "de vetement", llm, google)
-    fields = store.session_fields(store.get_session(conn, session_id))
-    assert fields["branding"] == store.BRANDING_UNKNOWN
-    # Le secteur se déduit de « marque de vetement » : pas de question dont la
-    # réponse est déjà dans la demande, on passe à la demi-journée.
-    assert fields["context"] == "mode et textile"
-    assert "activit" not in _texte(fin).lower()
-    assert "matin" in _texte(fin).lower()
-    assert llm.calls == 0
+    assert fields["project_type"]
+    assert relance
 
 
 def test_un_vrai_nom_apres_une_relance(conn):
+    """« Vaasam Paris » est le nom : le modèle le range tel quel."""
     google = FakeGoogle()
-    llm = FakeLLM([])
+    llm = FakeLLM(
+        [
+            [TurnOutput(text="Bonjour ! Quel type de projet avez-vous en tête ?")],
+            [
+                TurnOutput(text="", tool_calls=[_call("record_fields", project_type="Refonte d'identité visuelle")]),
+                TurnOutput(text="Très bien. Comment s'appelle la marque ?"),
+            ],
+            [
+                TurnOutput(text="", tool_calls=[_call("record_fields", branding="Vaasam Paris")]),
+                TurnOutput(text="Vaasam Paris, noté. Vous préférez le matin ou l'après-midi ?"),
+            ],
+        ]
+    )
     session_id = engine.prepare_session(conn)
 
     _collect(conn, session_id, "Bonjour", llm, google)
     _collect(conn, session_id, "Refonte d'identité visuelle", llm, google)
-    _collect(conn, session_id, "C'est pour une marque de vetement", llm, google)
     _collect(conn, session_id, "Vaasam Paris", llm, google)
 
     fields = store.session_fields(store.get_session(conn, session_id))
     assert fields["branding"] == "Vaasam Paris"
 
 
-def test_transcript_lahoni_plus_de_question_morte(conn):
-    """Le transcript signalé : cosmétique, puis redite, puis « Lahoni ».
-
-    L'agent ne doit ni redemander le type de projet, ni demander le secteur
-    alors que « marque de cosmétique » le dit déjà, et jamais recopier
-    « Pardon, pour quel type de projet me contactez-vous ? ».
-    """
+def test_le_secteur_deja_dit_n_est_pas_redemande(conn):
+    """« Marque de cosmétique » suffit : le secteur est déduit, pas questionné."""
     google = FakeGoogle()
-    llm = FakeLLM([])
+    llm = FakeLLM(
+        [
+            [TurnOutput(text="Bonjour ! Quel type de projet avez-vous en tête ?")],
+            [
+                TurnOutput(text="", tool_calls=[_call("record_fields", project_type="Créer une marque de cosmétique")]),
+                TurnOutput(text="Une marque de cosmétique, très bien. Comment s'appelle-t-elle ?"),
+            ],
+            [
+                TurnOutput(text="", tool_calls=[_call("record_fields", branding="Lahoni")]),
+                TurnOutput(text="Lahoni, joli nom. Vous préférez le matin ou l'après-midi ?"),
+            ],
+        ]
+    )
     session_id = engine.prepare_session(conn)
 
     accueil = _texte(_collect(conn, session_id, "Bonjour", llm, google))
     assert "type de projet" in accueil.lower()
 
-    projet = _texte(_collect(conn, session_id, "Direction artistique", llm, google))
-    assert "nom de la marque" in projet.lower()
-    assert "pardon" not in projet.lower()
-    assert "pardon" not in accueil.lower()
+    _collect(conn, session_id, "Créer une marque de cosmétique", llm, google)
+    _collect(conn, session_id, "Lahoni", llm, google)
 
-    redite = _collect(conn, session_id, "Créer une marque de cosmétique", llm, google)
-    texte_redite = _texte(redite)
-    assert "pardon" not in texte_redite.lower()
-    assert "bien reçu, à préciser" not in texte_redite.lower()
-    # La redite est comprise, pas recopiée : la question de la marque tient.
-    assert "s'appelle-t-elle" in texte_redite.lower()
-    champs = store.session_fields(store.get_session(conn, session_id))
-    assert "cosmétique" in champs["project_type"].lower()
-
-    marque = _collect(conn, session_id, "Lahoni", llm, google)
     fields = store.session_fields(store.get_session(conn, session_id))
     assert fields["branding"] == "Lahoni"
-    assert fields["context"] == "beauté et cosmétique"
-    # Secteur déduit : aucune question « activité / secteur » après « Lahoni ».
-    texte_marque = _texte(marque).lower()
-    assert "secteur" not in texte_marque
-    assert "activit" not in texte_marque
-    assert "matin" in texte_marque
-    assert llm.calls == 0
+    assert "cosmétique" in fields["context"].lower()
+
+

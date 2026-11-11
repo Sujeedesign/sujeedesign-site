@@ -30,6 +30,9 @@ TOOL_SPECS: list[dict[str, Any]] = [
                 "properties": {
                     "project_type": {"type": "string", "description": "Nature du projet"},
                     "context": {"type": "string", "description": "Activité, secteur, contexte"},
+                    "branding": {"type": "string", "description": "Nom de la marque ou du projet, s'il est donné"},
+                    "budget": {"type": "string", "description": "Budget évoqué par le visiteur, en ses termes"},
+                    "timeline": {"type": "string", "description": "Échéance ou date souhaitée, en ses termes"},
                     "moment": {
                         "type": "string",
                         "enum": ["matin", "apres-midi"],
@@ -313,18 +316,12 @@ class ToolBox:
         name = _slug(arguments.get("name", ""))[:120]
         email = _slug(arguments.get("email", "")).lower()[:180]
         phone = _slug(arguments.get("phone", ""))[:40] or fields.get("phone", "")
-        branding = fields.get("branding", "")
-        mode = fields.get("call_mode", "")
+        branding = fields.get("branding", "") or _slug(arguments.get("branding", ""))[:120]
+        mode = fields.get("call_mode", "") or "visio"
         if len(name) < 2:
             return self._error("Nom manquant : demande le prénom et le nom.")
         if not EMAIL_RE.match(email):
             return self._error("Email invalide : demande une adresse correcte avant de réserver.")
-        if not phone:
-            return self._error("Téléphone manquant : demande le numéro avant de réserver.")
-        if not branding:
-            return self._error("Nom du branding manquant : demande la marque ou le projet à réaliser.")
-        if not mode:
-            return self._error("Format manquant : demande s'il préfère un point visio ou un appel téléphonique.")
 
         if not store.reserve_slot(self.conn, slot_start, self.session_id, email):
             store.set_proposals(self.conn, self.session_id, [])

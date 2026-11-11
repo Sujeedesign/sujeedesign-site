@@ -96,21 +96,11 @@ def turn(
     messages.extend(pre)
     answer = ""
     pending = ""
-    side_turn = False
-    # Une question sur l'assistant, sur Sujee ou sur le déroulé n'est pas une
-    # réponse de qualification : elle passe avant les chemins serveur, qui
-    # sinon reposeraient la question en cours.
-    side = _side_answer(store.get_session(conn, session_id), message)
-    if side:
-        answer = side
-        side_turn = True
-    # Demi-journée puis choix du créneau : chemins serveur déterministes.
-    if not answer:
-        answer = _server_qualification_turn(toolbox, message)
-    if not answer:
-        answer = _server_moment_turn(toolbox, store.get_session(conn, session_id), message)
-    if not answer:
-        answer = _server_slot_turn(toolbox, store.get_session(conn, session_id), message)
+    # Choix d'un créneau déjà proposé : seule mécanique encore déterministe,
+    # parce qu'elle touche à la réservation réelle. Le reste de la
+    # conversation est mené par le modèle.
+    answer = _server_slot_turn(toolbox, store.get_session(conn, session_id), message)
+    server_led = bool(answer)
     if answer:
         for event in toolbox.events:
             slots_shown = slots_shown or event.get("type") == "slots"
@@ -173,70 +163,27 @@ def turn(
             answer = _clean(final.text) or pending
             break
 
-    # Filet de sécurité : le petit modèle oublie parfois d'enregistrer une
-    # réponse évidente. Si un seul champ manque et que le message ressemble à
-    # une réponse courte, on l'enregistre côté serveur.
-    row_now = store.get_session(conn, session_id)
-    if (
-        row_now
-        and not toolbox.booking
-        and row_now["step"] == "qualification"
-        and len(store.messages(conn, session_id)) > 2
-    ):
-        guess = message.strip()
-        missing = store.missing_fields(store.session_fields(row_now))
-        if len(missing) == 1 and guess and "?" not in guess and len(guess) <= 200:
-            store.merge_fields(conn, session_id, {missing[0]: guess})
-            fields_now = store.session_fields(store.get_session(conn, session_id))
-            if not store.missing_fields(fields_now):
-                moment = slots.normalize_moment(fields_now.get("moment", ""))
-                if not moment:
-                    # Les créneaux attendent la demi-journée préférée.
-                    store.touch(conn, session_id, step="moment")
-                    toolbox.events.append(
-                        {
-                            "type": "moment",
-                            "question": "Vous préférez le matin ou l'après-midi ?",
-                            "options": [
-                                {"value": "matin", "label": "Le matin"},
-                                {"value": "apres-midi", "label": "L'après-midi"},
-                            ],
-                        }
-                    )
-                    answer = "Vous préférez le matin ou l'après-midi ?"
-                else:
-                    toolbox.call("request_slots", {"moment": moment})
-                opened = False
-                for event in toolbox.events:
-                    slots_shown = slots_shown or event.get("type") == "slots"
-                    opened = opened or event.get("type") == "slots"
-                    yield event
-                toolbox.events = []
-                if moment and not opened:
-                    answer = (
-                        "Je n'ai pas de créneau en ligne ces prochains jours. "
-                        "Écrivez à hello@sujeedesign.com et je vous propose un horaire."
-                    )
-
     if not answer.strip():
         # Le modèle a enchaîné des outils sans conclure : on force une dernière phrase.
-        try:
-            final = llm.run(
-                messages
-                + [
-                    {
-                        "role": "system",
-                        "content": (
-                            "[consigne] Réponds maintenant au visiteur en une seule question, "
-                            "deux phrases maximum, sans appeler d'outil."
-                        ),
-                    }
-                ],
-                tools=[],
-            )
-        except LLMError as error:
-            print(f"agent: conclusion indisponible · {error}")
-            final = None
+        final = None
+        run = getattr(llm, "run", None)
+        if run is not None:
+            try:
+                final = run(
+                    messages
+                    + [
+                        {
+                            "role": "system",
+                            "content": (
+                                "[consigne] Réponds maintenant au visiteur en texte simple, sans appeler d'outil. "
+                                "Deux à quatre phrases, dans le ton de la conversation."
+                            ),
+                        }
+                    ],
+                    tools=[],
+                )
+            except LLMError as error:
+                print(f"agent: conclusion indisponible · {error}")
         if final is not None:
             answer = _clean(final.text) or pending
 
@@ -256,45 +203,15 @@ def turn(
         store.add_message(conn, session_id, "assistant", answer)
     elif answer.strip():
         row_now = store.get_session(conn, session_id)
-        # Refus explicite d'un créneau absent : la phrase est déjà juste, ne pas
-        # la remplacer par un gabarit qui perdrait les horaires disponibles.
-        refus = answer.startswith("Ce créneau n'est pas libre")
-        if refus:
-            pass
-        elif slots_shown and not toolbox.booking and row_now and row_now["step"] == "creneaux":
-            # Les boutons font le travail : une phrase suffit, jamais la liste.
-            if store.session_chosen(row_now):
-                answer = _one_question(answer)
-            elif had_slots:
-                answer = "Choisissez l'un des créneaux affichés pour réserver l'appel de 30 minutes."
-            else:
-                moment = slots.normalize_moment(store.session_fields(row_now).get("moment", ""))
-                if moment:
-                    answer = f"Voici les créneaux {slots.MOMENTS[moment]}. Lequel vous convient ?"
-                else:
-                    answer = "Les créneaux viennent de s'afficher. Lequel vous convient ?"
-        else:
-            fields = store.session_fields(row_now) if row_now else {}
-            if _fake_slots(answer) and not toolbox.booking:
-                # Le modèle invente parfois des horaires alors que rien n'est affiché.
-                answer = _question_for(fields)
-            if _asks_known_field(answer, fields) and not toolbox.booking:
-                # Le modèle redemande ce qu'il sait déjà (ex. « quel type de projet »
-                # après « identité de marque ») : on reprend la question utile.
-                answer = _question_for(fields)
-            if (
-                row_now
-                and str(row_now["step"] or "") == "moment"
-                and not toolbox.booking
-                and not re.search(r"matin|apr[eè]s-midi|soir", answer, re.IGNORECASE)
-            ):
-                # À l'étape demi-journée, une phrase qui ne propose pas matin/après-midi
-                # laisse le visiteur bloqué : on repose la question utile.
-                answer = "Vous préférez le matin ou l'après-midi ?"
-            if not slots_shown and not side_turn:
-                answer = _qualification_question(toolbox, row_now, answer)
-            answer = _greet_back(message, answer)
-            answer = _one_question(answer)
+        fields = store.session_fields(row_now) if row_now else {}
+        # Une phrase écrite par le moteur (créneaux réels) n'est jamais réécrite.
+        if not server_led and _fake_slots(answer) and not toolbox.booking:
+            # Le modèle invente parfois des horaires alors que rien n'est
+            # affiché : on ne laisse pas passer de faux créneaux.
+            answer = (
+                "Laissez-moi vérifier l'agenda, je vous propose les créneaux "
+                "réels dans un instant."
+            )
         for chunk in _chunks(answer):
             yield {"type": "delta", "text": chunk}
             time.sleep(0.012)
@@ -386,6 +303,11 @@ def _fallback_answer(row: Any, message: str) -> str:
         question = _question_for(fields)
         if question:
             return question
+    question = _question_for(fields)
+    if question:
+        return question
+    if not store.missing_fields(fields):
+        return "Vous préférez le matin ou l'après-midi pour un point de 30 minutes avec Sujee ?"
     return "Je n'ai pas bien saisi votre message. Pouvez-vous le reformuler en une phrase ?"
 
 
@@ -738,119 +660,6 @@ def _already_known(fields: dict, key: str, value: str) -> bool:
     return any(_flat(other) == flat for name, other in fields.items() if name != key and other)
 
 
-def _server_qualification_turn(toolbox: ToolBox, message: str) -> str:
-    """Qualification pilotée par le serveur : l'ordre ne dépend pas du modèle.
-
-    Le serveur retient le champ qu'il vient de demander (`pending`). La réponse
-    suivante est rangée dans ce champ, puis la question suivante est posée.
-    Le branding arrive ainsi juste après le type de projet, et une réponse
-    hors sujet (mode d'appel, numéro) ne vient pas polluer les champs.
-    """
-    conn, session_id = toolbox.conn, toolbox.session_id
-    row = store.get_session(conn, session_id)
-    if row is None or toolbox.booking or toolbox.handed_off:
-        return ""
-    if str(row["status"] or "") != store.STATUS_OPEN:
-        return ""
-    if str(row["step"] or "") in ("creneaux", "confirme") or store.session_proposals(row):
-        return ""
-    fields = store.session_fields(row)
-    asked = str(row["pending"] or "")
-    if not asked:
-        # Premier tour : la question d'accueil a été posée par le modèle sans
-        # étiquette `pending`. Sans ce filet, la réponse du visiteur était jetée
-        # et la même question reposée mot pour mot.
-        nxt = next((key for key in store.QUALIFICATION if not fields.get(key)), "")
-        value = _qualification_value(nxt, message) if nxt else ""
-        if value and _already_known(fields, nxt, value):
-            value = ""
-        if value:
-            store.merge_fields(conn, session_id, {nxt: value})
-            fields = store.session_fields(store.get_session(conn, session_id))
-    if asked and asked in store.QUALIFICATION and not fields.get(asked):
-        value = _qualification_value(asked, message)
-        if value and _already_known(fields, asked, value):
-            value = ""
-        if value:
-            store.merge_fields(conn, session_id, {asked: value})
-            fields = store.session_fields(store.get_session(conn, session_id))
-        if not fields.get(asked):
-            # Le visiteur précise son projet alors qu'on demande la marque :
-            # on garde la précision et on repose la question du branding.
-            precision = ""
-            if asked != "project_type":
-                precision = _qualification_value("project_type", message)
-                if precision and not _already_known(fields, "project_type", precision):
-                    store.merge_fields(conn, session_id, {"project_type": precision})
-                    fields = store.session_fields(store.get_session(conn, session_id))
-            # Réponse inexploitable : une relance reformulée plutôt que la même
-            # question recopiée. Redire son projet n'est pas une réponse ratée :
-            # on laisse un essai de plus avant de marquer le champ « à préciser ».
-            redite = bool(precision or store.infer_context(message))
-            if _relance_deja_faite(conn, session_id, asked, seuil=3 if redite else 2):
-                store.merge_fields(conn, session_id, {asked: _FALLBACK_VALUE[asked]})
-                fields = store.session_fields(store.get_session(conn, session_id))
-            else:
-                return _relance_for(asked, message, fields)
-    missing = [key for key in store.QUALIFICATION if not fields.get(key)]
-    if missing and all(key == "context" for key in missing):
-        # Le secteur se déduit du projet : « cosmétique » = beauté, inutile de
-        # poser une question dont la réponse est déjà dans la demande.
-        inferred = store.infer_context(fields.get("project_type", ""))
-        if inferred:
-            store.merge_fields(conn, session_id, {"context": inferred})
-            fields = store.session_fields(store.get_session(conn, session_id))
-            missing = [key for key in store.QUALIFICATION if not fields.get(key)]
-    if not missing:
-        if asked:
-            store.touch(conn, session_id, pending="")
-        fresh = store.get_session(conn, session_id)
-        if (
-            asked
-            and fresh is not None
-            and str(fresh["status"] or "") == store.STATUS_OPEN
-            and str(fresh["step"] or "") not in ("moment", "creneaux", "confirme")
-            and not store.session_proposals(fresh)
-            and not store.session_fields(fresh).get("moment")
-        ):
-            # Qualification bouclée côté serveur : on demande la demi-journée,
-            # comme le ferait l'outil record_fields.
-            store.touch(conn, session_id, step="moment")
-            toolbox.events.append(
-                {
-                    "type": "moment",
-                    "question": "Vous préférez le matin ou l'après-midi ?",
-                    "options": [
-                        {"value": "matin", "label": "Le matin"},
-                        {"value": "apres-midi", "label": "L'après-midi"},
-                    ],
-                }
-            )
-            return "Vous préférez le matin ou l'après-midi ?"
-        # La demi-journée est déjà connue (dite dans la même phrase que le
-        # projet) : on ouvre les créneaux au lieu de la redemander.
-        moment_now = (
-            slots.normalize_moment(store.session_fields(fresh).get("moment", ""))
-            if fresh is not None
-            else ""
-        )
-        if (
-            fresh is not None
-            and moment_now
-            and str(fresh["status"] or "") == store.STATUS_OPEN
-            and str(fresh["step"] or "") not in ("creneaux", "confirme")
-            and not store.session_proposals(fresh)
-        ):
-            opened = toolbox.call("request_slots", {"moment": moment_now})
-            if opened.get("ok") and opened.get("creneaux"):
-                return f"Parfait, voici les créneaux {slots.MOMENTS[moment_now]}. Lequel vous convient ?"
-        return ""
-    nxt = missing[0]
-    if nxt != asked:
-        store.touch(conn, session_id, pending=nxt)
-    return _question_for(fields)
-
-
 _GREETING = re.compile(
     r"(?i)^(?:bonjour|bonsoir|salut|hello|coucou|hey|yo|bjr|slt|bonne\s+journee)\b[\s!.,;:-]*"
 )
@@ -906,32 +715,6 @@ _SIDE_ANSWERS = {
         "se fait en ligne."
     ),
 }
-
-
-def _side_answer(row: Any, message: str) -> str:
-    """Réponse directe aux questions qui ne sont pas des réponses de qualification.
-
-    Le modèle, surtout un petit, préfère reposer sa question plutôt que de
-    répondre à « Qui es-tu ? ». Une question sur l'assistant, sur Sujee ou sur
-    le déroulé reçoit donc une réponse serveur, polie et exacte, et aucune
-    question de qualification n'est ajoutée pendant ce tour.
-    """
-    if row is None:
-        return ""
-    if str(row["status"] or "") != store.STATUS_OPEN:
-        return ""
-    if str(row["step"] or "") in ("creneaux", "confirme") or store.session_proposals(row):
-        return ""
-    text = " ".join(str(message or "").split())
-    if not text or len(text) > 200:
-        return ""
-    if _IDENTITY_Q.search(text):
-        return _SIDE_ANSWERS["identity"]
-    if _ABOUT_SUJEE_Q.search(text):
-        return _SIDE_ANSWERS["sujee"]
-    if _HOW_Q.search(text):
-        return _SIDE_ANSWERS["how"]
-    return ""
 
 
 def _greet_back(message: str, answer: str) -> str:
@@ -1091,6 +874,10 @@ def _harvest(toolbox: ToolBox, message: str) -> None:
         branding = _qualification_value("branding", message)
         if branding and branding != store.BRANDING_UNKNOWN:
             learned["branding"] = branding
+    if not fields.get("context") and "context" not in learned:
+        context = store.infer_context(message)
+        if context:
+            learned["context"] = context
     if learned:
         store.merge_fields(conn, session_id, learned)
         fields = store.session_fields(store.get_session(conn, session_id))
@@ -1269,33 +1056,6 @@ def _relance_deja_faite(
         return m["role"] == "assistant" and any(marker in contenu for marker in markers)
 
     return sum(1 for m in recent if _parle_du_champ(m)) >= seuil
-
-
-def _server_moment_turn(toolbox: ToolBox, row: Any, message: str) -> str:
-    """Demi-journée préférée : dès que le visiteur répond matin / après-midi,
-    le serveur ouvre les créneaux correspondants sans passer par le modèle.
-
-    Retourne la phrase à afficher (vide si le tour ne relève pas de ce chemin).
-    """
-    if row is None or str(row["step"] or "") != "moment":
-        return ""
-    folded = slots.normalize_moment(message)
-    if not folded:
-        return ""
-    if store.missing_fields(store.session_fields(row)):
-        return ""
-    result = toolbox.call("request_slots", {"moment": folded})
-    if not result.get("ok"):
-        return ""
-    if not result.get("moment_respecte", True):
-        return (
-            f"Rien de libre {slots.MOMENTS[folded]} dans les deux prochaines semaines. "
-            "Voici les créneaux les plus proches : lequel vous conviendrait ?"
-        )
-    return (
-        f"Parfait, voici les créneaux {slots.MOMENTS[folded]}. "
-        "Dites-moi lequel vous convient (ou cliquez dessus)."
-    )
 
 
 def _slots_answer(row: Any, moment: str = "") -> str:
@@ -1477,7 +1237,7 @@ def _preflight(toolbox: ToolBox, row: Any, message: str) -> list[dict[str, Any]]
         and step in ("accueil", "qualification", "recap", "coordonnees", "moment")
         and not store.session_proposals(row)
         and row["status"] != store.STATUS_BOOKED
-        # Une réponse « le matin » est traitée par _server_moment_turn juste après.
+        # Une réponse « le matin » / « l'après-midi » est traitée par _server_slot_turn.
         and not slots.normalize_moment(message)
     ):
         moment = slots.normalize_moment(fields.get("moment", ""))
@@ -1498,10 +1258,10 @@ def _preflight(toolbox: ToolBox, row: Any, message: str) -> list[dict[str, Any]]
                 {
                     "role": "system",
                     "content": (
-                        "[consigne serveur] La qualification est complète. Demande en une seule "
-                        "question courte s'il préfère le matin ou l'après-midi. Ne propose aucun "
-                        "horaire, ne parle pas de créneaux déjà affichés : ils s'afficheront "
-                        "après sa réponse."
+                        "[consigne serveur] Les informations utiles sont réunies. Tu peux maintenant "
+                        "proposer un créneau : demande simplement s'il préfère le matin ou "
+                        "l'après-midi, dans tes mots, une seule question. Les horaires réels "
+                        "s'afficheront après sa réponse."
                     ),
                 }
             ]
@@ -1571,36 +1331,3 @@ _BULLET = re.compile(r"^\s*(?:[-–—•*]|\d+[.)])\s+")
 _CLOCK = re.compile(r"\b\d{1,2}\s*[h:]\s*\d{2}\b|\b\d{1,2}h\b", re.IGNORECASE)
 
 
-def _drop_slot_list(text: str) -> str:
-    """Retire la liste des créneaux quand les boutons les affichent déjà.
-
-    Le prompt l'interdit, mais les modèles recopient volontiers les horaires.
-    On supprime les puces et les lignes de créneau, puis on garde la phrase.
-    """
-    kept: list[str] = []
-    for line in text.splitlines():
-        if not line.strip():
-            continue
-        if _BULLET.match(line) and (_WEEKDAY.search(line) or _CLOCK.search(line)):
-            continue
-        if _WEEKDAY.search(line) and _CLOCK.search(line) and len(line) < 90:
-            continue
-        kept.append(line.strip())
-    return " ".join(kept).strip() or text
-
-
-def _one_question(text: str, keep: int = 2) -> str:
-    """Garantit une seule question : on coupe après le premier point d'interrogation.
-
-    Les modèles, même bien briefés, glissent parfois plusieurs questions d'affilée.
-    La promesse « une question à la fois » est donc tenue côté serveur.
-    """
-    cleaned = _clean(text)
-    if cleaned.count("?") <= 1:
-        return cleaned
-    mark = cleaned.find("?")
-    head = cleaned[: mark + 1].strip()
-    sentences = [part for part in _SENTENCE.split(head) if part.strip()]
-    if len(sentences) > keep:
-        head = " ".join(sentences[-(keep - 1) :]) if keep > 1 else sentences[-1]
-    return head.strip()
