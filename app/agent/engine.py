@@ -303,8 +303,9 @@ def _official_price_line(text: str) -> str:
         return "Pour un site, comptez à partir de 2 000 € pour un vitrine sur mesure."
     if re.search(r"packaging|paquet|étiquette|etiquette|coffret|boîte|boite", lowered):
         return (
-            "Le packaging dépend du nombre de références : logo seul 800 à 1 500 €, "
-            "et le pack complet avec supports de lancement 3 200 à 5 000 €."
+            "Le packaging n'a pas de tarif public : il se chiffre avec Sujee selon le "
+            "nombre de références. Côté identité, comptez 800 à 1 500 € pour le logo seul, "
+            "3 200 à 5 000 € pour le pack complet avec les supports de lancement."
         )
     if re.search(r"carte de visite|flyer|affiche|plaquette|papeterie", lowered):
         return "Carte de visite 180 à 350 €, flyer 220 à 450 €, affiche A2 320 à 500 €."
@@ -1360,6 +1361,9 @@ def _preflight(toolbox: ToolBox, row: Any, message: str) -> list[dict[str, Any]]
         and row["status"] != store.STATUS_BOOKED
         # Une réponse « le matin » / « l'après-midi » est traitée par _server_slot_turn.
         and not slots.normalize_moment(message)
+        # Question déjà posée et sans réponse : on ne la rabâche pas, le modèle
+        # continue la conversation et la reproposera plus tard.
+        and step != "moment"
     ):
         moment = slots.normalize_moment(fields.get("moment", ""))
         if not moment:
@@ -1379,10 +1383,11 @@ def _preflight(toolbox: ToolBox, row: Any, message: str) -> list[dict[str, Any]]
                 {
                     "role": "system",
                     "content": (
-                        "[consigne serveur] Les informations utiles sont réunies. Tu peux maintenant "
-                        "proposer un créneau : demande simplement s'il préfère le matin ou "
-                        "l'après-midi, dans tes mots, une seule question. Les horaires réels "
-                        "s'afficheront après sa réponse."
+                        "[consigne serveur] Les informations utiles sont réunies. Réponds d'abord à "
+                        "ce que la personne vient de demander (dont le prix, avec la fourchette du "
+                        "site), puis propose un créneau : demande si elle préfère le matin ou "
+                        "l'après-midi, dans tes mots. Les horaires réels s'affichent après sa "
+                        "réponse."
                     ),
                 }
             ]

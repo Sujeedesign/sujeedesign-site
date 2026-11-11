@@ -1037,3 +1037,18 @@ def test_la_demi_journee_sans_qualification_demande_le_point_manquant(conn):
     assert not any(e.get("type") == "slots" for e in events)
     message = "".join(e["text"] for e in events if e.get("type") == "delta").strip()
     assert message.endswith("?")
+
+
+def test_la_question_du_creneau_n_est_pas_rabachee(conn):
+    """Une fois posée, la question matin/après-midi ne bloque plus le modèle."""
+    google = FakeGoogle(available=[slots.candidates()[0]])
+    session_id = engine.prepare_session(conn)
+    store.merge_fields(conn, session_id, FIELDS)
+    store.touch(conn, session_id, step="moment")
+
+    llm = FakeLLM([[TurnOutput(text="Pour les paquets, comptez 1 200 à 2 500 €. Vous préférez le matin ?")]])
+    events = _collect(conn, session_id, "Et les paquets, c'est combien ?", llm, google)
+
+    message = "".join(e["text"] for e in events if e.get("type") == "delta")
+    assert "pas de tarif public" in message and "800 à 1 500" in message
+    assert not any(e.get("type") == "moment" for e in events)
