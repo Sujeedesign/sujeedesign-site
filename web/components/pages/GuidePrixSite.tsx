@@ -13,9 +13,9 @@ import { CoverFigure } from "./CoverFigure";
  * marché exprimés en moyennes, sans citer de prestataire.
  */
 export const pageMeta = {
-  title: "Combien coûte un site internet en 2026 ?",
+  title: "Combien coûte un site vitrine en 2026 ?",
   description:
-    "Prix d'un site internet en 2026 : site vitrine, e-commerce, refonte, coûts récurrents. Les fourchettes réelles et ce qui fait varier la facture.",
+    "Prix d'un site vitrine en 2026 : fourchettes réelles, e-commerce, refonte et coûts récurrents. Ce qui fait varier la facture, poste par poste.",
 };
 
 export const aeo = {

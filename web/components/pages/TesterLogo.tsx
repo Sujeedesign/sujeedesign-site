@@ -6,7 +6,7 @@ import styles from "./TesterLogo.module.css";
 import { CoverFigure } from "./CoverFigure";
 
 export const pageMeta = {
-  title: "Générateur de favicon et test de logo",
+  title: "Générateur de favicon gratuit et test de logo",
   description:
     "Transformez votre logo en favicon prêt à installer : .ico, PNG de 16 à 512 px, apple-touch et manifest, dans un zip. Gratuit, sans envoi de fichier.",
 };

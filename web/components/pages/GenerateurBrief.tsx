@@ -7,12 +7,17 @@ import styles from "./GenerateurBrief.module.css";
 import { CoverFigure } from "./CoverFigure";
 
 export const pageMeta = {
-  title: "Générateur de brief logo et identité",
+  title: "Brief créatif : générateur en 10 questions",
   description:
-    "Dix questions, quatre minutes, un brief imprimable en PDF. Ce qu'un studio doit savoir avant de dessiner, et les erreurs qui coûtent un aller-retour.",
+    "Brief créatif en dix questions : positionnement, cible, ton, contraintes. Un document imprimable en PDF, à envoyer à un studio ou à un graphiste.",
 };
 
 export const faqItems = [
+  {
+    question: "Qu'est-ce qu'un brief créatif ?",
+    answer:
+      "C'est le document qui dit au studio ce que la marque doit exprimer avant qu'un seul trait soit dessiné : l'activité, la promesse, les clients, les concurrents, le ton et les contraintes. Sans lui, le graphiste dessine au hasard et le projet coûte un ou deux allers-retours de plus.",
+  },
   {
     question: "Faut-il remplir toutes les questions ?",
     answer:
@@ -89,7 +94,7 @@ export function GenerateurBrief() {
               de <span className={styles.accent}>brief</span> identité
             </h1>
             <p className="intro">
-              Dix questions, quatre minutes, un brief que vous pouvez imprimer en PDF. Le même
+              Dix questions, quatre minutes, un brief créatif que vous pouvez imprimer en PDF. Le même
               document sert à demander un devis, à comparer deux studios, ou à cadrer un projet que
               vous ferez vous-même.
             </p>

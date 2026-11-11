@@ -5,9 +5,9 @@ import styles from "./GuidePrixLogo.module.css";
 import { CoverFigure } from "./CoverFigure";
 
 export const pageMeta = {
-  title: "Combien coûte un logo en 2026 ? Prix et tarifs",
+  title: "Combien coûte un logo professionnel en 2026 ?",
   description:
-    "Prix d'un logo en 2026 : les fourchettes réelles de 40 à 6 000 €, ce que change chaque palier, et la différence avec une identité visuelle complète.",
+    "Prix d'un logo professionnel en 2026 : fourchettes réelles de 40 à 6 000 €, ce que change chaque palier, et l'écart avec une identité visuelle complète.",
 };
 
 /**
@@ -241,7 +241,7 @@ export function GuidePrixLogo() {
               un <span className={styles.accent}>logo</span> ?
             </h1>
             <p className="intro">
-              Un logo se vend entre 40 € et 6 000 €. Ce n&apos;est pas le même produit, ni le
+              Un logo professionnel se vend entre 40 € et 6 000 €. Ce n&apos;est pas le même produit, ni le
               même travail, ni le même usage. Voici les paliers observés sur le marché français
               en novembre 2026, ce qu&apos;on y trouve, ce qui manque en bas de l&apos;échelle,
               et les prix pratiqués ici.

@@ -12,9 +12,9 @@ import { routes, serviceHref } from "@/lib/routes";
 import styles from "./TestContraste.module.css";
 
 export const pageMeta = {
-  title: "Test de contraste de couleurs WCAG",
+  title: "Test de contraste couleurs WCAG AA et AAA",
   description:
-    "Vérifiez le contraste entre deux couleurs, avec les seuils WCAG AA et AAA, la simulation de daltonisme et un correctif proposé. Gratuit, sans inscription.",
+    "Testez le contraste entre deux couleurs : seuils WCAG AA et AAA, simulation de daltonisme, correctif qui garde la teinte. Gratuit, sans inscription.",
 };
 
 const SOMMAIRE = [
