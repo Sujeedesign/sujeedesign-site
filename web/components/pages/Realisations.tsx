@@ -109,16 +109,9 @@ export function Realisations({ doc, projects }: { doc?: PageDoc; projects: Proje
                   className="rl-p__img"
                   loading={i < 2 ? "eager" : "lazy"}
                 />
-                <span className="rl-scene__word" aria-hidden="true">
-                  {project.index}
-                </span>
                 {/* haut : type de projet à gauche, client et année à droite */}
                 <div className="rl-p__top">
-                  <p className="rl-p__type">
-                    <span className="rl-p__n">{project.index}</span>
-                    {" / "}
-                    {project.disciplines.join(" · ")}
-                  </p>
+                  <p className="rl-p__type">{project.disciplines.join(" · ")}</p>
                   <p className="rl-p__client">
                     {project.client}
                     {project.year ? ` ${project.year}` : ""}
