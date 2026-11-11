@@ -518,7 +518,9 @@ def test_horaires_inventes_remplaces_par_une_phrase_neutre(conn):
 
     message = "".join(e["text"] for e in events if e.get("type") == "delta")
     assert "septembre" not in message
-    assert "créneaux" in message
+    # Pas de promesse creuse : on demande l'information suivante.
+    assert "agenda" not in message
+    assert message.rstrip().endswith("?")
 
 
 def _session_avec_creneaux(conn, google):
@@ -1006,3 +1008,12 @@ def test_le_remplacement_reste_dans_le_sujet_du_visiteur():
     )
     assert "packaging" in sortie.lower()
     assert "3 200 à 5 000 €" in sortie
+
+
+def test_le_prix_demande_est_toujours_annonce_avant_l_appel():
+    """Un prix demandé et renvoyé à l'appel est une esquive : le prompt l'interdit."""
+    from app.agent.prompt import build_system_prompt
+
+    prompt = build_system_prompt()
+    assert "Renvoyer un prix demandé à l'appel" in prompt
+    assert "n'annonce jamais que tu vérifies l'agenda" in prompt

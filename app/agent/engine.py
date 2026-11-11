@@ -210,9 +210,10 @@ def turn(
         if not server_led and _fake_slots(answer) and not toolbox.booking:
             # Le modèle invente parfois des horaires alors que rien n'est
             # affiché : on ne laisse pas passer de faux créneaux.
-            answer = (
-                "Laissez-moi vérifier l'agenda, je vous propose les créneaux "
-                "réels dans un instant."
+            # On enchaîne sur la prochaine information manquante plutôt que de
+            # promettre des créneaux qu'aucun outil n'a encore ouverts.
+            answer = "Je ne donne pas d'horaires au hasard. " + _question_for(
+                store.session_fields(row_now) if row_now else {}
             )
         for chunk in _chunks(answer):
             yield {"type": "delta", "text": chunk}
