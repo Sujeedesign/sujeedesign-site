@@ -2,13 +2,13 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import Faq from "@/components/Faq";
 import { GuideVideo } from "./GuideVideo";
-import { routes, serviceHref } from "@/lib/routes";
+import { routes, realisationPath, serviceHref } from "@/lib/routes";
 import styles from "./GuideTendances2027.module.css";
 
 export const pageMeta = {
-  title: "Tendances web design 2027 : 8 signaux à suivre",
+  title: "Tendances design graphique 2027 : 8 signaux à suivre",
   description:
-    "Huit tendances web design 2027 passées au filtre du réel : ce que les sites de référence font déjà, ce que ça coûte, et ce qu'il vaut mieux ignorer.",
+    "Tendances design graphique et web 2027 filtrées par le réel : typographie, couleur, logo, coûts. Ce que les sites de référence font déjà, ce qu'on ignore.",
 };
 
 /**
@@ -17,7 +17,7 @@ export const pageMeta = {
  * jamais y introduire un chiffre ou une promesse absente du texte plus bas.
  */
 export const aeo = {
-  question: "Quelles tendances web design compter en 2027 ?",
+  question: "Quelles tendances design graphique compter en 2027 ?",
   answer:
     "Huit signaux dominent : une seule police à très grande échelle, une couleur d'accent franche, une mise en page éditoriale, un mode sombre pensé comme un système, un motion discret, la 3D réservée aux projets qui la justifient, l'IA dans la production et une preuve humaine visible. Trois sont rentables pour une PME : la typographie, la couleur et la vitesse.",
 };
@@ -64,6 +64,7 @@ const SOMMAIRE = [
   { href: "#trois-d", label: "6. La 3D au devis" },
   { href: "#ia", label: "7. L’IA dans le process" },
   { href: "#preuve", label: "8. La preuve humaine" },
+  { href: "#logo", label: "Et le logo ?" },
   { href: "#chiffres", label: "Les chiffres" },
   { href: "#ignorer", label: "Ce qu’on ignore" },
   { href: "#decider", label: "Comment décider" },
@@ -100,7 +101,7 @@ export function GuideTendances2027() {
           <div className="page-head">
             <p className="kick">Guides</p>
             <h1 className={styles.titre}>
-              Tendances web design
+              Tendances design graphique
               <br />
               <span className={styles.accent}>2027</span> : huit signaux,
               <br />
@@ -112,7 +113,8 @@ export function GuideTendances2027() {
                 qu&apos;il vaut mieux ignorer quand on tient un budget.
               </p>
               <p className={styles.byline}>
-                Par Sujeepan Sabesan · 10 novembre 2026 · 13 min de lecture
+                Par Sujeepan Sabesan · 10 novembre 2026, mis à jour le 11 novembre 2026 · 13
+                min de lecture
               </p>
             </div>
           </div>
@@ -585,6 +587,38 @@ export function GuideTendances2027() {
                   À éviter : simuler l&apos;authenticité. Faux grain, fausse écriture
                   manuscrite, photos « spontanées » achetées en banque d&apos;images. Le
                   résultat est exactement l&apos;inverse de l&apos;effet recherché.
+                </p>
+
+                <h2 id="logo">Et le logo, dans tout ça ?</h2>
+                <p>
+                  La tendance logo 2027 se lit exactement comme les sections précédentes. Le
+                  signe suit la page : moins de détails, une seule couleur d&apos;accent, et
+                  une typographie qui vient du site plutôt que d&apos;un dessin séparé. Le
+                  test reste celui de la police numéro un : est-ce que ça tient à 24 px, en
+                  favicon, en avatar et en tampon ?
+                </p>
+                <p>
+                  Trois décisions suffisent. Un signe lisible réduit à la taille d&apos;une
+                  icône d&apos;onglet. Une version monochrome qui reste nette sur photo, sur
+                  fond sombre et en impression une couleur. Et une règle de respiration
+                  écrite, pour que le logo ne soit jamais collé au bord ni noyé dans un
+                  visuel.
+                </p>
+                <p>
+                  Ce qui se retourne contre vous, c&apos;est le surplus : dégradés, effets de
+                  volume, ombres portées, lettres minuscules. Tout ce qui disparaît à la
+                  première réduction ne fait pas partie du logo, seulement de sa
+                  présentation. Le budget part d&apos;abord dans la simplicité du signe et la
+                  cohérence des déclinaisons, pas dans la complexité du dessin.
+                </p>
+                <p>
+                  Pour creuser :{" "}
+                  <Link href={serviceHref("identite-de-marque")}>
+                    notre offre identité de marque
+                  </Link>
+                  , <Link href={realisationPath("logofolio")}>les logos du studio</Link>, ou
+                  directement le{" "}
+                  <Link href={routes.testerSonLogo}>test de lisibilité de votre logo</Link>.
                 </p>
 
                 <h2 id="chiffres">Les cinq chiffres à retenir</h2>
