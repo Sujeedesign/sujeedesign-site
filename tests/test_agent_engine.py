@@ -387,7 +387,8 @@ def test_panne_du_modele_ne_coupe_pas_la_conversation(conn):
     events = _collect(conn, session_id, "Bonjour", PanneLLM(), google)
     assert not [e for e in events if e.get("type") == "error"]
     texte = "".join(e["text"] for e in events if e.get("type") == "delta").strip()
-    assert "type de projet" in texte.lower()
+    # Le visiteur reçoit une porte de sortie concrète, pas une boucle de formulaire.
+    assert "contact@sujeedesign.com" in texte
 
 
 def test_message_hors_sujet_recoit_toujours_une_phrase(conn):
@@ -1073,4 +1074,25 @@ def test_la_reponse_du_modele_n_est_pas_effacee_par_la_question_suivante(conn):
 
     message = "".join(e["text"] for e in events if e.get("type") == "delta")
     assert "800 à 1 500" in message
+    assert "Bien reçu" not in message
+
+
+def test_panne_du_modele_ne_repete_pas_la_meme_question(conn):
+    """Fournisseur muet : on propose une porte de sortie, pas une boucle sèche."""
+    from app.agent.llm import LLMError
+
+    class BrokenLLM:
+        def stream(self, *args, **kwargs):
+            raise LLMError("provider 429")
+            yield  # pragma: no cover
+
+        def close(self):
+            pass
+
+    google = FakeGoogle(available=[])
+    session_id = engine.prepare_session(conn)
+    events = _collect(conn, session_id, "Combien coûte un logo ?", BrokenLLM(), google)
+
+    message = "".join(e["text"] for e in events if e.get("type") == "delta")
+    assert "contact@sujeedesign.com" in message
     assert "Bien reçu" not in message

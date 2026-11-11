@@ -95,6 +95,7 @@ def turn(
     toolbox.events = []
     messages.extend(pre)
     answer = ""
+    panne = False
     pending = ""
     # Choix d'un créneau déjà proposé : seule mécanique encore déterministe,
     # parce qu'elle touche à la réservation réelle. Le reste de la
@@ -126,6 +127,7 @@ def turn(
             # Panne du fournisseur : on continue en mode serveur plutôt que de
             # laisser le visiteur devant une conversation morte.
             print(f"agent: modèle indisponible · {error}")
+            panne = True
             answer = ""
             break
         if output is None:
@@ -193,6 +195,10 @@ def turn(
         if final is not None:
             answer = _clean(final.text) or pending
 
+    if not answer.strip() and panne:
+        # Fournisseur muet : plutôt que de réciter la même question de formulaire,
+        # on donne une porte de sortie utile au visiteur.
+        answer = _PANNE_ANSWER
     if not answer.strip():
         # Ni chemin serveur ni modèle : on ne laisse jamais le visiteur sans réponse.
         answer = _fallback_answer(store.get_session(conn, session_id), message)
@@ -370,6 +376,13 @@ _AUTRE_PRENOM = re.compile(r"\bRaj\b", re.IGNORECASE)
 def _sans_autre_prenom(text: str) -> str:
     """Filet de sécurité : le visiteur ne lit jamais un prénom autre que Sujee."""
     return _AUTRE_PRENOM.sub("Sujee", text)
+
+
+_PANNE_ANSWER = (
+    "Je n'arrive pas à vous répondre correctement à l'instant. "
+    "Le plus simple : écrivez-moi sur contact@sujeedesign.com avec deux lignes sur votre projet, "
+    "Sujee revient vers vous avec une fourchette et un créneau d'appel."
+)
 
 
 def _fallback_answer(row: Any, message: str) -> str:

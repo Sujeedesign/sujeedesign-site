@@ -34,6 +34,15 @@ def _retry_delay(response: httpx.Response) -> float:
     return max(1.0, min(delay, 20.0))
 
 
+def fallback_endpoint() -> str:
+    """Fournisseur de secours, utilisé seulement si le principal refuse le tour."""
+    return os.environ.get("AGENT_LLM_FALLBACK_URL") or MISTRAL_URL
+
+
+def fallback_model() -> str:
+    return os.environ.get("AGENT_FALLBACK_MODEL") or FALLBACK_MODEL
+
+
 def configured_key(url: str) -> str:
     """Clé adaptée au fournisseur visé.
 
@@ -112,11 +121,40 @@ class MistralClient:
         tools: list[dict[str, Any]],
         model: str | None = None,
     ) -> Iterator[dict[str, Any]]:
-        """Génère `{"delta": str}` au fil de l'eau puis un unique `{"done": TurnOutput}`."""
+        """Génère `{"delta": str}` au fil de l'eau puis un unique `{"done": TurnOutput}`.
+
+        Le fournisseur principal (Gemini en prod) peut refuser pour quota épuisé :
+        dans ce cas seulement, et si aucun texte n'a déjà été envoyé au visiteur,
+        on rejoue le tour entier sur le fournisseur de secours.
+        """
         if not self.api_key:
             raise LLMError("Clé Mistral absente")
+        target = model or self.model
+        seen: list[str] = []
+        primary = endpoint()
+        try:
+            yield from self._stream_from(primary, self.api_key, target, messages, tools, seen)
+        except LLMError as error:
+            backup = fallback_endpoint()
+            backup_key = configured_key(backup)
+            if seen or not backup_key or backup == primary:
+                raise
+            print(f"agent: fournisseur principal indisponible, bascule de secours · {error}")
+            yield from self._stream_from(
+                backup, backup_key, fallback_model(), messages, tools, seen
+            )
+
+    def _stream_from(
+        self,
+        url: str,
+        api_key: str,
+        model: str,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        seen: list[str],
+    ) -> Iterator[dict[str, Any]]:
         payload: dict[str, Any] = {
-            "model": model or self.model,
+            "model": model,
             "messages": messages,
             "temperature": 0.3,
             "max_tokens": 700,
@@ -125,14 +163,14 @@ class MistralClient:
         if tools:
             payload["tools"] = tools
             payload["tool_choice"] = "auto"
-        headers = {"Authorization": f"Bearer {self.api_key}", "Accept": "text/event-stream"}
+        headers = {"Authorization": f"Bearer {api_key}", "Accept": "text/event-stream"}
 
-        output = TurnOutput(model=payload["model"])
+        output = TurnOutput(model=model)
         chunks: dict[int, dict[str, Any]] = {}
         try:
             done = False
             for attempt in range(RETRY_STATUSES_MAX_ATTEMPTS):
-                with self._client.stream("POST", endpoint(), json=payload, headers=headers) as response:
+                with self._client.stream("POST", url, json=payload, headers=headers) as response:
                     if response.status_code in RETRYABLE_STATUSES and attempt + 1 < RETRY_STATUSES_MAX_ATTEMPTS:
                         response.read()
                         time.sleep(_retry_delay(response))
@@ -160,6 +198,7 @@ class MistralClient:
                                 text = "".join(str(part.get("text", "")) for part in text if isinstance(part, dict))
                             if text:
                                 output.text += str(text)
+                                seen.append(str(text))
                                 yield {"delta": str(text)}
                             for call in delta.get("tool_calls") or []:
                                 index = int(call.get("index", 0))
