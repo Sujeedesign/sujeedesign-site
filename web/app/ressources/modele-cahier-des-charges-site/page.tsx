@@ -35,8 +35,8 @@ export default function Page() {
             PATH,
             pageMeta.title,
             pageMeta.description,
-            "2026-11-10T10:00:00+01:00",
-            "2026-11-10T10:00:00+01:00",
+            "2026-11-11T10:00:00+01:00",
+            "2026-11-11T10:00:00+01:00",
           ),
           // L'« En bref » est visible en haut de page : il ouvre le FAQPage.
           faqNode(PATH, [aeo, ...faqItems]),

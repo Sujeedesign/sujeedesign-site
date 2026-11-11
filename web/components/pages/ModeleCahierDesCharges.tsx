@@ -12,7 +12,7 @@ import { CoverFigure } from "./CoverFigure";
  * prestataire. Aucun e-mail demandé, ce qui est aussi un argument.
  */
 export const pageMeta = {
-  title: "Cahier des charges de site : le modèle à remplir",
+  title: "Cahier des charges de site : le modèle DOCX",
   description:
     "Un modèle de cahier des charges de site internet en douze blocs, avec les questions qui évitent les devis flous. DOCX et PDF, sans inscription.",
 };
