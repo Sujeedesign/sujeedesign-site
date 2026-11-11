@@ -1064,7 +1064,13 @@ def _qualification_question(
         store.touch(toolbox.conn, toolbox.session_id, pending=nxt)
     if _asks_field(answer, nxt):
         return answer
-    return _question_for(fields)
+    # Le modèle a répondu et posé sa propre question : on ne l'efface pas pour
+    # réciter la question suivante. Le champ manquant sera repris au tour d'après.
+    if "?" in (answer or ""):
+        return answer
+    if not (answer or "").strip():
+        return _question_for(fields)
+    return f"{answer.rstrip()} {_question_for(fields)}"
 
 
 _ASKS_FIELD = {

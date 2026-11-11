@@ -1052,3 +1052,25 @@ def test_la_question_du_creneau_n_est_pas_rabachee(conn):
     message = "".join(e["text"] for e in events if e.get("type") == "delta")
     assert "pas de tarif public" in message and "800 à 1 500" in message
     assert not any(e.get("type") == "moment" for e in events)
+
+
+def test_la_reponse_du_modele_n_est_pas_effacee_par_la_question_suivante(conn):
+    """Le formulaire ne doit pas remplacer une vraie réponse commerciale."""
+    google = FakeGoogle(available=[])
+    session_id = engine.prepare_session(conn)
+
+    llm = FakeLLM(
+        [[
+            TurnOutput(
+                text=(
+                    "Pour un logo, comptez 800 à 1 500 €. "
+                    "Vous avez déjà une piste de nom pour la marque ?"
+                )
+            )
+        ]]
+    )
+    events = _collect(conn, session_id, "Combien coûte un logo ?", llm, google)
+
+    message = "".join(e["text"] for e in events if e.get("type") == "delta")
+    assert "800 à 1 500" in message
+    assert "Bien reçu" not in message
