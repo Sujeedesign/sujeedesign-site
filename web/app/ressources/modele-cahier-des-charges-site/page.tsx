@@ -7,6 +7,7 @@ import {
 } from "@/components/pages/ModeleCahierDesCharges";
 import { JsonLd } from "@/components/site/JsonLd";
 import { PageShell } from "@/components/site/PageShell";
+import { FloatingCta } from "@/components/site/FloatingCta";
 import { pageMetadata } from "@/lib/page-metadata";
 import { routes } from "@/lib/routes";
 import {
@@ -50,6 +51,14 @@ export default function Page() {
       <main id="main">
         <ModeleCahierDesCharges />
       </main>
+
+      <FloatingCta
+        sujet="Ressource · Cahier des charges"
+        titre="Le document est rempli, passons au site"
+        texte="Un cahier des charges clair, c'est déjà la moitié du projet. On cadre le périmètre, le budget et le calendrier de votre site."
+        libelle="Cadrer mon site"
+        projet="site"
+      />
     </PageShell>
   );
 }

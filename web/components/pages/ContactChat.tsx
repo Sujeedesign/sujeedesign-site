@@ -40,6 +40,25 @@ const PROJECT_TYPES = [
   "Autre",
 ];
 
+// Amorces envoyées depuis un appel à l'action contextuel (/?projet=…).
+const PROJET_AMORCES: Record<string, { type: string; message: string }> = {
+  logo: {
+    type: "Identité de marque",
+    message:
+      "Bonjour, je viens de votre guide sur le prix d'un logo et je souhaite faire créer un logo pour mon activité.",
+  },
+  identite: {
+    type: "Identité de marque",
+    message:
+      "Bonjour, je viens de vos ressources sur l'identité de marque et je souhaite lancer mon projet d'identité.",
+  },
+  site: {
+    type: "Site web ou e-commerce",
+    message:
+      "Bonjour, je viens de vos ressources sur les sites web et je souhaite créer un site pour mon activité.",
+  },
+};
+
 const WELCOME =
   "Bonjour, je suis l'assistant de Sujee. Trois questions suffisent, puis je vous ouvre un créneau d'appel de 30 minutes. Quel type de projet avez-vous en tête ?";
 
@@ -89,12 +108,15 @@ export default function ContactChat() {
   const logRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const reprisRef = useRef(false);
+  const amorceRef = useRef(false);
 
   // Reprise de la conversation après un rechargement de page.
   useEffect(() => {
     try {
       const raw = sessionStorage.getItem(STORAGE_KEY);
       if (!raw) return;
+      reprisRef.current = true;
       const saved = JSON.parse(raw) as {
         sessionId?: string;
         messages?: Message[];
@@ -290,6 +312,23 @@ export default function ContactChat() {
   );
 
   useEffect(() => () => abortRef.current?.abort(), []);
+
+  // Arrivée depuis un appel à l'action contextuel : la conversation démarre sur le bon sujet.
+  useEffect(() => {
+    if (amorceRef.current) return;
+    amorceRef.current = true;
+    if (reprisRef.current) return;
+    let projet = "";
+    try {
+      projet = new URLSearchParams(window.location.search).get("projet") ?? "";
+    } catch {
+      return;
+    }
+    const amorce = PROJET_AMORCES[projet];
+    if (!amorce) return;
+    setLead((prev) => ({ ...prev, project_type: amorce.type }));
+    void send(amorce.message);
+  }, [send]);
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -617,7 +656,7 @@ export default function ContactChat() {
                     <span>Type de projet</span>
                     <select
                       name="project_type"
-                      defaultValue=""
+                      value={lead.project_type}
                       onChange={(event) => setLead({ ...lead, project_type: event.target.value })}
                     >
                       <option value="">Choisir</option>

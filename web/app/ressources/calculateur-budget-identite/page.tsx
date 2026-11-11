@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { CalculateurBudget, faqItems, pageMeta } from "@/components/pages/CalculateurBudget";
 import { JsonLd } from "@/components/site/JsonLd";
 import { PageShell } from "@/components/site/PageShell";
+import { FloatingCta } from "@/components/site/FloatingCta";
 import { pageMetadata } from "@/lib/page-metadata";
 import { routes } from "@/lib/routes";
 import {
@@ -34,6 +35,14 @@ export default function Page() {
       <main id="main">
         <CalculateurBudget />
       </main>
+
+      <FloatingCta
+        sujet="Ressource · Budget identité"
+        titre="Votre budget identité, au réel"
+        texte="Le calculateur donne un ordre de grandeur. Un devis, lui, tient compte de votre marché, de vos supports et de votre calendrier."
+        libelle="Parler de mon identité"
+        projet="identite"
+      />
     </PageShell>
   );
 }

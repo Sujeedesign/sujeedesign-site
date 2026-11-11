@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { GuidePrixSite, aeo, faqItems, pageMeta } from "@/components/pages/GuidePrixSite";
 import { JsonLd } from "@/components/site/JsonLd";
 import { PageShell } from "@/components/site/PageShell";
+import { FloatingCta } from "@/components/site/FloatingCta";
 import { pageMetadata } from "@/lib/page-metadata";
 import { routes } from "@/lib/routes";
 import {
@@ -45,6 +46,14 @@ export default function Page() {
       <main id="main">
         <GuidePrixSite />
       </main>
+
+      <FloatingCta
+        sujet="Guide · Prix d'un site"
+        titre="Un site au bon périmètre"
+        texte="Le prix dépend du contenu, des fonctionnalités et du suivi. On définit ensemble ce qui est indispensable, et ce qui peut attendre."
+        libelle="Cadrer mon site"
+        projet="site"
+      />
     </PageShell>
   );
 }

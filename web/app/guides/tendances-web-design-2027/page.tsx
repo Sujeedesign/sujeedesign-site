@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { GuideTendances2027, aeo, faqItems, pageMeta } from "@/components/pages/GuideTendances2027";
 import { JsonLd } from "@/components/site/JsonLd";
 import { PageShell } from "@/components/site/PageShell";
+import { FloatingCta } from "@/components/site/FloatingCta";
 import { pageMetadata } from "@/lib/page-metadata";
 import { routes } from "@/lib/routes";
 import {
@@ -45,6 +46,14 @@ export default function Page() {
       <main id="main">
         <GuideTendances2027 />
       </main>
+
+      <FloatingCta
+        sujet="Guide · Tendances 2027"
+        titre="Appliquer ces tendances à votre marque"
+        texte="Repérer une tendance, c'est facile. L'intégrer sans dater votre marque, c'est notre métier. Parlons de votre refonte."
+        libelle="Moderniser ma marque"
+        projet="identite"
+      />
     </PageShell>
   );
 }

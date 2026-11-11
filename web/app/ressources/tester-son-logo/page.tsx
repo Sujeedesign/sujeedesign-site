@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { TesterLogo, faqItems, pageMeta } from "@/components/pages/TesterLogo";
 import { JsonLd } from "@/components/site/JsonLd";
 import { PageShell } from "@/components/site/PageShell";
+import { FloatingCta } from "@/components/site/FloatingCta";
 import { pageMetadata } from "@/lib/page-metadata";
 import { routes } from "@/lib/routes";
 import {
@@ -42,6 +43,14 @@ export default function Page() {
       <main id="main">
         <TesterLogo />
       </main>
+
+      <FloatingCta
+        sujet="Ressource · Test de logo"
+        titre="Votre logo tient-il la route ?"
+        texte="Lisibilité, favicon, versions monochromes : on passe votre logo en revue et on vous dit ce qu'il faut corriger, ou refaire."
+        libelle="Faire relire mon logo"
+        projet="logo"
+      />
     </PageShell>
   );
 }

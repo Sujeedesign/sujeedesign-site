@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { GenerateurBrief, faqItems, pageMeta } from "@/components/pages/GenerateurBrief";
 import { JsonLd } from "@/components/site/JsonLd";
 import { PageShell } from "@/components/site/PageShell";
+import { FloatingCta } from "@/components/site/FloatingCta";
 import { pageMetadata } from "@/lib/page-metadata";
 import { routes } from "@/lib/routes";
 import {
@@ -34,6 +35,14 @@ export default function Page() {
       <main id="main">
         <GenerateurBrief />
       </main>
+
+      <FloatingCta
+        sujet="Ressource · Brief d'identité"
+        titre="Du brief rempli à l'identité livrée"
+        texte="Votre brief est prêt. On le relit ensemble et on le transforme en direction artistique, puis en fichiers utilisables."
+        libelle="Créer mon identité"
+        projet="identite"
+      />
     </PageShell>
   );
 }

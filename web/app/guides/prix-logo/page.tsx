@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { GuidePrixLogo, aeo, faqItems, pageMeta } from "@/components/pages/GuidePrixLogo";
 import { JsonLd } from "@/components/site/JsonLd";
 import { PageShell } from "@/components/site/PageShell";
+import { FloatingCta } from "@/components/site/FloatingCta";
 import { pageMetadata } from "@/lib/page-metadata";
 import { routes } from "@/lib/routes";
 import {
@@ -41,6 +42,14 @@ export default function Page() {
       <main id="main">
         <GuidePrixLogo />
       </main>
+
+      <FloatingCta
+        sujet="Guide · Prix du logo"
+        titre="Votre logo, chiffré pour vous"
+        texte="Le guide donne les fourchettes. Votre cas mérite un devis précis : un tarif ferme, un calendrier et des livrables définis."
+        libelle="Créer mon logo"
+        projet="logo"
+      />
     </PageShell>
   );
 }
