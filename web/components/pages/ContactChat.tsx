@@ -495,12 +495,14 @@ export default function ContactChat() {
                 <span>{busy ? "écrit…" : mode === "form" ? "formulaire direct" : mode === "checking" ? "…" : "en ligne"}</span>
               </span>
             </div>
-            <div className={styles.meter} aria-hidden="true">
-              <span className={styles.meterLabel}>{progress}%</span>
-              <span className={styles.meterTrack}>
-                <span className={styles.meterFill} style={{ transform: `scaleX(${progress / 100})` }} />
-              </span>
-            </div>
+            {mode !== "form" && (
+              <div className={styles.meter} aria-hidden="true">
+                <span className={styles.meterLabel}>{progress}%</span>
+                <span className={styles.meterTrack}>
+                  <span className={styles.meterFill} style={{ transform: `scaleX(${progress / 100})` }} />
+                </span>
+              </div>
+            )}
           </header>
 
           {mode === "form" && (
