@@ -5,7 +5,7 @@ import styles from "./RessourcesHub.module.css";
 export const pageMeta = {
   title: "Ressources gratuites : guides de prix et outils",
   description:
-    "Six outils gratuits pour cadrer un projet avant le devis : guides de prix, calculateur, test de logo, brief et cahier des charges. Sans inscription.",
+    "Sept outils gratuits pour cadrer un projet avant le devis : guides de prix, calculateur, test de logo, contraste, brief et cahier des charges. Sans inscription.",
 };
 
 type Cover =
@@ -64,7 +64,7 @@ const BUDGET: Entree[] = [
   },
 ];
 
-/** Trois pages pour préparer et vérifier. */
+/** Quatre pages pour préparer et vérifier. */
 const PREPARER: Entree[] = [
   {
     href: routes.testerSonLogo,
@@ -78,8 +78,19 @@ const PREPARER: Entree[] = [
     alt: "Tablette et téléphone affichant un diagnostic de logo, sur un bureau.",
   },
   {
-    href: routes.generateurBriefIdentite,
+    href: routes.testContraste,
     num: "05",
+    kind: "Vérificateur",
+    title: "Test de contraste WCAG",
+    text:
+      "Deux couleurs, un rapport, les seuils AA et AAA, et la simulation de daltonisme. Sans inscription.",
+    more: "Vérifier un contraste",
+    cover: "identite-visuelle",
+    alt: "Nuancier de couleurs et échantillons typographiques posés sur un bureau de studio.",
+  },
+  {
+    href: routes.generateurBriefIdentite,
+    num: "06",
     kind: "Outil",
     title: "Générateur de brief identité",
     text:
@@ -90,7 +101,7 @@ const PREPARER: Entree[] = [
   },
   {
     href: routes.modeleCahierDesCharges,
-    num: "06",
+    num: "07",
     kind: "Modèle",
     title: "Cahier des charges de site",
     text:

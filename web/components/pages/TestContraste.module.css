@@ -1,0 +1,30 @@
+/* Mise en page : même grille éditoriale que les autres pages ressources.
+   Les tableaux et la typographie du corps viennent de public/assets/article.css ;
+   on ne redéfinit ici que la colonne et l'accent du titre. */
+
+.conteneur {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.conteneur > * {
+  min-width: 0;
+}
+
+.legalInner > * {
+  min-width: 0;
+}
+
+.titre {
+  letter-spacing: var(--ds-track);
+}
+
+.accent {
+  color: var(--accent);
+}
+
+/* Colonne de valeurs : chiffres alignés, jamais coupés. */
+.price {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}

@@ -112,6 +112,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.8,
     },
+    {
+      url: `${SITE_URL}${routes.testContraste}`,
+      lastModified: pageUpdated(routes.testContraste),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
   ];
 
   const services: MetadataRoute.Sitemap = serviceSlugs.map((slug) => ({

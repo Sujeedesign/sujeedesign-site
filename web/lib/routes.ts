@@ -29,6 +29,8 @@ export const routes = {
   generateurBriefIdentite: "/ressources/generateur-brief-identite",
   /** Test de logo : lisibilité, contraste, un seul ton. */
   testerSonLogo: "/ressources/tester-son-logo",
+  /** Vérificateur de contraste WCAG entre deux couleurs. */
+  testContraste: "/ressources/test-contraste-couleur",
 } as const;
 
 /** Slugs des cinq services, dans l'ordre éditorial 01 → 05. */

@@ -47,6 +47,7 @@ export const PAGE_UPDATED = {
   [routes.guideTendances2027]: "2026-11-11",
   [routes.generateurBriefIdentite]: "2026-11-03",
   [routes.testerSonLogo]: "2026-11-03",
+  [routes.testContraste]: "2026-11-11",
 } satisfies Record<(typeof routes)[keyof typeof routes], IsoDay>;
 
 /** Slug de service qui possède sa propre fiche dans `/services/`. */

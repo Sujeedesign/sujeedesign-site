@@ -167,6 +167,12 @@ export function TesterLogo() {
                   ne le sauvera : c&apos;est le dessin qu&apos;il faut reprendre.
                 </p>
 
+                <p>
+                  Pour les couleurs de la marque elle-même, le{" "}
+                  <Link href={routes.testContraste}>test de contraste WCAG</Link> donne le rapport
+                  exact et propose un ton conforme sans changer la teinte.
+                </p>
+
                 <h2 id="tests">Les trois tests qui comptent</h2>
                 <p>
                   Un logo doit survivre à trois situations qu&apos;on oublie au moment de le

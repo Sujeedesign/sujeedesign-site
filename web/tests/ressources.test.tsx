@@ -65,12 +65,12 @@ describe("hub ressources", () => {
     expect(container.querySelectorAll("h2")).toHaveLength(3);
   });
 
-  it("affiche six cartes, chacune avec sa cover", () => {
+  it("affiche sept cartes, chacune avec sa cover", () => {
     const { container } = render(<RessourcesHub />);
     const cartes = container.querySelectorAll("a[class*=card]");
-    expect(cartes).toHaveLength(6);
+    expect(cartes).toHaveLength(7);
     const images = [...container.querySelectorAll("img[src*=\"/covers/\"]")];
-    expect(images).toHaveLength(6);
+    expect(images).toHaveLength(7);
     for (const img of images) {
       expect(img.getAttribute("src")).toMatch(/^\/assets\/img\/covers\/.+-800\.webp$/);
       expect(img.getAttribute("srcset")).toContain("-1200.webp 1200w");
