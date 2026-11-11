@@ -101,6 +101,12 @@ def turn(
     # conversation est mené par le modèle.
     answer = _server_slot_turn(toolbox, store.get_session(conn, session_id), message)
     server_led = bool(answer)
+    if not answer:
+        # Demi-journée annoncée (« le matin ») : l'ouverture des créneaux ne
+        # dépend pas de la mémoire du modèle, sinon la conversation tourne en
+        # rond sur la même question.
+        answer = _server_moment_turn(toolbox, store.get_session(conn, session_id), message)
+        server_led = bool(answer)
     if answer:
         for event in toolbox.events:
             slots_shown = slots_shown or event.get("type") == "slots"
@@ -1153,6 +1159,33 @@ def _slots_answer(row: Any, moment: str = "") -> str:
         return ""
     libelles = " ; ".join(proposal["label"] for proposal in proposals[:6])
     return f"Voici les créneaux disponibles : {libelles}. Lequel vous convient ?"
+
+
+def _server_moment_turn(toolbox: ToolBox, row: Any, message: str) -> str:
+    """Demi-journée choisie avant l'écran des créneaux : le serveur ouvre le reste.
+
+    Sans ça, le modèle répète « le matin ou l'après-midi ? » sans jamais
+    appeler l'outil qui affiche les vraies disponibilités.
+    """
+    if row is None or str(row["status"] or "") == store.STATUS_BOOKED:
+        return ""
+    if str(row["step"] or "") in ("creneaux", "confirme"):
+        return ""
+    moment = slots.normalize_moment(message)
+    if not moment:
+        return ""
+    fields = store.session_fields(row)
+    missing = store.missing_fields(fields)
+    if missing:
+        # La qualification passe avant l'agenda : une question, une seule.
+        return _question_for(fields)
+    result = toolbox.call("request_slots", {"moment": moment})
+    if result.get("ok"):
+        return "Voici les créneaux qui se sont libérés. Choisissez celui qui vous arrange."
+    return (
+        "Je n'ai pas de créneau libre dans les deux prochaines semaines. "
+        "Laissez-moi votre email et Sujee vous propose un horaire par retour."
+    )
 
 
 def _server_slot_turn(toolbox: ToolBox, row: Any, message: str) -> str:

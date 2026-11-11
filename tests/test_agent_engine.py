@@ -127,16 +127,8 @@ def test_parcours_complet_jusqu_au_rendez_vous(conn):
                     )
                 ),
             ],
-            [
-                TurnOutput(
-                    text="",
-                    tool_calls=[
-                        _call("record_fields", moment="matin"),
-                        _call("request_slots", moment="matin"),
-                    ],
-                ),
-                TurnOutput(text="Voici les créneaux du matin, choisissez celui qui vous arrange."),
-            ],
+            # La demi-journée ouvre les créneaux côté serveur : le modèle n'est
+            # pas sollicité sur ce tour.
             [
                 TurnOutput(
                     text="",
@@ -1017,3 +1009,31 @@ def test_le_prix_demande_est_toujours_annonce_avant_l_appel():
     prompt = build_system_prompt()
     assert "Renvoyer un prix demandé à l'appel" in prompt
     assert "n'annonce jamais que tu vérifies l'agenda" in prompt
+
+
+def test_la_demi_journee_ouvre_les_creneaux_sans_le_modele(conn):
+    """« Le matin » doit afficher les vrais créneaux, même si le modèle se tait."""
+    google = FakeGoogle(available=[slots.candidates()[0], slots.candidates()[1]])
+    session_id = engine.prepare_session(conn)
+    store.merge_fields(conn, session_id, FIELDS)
+    llm = FakeLLM([])
+
+    events = _collect(conn, session_id, "Le matin plutôt.", llm, google)
+
+    assert any(e.get("type") == "slots" for e in events)
+    message = "".join(e["text"] for e in events if e.get("type") == "delta")
+    assert "créneaux" in message.lower()
+    assert google.asked_moment == "matin"
+
+
+def test_la_demi_journee_sans_qualification_demande_le_point_manquant(conn):
+    """Pas de créneaux tant que le projet n'est pas cadré : on demande, on n'invente pas."""
+    google = FakeGoogle(available=[slots.candidates()[0]])
+    session_id = engine.prepare_session(conn)
+    llm = FakeLLM([])
+
+    events = _collect(conn, session_id, "Le matin de préférence.", llm, google)
+
+    assert not any(e.get("type") == "slots" for e in events)
+    message = "".join(e["text"] for e in events if e.get("type") == "delta").strip()
+    assert message.endswith("?")
