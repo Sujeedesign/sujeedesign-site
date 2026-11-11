@@ -153,6 +153,12 @@
   color: #2e7d4f;
 }
 
+/* Les paragraphes héritent des couleurs choisies : `.prose p` (0,1,1) impose
+   sinon son gris aux enfants, et la mise en situation perd sa couleur de texte. */
+.wrap .preview p {
+  color: inherit;
+}
+
 .wrap .preview {
   display: grid;
   gap: 12px;
