@@ -60,6 +60,19 @@ const nextConfig: NextConfig = {
   skipTrailingSlashRedirect: true,
   async redirects() {
     return [
+      // Back office déplacé sur son propre domaine : l'apex ne sert plus aucune
+      // page d'administration, il redirige les favoris et liens hérités.
+      { source: "/admin", destination: "https://admin.sujeedesign.com/admin", permanent: true },
+      {
+        source: "/admin/:path*",
+        destination: "https://admin.sujeedesign.com/admin/:path*",
+        permanent: true,
+      },
+      {
+        source: "/static-admin/:path*",
+        destination: "https://admin.sujeedesign.com/static-admin/:path*",
+        permanent: true,
+      },
       // Ancienne URL accentuée de la proposition Polyrésine : une seule adresse
       // valide, /propositions/polyresine (sans accent).
       { source: "/propositions/polyrésine", destination: "/propositions/polyresine", permanent: true },
@@ -134,7 +147,7 @@ const nextConfig: NextConfig = {
           // ancêtre au lieu de bloquer tout iframe (ce que ferait XFO).
           {
             key: "Content-Security-Policy",
-            value: "frame-ancestors 'self' https://admin-sujeedesign.145.241.167.66.sslip.io https://sujeedesign.com",
+            value: "frame-ancestors 'self' https://admin.sujeedesign.com https://admin-sujeedesign.145.241.167.66.sslip.io https://sujeedesign.com",
           },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           {
@@ -202,41 +215,21 @@ const nextConfig: NextConfig = {
    */
   async rewrites() {
     const admin = (
-      process.env.ADMIN_ORIGIN || "https://admin-sujeedesign.145.241.167.66.sslip.io"
+      process.env.ADMIN_ORIGIN || "https://admin.sujeedesign.com"
     ).replace(/\/+$/, "");
     return {
       beforeFiles: [
-        { source: "/admin", destination: `${admin}/admin` },
-        { source: "/admin/:path*", destination: `${admin}/admin/:path*` },
+        // Le back office vit sur son propre domaine depuis le 12/11 : plus de
+        // pages ni d'assets d'administration relayés par l'apex. Les liens
+        // hérités sont redirigés (voir `redirects()`), seules les données que
+        // le site public consomme restent ici.
         { source: "/medias/:path*", destination: `${admin}/medias/:path*` },
-        { source: "/api/admin/:path*", destination: `${admin}/api/admin/:path*` },
         // Agent de contact : la page publique parle à FastAPI par la même origine.
         { source: "/api/agent/:path*", destination: `${admin}/api/agent/:path*` },
+        // Barre d'édition du site : elle interroge la session et publie.
         { source: "/api/editor/:path*", destination: `${admin}/api/editor/:path*` },
         // Suivi de consultation des propositions clients (voir app/tracking.py).
         { source: "/api/track/:path*", destination: `${admin}/api/track/:path*` },
-        // Assets du back office et de l'éditeur visuel : le site Next possède son
-        // propre dossier public/assets, on ne relaie que les fichiers qui lui
-        // manquent (voir tests/admin-proxy.test.ts).
-        { source: "/static-admin/:path*", destination: `${admin}/static-admin/:path*` },
-        { source: "/bo/assets/:path*", destination: `${admin}/bo/assets/:path*` },
-        { source: "/assets/editor/:path*", destination: `${admin}/assets/editor/:path*` },
-        { source: "/assets/projects/:path*", destination: `${admin}/assets/projects/:path*` },
-        { source: "/assets/fonts/:path*", destination: `${admin}/assets/fonts/:path*` },
-        { source: "/assets/admin.css", destination: `${admin}/assets/admin.css` },
-        { source: "/assets/admin.js", destination: `${admin}/assets/admin.js` },
-        {
-          source: "/assets/logo-sujeepan-sabesan.svg",
-          destination: `${admin}/assets/logo-sujeepan-sabesan.svg`,
-        },
-        {
-          source: "/assets/logo-sujeepan-sabesan-clair.svg",
-          destination: `${admin}/assets/logo-sujeepan-sabesan-clair.svg`,
-        },
-        {
-          source: "/assets/icon_sujeepansabesan.svg",
-          destination: `${admin}/assets/icon_sujeepansabesan.svg`,
-        },
       ],
       // Proposition N2E : page statique autonome dans `public/propositions/n2e/`.
       // Next la sert avec son extension ; cette rewrite donne l'URL propre.

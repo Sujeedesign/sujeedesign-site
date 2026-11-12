@@ -3,70 +3,68 @@ import { describe, expect, it } from "vitest";
 import nextConfig from "../next.config";
 
 /**
- * Le back office est servi par un conteneur séparé : si une rewrite disparaît,
- * `/admin` retombe sur le site Next et renvoie 404, sans erreur de build. On
- * verrouille donc le contrat ici.
+ * Depuis le 12/11, le back office est servi sur son propre domaine
+ * (`admin.sujeedesign.com`). L'apex ne doit plus relayer ses pages, ses API ni
+ * ses assets : il redirige, et n'expose que les données que le site public
+ * consomme (/medias, agent de contact, barre d'édition, suivi de propositions).
+ *
+ * Une rewrite supprimée par erreur ne casse pas le build : /admin retomberait
+ * simplement en 404. On verrouille donc le contrat ici.
  */
-describe("relais du back office", () => {
-  const build = async () => {
-    const rewrites = await nextConfig.rewrites?.();
-    if (!rewrites || Array.isArray(rewrites)) throw new Error("rewrites attendues sous forme d'objet");
-    return new Map((rewrites.beforeFiles ?? []).map((rule) => [rule.source, rule.destination]));
+describe("back office hors de l'apex", () => {
+  const rewrites = async () => {
+    const rules = await nextConfig.rewrites?.();
+    if (!rules || Array.isArray(rules)) throw new Error("rewrites attendues sous forme d'objet");
+    return new Map((rules.beforeFiles ?? []).map((rule) => [rule.source, rule.destination]));
   };
 
-  it("relaie les pages d'administration et leurs actions", async () => {
-    const rules = await build();
-    expect(rules.get("/admin")).toMatch(/\/admin$/);
-    expect(rules.get("/admin/:path*")).toMatch(/\/admin\/:path\*$/);
+  const redirects = async () => {
+    const rules = (await nextConfig.redirects?.()) ?? [];
+    return new Map(rules.map((rule) => [rule.source, rule.destination]));
+  };
+
+  it("redirige les pages d'administration vers le sous-domaine", async () => {
+    const rules = await redirects();
+    expect(rules.get("/admin")).toBe("https://admin.sujeedesign.com/admin");
+    expect(rules.get("/admin/:path*")).toBe("https://admin.sujeedesign.com/admin/:path*");
   });
 
-  it("relaie les API et médias du back office", async () => {
-    const rules = await build();
-    expect(rules.get("/api/admin/:path*")).toMatch(/\/api\/admin\/:path\*$/);
-    // L'éditeur visuel dialogue avec /api/editor (config.api dans visual_page.html).
-    expect(rules.get("/api/editor/:path*")).toMatch(/\/api\/editor\/:path\*$/);
-    expect(rules.get("/medias/:path*")).toMatch(/\/medias\/:path\*$/);
-  });
-
-  it("relaie les assets que le site ne possède pas", async () => {
-    const rules = await build();
-    for (const asset of [
+  it("ne relaie plus aucune page, API ni asset d'administration", async () => {
+    const rules = await rewrites();
+    for (const gone of [
+      "/admin",
+      "/admin/:path*",
+      "/api/admin/:path*",
       "/static-admin/:path*",
       "/bo/assets/:path*",
       "/assets/admin.css",
       "/assets/admin.js",
-      "/assets/fonts/:path*",
       "/assets/editor/:path*",
       "/assets/projects/:path*",
+      "/assets/fonts/:path*",
       "/assets/logo-sujeepan-sabesan.svg",
-      "/assets/logo-sujeepan-sabesan-clair.svg",
       "/assets/icon_sujeepansabesan.svg",
     ]) {
-      expect(rules.has(asset), asset).toBe(true);
+      expect(rules.has(gone), gone).toBe(false);
     }
   });
 
-  it("sert les feuilles du thème sous /bo/assets, pas sous /assets", async () => {
-    const rules = await build();
-    expect(rules.get("/bo/assets/:path*")).toMatch(/\/bo\/assets\/:path\*$/);
-    // site.css et site.js existent des deux côtés : le thème passe par /bo/assets
-    // pour ne jamais écraser la version Next.
-    for (const themed of ["site.css", "site.js", "site-extras.css", "site-v5.css", "site-v5.js", "contact.js"]) {
-      expect(rules.has(`/assets/${themed}`), themed).toBe(false);
+  it("garde les données consommées par le site public", async () => {
+    const rules = await rewrites();
+    for (const kept of ["/medias/:path*", "/api/agent/:path*", "/api/editor/:path*", "/api/track/:path*"]) {
+      expect(rules.has(kept), kept).toBe(true);
+      expect(rules.get(kept), kept).toContain("admin.sujeedesign.com");
     }
   });
 
   it("n'avale pas les assets propres au site", async () => {
-    const rules = await build();
+    const rules = await rewrites();
     expect(rules.has("/assets/:path*")).toBe(false);
     expect(rules.has("/assets/site.css")).toBe(false);
+    expect(rules.has("/assets/site.js")).toBe(false);
   });
 
-  /**
-   * Le back office ne doit jamais apparaître dans les résultats de recherche.
-   * robots.txt le bloque déjà, mais l'en-tête le garantit même si une page est
-   * atteinte par un lien direct, et il survit à la rewrite vers FastAPI.
-   */
+  /** Le back office ne doit jamais apparaître dans les résultats de recherche. */
   it("marque le back office en noindex", async () => {
     const rules = (await nextConfig.headers?.()) ?? [];
     for (const source of ["/admin", "/admin/:path*"]) {
@@ -75,5 +73,15 @@ describe("relais du back office", () => {
       const robots = rule?.headers.find((h) => h.key === "X-Robots-Tag");
       expect(robots?.value, source).toContain("noindex");
     }
+  });
+
+  /** L'éditeur intégré affiche le site en iframe : l'ancêtre doit être autorisé. */
+  it("autorise l'aperçu du site depuis le domaine d'administration", async () => {
+    const rules = (await nextConfig.headers?.()) ?? [];
+    const global = rules.find((r) => r.source === "/:path*");
+    const csp = global?.headers.find((h) => h.key === "Content-Security-Policy");
+    expect(csp?.value).toContain("frame-ancestors");
+    expect(csp?.value).toContain("https://admin.sujeedesign.com");
+    expect(csp?.value).not.toContain("frame-ancestors *");
   });
 });
