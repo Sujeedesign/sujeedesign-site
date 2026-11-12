@@ -59,7 +59,7 @@
           <div class="msg-actions">
             <div class="msg-links">
               <a class="btn btn-accent btn-sm" href="mailto:{{ lead.email }}?subject=Votre%20projet%20%E2%80%94%20Sujee%20Design">Répondre</a>
-              <form method="post" action="/admin/demandes/{{ lead.id }}/supprimer" data-confirm="Supprimer cette demande et libérer son créneau ?">
+              <form method="post" action="{{ base }}/demandes/{{ lead.id }}/supprimer" data-confirm="Supprimer cette demande et libérer son créneau ?">
                 <input type="hidden" name="csrf" value="{{ csrf }}">
                 <button class="btn btn-danger btn-sm" type="submit">Supprimer</button>
               </form>

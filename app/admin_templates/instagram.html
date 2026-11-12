@@ -10,7 +10,7 @@
     l'enregistrement.
   </p>
 
-  <form class="card" method="post" action="/admin/instagram/reglages">
+  <form class="card" method="post" action="{{ base }}/instagram/reglages">
     <input type="hidden" name="csrf" value="{{ csrf }}">
     <div class="form-grid">
       <label class="field"><span>Titre de la section</span>
@@ -43,7 +43,7 @@
             {% endif %}
           </div>
 
-          <form method="post" action="/admin/instagram/{{ post.id }}/modifier" enctype="multipart/form-data">
+          <form method="post" action="{{ base }}/instagram/{{ post.id }}/modifier" enctype="multipart/form-data">
             <input type="hidden" name="csrf" value="{{ csrf }}">
             <label class="field"><span>Légende</span>
               <textarea name="legende" rows="2" maxlength="600">{{ post.caption }}</textarea>
@@ -63,17 +63,17 @@
           </form>
 
           <div class="ig-admin-tools">
-            <form method="post" action="/admin/instagram/{{ post.id }}/deplacer">
+            <form method="post" action="{{ base }}/instagram/{{ post.id }}/deplacer">
               <input type="hidden" name="csrf" value="{{ csrf }}">
               <input type="hidden" name="direction" value="up">
               <button class="btn btn-ghost btn-sm" type="submit" {% if loop.first %}disabled{% endif %} aria-label="Monter">↑</button>
             </form>
-            <form method="post" action="/admin/instagram/{{ post.id }}/deplacer">
+            <form method="post" action="{{ base }}/instagram/{{ post.id }}/deplacer">
               <input type="hidden" name="csrf" value="{{ csrf }}">
               <input type="hidden" name="direction" value="down">
               <button class="btn btn-ghost btn-sm" type="submit" {% if loop.last %}disabled{% endif %} aria-label="Descendre">↓</button>
             </form>
-            <form method="post" action="/admin/instagram/{{ post.id }}/supprimer" data-confirm="Retirer ce post de la grille ?">
+            <form method="post" action="{{ base }}/instagram/{{ post.id }}/supprimer" data-confirm="Retirer ce post de la grille ?">
               <input type="hidden" name="csrf" value="{{ csrf }}">
               <button class="btn btn-danger btn-sm" type="submit">Supprimer</button>
             </form>
@@ -85,7 +85,7 @@
 
   {% set libres = slots - posts|length %}
   {% if libres > 0 %}
-    <form class="card ig-admin-add" method="post" action="/admin/instagram/ajouter" enctype="multipart/form-data">
+    <form class="card ig-admin-add" method="post" action="{{ base }}/instagram/ajouter" enctype="multipart/form-data">
       <input type="hidden" name="csrf" value="{{ csrf }}">
       <h2>Ajouter un post <span class="muted small">({{ libres }} place{{ 's' if libres > 1 else '' }} libre{{ 's' if libres > 1 else '' }})</span></h2>
       <div class="upload-drop">

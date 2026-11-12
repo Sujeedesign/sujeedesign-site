@@ -13,7 +13,7 @@
   {% endif %}
 
   {% if not inv %}
-    <form class="card" method="get" action="/admin/medias/site">
+    <form class="card" method="get" action="{{ base }}/medias/site">
       <p>Aucune analyse enregistrée pour le moment.</p>
       <input type="hidden" name="scan" value="1">
       <div class="toolbar-actions">
@@ -24,12 +24,12 @@
   {% else %}
     <div class="card">
       <div class="toolbar-actions">
-        <form method="get" action="/admin/medias/site">
+        <form method="get" action="{{ base }}/medias/site">
           <input type="hidden" name="scan" value="1">
           <button class="btn btn-ghost btn-sm" type="submit">Relancer l'analyse</button>
         </form>
         {% if inv.counts.hors_media %}
-          <form method="post" action="/admin/medias/site" data-confirm="Réintégrer ces fichiers dans la médiathèque ?">
+          <form method="post" action="{{ base }}/medias/site" data-confirm="Réintégrer ces fichiers dans la médiathèque ?">
             <input type="hidden" name="csrf" value="{{ csrf }}">
             <button class="btn btn-accent btn-sm" type="submit">Réintégrer {{ inv.counts.hors_media }} fichier(s) dans la médiathèque</button>
           </form>

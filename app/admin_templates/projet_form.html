@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ 'Nouveau projet' if mode == 'new' else projet.nom }}{% endblock %}
-{% block heading %}Catalogue <span>/</span> <a href="/admin/projets">Projets</a> <span>/</span> <b>{{ 'nouveau' if mode == 'new' else projet.slug }}</b>{% endblock %}
+{% block heading %}Catalogue <span>/</span> <a href="{{ base }}/projets">Projets</a> <span>/</span> <b>{{ 'nouveau' if mode == 'new' else projet.slug }}</b>{% endblock %}
 
 {% macro image_row(src='', alt='', w='', h='') %}
   <div class="repeat-row">
@@ -39,7 +39,7 @@
       </select>
     </label>
     <button class="btn btn-sm" type="button" data-media-apply>Utiliser ce visuel</button>
-    <a class="btn btn-ghost btn-sm" href="/admin/medias" target="_blank" rel="noopener">Importer</a>
+    <a class="btn btn-ghost btn-sm" href="{{ base }}/medias" target="_blank" rel="noopener">Importer</a>
   </div>
 {% endmacro %}
 
@@ -69,7 +69,7 @@
 {% endmacro %}
 
 {% block content %}
-<form method="post" action="/admin/projets" class="content-form">
+<form method="post" action="{{ base }}/projets" class="content-form">
   <input type="hidden" name="csrf" value="{{ csrf }}">
   {% if projet.id %}<input type="hidden" name="id" value="{{ projet.id }}">{% endif %}
 
@@ -79,7 +79,7 @@
       <p class="sub">Une étude de cas : identité, contexte, sections narrées et résultats chiffrés.</p>
     </div>
     <div class="page-actions">
-      <a class="btn btn-ghost btn-sm" href="/admin/projets">Retour</a>
+      <a class="btn btn-ghost btn-sm" href="{{ base }}/projets">Retour</a>
       <button class="btn btn-accent btn-sm" type="submit">Enregistrer</button>
     </div>
   </div>
@@ -190,7 +190,7 @@
   <div class="card-head"><h2>Versions enregistrées</h2></div>
   <p class="tiny muted">Chaque enregistrement conserve la version précédente. Restaurer remplace la fiche actuelle par cette version.</p>
   {% for revision in revisions %}
-  <form method="post" action="/admin/projets/{{ projet.id }}/restaurer/{{ revision.id }}" class="inline-form" style="display:flex;gap:10px;align-items:center;justify-content:space-between;padding:6px 0">
+  <form method="post" action="{{ base }}/projets/{{ projet.id }}/restaurer/{{ revision.id }}" class="inline-form" style="display:flex;gap:10px;align-items:center;justify-content:space-between;padding:6px 0">
     <input type="hidden" name="csrf" value="{{ csrf }}">
     <span class="tiny">{{ revision.created_at }} · {{ revision.author }} · {{ revision.note }}</span>
     <button class="btn btn-sm" type="submit">Restaurer</button>
@@ -200,7 +200,7 @@
 {% endif %}
 
 {% if projet.id %}
-<form method="post" action="/admin/projets/{{ projet.id }}/supprimer" class="inline-form" style="margin-top:12px" data-confirm="Supprimer définitivement ce projet ?">
+<form method="post" action="{{ base }}/projets/{{ projet.id }}/supprimer" class="inline-form" style="margin-top:12px" data-confirm="Supprimer définitivement ce projet ?">
   <input type="hidden" name="csrf" value="{{ csrf }}">
   <button class="btn btn-danger btn-sm" type="submit">Supprimer le projet</button>
 </form>

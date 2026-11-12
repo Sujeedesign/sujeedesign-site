@@ -12,7 +12,7 @@
     </div>
     <div class="page-actions">
       <a class="btn btn-ghost" href="{{ public_url }}" target="_blank" rel="noopener">Voir le site</a>
-      <form method="post" action="/admin/contenu/publier">
+      <form method="post" action="{{ base }}/contenu/publier">
         <input type="hidden" name="csrf" value="{{ csrf }}">
         <button class="btn btn-accent" type="submit"{% if not publish_ready %} disabled title="Publication automatique non configurée sur ce serveur"{% endif %}>Publier les modifications</button>
       </form>
@@ -37,8 +37,8 @@
             </span>
           </div>
           <div class="page-actions">
-            <a class="btn btn-ghost btn-sm" href="/admin/contenu?page={{ p.slug }}">Formulaire</a>
-            <a class="btn btn-line btn-sm" href="/admin/editer?page={{ p.slug }}">Éditer en place →</a>
+            <a class="btn btn-ghost btn-sm" href="{{ base }}/contenu?page={{ p.slug }}">Formulaire</a>
+            <a class="btn btn-line btn-sm" href="{{ base }}/editer?page={{ p.slug }}">Éditer en place →</a>
           </div>
         </li>
       {% endfor %}
@@ -55,6 +55,6 @@
     <span class="note-k">Comment ça marche</span>
     « Éditer en place » ouvre la vraie page, connecté : clique un texte, corrige, c'est enregistré.
     Le formulaire reste là comme secours. Les présentations projet se gèrent depuis
-    <a href="/admin/projets">Projets</a>.
+    <a href="{{ base }}/projets">Projets</a>.
   </p>
 {% endblock %}

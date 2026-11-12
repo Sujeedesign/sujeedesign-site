@@ -58,7 +58,7 @@
               {% if v.referer %}{{ v.referer }}{% else %}lien direct{% endif %}
             </td>
             <td>
-              <form method="post" action="/admin/propositions/{{ v.id }}/supprimer" data-confirm="Retirer cette consultation du suivi ?">
+              <form method="post" action="{{ base }}/propositions/{{ v.id }}/supprimer" data-confirm="Retirer cette consultation du suivi ?">
                 <input type="hidden" name="csrf" value="{{ csrf }}">
                 <button class="btn btn-ghost btn-sm" type="submit">Retirer</button>
               </form>

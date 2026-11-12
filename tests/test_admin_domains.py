@@ -52,7 +52,7 @@ def _client(db_file, monkeypatch: pytest.MonkeyPatch, host: str) -> TestClient:
 
 def _login(client: TestClient):
     response = client.post(
-        "/admin/connexion",
+        "/connexion",
         data={"password": "mot-de-passe-de-test"},
         follow_redirects=False,
     )
@@ -74,7 +74,7 @@ def test_connexion_sur_le_back_office_partage_la_session(db_file, monkeypatch) -
 def test_editer_en_place_renvoie_vers_le_site_public(db_file, monkeypatch) -> None:
     with _client(db_file, monkeypatch, "admin.sujeedesign.com") as client:
         _login(client)
-        response = client.get("/admin/editer?page=services", follow_redirects=False)
+        response = client.get("/editer?page=services", follow_redirects=False)
         assert response.status_code == 303
         assert response.headers["location"] == "https://sujeedesign.com/services"
         cookie = response.headers["set-cookie"]
@@ -100,7 +100,7 @@ def test_deconnexion_efface_les_deux_portees(db_file, monkeypatch) -> None:
     with _client(db_file, monkeypatch, "admin.sujeedesign.com") as client:
         _login(client)
         csrf = client.get("/api/editor/session", params={"page": "home"}).json().get("csrf", "")
-        response = client.post("/admin/deconnexion", data={"csrf": csrf}, follow_redirects=False)
+        response = client.post("/deconnexion", data={"csrf": csrf}, follow_redirects=False)
     cookies = response.headers.get_list("set-cookie")
     deleted = [c for c in cookies if c.startswith(security.SESSION_COOKIE + "=") and "Max-Age=0" in c]
     assert any("Domain=.sujeedesign.com" in c for c in deleted)

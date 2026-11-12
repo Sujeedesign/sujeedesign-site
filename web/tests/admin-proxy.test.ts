@@ -25,8 +25,10 @@ describe("back office hors de l'apex", () => {
 
   it("redirige les pages d'administration vers le sous-domaine", async () => {
     const rules = await redirects();
-    expect(rules.get("/admin")).toBe("https://admin.sujeedesign.com/admin");
-    expect(rules.get("/admin/:path*")).toBe("https://admin.sujeedesign.com/admin/:path*");
+    // Le sous-domaine sert le back office à sa racine : plus de préfixe `/admin`
+    // dans l'URL publique.
+    expect(rules.get("/admin")).toBe("https://admin.sujeedesign.com/");
+    expect(rules.get("/admin/:path*")).toBe("https://admin.sujeedesign.com/:path*");
   });
 
   it("ne relaie plus aucune page, API ni asset d'administration", async () => {

@@ -86,6 +86,27 @@ def cookie_domain(request) -> str | None:
     return None
 
 
+def admin_host() -> str:
+    """Hôte du back office. `ADMIN_HOST` permet de viser un autre domaine."""
+    return (env("ADMIN_HOST", "admin.sujeedesign.com") or "").lower()
+
+
+def is_admin_host(host: str) -> bool:
+    host = (host or "").split(",")[0].strip().lower().split(":")[0]
+    return bool(host) and host == admin_host()
+
+
+def admin_base(host: str) -> str:
+    """Préfixe des URL du back office : vide sur son domaine, `/admin` ailleurs.
+
+    Sur `admin.sujeedesign.com`, l'administration est servie à la racine
+    (`/connexion`, `/pages`) : le nom d'hôte dit déjà qu'on est dans le back
+    office. L'hôte de secours (`*.sslip.io`) garde `/admin`, et le préfixe reste
+    la seule forme que connaissent les liens historiques.
+    """
+    return "" if is_admin_host(host) else "/admin"
+
+
 def get(conn: sqlite3.Connection, key: str, default: str = "") -> str:
     row = conn.execute("SELECT value FROM reglages WHERE key = ?", (key,)).fetchone()
     if row is not None and row["value"] != "":

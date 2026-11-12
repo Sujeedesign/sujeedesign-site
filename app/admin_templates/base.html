@@ -11,7 +11,7 @@
 {% if user %}
   <div class="shell">
     <aside class="side" id="side">
-      <a class="brand" href="/admin">
+      <a class="brand" href="{{ base }}/">
         <span class="brand-mark" aria-hidden="true">S</span>
         <span class="brand-txt"><strong>Sujee Design</strong><span>back office</span></span>
       </a>
@@ -32,7 +32,7 @@
       </nav>
 
       <div class="side-foot">
-        <a class="site-link site-link--edit" href="/admin/editer{% if slug is defined and slug %}?page={{ slug }}{% endif %}">
+        <a class="site-link site-link--edit" href="{{ base }}/editer{% if slug is defined and slug %}?page={{ slug }}{% endif %}">
           <span>Éditer {{ ('« ' ~ page_label ~ ' »') if slug is defined and slug and slug != 'home' else 'l’accueil' }}</span> <span aria-hidden="true">→</span>
         </a>
         <a class="site-link" href="{{ public_url }}" target="_blank" rel="noopener">
@@ -42,7 +42,7 @@
           <span class="ava" aria-hidden="true">SS</span>
           <span class="meta"><b>Sujeepan</b><span>administrateur</span></span>
         </div>
-        <form method="post" action="/admin/deconnexion">
+        <form method="post" action="{{ base }}/deconnexion">
           <input type="hidden" name="csrf" value="{{ csrf }}">
           <button class="btn btn-ghost btn-sm" type="submit">Déconnexion</button>
         </form>

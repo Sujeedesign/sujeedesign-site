@@ -126,21 +126,32 @@ NAV_PREFIXES = {
 }
 
 
-def nav_groups(active: str, badges: dict[str, int] | None = None) -> list[dict[str, Any]]:
+def _sans_prefixe(path: str) -> str:
+    """Chemin du back office ramené à sa forme courte (`/admin` → `/`)."""
+    if path in ("", "/admin"):
+        return "/"
+    if path.startswith("/admin/"):
+        return path[len("/admin"):]
+    return path
+
+
+def nav_groups(active: str, badges: dict[str, int] | None = None, base: str = "/admin") -> list[dict[str, Any]]:
     badges = badges or {}
+    active = _sans_prefixe(active)
     groups: list[dict[str, Any]] = []
     index = 0
     for label, items in NAV_GROUPS:
         entries = []
         for key, item_label, href in items:
             index += 1
-            prefixes = NAV_PREFIXES.get(key, (href,))
-            on = active == href if href == "/admin" else any(active.startswith(p) for p in prefixes)
+            court = _sans_prefixe(href)
+            prefixes = tuple(_sans_prefixe(p) for p in NAV_PREFIXES.get(key, (href,)))
+            on = active == "/" if court == "/" else any(active.startswith(p) for p in prefixes)
             entries.append(
                 {
                     "key": key,
                     "label": item_label,
-                    "href": href,
+                    "href": base + court,
                     "idx": str(index).zfill(2),
                     "on": on,
                     "cnt": badges.get(key) or 0,
@@ -262,11 +273,16 @@ def _demandes_a_traiter(conn: sqlite3.Connection) -> int:
 
 def render(request: Request, template: str, **context: Any) -> HTMLResponse:
     user = current_user(request)
-    active = request.url.path
+    active = _sans_prefixe(request.url.path)
+    prefixe = settings_module.admin_base(request.headers.get("host", ""))
     base = {
         "request": request,
         "user": user,
-        "nav": nav_groups(active, _nav_badges(request)),
+        # `base` est vide sur admin.sujeedesign.com : les gabarits écrivent
+        # `{{ base }}/pages`, ce qui donne `/pages` là-bas et `/admin/pages`
+        # sur l'hôte de secours.
+        "base": prefixe,
+        "nav": nav_groups(request.url.path, _nav_badges(request), prefixe),
         "active": active,
         "csrf": csrf_token(request),
         "flash": request.query_params.get("flash", ""),

@@ -8,8 +8,8 @@
     <p class="sub">Les études de cas de la vitrine. Un projet <strong>brouillon</strong> n'apparaît pas sur le site.</p>
   </div>
   <div class="page-actions">
-    <a class="btn btn-ghost btn-sm" href="/admin/catalogue/export.json">Export JSON</a>
-    <a class="btn btn-accent btn-sm" href="/admin/projets/nouveau">Nouveau projet</a>
+    <a class="btn btn-ghost btn-sm" href="{{ base }}/catalogue/export.json">Export JSON</a>
+    <a class="btn btn-accent btn-sm" href="{{ base }}/projets/nouveau">Nouveau projet</a>
   </div>
 </div>
 
@@ -19,9 +19,9 @@
 </p>
 
 <div class="filters" style="margin-bottom:14px">
-  <a class="chip{% if not statut %} is-active{% endif %}" href="/admin/projets">Tous <span>{{ counts.tous }}</span></a>
-  <a class="chip{% if statut == 'brouillon' %} is-active{% endif %}" href="/admin/projets?statut=brouillon">Brouillons <span>{{ counts.brouillon }}</span></a>
-  <a class="chip{% if statut == 'publie' %} is-active{% endif %}" href="/admin/projets?statut=publie">Publiés <span>{{ counts.publie }}</span></a>
+  <a class="chip{% if not statut %} is-active{% endif %}" href="{{ base }}/projets">Tous <span>{{ counts.tous }}</span></a>
+  <a class="chip{% if statut == 'brouillon' %} is-active{% endif %}" href="{{ base }}/projets?statut=brouillon">Brouillons <span>{{ counts.brouillon }}</span></a>
+  <a class="chip{% if statut == 'publie' %} is-active{% endif %}" href="{{ base }}/projets?statut=publie">Publiés <span>{{ counts.publie }}</span></a>
 </div>
 
 {% if projets %}
@@ -56,13 +56,13 @@
           </div>
         </div>
         <div class="lib-foot">
-          <form method="post" action="/admin/projets/{{ p.id }}/position" class="inline-form">
+          <form method="post" action="{{ base }}/projets/{{ p.id }}/position" class="inline-form">
             <input type="hidden" name="csrf" value="{{ csrf }}">
             <button class="btn btn-sm" name="dir" value="up" type="submit" title="Monter">↑</button>
             <button class="btn btn-sm" name="dir" value="down" type="submit" title="Descendre">↓</button>
           </form>
           <div class="spacer"></div>
-          <a class="btn btn-sm btn-ghost" href="/admin/projets/{{ p.id }}">Éditer</a>
+          <a class="btn btn-sm btn-ghost" href="{{ base }}/projets/{{ p.id }}">Éditer</a>
         </div>
       </article>
     {% endfor %}

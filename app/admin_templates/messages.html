@@ -16,17 +16,17 @@
     </div>
     {% if messages %}
       <div class="page-actions">
-        <a class="btn btn-ghost btn-sm" href="/admin/messages">Tout afficher</a>
+        <a class="btn btn-ghost btn-sm" href="{{ base }}/messages">Tout afficher</a>
       </div>
     {% endif %}
   </header>
 
   {% if counts.total %}
     <div class="filters">
-      <a class="chip{% if not statut %} is-active{% endif %}" href="/admin/messages">Tous <span>{{ counts.total }}</span></a>
-      <a class="chip{% if statut == 'nouveau' %} is-active{% endif %}" href="/admin/messages?statut=nouveau">Nouveaux <span>{{ counts.nouveau }}</span></a>
-      <a class="chip{% if statut == 'en cours' %} is-active{% endif %}" href="/admin/messages?statut=en%20cours">En cours <span>{{ counts['en cours'] }}</span></a>
-      <a class="chip{% if statut == 'traite' %} is-active{% endif %}" href="/admin/messages?statut=traite">Traités <span>{{ counts.traite }}</span></a>
+      <a class="chip{% if not statut %} is-active{% endif %}" href="{{ base }}/messages">Tous <span>{{ counts.total }}</span></a>
+      <a class="chip{% if statut == 'nouveau' %} is-active{% endif %}" href="{{ base }}/messages?statut=nouveau">Nouveaux <span>{{ counts.nouveau }}</span></a>
+      <a class="chip{% if statut == 'en cours' %} is-active{% endif %}" href="{{ base }}/messages?statut=en%20cours">En cours <span>{{ counts['en cours'] }}</span></a>
+      <a class="chip{% if statut == 'traite' %} is-active{% endif %}" href="{{ base }}/messages?statut=traite">Traités <span>{{ counts.traite }}</span></a>
     </div>
   {% endif %}
 
@@ -63,7 +63,7 @@
           {% endif %}
 
           <div class="msg-actions">
-            <form method="post" action="/admin/messages/{{ m.id }}/statut" class="inline-form">
+            <form method="post" action="{{ base }}/messages/{{ m.id }}/statut" class="inline-form">
               <input type="hidden" name="csrf" value="{{ csrf }}">
               <select name="statut">
                 {% for s in ('nouveau', 'en cours', 'traite') %}
@@ -75,7 +75,7 @@
             </form>
             <div class="msg-links">
               <a class="btn btn-ghost btn-sm" href="mailto:{{ m.email }}?subject=Votre%20projet%20%E2%80%94%20Sujee%20Design">Répondre</a>
-              <form method="post" action="/admin/messages/{{ m.id }}/supprimer" data-confirm="Supprimer définitivement ce message ?">
+              <form method="post" action="{{ base }}/messages/{{ m.id }}/supprimer" data-confirm="Supprimer définitivement ce message ?">
                 <input type="hidden" name="csrf" value="{{ csrf }}">
                 <button class="btn btn-danger btn-sm" type="submit">Supprimer</button>
               </form>
@@ -95,7 +95,7 @@
       <p class="empty-title">{% if statut %}Aucun message avec le statut « {{ libelles.get(statut, statut) }} »{% else %}Aucun message pour le moment{% endif %}</p>
       <p class="muted small">Les demandes envoyées depuis le formulaire de contact du site arrivent ici.</p>
       {% if statut %}
-        <a class="btn btn-ghost btn-sm" href="/admin/messages">Voir tous les messages</a>
+        <a class="btn btn-ghost btn-sm" href="{{ base }}/messages">Voir tous les messages</a>
       {% endif %}
     </div>
   {% endif %}

@@ -86,6 +86,47 @@ async def lifespan(app: FastAPI):
     yield
 
 
+class AdminRootRewrite:
+    """Sert le back office à la racine de son domaine.
+
+    Sur `admin.sujeedesign.com`, `/connexion` doit atteindre la route
+    `/admin/connexion` : le nom d'hôte porte déjà le contexte, et l'URL n'a pas
+    de raison de répéter « admin ». La réécriture est interne (le navigateur ne
+    voit jamais `/admin`), et elle est strictement limitée à cet hôte : sur
+    l'apex ou sur `*.sslip.io`, `/connexion` reste inconnu.
+    """
+
+    PASSTHROUGH = ("/admin", "/api/", "/medias/", "/static-admin", "/sante", "/favicon.ico", "/robots.txt")
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope.get("type") == "http":
+            host = dict(scope.get("headers") or []).get(b"host", b"").decode()
+            path = scope.get("path", "")
+            if settings_module.is_admin_host(host):
+                if path == "/admin" or path.startswith("/admin/"):
+                    # Anciens favoris et onglets ouverts : on renvoie vers l'URL
+                    # propre. 308 conserve la méthode, donc les POST suivent.
+                    location = "/" + path[len("/admin/"):] if path.startswith("/admin/") else "/"
+                    query = scope.get("query_string") or b""
+                    if query:
+                        location += "?" + query.decode()
+                    await send({
+                        "type": "http.response.start",
+                        "status": 308,
+                        "headers": [(b"location", location.encode()), (b"content-length", b"0")],
+                    })
+                    await send({"type": "http.response.body", "body": b""})
+                    return
+                if not path.startswith(self.PASSTHROUGH):
+                    scope = dict(scope)
+                    scope["path"] = "/admin" if path in ("", "/") else "/admin" + path
+                    scope["raw_path"] = scope["path"].encode()
+        await self.app(scope, receive, send)
+
+
 def create_app(db_file: Path | None = None) -> FastAPI:
     app = FastAPI(
         title="Sujee Design · back office",
@@ -94,6 +135,9 @@ def create_app(db_file: Path | None = None) -> FastAPI:
         openapi_url=None,
         lifespan=lifespan,
     )
+    # Le plus interne des middlewares : il réécrit le chemin juste avant le
+    # routage, pour que `/connexion` tombe sur la route `/admin/connexion`.
+    app.add_middleware(AdminRootRewrite)
     app.state.db_path = Path(db_file) if db_file else settings_module.db_path()
     app.state.media_dir = (
         Path(db_file).parent / "medias" if db_file else settings_module.media_dir()
@@ -117,6 +161,15 @@ def create_app(db_file: Path | None = None) -> FastAPI:
     @app.middleware("http")
     async def headers(request: Request, call_next):
         response = await call_next(request)
+        if settings_module.is_admin_host(request.headers.get("host", "")):
+            # Les routes redirigent encore vers `/admin/...` (forme historique) ;
+            # sur son domaine, l'URL publique n'a pas ce préfixe.
+            loc = response.headers.get("location")
+            if loc:
+                if loc.rstrip("/") == "/admin":
+                    response.headers["location"] = "/"
+                elif loc.startswith("/admin/"):
+                    response.headers["location"] = loc[len("/admin"):]
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
         response.headers.setdefault("Referrer-Policy", "same-origin")
         response.headers.setdefault("X-Frame-Options", "DENY")
@@ -128,7 +181,8 @@ def create_app(db_file: Path | None = None) -> FastAPI:
             # Fichiers déposés par l'admin : jamais interprétés comme du document,
             # même si un SVG ou un HTML se glissait dans le dossier.
             response.headers.setdefault("Content-Security-Policy", "default-src 'none'; sandbox")
-        if request.url.path.startswith("/admin") or request.url.path.startswith("/api/"):
+        sur_domaine_admin = settings_module.is_admin_host(request.headers.get("host", ""))
+        if request.url.path.startswith("/admin") or request.url.path.startswith("/api/") or sur_domaine_admin:
             response.headers.setdefault("Cache-Control", "no-store")
             # Tout ce conteneur est un back office : on interdit l'indexation au
             # niveau de la réponse, en plus du robots.txt du domaine public.

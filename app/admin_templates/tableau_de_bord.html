@@ -3,17 +3,17 @@
 {% block heading %}Tableau de bord{% endblock %}
 {% block content %}
   <section class="grid grid-stats">
-    <a class="card stat" href="/admin/messages?statut=nouveau">
+    <a class="card stat" href="{{ base }}/messages?statut=nouveau">
       <span class="stat-k">Nouveaux messages</span>
       <strong class="stat-v">{{ counts.nouveau }}</strong>
       <span class="stat-s">{{ counts.total }} au total</span>
     </a>
-    <a class="card stat" href="/admin/messages?statut=en%20cours">
+    <a class="card stat" href="{{ base }}/messages?statut=en%20cours">
       <span class="stat-k">En cours</span>
       <strong class="stat-v">{{ counts['en cours'] }}</strong>
       <span class="stat-s">à suivre</span>
     </a>
-    <a class="card stat" href="/admin/medias">
+    <a class="card stat" href="{{ base }}/medias">
       <span class="stat-k">Médias</span>
       <strong class="stat-v">{{ medias }}</strong>
       <span class="stat-s">images et documents</span>
@@ -33,7 +33,7 @@
     <section class="card">
       <header class="card-head">
         <h2>Derniers messages</h2>
-        <a class="link" href="/admin/messages">Tout voir</a>
+        <a class="link" href="{{ base }}/messages">Tout voir</a>
       </header>
       {% if recents %}
         <ul class="list">
@@ -58,10 +58,10 @@
         <h2>Actions</h2>
       </header>
       <div class="stack">
-        <a class="btn btn-accent" href="/admin/pages">Modifier le contenu du site</a>
-        <a class="btn btn-line" href="/admin/projets">Gérer le catalogue projets</a>
-        <a class="btn btn-line" href="/admin/prestations">Gérer les prestations</a>
-        <a class="btn btn-line" href="/admin/sauvegarde">Exporter une sauvegarde</a>
+        <a class="btn btn-accent" href="{{ base }}/pages">Modifier le contenu du site</a>
+        <a class="btn btn-line" href="{{ base }}/projets">Gérer le catalogue projets</a>
+        <a class="btn btn-line" href="{{ base }}/prestations">Gérer les prestations</a>
+        <a class="btn btn-line" href="{{ base }}/sauvegarde">Exporter une sauvegarde</a>
       </div>
       <hr class="rule">
       <h3 class="mini-title">État de la publication</h3>
@@ -83,7 +83,7 @@
     <header class="card-head">
       <h2>Propositions clients</h2>
       <span class="spacer"></span>
-      <a class="link" href="/admin/propositions">Suivi détaillé</a>
+      <a class="link" href="{{ base }}/propositions">Suivi détaillé</a>
     </header>
     <ul class="list">
       {% for p in propositions %}
@@ -113,7 +113,7 @@
             <strong>{{ r.note or 'enregistrement' }}</strong>
             <span class="muted small">{{ r.created_at | datetimefr }} · {{ r.author }}</span>
           </div>
-          <form method="post" action="/admin/contenu/restaurer/{{ r.id }}" data-confirm="Restaurer cette version du contenu ?">
+          <form method="post" action="{{ base }}/contenu/restaurer/{{ r.id }}" data-confirm="Restaurer cette version du contenu ?">
             <input type="hidden" name="csrf" value="{{ csrf }}">
             <button class="btn btn-ghost btn-sm" type="submit">Restaurer</button>
           </form>

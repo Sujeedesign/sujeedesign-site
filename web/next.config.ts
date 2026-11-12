@@ -62,10 +62,10 @@ const nextConfig: NextConfig = {
     return [
       // Back office déplacé sur son propre domaine : l'apex ne sert plus aucune
       // page d'administration, il redirige les favoris et liens hérités.
-      { source: "/admin", destination: "https://admin.sujeedesign.com/admin", permanent: true },
+      { source: "/admin", destination: "https://admin.sujeedesign.com/", permanent: true },
       {
         source: "/admin/:path*",
-        destination: "https://admin.sujeedesign.com/admin/:path*",
+        destination: "https://admin.sujeedesign.com/:path*",
         permanent: true,
       },
       {
