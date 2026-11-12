@@ -535,7 +535,9 @@ export function GuidePrixSite() {
                   <Link href={serviceHref("site-ecommerce")}>sites et e-commerce</Link> détaille
                   ce qui est livré, et le{" "}
                   <Link href={routes.guidePrixLogo}>guide des prix du logo</Link> applique la
-                  même logique à l&apos;identité visuelle. Le{" "}
+                  même logique à l&apos;identité visuelle, et le guide{" "}
+                  <Link href={routes.guideAgenceFreelance}>agence ou freelance</Link> aide à
+                  choisir à qui confier le projet. Le{" "}
                   <Link href={routes.calculateurBudgetIdentite}>calculateur de budget</Link>{" "}
                   chiffre de son côté une identité complète, souvent le préalable à un site.
                 </p>

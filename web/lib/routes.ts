@@ -21,6 +21,8 @@ export const routes = {
   guidePrixLogo: "/guides/prix-logo",
   /** Guide de prix d'un site internet. */
   guidePrixSite: "/guides/prix-site-internet",
+  /** Guide : agence ou freelance, comment choisir. */
+  guideAgenceFreelance: "/guides/agence-ou-freelance",
   /** Guide des tendances web design 2027. */
   guideTendances2027: "/guides/tendances-web-design-2027",
   /** Modèle de cahier des charges de site, DOCX et PDF. */

@@ -469,6 +469,9 @@ export function GuidePrixLogo() {
                   courantes (carte de visite, flyer, affiche, plaquette, post) sont chiffrées
                   séparément dans le{" "}
                   <Link href={routes.calculateurBudgetIdentite}>calculateur de budget</Link>.
+                  Pour choisir à qui confier le projet, le guide{" "}
+                  <Link href={routes.guideAgenceFreelance}>agence ou freelance</Link> compare
+                  les trois formats possibles et leurs coûts réels.
                 </p>
 
                 <h2 id="identite">Prix d&apos;un logo ou prix d&apos;une identité visuelle</h2>

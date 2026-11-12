@@ -95,6 +95,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
+      url: `${SITE_URL}${routes.guideAgenceFreelance}`,
+      lastModified: pageUpdated(routes.guideAgenceFreelance),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
       url: `${SITE_URL}${routes.guideTendances2027}`,
       lastModified: pageUpdated(routes.guideTendances2027),
       changeFrequency: "monthly",
