@@ -124,6 +124,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.8,
     },
+    // Tunnel de vente hors navigation : page produit autonome, non listée dans la nav.
+    {
+      url: `${SITE_URL}/reussir-examen-vtc`,
+      lastModified: "2026-11-12",
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
   ];
 
   const services: MetadataRoute.Sitemap = serviceSlugs.map((slug) => ({
