@@ -1,5 +1,9 @@
 /* Illustrations du guide « agence ou freelance ».
 
+   Ce module ne contient que le dessin : panneau, légende, titre accessible et
+   défilement mobile sont dans GuideFigure.module.css, partagé par toutes les
+   figures de guides.
+
    Aucune couleur brute dans ce module : tout dérive des jetons du thème
    (public/assets/light.css). Deux choix assumés :
 
@@ -13,44 +17,6 @@
 
    Toutes les animations sont en CSS pur et s'éteignent sous
    prefers-reduced-motion, en laissant le schéma dans son état final. */
-
-.figure {
-  margin: 2em 0 2.2em;
-  width: 100%;
-}
-
-.panel {
-  background: var(--sand);
-  border: 1px solid var(--line-2);
-  border-radius: 8px;
-  padding: 10px 6px 4px;
-  overflow: hidden;
-}
-
-.svg {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.hint {
-  display: none;
-  margin: 6px 0 0;
-  font-family: var(--sans, system-ui, sans-serif);
-  font-size: 10.5px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.caption {
-  margin-top: 0.7em;
-  font-family: var(--sans, system-ui, sans-serif);
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: var(--muted);
-  max-width: 62ch;
-}
 
 /* ---------- Typo interne aux schémas ---------- */
 
@@ -285,25 +251,5 @@
   }
 }
 
-/* Sur mobile, un schéma de 820 unités réduit à 390 px rendrait les libellés
-   illisibles. On garde donc une largeur minimale et on laisse défiler le
-   panneau horizontalement, plutôt que d'écraser le dessin. */
-@media (max-width: 700px) {
-  .panel {
-    padding: 6px 2px 2px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .svg {
-    min-width: 680px;
-  }
-
-  .caption {
-    font-size: 12px;
-  }
-
-  .hint {
-    display: block;
-  }
-}
+/* Le défilement horizontal mobile et la largeur minimale du dessin sont dans
+   GuideFigure.module.css : ils font partie du cadre, pas du schéma. */

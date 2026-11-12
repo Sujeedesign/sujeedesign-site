@@ -1,0 +1,72 @@
+/* Cadre commun des illustrations de guides.
+   Aucune couleur brute : le panneau reprend le sable du thème et les filets
+   ses gris de séparation, pour qu'une illustration ne détonne pas d'une page
+   à l'autre. */
+
+.figure {
+  margin: 2em 0 2.2em;
+  width: 100%;
+}
+
+.panel {
+  background: var(--sand);
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  padding: 10px 6px 4px;
+  overflow: hidden;
+}
+
+/* Le panneau reçoit le focus quand il défile : sans marque visible, le clavier
+   ne saurait pas où il est. */
+.panel:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.hint {
+  display: none;
+  margin: 6px 0 0;
+  font-family: var(--sans, system-ui, sans-serif);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.caption {
+  margin-top: 0.7em;
+  font-family: var(--sans, system-ui, sans-serif);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--muted);
+  max-width: 62ch;
+}
+
+/* Sur mobile, un schéma de 820 unités réduit à 390 px rendrait les libellés
+   illisibles. On garde donc une largeur minimale et on laisse défiler le
+   panneau horizontalement, plutôt que d'écraser le dessin. */
+@media (max-width: 700px) {
+  .panel {
+    padding: 6px 2px 2px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .svg {
+    min-width: 680px;
+  }
+
+  .caption {
+    font-size: 12px;
+  }
+
+  .hint {
+    display: block;
+  }
+}
