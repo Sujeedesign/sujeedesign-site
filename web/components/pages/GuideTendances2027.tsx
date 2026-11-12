@@ -6,7 +6,7 @@ import { routes, realisationPath, serviceHref } from "@/lib/routes";
 import styles from "./GuideTendances2027.module.css";
 
 export const pageMeta = {
-  title: "Tendances design graphique 2027 : 8 signaux à suivre",
+  title: "Tendances design graphique 2027 : 8 signaux",
   description:
     "Tendances design graphique et web 2027 filtrées par le réel : typographie, couleur, logo, coûts. Ce que les sites de référence font déjà, ce qu'on ignore.",
 };
