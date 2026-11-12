@@ -2,6 +2,11 @@ import Link from "next/link";
 import Faq from "@/components/Faq";
 import { routes, serviceHref } from "@/lib/routes";
 import styles from "./GuidePrixLogo.module.css";
+import {
+  IlluCoordination,
+  IlluDecision,
+  IlluTroisOptions,
+} from "./GuideIllu";
 
 /**
  * Page /guides/agence-ou-freelance (D1).
@@ -265,6 +270,7 @@ export function GuideAgenceFreelance() {
                   le nombre de personnes qui doivent se coordonner pour livrer votre projet, et
                   qui paie cette coordination.
                 </p>
+                <IlluTroisOptions />
                 {OPTIONS.map((option) => (
                   <div key={option.nom}>
                     <h3>{option.nom}</h3>
@@ -289,6 +295,7 @@ export function GuideAgenceFreelance() {
                   tableau ci-dessous donne les points de bascule observés sur des projets de
                   marque, du plus structuré au plus léger.
                 </p>
+                <IlluCoordination />
 
                 <div className="tableWrap">
                   <table>
@@ -362,6 +369,7 @@ export function GuideAgenceFreelance() {
                   troisième, regardez du côté de l&apos;agence. Si vous répondez « non » aux deux,
                   un studio indépendant fera le travail pour moins cher.
                 </p>
+                <IlluDecision />
                 <ul>
                   {GRILLE.map((item) => (
                     <li key={item.question}>

@@ -127,7 +127,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Tunnel de vente hors navigation : page produit autonome, non listée dans la nav.
     {
       url: `${SITE_URL}/reussir-examen-vtc`,
-      lastModified: "2026-11-12",
+      lastModified: new Date("2026-11-12T12:00:00.000Z"),
       changeFrequency: "monthly",
       priority: 0.5,
     },
