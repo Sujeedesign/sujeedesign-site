@@ -178,6 +178,14 @@
       {
         "q": "Et après la livraison ?",
         "a": "Vous partez avec les sources, les accès et une documentation. Une maintenance est possible, jamais obligatoire. Je réponds sous 24 h ouvrées, même après la fin du projet."
+      },
+      {
+        "q": "Combien coûte une prestation ?",
+        "a": "Le devis est écrit après le cadrage, parce qu'un logo seul et une identité complète ne demandent pas le même travail. Les fourchettes du marché sont publiées dans les guides de prix du site, et le calculateur d'identité donne un ordre de grandeur en trente secondes. Ici, aucun prix n'est affiché à la carte : le devis décrit le périmètre, les livrables et les délais, puis le montant."
+      },
+      {
+        "q": "Peut-on commencer par un seul métier ?",
+        "a": "Oui, et c'est le cas le plus fréquent. La plupart des projets démarrent par l'identité de marque, puis ajoutent le site, la direction artistique ou le contenu quand le besoin arrive. Chaque métier se prend seul, avec son propre périmètre écrit."
       }
     ]
   },

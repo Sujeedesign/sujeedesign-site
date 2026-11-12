@@ -147,6 +147,14 @@
       {
         "q": "Vous gérez l'impression ?",
         "a": "Je prépare les fichiers et je contrôle les BAT. Le devis imprimeur reste chez vous, sans marge de ma part."
+      },
+      {
+        "q": "Quelle différence avec une identité visuelle ?",
+        "a": "L'identité visuelle définit la marque : nom, logotype, typographies, couleurs, règles d'usage. La direction artistique prend ce système et l'applique à des campagnes : direction photo, cadrages, gabarits print et réseaux, suivi de production. L'une pose le vocabulaire, l'autre écrit les phrases."
+      },
+      {
+        "q": "Combien coûte une direction artistique ?",
+        "a": "Pas de grille fixe : le budget dépend du nombre de supports, de la présence sur le shoot et du niveau de documentation attendu. Une charte visuelle documentée et un dispositif complet avec direction photo ne sont pas le même travail. Le devis est écrit après le cadrage, avec le périmètre et les livrables listés."
       }
     ]
   },

@@ -34,7 +34,7 @@ const NOON_UTC = "T12:00:00.000Z";
 export const PAGE_UPDATED = {
   [routes.home]: "2026-11-05",
   [routes.realisations]: "2026-11-02",
-  [routes.services]: "2026-11-04",
+  [routes.services]: "2026-11-12",
   [routes.aPropos]: "2026-11-04",
   [routes.agentsIa]: "2026-11-02",
   [routes.contact]: "2026-11-05",
@@ -59,7 +59,7 @@ export type ServicePageSlug = Exclude<ServiceSlug, "agents-ia">;
  */
 export const SERVICE_UPDATED: Record<ServicePageSlug, IsoDay> = {
   "identite-de-marque": "2026-11-06",
-  "direction-artistique": "2026-11-06",
+  "direction-artistique": "2026-11-12",
   "site-ecommerce": "2026-11-06",
   "contenu-reseaux": "2026-11-06",
 };
