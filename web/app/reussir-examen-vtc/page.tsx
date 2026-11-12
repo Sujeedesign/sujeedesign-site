@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageShell } from "@/components/site/PageShell";
 import { JsonLd } from "@/components/site/JsonLd";
+import VtcStickyBar from "@/components/pages/VtcStickyBar";
 import {
   articleNode,
   breadcrumbNode,
@@ -15,7 +16,7 @@ const PATH = "/reussir-examen-vtc";
 const SITE_URL = "https://sujeedesign.com";
 
 /** Une seule ligne à changer quand la nouvelle édition sort. */
-const EDITION = "2026";
+const EDITION = "2027";
 
 /** `?wanted=true` ouvre directement le paiement Gumroad. */
 const GUIDE_URL = "https://sujeedesign.gumroad.com/l/reussir-examen-vtc-2026?wanted=true";
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
     title: TITLE,
     description: DESCRIPTION,
     url: `${SITE_URL}${PATH}`,
-    images: [{ url: "/assets/vtc/sedan-night.webp", width: 1800, height: 1199 }],
+    images: [{ url: "/assets/vtc/chauffeur-mercedes.webp", width: 1800, height: 1344 }],
   },
 };
 
@@ -215,10 +216,10 @@ export default function Page() {
         <section className={styles.hero}>
           <div className={styles.heroMedia} aria-hidden="true">
             <img
-              src="/assets/vtc/sedan-night.webp"
+              src="/assets/vtc/chauffeur-mercedes.webp"
               alt=""
               width={1800}
-              height={1199}
+              height={1344}
               fetchPriority="high"
             />
           </div>
@@ -274,10 +275,10 @@ export default function Page() {
             <div className={styles.heroAside}>
               <figure className={styles.heroCard}>
                 <img
-                  src="/assets/vtc/guide-vtc-2026.png"
-                  alt="Couverture du guide Réussir l’examen VTC, manuel de préparation pour candidat libre."
-                  width={1280}
-                  height={720}
+                  src="/assets/vtc/guide-vtc-2027-700.webp"
+                  alt="Couverture du guide Réussir l’examen VTC, édition 2027, manuel de préparation pour candidat libre."
+                  width={700}
+                  height={988}
                 />
                 <figcaption>
                   <span>Le guide</span>
@@ -465,10 +466,10 @@ export default function Page() {
           <div className={`wrap ${styles.magnet}`}>
             <figure className={styles.magnetFig}>
               <img
-                src="/assets/vtc/fiches-memo-vtc-2026.png"
-                alt="Couverture des 7 fiches mémo de l’examen VTC, une page par épreuve, format A4."
-                width={1280}
-                height={720}
+                src="/assets/vtc/fiches-memo-2027-700.webp"
+                alt="Couverture des 7 fiches mémo de l’examen VTC 2027, une page par épreuve, format A4."
+                width={700}
+                height={992}
                 loading="lazy"
               />
             </figure>
@@ -719,14 +720,7 @@ export default function Page() {
 
       {/* Barre d'action mobile */}
       <div className={styles.stickySpacer} aria-hidden="true" />
-      <div className={styles.stickyBar} aria-label="Actions rapides">
-        <a className={styles.stickyGhost} href={MEMO_URL} target="_blank" rel="noopener">
-          PDF gratuit
-        </a>
-        <a className={styles.stickySolid} href={GUIDE_URL} target="_blank" rel="noopener">
-          Le guide · 23,88 €
-        </a>
-      </div>
+      <VtcStickyBar memoUrl={MEMO_URL} guideUrl={GUIDE_URL} />
     </PageShell>
   );
 }
