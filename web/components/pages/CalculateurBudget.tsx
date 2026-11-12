@@ -177,9 +177,9 @@ export function CalculateurBudget() {
               ))}
 
               <h2 id="niveaux">Ce qui est inclus dans chaque niveau</h2>
-              <div className={styles.tableWrap}>
-                <table className={styles.table}>
-                  <caption className={styles.caption}>
+              <div className="tableWrap">
+                <table>
+                  <caption>
                     Contenu des sept niveaux et fourchettes associées, hors taxes.
                   </caption>
                   <thead>
@@ -202,9 +202,9 @@ export function CalculateurBudget() {
               </div>
 
               <h3>Les options</h3>
-              <div className={styles.tableWrap}>
-                <table className={styles.table}>
-                  <caption className={styles.caption}>
+              <div className="tableWrap">
+                <table>
+                  <caption>
                     Options chiffrées, à ajouter au niveau retenu, hors taxes.
                   </caption>
                   <thead>
@@ -248,9 +248,9 @@ export function CalculateurBudget() {
 
               <h3 id="temps">Le temps réel d&apos;un projet</h3>
               <RepartitionTemps />
-              <div className={styles.tableWrap}>
-                <table className={styles.table}>
-                  <caption className={styles.caption}>
+              <div className="tableWrap">
+                <table>
+                  <caption>
                     Temps de travail estimé par étape, sur nos projets, hors échanges clients.
                   </caption>
                   <thead>

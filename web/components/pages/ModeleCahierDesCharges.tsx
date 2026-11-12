@@ -263,9 +263,9 @@ export function ModeleCahierDesCharges() {
                   généralement là que le projet dérape.
                 </p>
 
-                <div className={styles.tableWrap}>
-                  <table className={styles.table}>
-                    <caption className={styles.caption}>
+                <div className="tableWrap">
+                  <table>
+                    <caption>
                       Structure du modèle, version de novembre 2026, hors taxes.
                     </caption>
                     <thead>
@@ -296,9 +296,9 @@ export function ModeleCahierDesCharges() {
                   la différence entre une intention et un besoin.
                 </p>
 
-                <div className={styles.tableWrap}>
-                  <table className={styles.table}>
-                    <caption className={styles.caption}>
+                <div className="tableWrap">
+                  <table>
+                    <caption>
                       Même besoin, deux façons de l&apos;écrire.
                     </caption>
                     <thead>

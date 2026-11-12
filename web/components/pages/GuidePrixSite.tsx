@@ -318,9 +318,9 @@ export function GuidePrixSite() {
                   thème coûte moins cher qu&apos;un site de cinq pages conçu de zéro.
                 </p>
 
-                <div className={styles.tableWrap}>
-                  <table className={styles.table}>
-                    <caption className={styles.caption}>
+                <div className="tableWrap">
+                  <table>
+                    <caption>
                       Paliers observés sur le marché français, hors taxes.
                     </caption>
                     <thead>
@@ -362,9 +362,9 @@ export function GuidePrixSite() {
                   de domaine se renouvelle, l&apos;hébergement tourne, les mises à jour
                   s&apos;enchaînent. Voici ce qu&apos;il faut prévoir, hors travail de création.
                 </p>
-                <div className={styles.tableWrap}>
-                  <table className={styles.table}>
-                    <caption className={styles.caption}>
+                <div className="tableWrap">
+                  <table>
+                    <caption>
                       Coûts récurrents d&apos;un site vitrine, hors taxes, 2026.
                     </caption>
                     <thead>
@@ -400,9 +400,9 @@ export function GuidePrixSite() {
                   la même histoire : c&apos;est la première chose à comprendre avant de comparer
                   des devis.
                 </p>
-                <div className={styles.tableWrap}>
-                  <table className={styles.table}>
-                    <caption className={styles.caption}>
+                <div className="tableWrap">
+                  <table>
+                    <caption>
                       Prix moyens observés, France, novembre 2026, hors taxes.
                     </caption>
                     <thead>
@@ -439,9 +439,9 @@ export function GuidePrixSite() {
                   le devis les précise selon le nombre de modèles de pages et les
                   fonctionnalités demandées.
                 </p>
-                <div className={styles.tableWrap}>
-                  <table className={styles.table}>
-                    <caption className={styles.caption}>
+                <div className="tableWrap">
+                  <table>
+                    <caption>
                       Prix de départ, hors taxes, avant devis.
                     </caption>
                     <thead>
@@ -477,9 +477,9 @@ export function GuidePrixSite() {
                   500 € la journée, soit 62,50 € de l&apos;heure, voici les ordres de grandeur
                   d&apos;un site vitrine et d&apos;une boutique.
                 </p>
-                <div className={styles.tableWrap}>
-                  <table className={styles.table}>
-                    <caption className={styles.caption}>
+                <div className="tableWrap">
+                  <table>
+                    <caption>
                       Temps de travail estimé par étape, hors échanges clients.
                     </caption>
                     <thead>

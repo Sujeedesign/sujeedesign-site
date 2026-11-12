@@ -286,9 +286,9 @@ export function GuidePrixLogo() {
                   travail change de nature. À chaque palier, on n&apos;achète pas la même chose.
                 </p>
 
-                <div className={styles.tableWrap}>
-                  <table className={styles.table}>
-                    <caption className={styles.caption}>
+                <div className="tableWrap">
+                  <table>
+                    <caption>
                       Paliers observés sur le marché français, hors taxes.
                     </caption>
                     <thead>
@@ -328,9 +328,9 @@ export function GuidePrixLogo() {
                   Un logo ne se facture pas au dessin mais au temps de conception. Voici les
                   ordres de grandeur sur nos projets, hors échanges clients.
                 </p>
-                <div className={styles.tableWrap}>
-                  <table className={styles.table}>
-                    <caption className={styles.caption}>
+                <div className="tableWrap">
+                  <table>
+                    <caption>
                       Temps de travail estimé par étape, hors échanges clients.
                     </caption>
                     <thead>
@@ -398,9 +398,9 @@ export function GuidePrixLogo() {
                   arrondies, tous prestataires confondus, pas des prix de concurrents en
                   particulier.
                 </p>
-                <div className={styles.tableWrap}>
-                  <table className={styles.table}>
-                    <caption className={styles.caption}>
+                <div className="tableWrap">
+                  <table>
+                    <caption>
                       Prix moyens observés, France, novembre 2026, hors taxes.
                     </caption>
                     <thead>
@@ -438,9 +438,9 @@ export function GuidePrixLogo() {
                   départ : le devis les précise selon le périmètre, et chaque niveau reprend le
                   travail du précédent.
                 </p>
-                <div className={styles.tableWrap}>
-                  <table className={styles.table}>
-                    <caption className={styles.caption}>
+                <div className="tableWrap">
+                  <table>
+                    <caption>
                       Prix de départ, hors taxes, avant devis.
                     </caption>
                     <thead>
