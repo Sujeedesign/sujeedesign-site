@@ -167,10 +167,12 @@ def create_app(db_file: Path | None = None) -> FastAPI:
         if renewed is None:
             return response
         secure = settings_module.cookie_secure()
+        domain = settings_module.cookie_domain(request)
         response.set_cookie(
             security.SESSION_COOKIE,
             renewed,
             max_age=security.SESSION_TTL,
+            domain=domain,
             httponly=True,
             samesite="lax",
             secure=secure,
@@ -180,6 +182,7 @@ def create_app(db_file: Path | None = None) -> FastAPI:
             security.UI_MARKER_COOKIE,
             "1",
             max_age=security.SESSION_TTL,
+            domain=domain,
             httponly=False,
             samesite="lax",
             secure=secure,

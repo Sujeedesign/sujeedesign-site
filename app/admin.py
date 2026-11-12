@@ -308,6 +308,7 @@ def connexion(request: Request, password: str = Form("")) -> Response:
         security.SESSION_COOKIE,
         security.make_session(),
         max_age=security.SESSION_TTL,
+        domain=settings_module.cookie_domain(request),
         httponly=True,
         samesite="lax",
         secure=settings_module.cookie_secure(),
@@ -321,6 +322,7 @@ def connexion(request: Request, password: str = Form("")) -> Response:
         security.UI_MARKER_COOKIE,
         "1",
         max_age=security.SESSION_TTL,
+        domain=settings_module.cookie_domain(request),
         httponly=False,
         samesite="lax",
         secure=settings_module.cookie_secure(),
@@ -339,9 +341,17 @@ def deconnexion(request: Request, csrf: str = Form("")) -> Response:
     except HTTPException:
         pass
     response = RedirectResponse("/admin/connexion", status_code=303)
-    response.delete_cookie(security.SESSION_COOKIE, path="/")
-    response.delete_cookie(security.UI_MARKER_COOKIE, path="/")
-    response.delete_cookie(security.EDIT_MARKER_COOKIE, path="/")
+    domain = settings_module.cookie_domain(request)
+    response.delete_cookie(security.SESSION_COOKIE, path="/", domain=domain)
+    response.delete_cookie(security.UI_MARKER_COOKIE, path="/", domain=domain)
+    response.delete_cookie(security.EDIT_MARKER_COOKIE, path="/", domain=domain)
+    # Les anciennes sessions host-only (avant le passage au domaine partagé)
+    # ne seraient pas effacées par un delete_cookie avec Domain : on les
+    # supprime aussi sans domaine, sans effet de bord si elles n'existent pas.
+    if domain:
+        response.delete_cookie(security.SESSION_COOKIE, path="/")
+        response.delete_cookie(security.UI_MARKER_COOKIE, path="/")
+        response.delete_cookie(security.EDIT_MARKER_COOKIE, path="/")
     return response
 
 
@@ -425,12 +435,16 @@ def editer_en_place(request: Request, page: str = "", user: str = Depends(requir
     consultation, même si l'onglet a été fermé en pleine édition.
     """
     slug = content_page(page)
-    target = PAGE_PATHS[slug]
+    # Chemin de la vitrine, pas du back office : `/` sur ce domaine renvoie à
+    # l'écran de connexion. On construit l'URL absolue pour que « Éditer en
+    # place » retombe toujours sur la page publique, quel que soit l'hôte.
+    target = settings_module.public_base_url() + PAGE_PATHS[slug]
     response = RedirectResponse(target, status_code=303)
     response.set_cookie(
         security.EDIT_MARKER_COOKIE,
         "1",
         max_age=security.SESSION_TTL,
+        domain=settings_module.cookie_domain(request),
         httponly=False,
         samesite="lax",
         secure=settings_module.cookie_secure(),

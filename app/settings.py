@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import sqlite3
 from pathlib import Path
+from urllib.parse import urlparse
 
 VERSION = "1.0.0"
 
@@ -56,6 +57,33 @@ def cookie_secure() -> bool:
 
 def public_base_url() -> str:
     return env("SITE_BASE_URL", "https://sujeedesign.com").rstrip("/")
+
+
+def cookie_domain(request) -> str | None:
+    """Domaine des cookies de session, partagé entre l'apex et le back office.
+
+    Le back office vit sur `admin.sujeedesign.com` depuis le 12/11, mais
+    l'édition en place se fait sur le site public : la vitrine appelle
+    `/api/editor/session` pour savoir si une session existe et si l'édition est
+    demandée (`sjd_edit`). Avec des cookies host-only, ces repères posés par le
+    back office seraient invisibles depuis `sujeedesign.com` et la barre
+    d'édition ne s'afficherait jamais.
+
+    On élargit donc le domaine à `.sujeedesign.com` quand la requête arrive sur
+    ce domaine (ou un sous-domaine), et on garde des cookies host-only partout
+    ailleurs : un hôte de secours type `*.sslip.io` ne peut pas poser de cookie
+    pour `sujeedesign.com`, et inversement.
+    """
+    host = (request.headers.get("host") or "").split(",")[0].strip().lower()
+    host = host.split(":")[0]
+    site = urlparse(public_base_url()).netloc.lower().split(":")[0]
+    if not host or not site:
+        return None
+    if host == site or host.endswith("." + site):
+        # Domaine parent explicite : accepté depuis l'apex comme depuis un
+        # sous-domaine, et c'est la seule forme partagée entre les deux.
+        return "." + site
+    return None
 
 
 def get(conn: sqlite3.Connection, key: str, default: str = "") -> str:
