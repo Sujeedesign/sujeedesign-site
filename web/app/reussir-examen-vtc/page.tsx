@@ -13,6 +13,10 @@ export const metadata: Metadata = {
   description:
     "Sept épreuves écrites, une épreuve pratique : le guide complet de l'examen VTC 2026, écrit pour les candidats libres. 85 pages, 14 chapitres, un plan de révision de 45 jours et 7 fiches mémo gratuites.",
   alternates: { canonical: "/reussir-examen-vtc" },
+  robots: {
+    index: false,
+    follow: false,
+  },
   openGraph: {
     type: "article",
     title: "Réussir l'examen VTC 2026 en candidat libre",
