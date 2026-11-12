@@ -26,7 +26,7 @@ const TITLE = `Examen VTC ${EDITION} : réussir en candidat libre`;
 const DESCRIPTION = `Réussir l’examen VTC ${EDITION} sans centre de formation : les 7 épreuves, les 3 seuils, un plan de 45 jours. 7 fiches mémo en PDF gratuit, guide complet à 23,88 € TTC.`;
 
 export const metadata: Metadata = {
-  title: { absolute: `${TITLE} | Guide, PDF gratuit et site clé en main` },
+  title: { absolute: `${TITLE} | Guide et PDF` },
   description: DESCRIPTION,
   alternates: { canonical: PATH },
   openGraph: {
