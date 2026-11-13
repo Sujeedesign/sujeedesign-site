@@ -18,12 +18,13 @@ const SITE_URL = "https://sujeedesign.com";
 /** Une seule ligne à changer quand la nouvelle édition sort. */
 const EDITION = "2027";
 
-/** `?wanted=true` ouvre directement le paiement Gumroad. */
-const GUIDE_URL = "https://sujeedesign.gumroad.com/l/reussir-examen-vtc-2026?wanted=true";
+/** Lien avec le code LANCEMENT-VTC déjà appliqué : Gumroad ouvre le paiement à 16,72 € TTC.
+    Le code porte sur les 20 premiers exemplaires, jusqu'au 12 décembre 2026. */
+const GUIDE_URL = "https://sujeedesign.gumroad.com/l/reussir-examen-vtc-2026/LANCEMENT-VTC";
 const MEMO_URL = "https://sujeedesign.gumroad.com/l/fiches-memo-examen-vtc-2026";
 
 const TITLE = `Examen VTC ${EDITION} : réussir en candidat libre`;
-const DESCRIPTION = `Réussir l’examen VTC ${EDITION} sans centre de formation : les 7 épreuves, les 3 seuils, un plan de 45 jours. 7 fiches mémo en PDF gratuit, guide complet à 23,88 € TTC.`;
+const DESCRIPTION = `Réussir l’examen VTC ${EDITION} sans centre de formation : les 7 épreuves, les 3 seuils, un plan de 45 jours. 7 fiches mémo en PDF gratuit, guide complet à 16,72 € TTC au lieu de 23,88 €.`;
 
 export const metadata: Metadata = {
   title: { absolute: `${TITLE} | Guide et PDF` },
@@ -244,7 +245,7 @@ export default function Page() {
                   <span aria-hidden="true">↘</span>
                 </a>
                 <a className={styles.btnGhost} href={GUIDE_URL} target="_blank" rel="noopener">
-                  Le guide complet · 23,88 €
+                  Le guide complet · 16,72 €
                 </a>
               </div>
 
@@ -510,7 +511,7 @@ export default function Page() {
                   épreuve, les réponses attendues, l’entraînement et le calendrier jusqu’au jour J.
                 </p>
               </div>
-              <div className="side">PDF · 23,88 € TTC</div>
+              <div className="side">PDF · 16,72 € TTC · −30 %</div>
             </div>
 
             <div className={styles.guideGrid}>
@@ -528,7 +529,12 @@ export default function Page() {
                   l’impression. Édition novembre 2026, textes à jour.
                 </p>
                 <p className={styles.price}>
-                  23,88 €<span className={styles.priceUnit}>TTC</span>
+                  <s className={styles.priceStrike}>23,88 €</s>
+                  16,72 €<span className={styles.priceUnit}>TTC</span>
+                </p>
+                <p className={styles.promoNote}>
+                  Code <b>LANCEMENT-VTC</b> déjà appliqué : −30 %, soit 7,16 € d’économie.
+                  Offre limitée aux 20 premiers exemplaires, jusqu’au 12 décembre 2026.
                 </p>
                 <a className={styles.btnSolid} href={GUIDE_URL} target="_blank" rel="noopener">
                   Acheter le guide
@@ -699,7 +705,7 @@ export default function Page() {
                   <span aria-hidden="true">↘</span>
                 </a>
                 <a className={styles.btnGhost} href={GUIDE_URL} target="_blank" rel="noopener">
-                  Le guide · 23,88 €
+                  Le guide · 16,72 €
                 </a>
               </div>
               <Link className={styles.ctaSite} href="#site">
