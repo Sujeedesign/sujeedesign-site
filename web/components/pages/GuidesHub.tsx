@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { routes } from "@/lib/routes";
 import styles from "./RessourcesHub.module.css";
+import vtc from "./GuidesHub.module.css";
 
 export const pageMeta = {
   title: "Guides : prix, choix et méthode avant de lancer un projet",
@@ -174,42 +175,41 @@ export function GuidesHub() {
             </Link>
           </div>
 
-          <div className={styles.bloc}>
-            <div className={styles.blocHead}>
-              <h2 className={styles.blocTitle}>Hors design : chauffeurs VTC</h2>
-              <p className={styles.blocText}>
-                Un métier qui vient souvent chercher une identité et un site au studio : le guide
-                écrit pour ceux qui préparent l&apos;examen seuls, et l&apos;offre pour ceux qui
-                sont déjà en activité.
+          <div className={vtc.vtc}>
+            <span className={vtc.vtcMedia}>
+              <img
+                src="/assets/vtc/chauffeur-mercedes-900.webp"
+                alt="Chauffeur VTC en costume devant sa berline, photo d'ouverture du guide."
+                width={900}
+                height={600}
+                loading="lazy"
+                decoding="async"
+              />
+            </span>
+            <div className={vtc.vtcBody}>
+              <p className={vtc.vtcKick}>Hors design · chauffeurs VTC</p>
+              <h2 className={vtc.vtcTitle}>
+                Réussir l&apos;examen VTC 2027, seul
+              </h2>
+              <p className={vtc.vtcText}>
+                Les 7 épreuves décryptées, les 3 seuils, un plan de 45 jours et 7 fiches mémo
+                gratuites. Pour les chauffeurs déjà en activité, un pack logo, site et flyer
+                clé en main à 59 €/mois.
               </p>
-            </div>
-            <Link href={routes.vtc} className={styles.wide}>
-              <span className={styles.wideMedia}>
-                <img
-                  src="/assets/vtc/chauffeur-mercedes-900.webp"
-                  alt="Chauffeur VTC en costume devant sa berline, photo d'ouverture du guide."
-                  width={900}
-                  height={600}
-                  loading="lazy"
-                  decoding="async"
-                />
-              </span>
-              <span className={styles.wideBody}>
-                <span className={styles.cardHead}>
-                  <span className={styles.kind}>Guide VTC</span>
-                  <span className={styles.num}>85 pages</span>
-                </span>
-                <h3 className={styles.wideTitle}>Réussir l&apos;examen VTC 2027</h3>
-                <p className={styles.cardText}>
-                  Les 7 épreuves décryptées, les 3 seuils, un plan de 45 jours et 7 fiches mémo
-                  gratuites. Pour les chauffeurs déjà diplômés, un pack site, logo et flyer clé
-                  en main.
-                </p>
-                <span className={styles.cta}>
+              <ul className={vtc.vtcPoints}>
+                <li>85 pages</li>
+                <li>7 fiches offertes</li>
+                <li>Plan 45 jours</li>
+              </ul>
+              <div className={vtc.vtcFoot}>
+                <Link href={routes.vtc} className={vtc.vtcCta}>
                   Ouvrir le guide VTC <span aria-hidden="true">↗</span>
+                </Link>
+                <span className={vtc.vtcPrice}>
+                  Guide <b>16,72 €</b> · pack site <b>59 €/mois</b>
                 </span>
-              </span>
-            </Link>
+              </div>
+            </div>
           </div>
 
           <p className={styles.note}>

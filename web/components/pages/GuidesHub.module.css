@@ -1,0 +1,150 @@
+/* Bandeau VTC : bloc sombre plein cadre, seul élément hors charte claire de la page.
+   Il reprend la direction artistique du tunnel /reussir-examen-vtc pour que la
+   section se démarque des cartes éditoriales blanches. */
+
+.vtc {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  margin-top: clamp(30px, 4vw, 50px);
+  background: #0a0a09;
+  color: #f2efe7;
+  overflow: hidden;
+  border-radius: var(--ds-radius);
+}
+
+.vtcMedia {
+  position: relative;
+  min-height: 300px;
+}
+
+.vtcMedia img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 40%;
+  filter: brightness(0.82) contrast(1.05);
+}
+
+/* Dégradé de jonction : la photo se fond dans le noir du bloc. */
+.vtcMedia::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(10, 10, 9, 0) 55%, rgba(10, 10, 9, 0.92) 100%);
+  pointer-events: none;
+}
+
+.vtcBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: clamp(24px, 3.4vw, 48px);
+  padding-left: clamp(18px, 2vw, 26px);
+}
+
+.vtcKick {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #ff4b1f;
+}
+
+.vtcTitle {
+  margin: 0;
+  font-family: var(--display);
+  font-size: clamp(24px, 2.8vw, 38px);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  color: #f2efe7;
+}
+
+.vtcText {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: #c9c3b7;
+  max-width: 46ch;
+}
+
+.vtcPoints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin: 2px 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: #9a958a;
+}
+
+.vtcPoints li {
+  padding: 5px 9px;
+  border: 1px solid rgba(242, 239, 231, 0.18);
+}
+
+.vtcFoot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+  margin-top: 6px;
+}
+
+.vtcCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 20px;
+  background: #ff4b1f;
+  color: #0a0a09;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 0;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.vtcCta:hover,
+.vtcCta:focus-visible {
+  background: #f2efe7;
+  color: #0a0a09;
+}
+
+.vtcPrice {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+  color: #9a958a;
+}
+
+.vtcPrice b {
+  font-weight: 500;
+  color: #f2efe7;
+}
+
+@media (max-width: 860px) {
+  .vtc {
+    grid-template-columns: 1fr;
+  }
+
+  .vtcMedia {
+    min-height: 190px;
+    max-height: 230px;
+  }
+
+  .vtcMedia::after {
+    background: linear-gradient(180deg, rgba(10, 10, 9, 0) 45%, rgba(10, 10, 9, 0.95) 100%);
+  }
+
+  .vtcBody {
+    padding: 22px 20px 24px;
+  }
+}
