@@ -619,7 +619,7 @@ export default function Page() {
                   height={1350}
                   loading="lazy"
                 />
-                <span className={styles.packTag}>Offre de lancement</span>
+                <span className={styles.packTag}>Tout compris</span>
               </div>
 
               <h3 className={styles.packName}>Pack VTC clé en main</h3>

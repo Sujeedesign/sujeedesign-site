@@ -193,8 +193,8 @@ export function GuidesHub() {
               </h2>
               <p className={vtc.vtcText}>
                 Les 7 épreuves décryptées, les 3 seuils, un plan de 45 jours et 7 fiches mémo
-                gratuites. Pour les chauffeurs déjà en activité, un pack logo, site et flyer
-                clé en main à 59 €/mois.
+                gratuites. Pour les chauffeurs déjà en activité, un pack site et flyer
+                clé en main : 490 € de mise en service, puis 39 €/mois.
               </p>
               <ul className={vtc.vtcPoints}>
                 <li>85 pages</li>
@@ -206,7 +206,7 @@ export function GuidesHub() {
                   Ouvrir le guide VTC <span aria-hidden="true">↗</span>
                 </Link>
                 <span className={vtc.vtcPrice}>
-                  Guide <b>16,72 €</b> · pack site <b>59 €/mois</b>
+                  Guide <b>19,90 €</b> · pack site <b>490 € + 39 €/mois</b>
                 </span>
               </div>
             </div>
