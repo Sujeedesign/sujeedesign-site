@@ -33,7 +33,7 @@ export default function VtcStickyBar({ memoUrl, guideUrl }: Props) {
         PDF gratuit
       </a>
       <a className={styles.stickySolid} href={guideUrl} target="_blank" rel="noopener">
-        Le guide · 16,72 €
+        Le guide · 19,90 €
       </a>
     </div>
   );

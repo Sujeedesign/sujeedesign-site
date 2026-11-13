@@ -838,16 +838,6 @@
   color: var(--bone);
 }
 
-.priceStrike {
-  font-family: var(--mono);
-  font-weight: 400;
-  font-size: clamp(14px, 1.3vw, 17px);
-  letter-spacing: 0;
-  color: var(--muted);
-  text-decoration: line-through;
-  text-decoration-thickness: 1px;
-}
-
 .promoNote {
   margin: 0;
   font-family: var(--mono);

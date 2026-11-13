@@ -18,13 +18,13 @@ const SITE_URL = "https://sujeedesign.com";
 /** Une seule ligne à changer quand la nouvelle édition sort. */
 const EDITION = "2027";
 
-/** Lien avec le code LANCEMENT-VTC déjà appliqué : Gumroad ouvre le paiement à 16,72 € TTC.
-    Le code porte sur les 20 premiers exemplaires, jusqu'au 12 décembre 2026. */
-const GUIDE_URL = "https://sujeedesign.gumroad.com/l/reussir-examen-vtc-2026/LANCEMENT-VTC";
+/** Lien sans code promo : Gumroad ouvre le paiement au prix plein, 19,90 € TTC.
+    Un seul prix, pas d'offre datée, pas de code à saisir. */
+const GUIDE_URL = "https://sujeedesign.gumroad.com/l/reussir-examen-vtc-2026";
 const MEMO_URL = "https://sujeedesign.gumroad.com/l/fiches-memo-examen-vtc-2026";
 
 const TITLE = `Examen VTC ${EDITION} : réussir en candidat libre`;
-const DESCRIPTION = `Les 7 épreuves, les 3 seuils et un plan de 45 jours pour réussir l’examen VTC ${EDITION} seul. 7 fiches mémo gratuites, guide complet à 16,72 €.`;
+const DESCRIPTION = `Les 7 épreuves, les 3 seuils et un plan de 45 jours pour réussir l’examen VTC ${EDITION} seul. 7 fiches mémo gratuites, guide complet à 19,90 €.`;
 
 export const metadata: Metadata = {
   title: { absolute: `${TITLE} | Guide et PDF` },
@@ -129,7 +129,7 @@ const livrables = [
     n: "02",
     titre: "La production",
     texte:
-      "Logo, charte, site et supports avancent ensemble. Deux allers-retours inclus, sans réunion à rallonge.",
+      "Site et supports avancent ensemble. Deux allers-retours inclus, sans réunion à rallonge.",
   },
   {
     n: "03",
@@ -175,16 +175,16 @@ const faq = [
     a: "Le paiement se fait sur Gumroad, par carte. Le PDF est disponible immédiatement après l’achat, sans compte à créer, et le lien de téléchargement reste accessible depuis la confirmation de commande. Comme pour tout contenu numérique, il n’y a pas de rétractation après téléchargement.",
   },
   {
-    q: "Que comprend exactement l’offre à 59 € par mois ?",
-    a: "Le logo et sa charte, le nom de domaine offert la première année, un site de cinq pages avec formulaire de réservation, un flyer A5 et une carte de visite à la même charte, l’hébergement et la maintenance. Un seul interlocuteur, un seul calendrier. Engagement de douze mois, sans frais de mise en service.",
+    q: "Que comprend exactement l’offre à 39 € par mois ?",
+    a: "Le nom de domaine offert la première année, un site de cinq pages avec formulaire de réservation, un flyer A5 et une carte de visite à la même direction visuelle, l’hébergement et la maintenance. Un seul interlocuteur, un seul calendrier. 490 € de mise en service une seule fois, puis 39 € par mois, engagement de douze mois.",
   },
   {
     q: "Pourquoi un abonnement plutôt qu’un paiement unique ?",
-    a: "Parce qu’un site ne s’arrête pas le jour de la livraison : il y a l’hébergement, les mises à jour, les changements de tarifs, la nouvelle photo du véhicule. L’abonnement couvre la production et la vie du site. Si tu préfères payer une fois, les formules à la carte existent, à partir de 1 200 €.",
+    a: "Parce qu’un site ne s’arrête pas le jour de la livraison : il y a l’hébergement, les mises à jour, les changements de tarifs, la nouvelle photo du véhicule. Les 490 € couvrent la production, les 39 € par mois couvrent la vie du site.",
   },
   {
     q: "Faut-il déjà avoir la carte VTC pour commander ?",
-    a: "Non, et c’est même le bon moment. L’identité et le site peuvent se préparer pendant les révisions, pour être en ligne le jour où tu commences à rouler. La prestation est indépendante du guide : elle démarre par un devis et un rendez-vous de cadrage.",
+    a: "Non, et c’est même le bon moment. Le site et les supports peuvent se préparer pendant les révisions, pour être en ligne le jour où tu commences à rouler. La prestation est indépendante du guide : elle démarre par un devis et un rendez-vous de cadrage.",
   },
 ];
 
@@ -216,9 +216,8 @@ export default function Page() {
             offers: {
               "@type": "Offer",
               url: GUIDE_URL,
-              price: "16.72",
+              price: "19.90",
               priceCurrency: "EUR",
-              priceValidUntil: "2026-12-12",
               availability: "https://schema.org/InStock",
               seller: { "@id": `${SITE_URL}/#studio` },
             },
@@ -264,7 +263,7 @@ export default function Page() {
                   <span aria-hidden="true">↘</span>
                 </a>
                 <a className={styles.btnGhost} href={GUIDE_URL} target="_blank" rel="noopener">
-                  Le guide complet · 16,72 €
+                  Le guide complet · 19,90 €
                 </a>
               </div>
 
@@ -386,10 +385,10 @@ export default function Page() {
                   <span className={styles.segNum}>02 · Je veux des clients</span>
                   <span className={styles.segName}>Chauffeur en activité</span>
                   <span className={styles.segText}>
-                    Tu as la carte, ou tu l’auras bientôt. Il te faut un nom, un logo, un site et
-                    de quoi te présenter. Le pack clé en main est fait pour ça.
+                    Tu as la carte, ou tu l’auras bientôt. Il te faut un nom, un site et de quoi te
+                    présenter. Le pack clé en main est fait pour ça.
                   </span>
-                  <span className={styles.segCta}>Logo, site, flyer · 59 €/mois →</span>
+                  <span className={styles.segCta}>Site clé en main · 39 €/mois →</span>
                 </span>
               </a>
             </div>
@@ -530,7 +529,7 @@ export default function Page() {
                   épreuve, les réponses attendues, l’entraînement et le calendrier jusqu’au jour J.
                 </p>
               </div>
-              <div className="side">PDF · 16,72 € TTC · −30 %</div>
+              <div className="side">PDF · 19,90 € TTC</div>
             </div>
 
             <div className={styles.guideGrid}>
@@ -548,12 +547,10 @@ export default function Page() {
                   l’impression. Édition novembre 2026, textes à jour.
                 </p>
                 <p className={styles.price}>
-                  <s className={styles.priceStrike}>23,88 €</s>
-                  16,72 €<span className={styles.priceUnit}>TTC</span>
+                  19,90 €<span className={styles.priceUnit}>TTC</span>
                 </p>
                 <p className={styles.promoNote}>
-                  Code <b>LANCEMENT-VTC</b> déjà appliqué : −30 %, soit 7,16 € d’économie.
-                  Offre limitée aux 20 premiers exemplaires, jusqu’au 12 décembre 2026.
+                  Prix unique. Pas de code, pas d’offre qui expire.
                 </p>
                 <a className={styles.btnSolid} href={GUIDE_URL} target="_blank" rel="noopener">
                   Acheter le guide
@@ -584,7 +581,7 @@ export default function Page() {
               <p className={styles.kick}>Prestation sujee design · chauffeurs VTC</p>
               <h2 className={styles.siteTitle}>
                 Ton activité, clé en main.
-                <span>Logo, domaine, site, flyer.</span>
+                <span>Domaine, site, flyer.</span>
               </h2>
               <p className={styles.siteLead}>
                 Passer l’examen, c’est une chose. Être trouvé le lendemain, c’en est une autre. Un
@@ -604,9 +601,8 @@ export default function Page() {
 
               <div className={styles.siteFoot}>
                 <p className={styles.siteNote}>
-                  Sans frais de mise en service · engagement 12 mois · option référencement local
-                  +49 €/mois. Tu préfères payer une fois ? Identité seule à partir de 1 200 €, site
-                  seul à partir de 1 500 €.
+                 490 € de mise en service · engagement 12 mois · option référencement local
+                 +49 €/mois.
                 </p>
                 <Link className={styles.textLink} href="/realisations">
                   Voir des exemples de sites livrés
@@ -628,12 +624,11 @@ export default function Page() {
 
               <h3 className={styles.packName}>Pack VTC clé en main</h3>
               <p className={styles.packPrice}>
-                59 €<span>/ mois</span>
+                39 €<span>/ mois</span>
               </p>
-              <p className={styles.packNote}>TTC · 12 mois · 0 € de mise en service</p>
+              <p className={styles.packNote}>490 € de mise en service, une seule fois · TTC · 12 mois</p>
 
               <ul className={styles.packList}>
-                <li>Logo + charte graphique</li>
                 <li>Nom de domaine .fr offert 1 an</li>
                 <li>Site 5 pages avec réservation</li>
                 <li>Flyer A5 + carte de visite</li>
@@ -683,7 +678,7 @@ export default function Page() {
               <div className="sec-num">Questions</div>
               <div>
                 <h2>Ce qu’on nous demande le plus</h2>
-                <p>Inscription, seuils, révisions, commande, site et identité : les réponses sans détour.</p>
+                <p>Inscription, seuils, révisions, commande, site et supports : les réponses sans détour.</p>
               </div>
             </div>
 
@@ -697,7 +692,7 @@ export default function Page() {
               ))}
             </div>
 
-            <h3 className={styles.subHead}>Le site et l’identité</h3>
+            <h3 className={styles.subHead}>Le site et les supports</h3>
             <div className={styles.faq}>
               {faqSite.map((f) => (
                 <details key={f.q}>
@@ -724,11 +719,11 @@ export default function Page() {
                   <span aria-hidden="true">↘</span>
                 </a>
                 <a className={styles.btnGhost} href={GUIDE_URL} target="_blank" rel="noopener">
-                  Le guide · 16,72 €
+                  Le guide · 19,90 €
                 </a>
               </div>
               <Link className={styles.ctaSite} href="#site">
-                Le pack clé en main · 59 €/mois
+                Le pack clé en main · 39 €/mois
               </Link>
             </div>
 
@@ -736,7 +731,7 @@ export default function Page() {
               sujee design n’est ni un organisme de formation agréé, ni un centre d’examen, ni une
               administration. Le guide est un support de révision indépendant : il ne délivre aucun
               titre. Les informations administratives renvoient aux pages officielles de la CMA et de
-              service-public.fr. La prestation site et identité est un service distinct, précédé d’un
+              service-public.fr. La prestation site et supports est un service distinct, précédé d’un
               devis. Photos : Pexels.
             </p>
           </div>
