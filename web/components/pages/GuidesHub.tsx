@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { routes } from "@/lib/routes";
-import styles from "./GuidesHub.module.css";
+import styles from "./RessourcesHub.module.css";
 
 export const pageMeta = {
   title: "Guides : prix, choix et méthode avant de lancer un projet",
@@ -8,33 +8,40 @@ export const pageMeta = {
     "Quatre guides pour décider sans se tromper : prix d'un logo, prix d'un site, agence ou freelance, tendances 2027. Chiffres réels et temps de travail.",
 };
 
-type Guide = {
+type Entree = {
   href: string;
   num: string;
   kind: string;
   title: string;
   text: string;
-  meta: string;
+  more: string;
+  cover: string;
+  alt: string;
 };
 
-const GUIDES: Guide[] = [
+/** Trois guides pour situer un budget et choisir à qui le confier. */
+const DECIDER: Entree[] = [
   {
     href: routes.guidePrixLogo,
     num: "01",
-    kind: "Prix",
+    kind: "Guide",
     title: "Combien coûte un logo en 2026 ?",
     text:
       "Quatre paliers de prix, le temps de travail réel derrière chaque niveau, et ce qui manque dans un devis à 200 €.",
-    meta: "9 min",
+    more: "Lire le guide",
+    cover: "creer-un-logo",
+    alt: "Graphiste dessinant un logo sur une tablette, devant un écran de création vectorielle.",
   },
   {
     href: routes.guidePrixSite,
     num: "02",
-    kind: "Prix",
+    kind: "Guide",
     title: "Combien coûte un site internet ?",
     text:
       "Les fourchettes du marché, les coûts récurrents que personne n'annonce et le prix réel d'un site vitrine.",
-    meta: "11 min",
+    more: "Lire le guide",
+    cover: "site-internet",
+    alt: "Ordinateur portable ouvert sur la page d'accueil d'un site, sur un bureau clair.",
   },
   {
     href: routes.guideAgenceFreelance,
@@ -43,18 +50,42 @@ const GUIDES: Guide[] = [
     title: "Agence ou freelance, comment choisir",
     text:
       "Ce qui change vraiment entre les deux, les signaux qui doivent alerter, et la question à poser avant de signer.",
-    meta: "8 min",
-  },
-  {
-    href: routes.guideTendances2027,
-    num: "04",
-    kind: "Analyse",
-    title: "Tendances web design 2027",
-    text:
-      "Quatre tendances passées au filtre du réel : ce qui tient deux ans pour une PME, et ce qui n'est qu'une mode.",
-    meta: "12 min",
+    more: "Lire le guide",
+    cover: "freelance-ou-agence",
+    alt: "Équipe de designers travaillant ensemble autour d'une table blanche dans un studio lumineux.",
   },
 ];
+
+function Carte({ entree }: { entree: Entree }) {
+  const base = `/assets/img/covers/${entree.cover}`;
+  return (
+    <Link href={entree.href} className={styles.card}>
+      <span className={styles.cover}>
+        <img
+          src={`${base}-800.webp`}
+          srcSet={`${base}-480.webp 480w, ${base}-800.webp 800w, ${base}-1200.webp 1200w`}
+          sizes="(max-width: 640px) 92vw, (max-width: 980px) 46vw, 30vw"
+          alt={entree.alt}
+          width={1200}
+          height={896}
+          loading="lazy"
+          decoding="async"
+        />
+      </span>
+      <span className={styles.body}>
+        <span className={styles.cardHead}>
+          <span className={styles.num}>{entree.num}</span>
+          <span className={styles.kind}>{entree.kind}</span>
+        </span>
+        <h3 className={styles.cardTitle}>{entree.title}</h3>
+        <p className={styles.cardText}>{entree.text}</p>
+        <span className={styles.cta}>
+          {entree.more} <span aria-hidden="true">↗</span>
+        </span>
+      </span>
+    </Link>
+  );
+}
 
 export function GuidesHub() {
   return (
@@ -75,7 +106,7 @@ export function GuidesHub() {
               travail.
             </p>
           </div>
-          <div className={styles.bar}>
+          <div className={styles.sousHead}>
             <p className={styles.pourQui}>
               Pour un dirigeant de TPE, un artisan ou une association qui doit engager un budget
               et veut comprendre ce qu&apos;il achète avant de demander un devis.
@@ -91,51 +122,113 @@ export function GuidesHub() {
 
       <section className="section">
         <div className="wrap">
-          <div className={styles.grid}>
-            {GUIDES.map((guide) => (
-              <Link key={guide.href} href={guide.href} className={styles.card}>
-                <span className={styles.cardTop}>
-                  <span className={styles.num}>{guide.num}</span>
-                  <span className={styles.kind}>{guide.kind}</span>
-                </span>
-                <h2 className={styles.cardTitle}>{guide.title}</h2>
-                <p className={styles.cardText}>{guide.text}</p>
-                <span className={styles.cardFoot}>
-                  <span className={styles.read}>
-                    Lire le guide <span aria-hidden="true">↗</span>
-                  </span>
-                  <span className={styles.time}>{guide.meta}</span>
-                </span>
-              </Link>
-            ))}
+          <div className={styles.bloc}>
+            <div className={styles.blocHead}>
+              <h2 className={styles.blocTitle}>Situer le budget</h2>
+              <p className={styles.blocText}>
+                Deux guides de prix et une grille de lecture pour choisir à qui confier le
+                projet, avec le temps de travail réel derrière chaque fourchette.
+              </p>
+            </div>
+            <div className={styles.grid}>
+              {DECIDER.map((entree) => (
+                <Carte key={entree.href} entree={entree} />
+              ))}
+            </div>
           </div>
 
-          <div className={styles.vtc}>
-            <div className={styles.vtcMedia}>
-              <img
-                src="/assets/vtc/chauffeur-mercedes-900.webp"
-                alt="Chauffeur VTC en costume au volant de sa berline."
-                width={900}
-                height={600}
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
-            <div className={styles.vtcBody}>
-              <p className={styles.vtcKick}>Hors design · chauffeurs VTC</p>
-              <h2 className={styles.vtcTitle}>
-                Réussir l&apos;examen VTC 2027, seul
-              </h2>
-              <p className={styles.vtcText}>
-                Un guide de 85 pages sur les 7 épreuves, les 3 seuils et un plan de 45 jours,
-                avec 7 fiches mémo gratuites. Et pour ceux qui sont déjà en activité, un pack
-                site, logo et flyer clé en main.
+          <div className={styles.bloc}>
+            <div className={styles.blocHead}>
+              <h2 className={styles.blocTitle}>Comprendre ce qui vient</h2>
+              <p className={styles.blocText}>
+                Les guides servent à décider maintenant. Cette analyse sert à décider pour les
+                deux prochaines années : ce qui change vraiment dans un site, et ce qui n&apos;est
+                qu&apos;une mode.
               </p>
-              <Link href={routes.vtc} className={styles.vtcCta}>
-                Ouvrir le guide VTC
-                <span aria-hidden="true">↗</span>
-              </Link>
             </div>
+            <Link href={routes.guideTendances2027} className={styles.wide}>
+              <span className={styles.wideMedia}>
+                <img
+                  src="/assets/img/guides/tendances-2027-ouverture.webp"
+                  alt="Visuel de couverture du guide : grand titre 2027 et maquette de navigateur illustrant une identité de marque."
+                  width={1600}
+                  height={900}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </span>
+              <span className={styles.wideBody}>
+                <span className={styles.cardHead}>
+                  <span className={styles.kind}>Analyse</span>
+                  <span className={styles.num}>1 800 mots</span>
+                </span>
+                <h3 className={styles.wideTitle}>Tendances web design 2027</h3>
+                <p className={styles.cardText}>
+                  Quatre tendances passées au filtre du réel : ce qui change pour un site de PME,
+                  de commerce ou d&apos;indépendant, et ce qui ne tiendra pas deux ans.
+                </p>
+                <span className={styles.cta}>
+                  Lire l&apos;analyse <span aria-hidden="true">↗</span>
+                </span>
+              </span>
+            </Link>
+          </div>
+
+          <div className={styles.bloc}>
+            <div className={styles.blocHead}>
+              <h2 className={styles.blocTitle}>Hors design : chauffeurs VTC</h2>
+              <p className={styles.blocText}>
+                Un métier qui vient souvent chercher une identité et un site au studio : le guide
+                écrit pour ceux qui préparent l&apos;examen seuls, et l&apos;offre pour ceux qui
+                sont déjà en activité.
+              </p>
+            </div>
+            <Link href={routes.vtc} className={styles.wide}>
+              <span className={styles.wideMedia}>
+                <img
+                  src="/assets/vtc/chauffeur-mercedes-900.webp"
+                  alt="Chauffeur VTC en costume devant sa berline, photo d'ouverture du guide."
+                  width={900}
+                  height={600}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </span>
+              <span className={styles.wideBody}>
+                <span className={styles.cardHead}>
+                  <span className={styles.kind}>Guide VTC</span>
+                  <span className={styles.num}>85 pages</span>
+                </span>
+                <h3 className={styles.wideTitle}>Réussir l&apos;examen VTC 2027</h3>
+                <p className={styles.cardText}>
+                  Les 7 épreuves décryptées, les 3 seuils, un plan de 45 jours et 7 fiches mémo
+                  gratuites. Pour les chauffeurs déjà diplômés, un pack site, logo et flyer clé
+                  en main.
+                </p>
+                <span className={styles.cta}>
+                  Ouvrir le guide VTC <span aria-hidden="true">↗</span>
+                </span>
+              </span>
+            </Link>
+          </div>
+
+          <p className={styles.note}>
+            Ces pages complètent les services du studio : elles servent à savoir où vous mettez
+            les pieds avant de parler budget. Aucune ne demande votre e-mail, aucune ne renvoie
+            vers un formulaire pour obtenir un chiffre. Si votre cas ne rentre dans aucune
+            fourchette, écrivez-moi, le devis se construit sur votre périmètre.
+          </p>
+        </div>
+      </section>
+
+      <section className="cta-section">
+        <div className="wrap">
+          <div className="bandcta bandcta--dark cta-glow">
+            <div className="glow" aria-hidden="true" />
+            <p>Un projet, une question de budget ?</p>
+            <Link className="btn-fill btn-fill--light" href={routes.contact}>
+              Parler de votre projet <span aria-hidden="true">↗</span>
+            </Link>
           </div>
         </div>
       </section>
