@@ -661,12 +661,14 @@ body.has-dark-hero .nav.nav--open .nav-burger{ color: var(--ink) !important; }
 
 /* ============================================================
    Footer — version unique et structurée (toutes les pages)
-   Remplace la ligne de liens du v5 : colonnes lisibles, réseaux
-   sociaux en pastilles visibles dès le premier écran de footer.
+   Cinq colonnes : studio, métiers, guides, outils, puis un
+   bandeau VTC et la ligne légale avec les réseaux.
+   L'espace avant le footer est volontairement court : les
+   sections d'appel à l'action ont déjà leur respiration.
    ============================================================ */
 footer.sf{
-  margin-top: clamp(48px, 7vw, 96px);
-  padding: clamp(44px, 5.4vw, 74px) 0 calc(20px + env(safe-area-inset-bottom));
+  margin-top: clamp(12px, 1.6vw, 24px);
+  padding: clamp(38px, 4.6vw, 60px) 0 calc(18px + env(safe-area-inset-bottom));
   background: #0A0A09;
   color: #F4F1E8;
   font-family: "Space Grotesk", system-ui, sans-serif;
@@ -675,8 +677,8 @@ footer.sf{
 
 .sf__grid{
   display: grid;
-  grid-template-columns: 1.55fr .85fr 1.1fr 1.2fr;
-  gap: clamp(26px, 3.6vw, 60px);
+  grid-template-columns: 1.5fr .82fr 1fr 1.02fr 1.02fr;
+  gap: clamp(22px, 3vw, 46px);
   align-items: start;
 }
 
@@ -693,29 +695,22 @@ footer.sf{
   text-decoration: none;
   border: 0;
 }
-.sf__dot{
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--accent);
-  flex: 0 0 auto;
-}
 .sf__logo-img{
   display: block;
-  width: clamp(132px, 14vw, 164px);
+  width: clamp(126px, 13vw, 152px);
   height: auto;
 }
 .sf__tagline{
-  margin: 16px 0 0;
+  margin: 14px 0 0;
   color: #B8B2A6;
-  font-size: 13px;
-  line-height: 1.65;
+  font-size: 12.5px;
+  line-height: 1.6;
 }
 .sf__avail{
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 18px 0 0;
+  margin: 14px 0 0;
   font-family: var(--mono);
   font-size: 10px;
   letter-spacing: .08em;
@@ -738,9 +733,26 @@ footer.sf{
   .sf__pulse{ animation: none; }
 }
 
+footer.sf .sf__reach{
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, .1);
+}
+footer.sf .sf__reach a{
+  font-size: 12.5px;
+  color: #C9C3B6;
+  text-decoration: none;
+  border: 0;
+  transition: color .2s var(--ease);
+}
+footer.sf .sf__reach a:hover{ color: var(--accent); }
+
 .sf__col{ display: flex; flex-direction: column; align-items: flex-start; }
 .sf__lbl{
-  margin: 0 0 12px;
+  margin: 0 0 10px;
   font-family: var(--mono);
   font-size: 9.5px;
   font-weight: 400;
@@ -750,10 +762,10 @@ footer.sf{
 }
 footer.sf .sf__col > a{
   display: inline-block;
-  padding: 5px 0;
+  padding: 4px 0;
   color: #C9C3B6;
-  font-size: 13.5px;
-  line-height: 1.5;
+  font-size: 13px;
+  line-height: 1.45;
   text-decoration: none;
   border: 0;
   transition: color .2s var(--ease), transform .2s var(--ease);
@@ -767,47 +779,87 @@ footer.sf .sf__col > a:focus-visible{
   outline: 1px solid var(--accent);
   outline-offset: 3px;
 }
-.sf__city{
-  margin: 8px 0 0;
+
+/* Bandeau VTC : seul lien mis en avant, il sert aussi de maillage interne. */
+footer.sf .sf__vtc{
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px 18px;
+  margin-top: clamp(26px, 3.2vw, 38px);
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, .12);
+  text-decoration: none;
+  border-bottom: 0;
+}
+.sf__vtc-kick{
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.sf__vtc-title{
+  font-size: 14px;
+  line-height: 1.4;
+  color: #F4F1E8;
+  transition: color .2s var(--ease);
+}
+.sf__vtc-more{
   font-family: var(--mono);
   font-size: 10px;
-  letter-spacing: .06em;
+  letter-spacing: .05em;
   color: #8C877C;
+  transition: color .2s var(--ease);
 }
+footer.sf .sf__vtc:hover .sf__vtc-title,
+footer.sf .sf__vtc:hover .sf__vtc-more{ color: var(--accent); }
 
-.sf__social-band{
+.sf__base{
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px 22px;
-  margin-top: clamp(28px, 3.6vw, 46px);
-  padding-top: 20px;
+  justify-content: space-between;
+  gap: 12px 22px;
+  margin-top: 14px;
+  padding-top: 14px;
   border-top: 1px solid rgba(255, 255, 255, .12);
+  font-size: 11.5px;
+  color: #A8A296;
 }
-.sf__social-band .sf__lbl{ margin: 0; }
+.sf__base p{ margin: 0; }
+.sf__legal{ display: flex; flex-wrap: wrap; gap: 6px 18px; }
+footer.sf .sf__legal a{
+  color: #A8A296;
+  text-decoration: none;
+  border: 0;
+  transition: color .2s var(--ease);
+}
+footer.sf .sf__legal a:hover{ color: #F4F1E8; }
+
 .sf__social{
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 footer.sf .sf__social a{
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 8px 13px;
-  min-height: 36px;
-  border: 1px solid rgba(255, 255, 255, .32);
+  gap: 4px;
+  padding: 6px 10px;
+  min-height: 30px;
+  border: 1px solid rgba(255, 255, 255, .34);
   border-radius: 2px;
   background: rgba(255, 255, 255, .04);
   color: #F4F1E8;
-  font-size: 12px;
+  font-size: 11px;
   line-height: 1;
   text-decoration: none;
   transition: color .2s var(--ease), border-color .2s var(--ease), background .2s var(--ease);
 }
 footer.sf .sf__social a span{
-  font-size: 10px;
-  color: #8C877C;
+  font-size: 9px;
+  color: #A8A296;
   transition: color .2s var(--ease);
 }
 footer.sf .sf__social a:hover,
@@ -819,44 +871,31 @@ footer.sf .sf__social a:focus-visible{
 footer.sf .sf__social a:hover span,
 footer.sf .sf__social a:focus-visible span{ color: #0A0A09; }
 
-.sf__base{
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 8px 22px;
-  margin-top: 18px;
-  padding-top: 0;
-  border-top: 0;
-  font-size: 11px;
-  color: #8C877C;
+@media (max-width: 1180px){
+  .sf__grid{ grid-template-columns: 1.3fr .9fr 1fr 1fr; }
+  .sf__grid > .sf__col:last-child{ grid-column: 2 / -1; }
 }
-.sf__base p{ margin: 0; }
-.sf__legal{ display: flex; flex-wrap: wrap; gap: 6px 20px; }
-footer.sf .sf__legal a{
-  color: #8C877C;
-  text-decoration: none;
-  border: 0;
-  transition: color .2s var(--ease);
-}
-footer.sf .sf__legal a:hover{ color: #F4F1E8; }
 
 @media (max-width: 1024px){
-  .sf__grid{ grid-template-columns: 1fr 1fr; gap: 32px 40px; }
+  .sf__grid{ grid-template-columns: 1fr 1fr; gap: 28px 32px; }
   .sf__brand{ grid-column: 1 / -1; max-width: 46ch; }
-  .sf__col--contact{ grid-column: 1 / -1; }
+  .sf__grid > .sf__col:last-child{ grid-column: auto; }
+  footer.sf .sf__vtc{ grid-template-columns: 1fr; gap: 4px; }
   /* le bandeau cookies est déjà centré en bas dès 641 px : on libère sa hauteur
-     (108 à 129 px + 24 px de marge) pour qu'il ne masque jamais Suivre ni la ligne légale */
-  body:has(#cookie-banner) footer.sf{ padding-bottom: 170px; }
+     (108 à 129 px + 24 px de marge) pour qu'il ne masque jamais la ligne légale */
+  body:has(#cookie-banner) footer.sf{ padding-bottom: 168px; }
 }
-@media (max-width: 640px){
-  .sf__grid{ grid-template-columns: 1fr 1fr; gap: 26px 18px; }
+
+@media (max-width: 560px){
+  .sf__grid{ grid-template-columns: 1fr 1fr; gap: 22px 20px; }
   .sf__brand{ grid-column: 1 / -1; }
-  .sf__col--contact{ grid-column: 1 / -1; }
   /* 20 px de ligne + 24 px de padding = 44 px de cible tactile */
-  footer.sf .sf__col > a{ padding: 12px 0; }
-  footer.sf .sf__social a{ min-height: 44px; }
+  footer.sf .sf__col > a{ padding: 11px 0; font-size: 13.5px; }
+  footer.sf .sf__social a{ min-height: 40px; justify-content: center; }
+  .sf__social{ display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+  .sf__base{ flex-direction: column; align-items: flex-start; gap: 10px; }
   .sf__base{ font-size: 10.5px; }
+  .sf__vtc-title{ font-size: 13.5px; }
   /* le bandeau cookies occupe le bas de l'écran : on libère la place */
-  body:has(#cookie-banner) footer.sf{ padding-bottom: 230px; }
+  body:has(#cookie-banner) footer.sf{ padding-bottom: 226px; }
 }

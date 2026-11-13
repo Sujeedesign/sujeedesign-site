@@ -33,6 +33,8 @@ export const routes = {
   testerSonLogo: "/ressources/tester-son-logo",
   /** Vérificateur de contraste WCAG entre deux couleurs. */
   testContraste: "/ressources/test-contraste-couleur",
+  /** Tunnel VTC : guide, fiches gratuites et offre site clé en main. */
+  vtc: "/reussir-examen-vtc",
 } as const;
 
 /** Slugs des cinq services, dans l'ordre éditorial 01 → 05. */

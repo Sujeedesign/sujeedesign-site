@@ -194,13 +194,42 @@ export function ReadRail() {
 /**
  * Pied de page.
  *
- * Version unique pour tout le site : même structure, mêmes liens et mêmes
- * réseaux sociaux sur l'accueil, les pages service et les pages ressources.
- * Les colonnes sont explicites pour rester lisibles sur grand écran, et
- * s'empilent sous 1024 px (deux colonnes) puis sous 640 px.
+ * Version unique pour tout le site : mêmes colonnes, mêmes liens partout.
+ * Cinq colonnes sur grand écran (studio, métiers, guides, outils), un bandeau
+ * VTC, puis la ligne légale et les réseaux. Empilé en deux colonnes sous
+ * 1024 px, en une sous 560 px.
  */
 export function SiteFooter() {
   const year = new Date().getFullYear();
+
+  const studio = [
+    { href: routes.home, label: "Accueil" },
+    { href: routes.realisations, label: "Réalisations" },
+    { href: routes.services, label: "Services" },
+    { href: routes.aPropos, label: "À propos" },
+    { href: routes.contact, label: "Contact" },
+  ];
+
+  const metiers = serviceSlugs.map((slug) => ({
+    href: serviceHref(slug),
+    label: serviceLabels[slug],
+  }));
+
+  const guides = [
+    { href: routes.ressources, label: "Toutes les ressources" },
+    { href: routes.guidePrixLogo, label: "Combien coûte un logo" },
+    { href: routes.guidePrixSite, label: "Combien coûte un site" },
+    { href: routes.guideAgenceFreelance, label: "Agence ou freelance" },
+    { href: routes.guideTendances2027, label: "Tendances web 2027" },
+  ];
+
+  const outils = [
+    { href: routes.calculateurBudgetIdentite, label: "Calculateur de budget" },
+    { href: routes.modeleCahierDesCharges, label: "Cahier des charges" },
+    { href: routes.generateurBriefIdentite, label: "Générateur de brief" },
+    { href: routes.testerSonLogo, label: "Tester son logo" },
+    { href: routes.testContraste, label: "Test de contraste" },
+  ];
 
   return (
     <footer className="sf">
@@ -225,40 +254,62 @@ export function SiteFooter() {
             <span className="sf__pulse" aria-hidden="true" />
             Disponible pour de nouveaux projets
           </p>
+          <div className="sf__reach">
+            <a href={mailto()}>{CONTACT_EMAIL}</a>
+            <a href={CONTACT_PHONE_HREF}>{CONTACT_PHONE}</a>
+          </div>
         </div>
 
-        <nav className="sf__col" aria-label="Pages du site">
-          <p className="sf__lbl">Pages</p>
-          <a href={routes.home}>Accueil</a>
-          <a href={routes.realisations}>Réalisations</a>
-          <a href={routes.services}>Services</a>
-          <a href={routes.agentsIa}>Agents IA</a>
-          <a href={routes.aPropos}>À propos</a>
-          <a href={routes.contact}>Contact</a>
+        <nav className="sf__col" aria-label="Le studio">
+          <p className="sf__lbl">Studio</p>
+          {studio.map((l) => (
+            <a key={l.href} href={l.href}>
+              {l.label}
+            </a>
+          ))}
         </nav>
 
-        <nav className="sf__col" aria-label="Ressources">
-          <p className="sf__lbl">Ressources</p>
-          <a href={routes.ressources}>Toutes les ressources</a>
-          <a href={routes.calculateurBudgetIdentite}>Calculateur de budget</a>
-          <a href={routes.guidePrixLogo}>Combien coûte un logo</a>
-          <a href={routes.guidePrixSite}>Combien coûte un site</a>
-          <a href={routes.modeleCahierDesCharges}>Cahier des charges</a>
-          <a href={routes.guideTendances2027}>Tendances web design 2027</a>
-          <a href={routes.generateurBriefIdentite}>Générateur de brief</a>
-          <a href={routes.testerSonLogo}>Tester son logo</a>
+        <nav className="sf__col" aria-label="Métiers">
+          <p className="sf__lbl">Métiers</p>
+          {metiers.map((l) => (
+            <a key={l.href} href={l.href}>
+              {l.label}
+            </a>
+          ))}
         </nav>
 
-        <div className="sf__col sf__col--contact">
-          <p className="sf__lbl">Contact</p>
-          <a href={mailto()}>{CONTACT_EMAIL}</a>
-          <a href={CONTACT_PHONE_HREF}>{CONTACT_PHONE}</a>
-          <p className="sf__city">Cergy · Paris</p>
-        </div>
+        <nav className="sf__col" aria-label="Guides">
+          <p className="sf__lbl">Guides</p>
+          {guides.map((l) => (
+            <a key={l.href} href={l.href}>
+              {l.label}
+            </a>
+          ))}
+        </nav>
+
+        <nav className="sf__col" aria-label="Outils gratuits">
+          <p className="sf__lbl">Outils</p>
+          {outils.map((l) => (
+            <a key={l.href} href={l.href}>
+              {l.label}
+            </a>
+          ))}
+        </nav>
       </div>
 
-      <div className="wrap sf__social-band">
-        <p className="sf__lbl">Suivre</p>
+      <div className="wrap">
+        <a className="sf__vtc" href={routes.vtc}>
+          <span className="sf__vtc-kick">Nouveau · chauffeurs VTC</span>
+          <span className="sf__vtc-title">Réussir l’examen VTC 2027, sans centre de formation</span>
+          <span className="sf__vtc-more">
+            Guide, fiches gratuites et site clé en main
+            <span aria-hidden="true"> →</span>
+          </span>
+        </a>
+      </div>
+
+      <div className="wrap sf__base">
+        <p>© {year} Sujee Design · Sujeepan Sabesan · Cergy · Paris</p>
         <div className="sf__social">
           {socials.map((social) => (
             <a key={social.href} href={social.href} target="_blank" rel="noopener">
@@ -267,10 +318,6 @@ export function SiteFooter() {
             </a>
           ))}
         </div>
-      </div>
-
-      <div className="wrap sf__base">
-        <p>© {year} Sujee Design · Sujeepan Sabesan</p>
         <div className="sf__legal">
           <a href={routes.mentionsLegales}>Mentions légales</a>
           <a href="#top">Haut de page ↑</a>
