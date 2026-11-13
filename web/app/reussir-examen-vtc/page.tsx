@@ -24,7 +24,7 @@ const GUIDE_URL = "https://sujeedesign.gumroad.com/l/reussir-examen-vtc-2026/LAN
 const MEMO_URL = "https://sujeedesign.gumroad.com/l/fiches-memo-examen-vtc-2026";
 
 const TITLE = `Examen VTC ${EDITION} : réussir en candidat libre`;
-const DESCRIPTION = `Réussir l’examen VTC ${EDITION} sans centre de formation : les 7 épreuves, les 3 seuils, un plan de 45 jours. 7 fiches mémo en PDF gratuit, guide complet à 16,72 € TTC au lieu de 23,88 €.`;
+const DESCRIPTION = `Les 7 épreuves, les 3 seuils et un plan de 45 jours pour réussir l’examen VTC ${EDITION} seul. 7 fiches mémo gratuites, guide complet à 16,72 €.`;
 
 export const metadata: Metadata = {
   title: { absolute: `${TITLE} | Guide et PDF` },
@@ -204,6 +204,25 @@ export default function Page() {
             "2026-11-12T09:00:00+01:00",
             "2026-11-12T18:00:00+01:00",
           ),
+          {
+            "@type": "Product",
+            "@id": `${SITE_URL}${PATH}#guide`,
+            name: `Réussir l’examen VTC ${EDITION}`,
+            description:
+              "Manuel de 85 pages pour préparer seul les 7 épreuves de l’examen VTC, avec examen blanc corrigé et plan de révision de 45 jours.",
+            image: `${SITE_URL}/assets/vtc/guide-vtc-2027.webp`,
+            brand: { "@type": "Brand", name: "Sujee Design" },
+            category: "Livre numérique",
+            offers: {
+              "@type": "Offer",
+              url: GUIDE_URL,
+              price: "16.72",
+              priceCurrency: "EUR",
+              priceValidUntil: "2026-12-12",
+              availability: "https://schema.org/InStock",
+              seller: { "@id": `${SITE_URL}/#studio` },
+            },
+          },
           faqNode(PATH, faq.map((f) => ({ question: f.q, answer: f.a }))),
           breadcrumbNode([
             { name: "Accueil", path: "/" },

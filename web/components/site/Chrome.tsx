@@ -216,6 +216,7 @@ export function SiteFooter() {
   }));
 
   const guides = [
+    { href: routes.guides, label: "Tous les guides" },
     { href: routes.ressources, label: "Toutes les ressources" },
     { href: routes.guidePrixLogo, label: "Combien coûte un logo" },
     { href: routes.guidePrixSite, label: "Combien coûte un site" },

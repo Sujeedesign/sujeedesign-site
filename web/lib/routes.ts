@@ -15,6 +15,8 @@ export const routes = {
   mentionsLegales: "/mentions-legales",
   /** Hub des pages outils et guides, hors menu principal. */
   ressources: "/ressources",
+  /** Index éditorial des guides. */
+  guides: "/guides",
   /** Calculateur de budget identité. */
   calculateurBudgetIdentite: "/ressources/calculateur-budget-identite",
   /** Guide de prix du logo. */
