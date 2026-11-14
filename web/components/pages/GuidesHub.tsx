@@ -4,7 +4,7 @@ import styles from "./RessourcesHub.module.css";
 import vtc from "./GuidesHub.module.css";
 
 export const pageMeta = {
-  title: "Guides : prix, choix et méthode avant de lancer un projet",
+  title: "Guides : prix et choix pour lancer un projet",
   description:
     "Quatre guides pour décider sans se tromper : prix d'un logo, prix d'un site, agence ou freelance, tendances 2027. Chiffres réels et temps de travail.",
 };
