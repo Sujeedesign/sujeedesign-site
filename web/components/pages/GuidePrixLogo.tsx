@@ -471,7 +471,9 @@ export function GuidePrixLogo() {
                   <Link href={routes.calculateurBudgetIdentite}>calculateur de budget</Link>.
                   Pour choisir à qui confier le projet, le guide{" "}
                   <Link href={routes.guideAgenceFreelance}>agence ou freelance</Link> compare
-                  les trois formats possibles et leurs coûts réels.
+                  les trois formats possibles et leurs coûts réels. Le{" "}
+                  <Link href={routes.guides}>sommaire des guides</Link> rassemble aussi le prix
+                  d&apos;un site et les tendances web 2027.
                 </p>
 
                 <h2 id="identite">Prix d&apos;un logo ou prix d&apos;une identité visuelle</h2>

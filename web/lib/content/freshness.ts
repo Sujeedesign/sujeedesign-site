@@ -41,7 +41,7 @@ export const PAGE_UPDATED = {
   [routes.mentionsLegales]: "2026-11-02",
   [routes.ressources]: "2026-11-03",
   [routes.calculateurBudgetIdentite]: "2026-11-03",
-  [routes.guidePrixLogo]: "2026-11-11",
+  [routes.guidePrixLogo]: "2026-11-15",
   [routes.guidePrixSite]: "2026-11-11",
   [routes.guideAgenceFreelance]: "2026-11-12",
   [routes.modeleCahierDesCharges]: "2026-11-11",
@@ -49,7 +49,7 @@ export const PAGE_UPDATED = {
   [routes.generateurBriefIdentite]: "2026-11-11",
   [routes.testerSonLogo]: "2026-11-11",
   [routes.testContraste]: "2026-11-11",
-  [routes.guides]: "2026-11-13",
+  [routes.guides]: "2026-11-15",
   [routes.vtc]: "2026-11-12",
 } satisfies Record<(typeof routes)[keyof typeof routes], IsoDay>;
 

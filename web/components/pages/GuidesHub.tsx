@@ -123,6 +123,19 @@ export function GuidesHub() {
 
       <section className="section">
         <div className="wrap">
+          <div className={vtc.enBref}>
+            <p className={vtc.enBrefKick}>En bref</p>
+            <h2 className={vtc.enBrefTitle}>Quel budget prévoir pour un logo ou un site ?</h2>
+            <p className={vtc.enBrefText}>
+              Un logo seul démarre à 800 € et une identité visuelle complète coûte 2 200 €. Pour
+              un site, comptez 2 000 € pour un site statique sur mesure de cinq à sept pages et
+              2 750 € pour un site vitrine WordPress de cinq à dix pages. Ce sont des prix de
+              départ hors taxes, avant devis : le périmètre, les déclinaisons et les délais font
+              varier la facture. Les guides ci-dessous donnent le temps de travail derrière
+              chaque fourchette et les questions à poser avant de signer.
+            </p>
+          </div>
+
           <div className={styles.bloc}>
             <div className={styles.blocHead}>
               <h2 className={styles.blocTitle}>Situer le budget</h2>
