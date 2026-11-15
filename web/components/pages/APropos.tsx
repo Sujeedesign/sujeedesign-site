@@ -27,7 +27,7 @@ export function APropos({ doc }: { doc?: PageDoc }) {
                 <div className="ab-stats-hero">
                   <div><b>13</b><span>ans de studio</span></div>
                   <div><b>60+</b><span>marques</span></div>
-                  <div><b>8</b><span>ans d'enseignement</span></div>
+                  <div><b>7</b><span>ans d'enseignement</span></div>
                   <div><b>6</b><span>écoles</span></div>
                 </div>
                 <div className="ab-hero__cta">
@@ -97,7 +97,7 @@ export function APropos({ doc }: { doc?: PageDoc }) {
               <article className="row rv">
                 <span className="row__n">05</span>
                 <h3>Formation &amp; pédagogie</h3>
-                <p>Huit ans devant des classes, du BTS au mastère. J'ai appris à expliquer sans jargon, à faire produire vite, et à laisser des supports qui servent encore après le cours.</p>
+                <p>Sept ans devant des classes, du BTS au mastère. J'ai appris à expliquer l'UI/UX sans jargon, à faire produire vite, et à laisser des supports qui servent encore après le cours.</p>
                 <div className="row__tags"><span>Design graphique</span><span>UI/UX</span><span>IA appliquée</span></div>
               </article>
               <article className="row rv">
@@ -177,12 +177,12 @@ export function APropos({ doc }: { doc?: PageDoc }) {
             <div className="teach">
               <div className="teach__big rv">
                 <div className="sec-num">04</div>
-                <b>8</b>
+                <b>7</b>
                 <span>ans à enseigner<br />ce que je pratique</span>
               </div>
               <div className="teach__list rv">
                 <p className="teach__intro">La pédagogie n'est pas un à-côté. C'est ce qui m'oblige à garder des méthodes claires, documentées, transmissibles. Et ce qui m'a appris à expliquer un choix en une phrase, ce qui sert aussi en réunion client.</p>
-                <div className="school"><b>MJM Graphic Design</b><i>Paris · Design graphique, direction artistique</i></div>
+                <div className="school"><b>MJM Graphic Design</b><i>Paris · UI/UX, design graphique</i></div>
                 <div className="school"><b>Webstart</b><i>Paris · UI/UX, Figma, culture web</i></div>
                 <div className="school"><b>Supcad</b><i>Paris · PAO, chaîne graphique</i></div>
                 <div className="school"><b>Digital Campus</b><i>Paris · Design digital, projets étudiants</i></div>
