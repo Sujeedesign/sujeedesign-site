@@ -16,3 +16,7 @@ __pycache__/
 # le catalogue de départ doit voyager avec le code
 !app/data/
 !app/data/catalogue_seed.json
+
+# Impeccable : runtime local seulement (PRODUCT.md, DESIGN.md et config.json se committent)
+.impeccable/hook.cache.json
+.impeccable/config.local.json
