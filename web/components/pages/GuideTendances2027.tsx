@@ -308,8 +308,11 @@ export function GuideTendances2027() {
                 </p>
                 <p>
                   Le coût est presque nul en production. Le vrai coût, c&apos;est la
-                  décision : un atelier d&apos;une heure pour choisir, puis des tests de
-                  contraste sur chaque association. C&apos;est le chantier le plus rentable
+                  décision : un atelier d&apos;une heure pour choisir, puis des{" "}
+                  <Link href={routes.testContraste}>
+                    tests de contraste WCAG sur chaque association
+                  </Link>
+                  . C&apos;est le chantier le plus rentable
                   de la liste avec la typographie.
                 </p>
                 <p>

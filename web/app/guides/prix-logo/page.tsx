@@ -28,7 +28,7 @@ export default function Page() {
             pageMeta.title,
             pageMeta.description,
             "2026-11-03T09:00:00+01:00",
-            "2026-11-08T09:00:00+01:00",
+            "2026-11-15T09:00:00+01:00",
           ),
           // La réponse « En bref » est visible en haut de page : elle entre en tête du FAQPage.
           faqNode(PATH, [aeo, ...faqItems]),
