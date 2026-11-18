@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { TestContraste, faqItems, pageMeta } from "@/components/pages/TestContraste";
+import { TestContraste, aeo, faqItems, pageMeta } from "@/components/pages/TestContraste";
 import { JsonLd } from "@/components/site/JsonLd";
 import { PageShell } from "@/components/site/PageShell";
 import { FloatingCta } from "@/components/site/FloatingCta";
@@ -32,7 +32,7 @@ export default function Page() {
               "Correctif proposé en conservant la teinte d'origine",
             ],
           },
-          faqNode(PATH, faqItems),
+          faqNode(PATH, [aeo, ...faqItems]),
           breadcrumbNode([
             { name: "Accueil", path: routes.home },
             { name: "Ressources", path: routes.ressources },

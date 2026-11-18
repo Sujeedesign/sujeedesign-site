@@ -19,6 +19,7 @@ vi.mock("next/navigation", () => ({
 import CalculateurPage from "@/app/ressources/calculateur-budget-identite/page";
 import BriefPage from "@/app/ressources/generateur-brief-identite/page";
 import TesterLogoPage from "@/app/ressources/tester-son-logo/page";
+import TestContrastePage from "@/app/ressources/test-contraste-couleur/page";
 import PrixLogoPage from "@/app/guides/prix-logo/page";
 import PrixSitePage from "@/app/guides/prix-site-internet/page";
 import ModeleCdcPage from "@/app/ressources/modele-cahier-des-charges-site/page";
@@ -155,6 +156,12 @@ const PAGES: PageCase[] = [
     path: routes.testerSonLogo,
     aeo: false,
     load: () => TesterLogoPage(),
+  },
+  {
+    label: "test de contraste",
+    path: routes.testContraste,
+    aeo: true,
+    load: () => TestContrastePage(),
   },
 ];
 

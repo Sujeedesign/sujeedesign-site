@@ -17,6 +17,17 @@ export const pageMeta = {
     "Testez le contraste entre deux couleurs : seuils WCAG AA et AAA, simulation de daltonisme, correctif qui garde la teinte. Gratuit, sans inscription.",
 };
 
+/**
+ * Réponse courte servie en haut de page (bloc « En bref ») et première entrée
+ * du `FAQPage`. Les valeurs sont celles des tableaux et des paragraphes de la
+ * page : ne jamais en introduire une nouvelle ici sans l'afficher plus bas.
+ */
+export const aeo = {
+  question: "Quel contraste minimum pour un texte sur un site web ?",
+  answer:
+    "Le minimum est 4,5:1 entre le texte et son fond, pour une taille courante. Un grand texte, à partir de 24 px, ou 18,66 px en gras, se contente de 3:1. Ce même 3:1 vaut pour les bordures de champs et les icônes porteuses de sens ; le niveau AAA monte à 7:1. Sous 3:1, le texte devient illisible pour une partie des visiteurs. Le seuil se vérifie paire par paire, placeholders et légendes compris : sur fond blanc, #767676 passe tout juste et #808080 échoue.",
+};
+
 const SOMMAIRE = [
   { href: "#outil", label: "Le vérificateur" },
   { href: "#seuils", label: "Les seuils" },
@@ -80,6 +91,18 @@ export function TestContraste() {
           </div>
         </div>
       </header>
+
+      <section className="section">
+        <div className="wrap">
+          <div className="sec-head rv">
+            <div className="sec-num">En bref</div>
+            <div>
+              <h2>{aeo.question}</h2>
+              <p>{aeo.answer}</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section className="section">
         <div className="wrap">

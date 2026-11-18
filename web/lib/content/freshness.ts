@@ -48,7 +48,7 @@ export const PAGE_UPDATED = {
   [routes.guideTendances2027]: "2026-11-17",
   [routes.generateurBriefIdentite]: "2026-11-11",
   [routes.testerSonLogo]: "2026-11-11",
-  [routes.testContraste]: "2026-11-11",
+  [routes.testContraste]: "2026-11-18",
   [routes.guides]: "2026-11-15",
   [routes.vtc]: "2026-11-12",
 } satisfies Record<(typeof routes)[keyof typeof routes], IsoDay>;
