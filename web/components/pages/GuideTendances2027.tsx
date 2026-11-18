@@ -8,7 +8,7 @@ import styles from "./GuideTendances2027.module.css";
 export const pageMeta = {
   title: "Tendances design graphique 2027 : 8 signaux",
   description:
-    "Tendances design graphique et web 2027 filtrées par le réel : typographie, couleur, logo, coûts. Ce que les sites de référence font déjà, ce qu'on ignore.",
+    "Tendance graphique 2027 : huit signaux relevés sur les sites de référence, de la typographie au logo. Ce que ça change pour une PME, et ce qu'on ignore.",
 };
 
 /**
@@ -109,11 +109,12 @@ export function GuideTendances2027() {
             </h1>
             <div className={styles.headMeta}>
               <p className="intro">
-                Ce que les sites de référence font déjà, ce que ça coûte vraiment, et ce
-                qu&apos;il vaut mieux ignorer quand on tient un budget.
+                La tendance graphique 2027 vue depuis les sites qui tournent vraiment : ce
+                que les références font déjà, ce que ça coûte, et ce qu&apos;il vaut mieux
+                ignorer quand on tient un budget.
               </p>
               <p className={styles.byline}>
-                Par Sujeepan Sabesan · 10 novembre 2026, mis à jour le 11 novembre 2026 · 13
+                Par Sujeepan Sabesan · 10 novembre 2026, mis à jour le 18 novembre 2026 · 13
                 min de lecture
               </p>
             </div>
@@ -363,7 +364,13 @@ export function GuideTendances2027() {
                 <p>
                   Ce que ça change pour une PME : arrêter de tout mettre dans des cartes
                   arrondies de la même taille. Un titre, un paragraphe, un chiffre et une
-                  image n&apos;ont pas le même poids. La page doit le montrer.
+                  image n&apos;ont pas le même poids. La page doit le montrer. C&apos;est
+                  exactement le travail de la{" "}
+                  <Link href={serviceHref("direction-artistique")}>
+                    direction artistique d&apos;un site
+                  </Link>{" "}
+                  : décider la hiérarchie et la grille avant qu&apos;une ligne de code soit
+                  écrite.
                 </p>
                 <p>
                   Le coût : du temps de maquette, pas de développement supplémentaire. La
@@ -600,8 +607,9 @@ export function GuideTendances2027() {
                   test reste celui de la police numéro un : est-ce que ça tient à 24 px, en
                   favicon, en avatar et en tampon ?
                 </p>
+                <h3>Tendance logo 2027 : trois décisions suffisent</h3>
                 <p>
-                  Trois décisions suffisent. Un signe lisible réduit à la taille d&apos;une
+                  Un signe lisible réduit à la taille d&apos;une
                   icône d&apos;onglet. Une version monochrome qui reste nette sur photo, sur
                   fond sombre et en impression une couleur. Et une règle de respiration
                   écrite, pour que le logo ne soit jamais collé au bord ni noyé dans un
