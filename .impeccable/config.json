@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "sujeedesign-site/web/components/pages/GuideTendances2027.module.css"
+        ],
+        "createdAt": "2026-11-18T10:16:02.551Z",
+        "reason": "house pattern: site.css:1473 uses the same left accent rule for .chapter blockquote; TL;DR box reuses it, predates this session"
+      }
+    ]
+  }
+}
