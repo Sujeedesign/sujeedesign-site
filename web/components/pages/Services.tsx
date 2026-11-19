@@ -74,6 +74,20 @@ export const pageMeta = {
   "description": "Identité de marque, direction artistique, sites WordPress et Shopify, contenu, agents IA. Périmètre écrit, livraison documentée, sources à votre nom."
 };
 
+/**
+ * FAQ du sommaire, dans l'ordre affiché.
+ *
+ * Le `FAQPage` de `/services` est construit avec cette même source : le texte
+ * publié à l'écran et celui du JSON-LD restent identiques, y compris après une
+ * retouche faite depuis le back office.
+ */
+export function servicesFaqEntries(doc: ServicesDoc) {
+  const { faq } = read(doc as Dict);
+  return (faq.items as Dict[])
+    .filter((item) => Boolean(item?.q) && Boolean(item?.a))
+    .map((item) => ({ question: String(item.q).trim(), answer: String(item.a).trim() }));
+}
+
 export function Services({ doc }: { doc: ServicesDoc }) {
   const { hero, prestations, methode, livrables, faq, cta } = read(doc as Dict);
   return (

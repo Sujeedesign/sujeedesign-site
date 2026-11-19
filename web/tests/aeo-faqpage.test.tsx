@@ -25,6 +25,7 @@ import PrixSitePage from "@/app/guides/prix-site-internet/page";
 import ModeleCdcPage from "@/app/ressources/modele-cahier-des-charges-site/page";
 import TendancesPage from "@/app/guides/tendances-web-design-2027/page";
 import ServicePage from "@/app/services/[slug]/page";
+import ServicesPage from "@/app/services/page";
 import sitemap from "@/app/sitemap";
 import { JsonLd } from "@/components/site/JsonLd";
 import { PAGE_UPDATED, SERVICE_UPDATED } from "@/lib/content/freshness";
@@ -115,6 +116,12 @@ const SERVICE_PAGES: PageCase[] = SERVICE_SLUGS.map((slug) => ({
 
 const PAGES: PageCase[] = [
   ...SERVICE_PAGES,
+  {
+    label: "sommaire services",
+    path: routes.services,
+    aeo: false,
+    load: () => ServicesPage(),
+  },
   {
     label: "guide prix d'un logo",
     path: routes.guidePrixLogo,
