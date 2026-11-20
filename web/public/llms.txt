@@ -13,6 +13,7 @@ Sujee Design est le studio de Sujeepan Sabesan, directeur artistique et designer
 - [Agents IA](https://sujeedesign.com/agents-ia) : conception d'agents IA pour la création, le service client et les opérations.
 - [Contact](https://sujeedesign.com/contact) : demande de devis et prise de rendez-vous.
 - [Ressources](https://sujeedesign.com/ressources) : guides, calculateurs et outils gratuits.
+- [Guides](https://sujeedesign.com/guides) : prix d'un logo, prix d'un site, agence ou freelance, tendances 2027.
 
 ## Services
 
@@ -38,11 +39,15 @@ Sujee Design est le studio de Sujeepan Sabesan, directeur artistique et designer
 
 ## Ressources
 
-- [Calculateur de budget identité](https://sujeedesign.com/ressources/calculateur-budget-identite)
-- [Générateur de brief identité](https://sujeedesign.com/ressources/generateur-brief-identite)
-- [Tester son logo](https://sujeedesign.com/ressources/tester-son-logo)
-- [Guide : prix d'un logo](https://sujeedesign.com/guides/prix-logo)
-- [Guide : tendances web design 2027](https://sujeedesign.com/guides/tendances-web-design-2027)
+- [Calculateur de budget identité](https://sujeedesign.com/ressources/calculateur-budget-identite) : estimation en 30 secondes d'un budget de logo ou d'identité visuelle, du logo simple au branding complet.
+- [Générateur de brief identité](https://sujeedesign.com/ressources/generateur-brief-identite) : brief créatif en dix questions (positionnement, cible, ton, contraintes), imprimable en PDF.
+- [Tester son logo et générer un favicon](https://sujeedesign.com/ressources/tester-son-logo) : logo testé aux petites tailles, favicon .ico et PNG de 16 à 512 px, apple-touch et manifest, dans un zip.
+- [Test de contraste couleurs WCAG AA et AAA](https://sujeedesign.com/ressources/test-contraste-couleur) : seuils WCAG AA et AAA, simulation de daltonisme, correctif qui garde la teinte.
+- [Modèle de cahier des charges site internet](https://sujeedesign.com/ressources/modele-cahier-des-charges-site) : douze blocs et les questions qui évitent les devis flous, en DOCX et PDF.
+- [Guide : prix d'un logo](https://sujeedesign.com/guides/prix-logo) : fourchettes réelles et temps de travail facturé.
+- [Guide : prix d'un site vitrine en 2026](https://sujeedesign.com/guides/prix-site-internet) : fourchettes, e-commerce, refonte et coûts récurrents, poste par poste.
+- [Guide : agence ou graphiste freelance](https://sujeedesign.com/guides/agence-ou-freelance) : ce que change chaque option sur le prix, le délai, la continuité et la propriété des fichiers.
+- [Guide : tendances web design 2027](https://sujeedesign.com/guides/tendances-web-design-2027) : huit signaux relevés sur des sites de référence, de la typographie au logo.
 - [Guide : réussir l'examen VTC 2027 en candidat libre](https://sujeedesign.com/reussir-examen-vtc) : les 7 épreuves, les 3 seuils et un plan de révision de 45 jours.
 
 ## Contact
