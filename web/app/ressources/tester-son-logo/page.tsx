@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { TesterLogo, faqItems, pageMeta } from "@/components/pages/TesterLogo";
+import { TesterLogo, aeo, faqItems, pageMeta } from "@/components/pages/TesterLogo";
 import { JsonLd } from "@/components/site/JsonLd";
 import { PageShell } from "@/components/site/PageShell";
 import { FloatingCta } from "@/components/site/FloatingCta";
@@ -32,7 +32,7 @@ export default function Page() {
               "Analyse traitée dans le navigateur, sans téléversement du logo",
             ],
           },
-          faqNode(PATH, faqItems),
+          faqNode(PATH, [aeo, ...faqItems]),
           breadcrumbNode([
             { name: "Accueil", path: routes.home },
             { name: "Ressources", path: routes.ressources },

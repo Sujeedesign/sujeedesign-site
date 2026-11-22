@@ -11,6 +11,12 @@ export const pageMeta = {
     "Transformez votre logo en favicon prêt à installer : .ico, PNG de 16 à 512 px, apple-touch et manifest, dans un zip. Gratuit, sans envoi de fichier.",
 };
 
+export const aeo = {
+  question: "Comment savoir si mon logo est lisible et utilisable partout ?",
+  answer:
+    "Il faut le regarder en situation réelle, pas sur une planche : à 16 pixels pour un favicon, en un seul ton pour un tampon ou une gravure, sur fond clair comme sur fond sombre. Cinq points se mesurent : la largeur du fichier, la transparence, le contraste sur fond clair, le contraste sur fond sombre et la part du dessin qui dépend d'un écart de couleur. Sous 3 pour 1 de contraste, une zone du logo s'efface ; au-delà d'un quart de surface tributaire de la couleur, il ne tient plus en noir et blanc. Le test de cette page calcule ces mesures dans le navigateur, sans envoyer le fichier. Il ne juge ni le style ni l'antériorité : ce sont deux travaux humains.",
+};
+
 export const faqItems = [
   {
     question: "Comment créer un favicon à partir de mon logo ?",
@@ -85,6 +91,18 @@ export function TesterLogo() {
           </div>
         </div>
       </header>
+
+      <section className="section">
+        <div className="wrap">
+          <div className="sec-head rv">
+            <div className="sec-num">En bref</div>
+            <div>
+              <h2>{aeo.question}</h2>
+              <p>{aeo.answer}</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section className="section" id="outil">
         <div className="wrap">

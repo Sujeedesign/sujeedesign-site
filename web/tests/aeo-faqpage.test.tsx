@@ -161,7 +161,7 @@ const PAGES: PageCase[] = [
   {
     label: "test de logo",
     path: routes.testerSonLogo,
-    aeo: false,
+    aeo: true,
     load: () => TesterLogoPage(),
   },
   {

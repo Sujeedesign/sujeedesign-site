@@ -47,7 +47,7 @@ export const PAGE_UPDATED = {
   [routes.modeleCahierDesCharges]: "2026-11-11",
   [routes.guideTendances2027]: "2026-11-18",
   [routes.generateurBriefIdentite]: "2026-11-11",
-  [routes.testerSonLogo]: "2026-11-11",
+  [routes.testerSonLogo]: "2026-11-22",
   [routes.testContraste]: "2026-11-18",
   [routes.guides]: "2026-11-15",
   [routes.vtc]: "2026-11-12",
