@@ -11,6 +11,12 @@
         ],
         "createdAt": "2026-11-18T10:16:02.551Z",
         "reason": "house pattern: site.css:1473 uses the same left accent rule for .chapter blockquote; TL;DR box reuses it, predates this session"
+      },
+      {
+        "rule": "overused-font",
+        "value": "space grotesk",
+        "createdAt": "2026-11-23T08:29:54.182Z",
+        "reason": "Paire typographique de marque documentee en tete de site.css depuis la v5 : Bricolage Grotesque en display, Space Grotesk en texte. Finding anterieur a la session (attribution unknown), choix de DA de Sujee, pas un defaut generatif."
       }
     ]
   }
