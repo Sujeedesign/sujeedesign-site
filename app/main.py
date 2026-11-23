@@ -93,7 +93,7 @@ class AdminRootRewrite:
     `/admin/connexion` : le nom d'hôte porte déjà le contexte, et l'URL n'a pas
     de raison de répéter « admin ». La réécriture est interne (le navigateur ne
     voit jamais `/admin`), et elle est strictement limitée à cet hôte : sur
-    l'apex ou sur `*.sslip.io`, `/connexion` reste inconnu.
+    l'apex ou sur l'ancien `*.sslip.io`, `/connexion` reste inconnu.
     """
 
     PASSTHROUGH = ("/admin", "/api/", "/medias/", "/static-admin", "/sante", "/favicon.ico", "/robots.txt")
@@ -190,7 +190,7 @@ def create_app(db_file: Path | None = None) -> FastAPI:
             response.headers.setdefault(
                 "Content-Security-Policy",
                 "default-src 'self'; img-src 'self' data: blob: "
-                "https://sujeedesign.com https://admin-sujeedesign.145.241.167.66.sslip.io; "
+                "https://sujeedesign.com https://admin.sujeedesign.com; "
                 "style-src 'self' 'unsafe-inline'; script-src 'self'; "
                 "frame-src https://sujeedesign.com https://www.sujeedesign.com; "
                 "form-action 'self'; base-uri 'none'; frame-ancestors 'none'",

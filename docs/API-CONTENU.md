@@ -4,7 +4,7 @@ API HTTP du back office, destinée aux agents et aux automatisations. Elle écri
 dans le même stockage que le formulaire d'administration : même validation,
 même historique de révisions, même déclenchement de publication.
 
-Base : `https://admin-sujeedesign.145.241.167.66.sslip.io`
+Base : `https://admin.sujeedesign.com`
 (côté vitrine, les mêmes routes existent sous `https://sujeedesign.com/api/admin/…`
 pour le back office HTML ; l'API ci-dessous n'est exposée que sur l'origine admin).
 
@@ -23,7 +23,7 @@ avec un jeton invalide : `401`. Si la variable est absente du serveur : `503`.
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
-  https://admin-sujeedesign.145.241.167.66.sslip.io/api/v1/admin/content/home
+  https://admin.sujeedesign.com/api/v1/admin/content/home
 ```
 
 Réponse : `{slug, data, custom, updated_at, schema, fields}`.
@@ -43,7 +43,7 @@ curl -s -X PUT \
   -H "Authorization: Bearer $TOKEN" -H "X-Author: sita" \
   -H "Content-Type: application/json" \
   -d '{"changes": {"hero.title.first": "Studio"}}' \
-  https://admin-sujeedesign.145.241.167.66.sslip.io/api/v1/admin/content/home
+  https://admin.sujeedesign.com/api/v1/admin/content/home
 ```
 
 * `200` : enregistré, une révision de l'état précédent est créée avant écriture.
@@ -65,7 +65,7 @@ curl -s -X PUT \
   -H "Authorization: Bearer ***" -H "X-Author: sujee" \
   -H "Content-Type: application/json" \
   -d @fiche.json \
-  https://admin-sujeedesign.145.241.167.66.sslip.io/api/v1/admin/projets/american-steak-house
+  https://admin.sujeedesign.com/api/v1/admin/projets/american-steak-house
 ```
 
 Le corps reprend la forme d'une entrée de `app/data/catalogue_seed.json` :
@@ -87,7 +87,7 @@ Créer une fiche de zéro :
 curl -s -X POST -H "Authorization: Bearer ***" \
   -H "Content-Type: application/json" \
   -d '{"nom": "Nouveau projet", "statut": "publie", "images": [...]}' \
-  https://admin-sujeedesign.145.241.167.66.sslip.io/api/v1/admin/projets
+  https://admin.sujeedesign.com/api/v1/admin/projets
 ```
 
 `nom` obligatoire, slug dérivé du nom (dédoublonné : `-2`, `-3`…) et fiche en
@@ -101,7 +101,7 @@ la revalidation n'est pas configurée sur cette instance (pas d'erreur).
 
 ```bash
 curl -s -X POST -H "Authorization: Bearer $TOKEN" \
-  https://admin-sujeedesign.145.241.167.66.sslip.io/api/v1/admin/publish
+  https://admin.sujeedesign.com/api/v1/admin/publish
 ```
 
 Déclenche un déploiement Coolify de l'app Next (`kbt19dmgg3tnm6azvdcvuegg`),
@@ -116,7 +116,7 @@ un seul appel.
 
 ```bash
 curl -s -H "Authorization: Bearer $TOKEN" \
-  https://admin-sujeedesign.145.241.167.66.sslip.io/api/v1/admin/status
+  https://admin.sujeedesign.com/api/v1/admin/status
 ```
 
 `{ok, content_updated_at, custom, publish_ready, last_publication}` : utile pour

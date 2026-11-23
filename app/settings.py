@@ -71,7 +71,7 @@ def cookie_domain(request) -> str | None:
 
     On élargit donc le domaine à `.sujeedesign.com` quand la requête arrive sur
     ce domaine (ou un sous-domaine), et on garde des cookies host-only partout
-    ailleurs : un hôte de secours type `*.sslip.io` ne peut pas poser de cookie
+    ailleurs : un hôte de secours comme l'ancien `*.sslip.io` ne peut pas poser de cookie
     pour `sujeedesign.com`, et inversement.
     """
     host = (request.headers.get("host") or "").split(",")[0].strip().lower()
@@ -101,7 +101,7 @@ def admin_base(host: str) -> str:
 
     Sur `admin.sujeedesign.com`, l'administration est servie à la racine
     (`/connexion`, `/pages`) : le nom d'hôte dit déjà qu'on est dans le back
-    office. L'hôte de secours (`*.sslip.io`) garde `/admin`, et le préfixe reste
+    office. L'hôte de secours (ex-`*.sslip.io`) garde `/admin`, et le préfixe reste
     la seule forme que connaissent les liens historiques.
     """
     return "" if is_admin_host(host) else "/admin"

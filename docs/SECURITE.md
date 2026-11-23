@@ -46,9 +46,10 @@ messages de l'agent (`test_agent_engine.py`), identiques sur `HEAD` avant audit.
 
 ## Reste à décider (non bloquant, hors code)
 
-- **API exposée sur `admin-sujeedesign.145.241.167.66.sslip.io`** : nom d'hôte
-  en IP nue, pas de WAF. Restreindre par IP ou passer derrière un nom de
-  domaine propre serait un vrai gain.
+- **API admin sur un nom d'hôte en IP nue (`*.sslip.io`)** : corrigé le
+  23/11/2026, le domaine sslip a été retiré de l'app Coolify ; l'API n'est plus
+  joignable que sur `admin.sujeedesign.com`. Reste à décider : restriction par
+  IP ou WAF devant ce sous-domaine.
 - **Jeton admin unique et partagé** : pas de comptes nominatifs, donc pas
   d'audit par personne au-delà de `X-Author`. Des comptes séparés ou un SSO
   régleraient ça.

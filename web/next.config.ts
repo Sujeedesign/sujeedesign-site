@@ -147,7 +147,7 @@ const nextConfig: NextConfig = {
           // ancêtre au lieu de bloquer tout iframe (ce que ferait XFO).
           {
             key: "Content-Security-Policy",
-            value: "frame-ancestors 'self' https://admin.sujeedesign.com https://admin-sujeedesign.145.241.167.66.sslip.io https://sujeedesign.com",
+            value: "frame-ancestors 'self' https://admin.sujeedesign.com https://sujeedesign.com",
           },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           {
