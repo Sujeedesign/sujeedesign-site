@@ -62,7 +62,7 @@ export type ServicePageSlug = Exclude<ServiceSlug, "agents-ia">;
  */
 export const SERVICE_UPDATED: Record<ServicePageSlug, IsoDay> = {
   "identite-de-marque": "2026-11-06",
-  "direction-artistique": "2026-11-12",
+  "direction-artistique": "2026-11-23",
   "site-ecommerce": "2026-11-06",
   "contenu-reseaux": "2026-11-06",
 };

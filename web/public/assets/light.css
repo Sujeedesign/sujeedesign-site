@@ -1147,6 +1147,9 @@ footer{margin-top:0}
 .sp-item b{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--accent);padding-top:5px}
 .sp-item h3{font-family:var(--display);font-weight:600;font-size:clamp(17px,1.55vw,21px);line-height:1.1;letter-spacing:-.025em;margin:0 0 6px}
 .sp-item p{margin:0;font-size:13.5px;line-height:1.6;color:var(--muted-2);max-width:48ch}
+.sp-item h3 a{color:inherit;text-decoration:none;border-bottom:1px solid transparent;transition:border-color .2s}
+.sp-item h3 a:hover,.sp-item h3 a:focus-visible{border-bottom-color:var(--accent)}
+.sp-item .sp-item__meta{margin-top:8px;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 
 @media (max-width:1000px){
   .sp-hero__grid{grid-template-columns:1fr}

@@ -15,6 +15,9 @@ import { ServiceContenu, pageMeta as metaContenu, pageFaqEntries as faqContenu }
 import { JsonLd } from "@/components/site/JsonLd";
 import { PageShell } from "@/components/site/PageShell";
 import { getServiceContent, servicePageSlugs, type ServicePageSlug } from "@/lib/content/live";
+import { getProjects } from "@/lib/content/catalogue";
+import type { Project } from "@/content/projects";
+import { disciplineServices } from "@/lib/project-links";
 import { pageMetadata } from "@/lib/page-metadata";
 import { routes, serviceHref, servicePath, serviceSlugs, type ServiceSlug } from "@/lib/routes";
 import { breadcrumbNode, faqNode, pageGraph, serviceCatalog, serviceNode, webPageNode } from "@/lib/structured-data";
@@ -25,7 +28,7 @@ import { breadcrumbNode, faqNode, pageGraph, serviceCatalog, serviceNode, webPag
  * `agents-ia` n'a pas de page sous `/services` : l'offre vit à la racine, on redirige
  * définitivement pour ne pas dupliquer le contenu.
  */
-const services: Record<string, { Component: (props: { doc: Record<string, any> }) => React.JSX.Element; meta: { title: string; description: string }; faq?: (doc: Record<string, any>) => { question: string; answer: string }[] }> = {
+const services: Record<string, { Component: (props: { doc: Record<string, any>; related?: Project[] }) => React.JSX.Element; meta: { title: string; description: string }; faq?: (doc: Record<string, any>) => { question: string; answer: string }[] }> = {
   "identite-de-marque": { Component: ServiceIdentite, meta: metaIdentite, faq: faqIdentite },
   "direction-artistique": { Component: ServiceDirectionArtistique, meta: metaDirection, faq: faqDirection },
   "site-ecommerce": { Component: ServiceSiteEcommerce, meta: metaEcommerce, faq: faqEcommerce },
@@ -76,6 +79,28 @@ export default async function Page({ params }: Params) {
     ? await getServiceContent(slug as ServicePageSlug)
     : {};
 
+  /**
+   * Maillage interne sortant de la fiche direction artistique : les réalisations
+   * dont une discipline est portée par ce service (`disciplineServices`), dans
+   * l'ordre du catalogue publié dans l'admin. Les fiches sont des sources de
+   * preuve pour la page service, et la page service renvoie vers elles.
+   */
+  const related =
+    slug === "direction-artistique"
+      ? (await getProjects())
+          .filter((project) =>
+            project.disciplines.some((discipline) => (disciplineServices[discipline] ?? []).includes("direction-artistique")),
+          )
+          // Les fiches qui portent explicitement « Direction artistique » passent
+          // d'abord ; les autres (illustration, design de présentation) complètent.
+          .sort(
+            (a, b) =>
+              Number(b.disciplines.includes("Direction artistique")) -
+              Number(a.disciplines.includes("Direction artistique")),
+          )
+          .slice(0, 3)
+      : undefined;
+
   return (
     <PageShell current={serviceHref(slug as ServiceSlug)}>
       <JsonLd
@@ -93,7 +118,7 @@ export default async function Page({ params }: Params) {
         ])}
       />
       <main id="main">
-        <Component doc={doc} />
+        <Component doc={doc} related={related} />
       </main>
     </PageShell>
   );

@@ -1,4 +1,5 @@
-import { routes } from "@/lib/routes";
+import type { Project } from "@/content/projects";
+import { realisationPath, routes } from "@/lib/routes";
 
 /** Portage du v5 : service-direction-artistique.html. Textes pilotés par /content/services. */
 export const pageMeta = {
@@ -21,7 +22,7 @@ export function pageFaqEntries(doc: Doc) {
     .map((entry) => ({ question: String(entry.question), answer: String(entry.answer) }));
 }
 
-export function ServiceDirectionArtistique({ doc }: { doc: Doc }) {
+export function ServiceDirectionArtistique({ doc, related = [] }: { doc: Doc; related?: Project[] }) {
   const hero = doc.hero ?? {};
   const aeo = doc.aeo ?? {};
   const scope = doc.scope ?? {};
@@ -109,6 +110,40 @@ export function ServiceDirectionArtistique({ doc }: { doc: Doc }) {
             </div>
           </div>
         </section>
+
+        {related.length ? (
+          <section className="section section--tint">
+            <div className="wrap">
+              <div className="sec-head rv">
+                <div className="sec-num">Réalisations</div>
+                <div>
+                  <h2>Trois projets où la direction artistique se voit</h2>
+                  <p>
+                    Les mêmes règles, appliquées à des secteurs différents : le cadre tient parce qu&apos;il a été écrit
+                    avant la première image.
+                  </p>
+                </div>
+                <div className="side">
+                  <a href={routes.realisations}>Toutes les réalisations</a>
+                </div>
+              </div>
+              <div className="sp-items rv">
+                {related.map((project) => (
+                  <div className="sp-item" key={project.slug}>
+                    <b>{project.index}</b>
+                    <div>
+                      <h3>
+                        <a href={realisationPath(project.slug)}>{project.name}</a>
+                      </h3>
+                      <p>{project.pitch}</p>
+                      <p className="sp-item__meta">{project.disciplines.join(" · ")}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        ) : null}
 
         <section className="section">
           <div className="wrap">
