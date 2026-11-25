@@ -4,15 +4,6 @@
     "ignoreFiles": [],
     "ignoreValues": [
       {
-        "rule": "side-tab",
-        "value": "*",
-        "files": [
-          "sujeedesign-site/web/components/pages/GuideTendances2027.module.css"
-        ],
-        "createdAt": "2026-11-18T10:16:02.551Z",
-        "reason": "house pattern: site.css:1473 uses the same left accent rule for .chapter blockquote; TL;DR box reuses it, predates this session"
-      },
-      {
         "rule": "overused-font",
         "value": "space grotesk",
         "createdAt": "2026-11-23T08:29:54.182Z",
@@ -24,8 +15,8 @@
         "files": [
           "web/components/pages/GuideTendances2027.module.css"
         ],
-        "createdAt": "2026-11-25T10:20:41.303Z",
-        "reason": "Bloc TL;DR du guide : filet d'accent 3px conforme au systeme visuel du site (barres d'accent des h2, kick, boutons) ; choix de direction artistique valide, pas un gabarit IA"
+        "createdAt": "2026-11-25T23:45:39.963Z",
+        "reason": "Bloc TL;DR du guide : filet d'accent 3px identique aux barres d'accent des h2 et des boutons du site (site.css). Pattern maison, choix de DA, pas un gabarit generatif."
       }
     ]
   }
