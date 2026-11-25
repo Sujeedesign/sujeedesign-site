@@ -173,6 +173,13 @@ export function GuideTendances2027() {
                   deux se rejoignent, et c&apos;est tant mieux : un site qui change de style
                   sans toucher au logo se voit tout de suite.
                 </p>
+                <p>
+                  Et si vous voulez voir ce que ces choix deviennent sur un vrai projet,{" "}
+                  <Link href={routes.services}>
+                    le détail des prestations et du périmètre écrit
+                  </Link>{" "}
+                  expose ce qui est inclus, le déroulé et les livrables, métier par métier.
+                </p>
 
                 <div className={styles.tldr}>
                   <p className={styles.tldrTitle}>L&apos;essentiel en six points</p>

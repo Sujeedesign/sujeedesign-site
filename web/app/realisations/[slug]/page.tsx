@@ -21,12 +21,26 @@ export function generateStaticParams() {
 export const dynamicParams = true;
 export const revalidate = 3600;
 
+/**
+ * Titres et descriptions retravaillés quand la fiche seule ne dit pas ce qu'on
+ * trouve dedans. `projectMeta` dérive tout du nom et de la première discipline,
+ * ce qui suffit pour une navigation interne mais pas pour gagner le clic sur une
+ * requête de marque.
+ */
+const SEO_OVERRIDES: Record<string, { title: string; description: string }> = {
+  elerya: {
+    title: "Elerya : identité et direction photo (2024)",
+    description:
+      "Maroquinerie Elerya : logotype serif, système typographique, direction photo produit et gabarits e-commerce. Étude de cas, du cadrage aux visuels finaux.",
+  },
+};
+
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const project = findProject(await getProjects(), slug);
   if (!project) return {};
   return pageMetadata(
-    projectMeta(project),
+    SEO_OVERRIDES[slug] ?? projectMeta(project),
     realisationPath(slug),
     `/assets/img/og/${slug}.jpg`,
   );
