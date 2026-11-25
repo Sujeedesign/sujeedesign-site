@@ -6,9 +6,9 @@ import { routes, realisationPath, serviceHref } from "@/lib/routes";
 import styles from "./GuideTendances2027.module.css";
 
 export const pageMeta = {
-  title: "Tendances design graphique 2027 : 8 signaux",
+  title: "Tendances web design 2027 : 8 signaux qui valent le budget",
   description:
-    "Tendance graphique 2027 : huit signaux relevés sur les sites de référence, de la typographie au logo. Ce que ça change pour une PME, et ce qu'on ignore.",
+    "Tendances web design et design graphique 2027 : huit signaux relevés sur des sites réels, de la typographie au logo. Ce qui change pour une PME.",
 };
 
 /**
@@ -17,7 +17,7 @@ export const pageMeta = {
  * jamais y introduire un chiffre ou une promesse absente du texte plus bas.
  */
 export const aeo = {
-  question: "Quelles tendances design graphique compter en 2027 ?",
+  question: "Quelles tendances retenir en web design et design graphique en 2027 ?",
   answer:
     "Huit signaux dominent : une seule police à très grande échelle, une couleur d'accent franche, une mise en page éditoriale, un mode sombre pensé comme un système, un motion discret, la 3D réservée aux projets qui la justifient, l'IA dans la production et une preuve humaine visible. Trois sont rentables pour une PME : la typographie, la couleur et la vitesse.",
 };
@@ -101,11 +101,11 @@ export function GuideTendances2027() {
           <div className="page-head">
             <p className="kick">Guides</p>
             <h1 className={styles.titre}>
-              Tendances design graphique
+              Tendances web design
               <br />
-              <span className={styles.accent}>2027</span> : huit signaux,
+              et design graphique <span className={styles.accent}>2027</span> : huit
               <br />
-              pas une liste de styles.
+              signaux, pas une liste de styles.
             </h1>
             <div className={styles.headMeta}>
               <p className="intro">
@@ -114,7 +114,7 @@ export function GuideTendances2027() {
                 ignorer quand on tient un budget.
               </p>
               <p className={styles.byline}>
-                Par Sujeepan Sabesan · 10 novembre 2026, mis à jour le 18 novembre 2026 · 13
+                Par Sujeepan Sabesan · 10 novembre 2026, mis à jour le 25 novembre 2026 · 13
                 min de lecture
               </p>
             </div>
@@ -165,6 +165,13 @@ export function GuideTendances2027() {
                   Behance en 2025 et 2026, et les chiffres de nos propres chantiers. Pour chaque
                   tendance : le signal, l&apos;exemple, le coût, et le moment où il faut
                   s&apos;arrêter.
+                </p>
+                <p>
+                  Une précision de vocabulaire, parce qu&apos;elle change les décisions. Le
+                  web design décide de la page : grille, hiérarchie, vitesse de lecture. Le
+                  design graphique décide du signe : logo, couleur, typographie. En 2027, les
+                  deux se rejoignent, et c&apos;est tant mieux : un site qui change de style
+                  sans toucher au logo se voit tout de suite.
                 </p>
 
                 <div className={styles.tldr}>
@@ -738,7 +745,12 @@ export function GuideTendances2027() {
                   mesure démarre à 2 000 €, un WordPress à 2 750 €, une boutique Shopify à
                   4 000 €. Ces repères viennent de notre{" "}
                   <Link href={routes.guidePrixSite}>guide des prix d&apos;un site</Link>, pas
-                  d&apos;une moyenne d&apos;agence.
+                  d&apos;une moyenne d&apos;agence. Pour voir comment ces postes se
+                  traduisent en prestation :{" "}
+                  <Link href={serviceHref("site-ecommerce")}>
+                    création de site web et e-commerce
+                  </Link>
+                  .
                 </p>
                 <div className="tableWrap">
                   <table>
