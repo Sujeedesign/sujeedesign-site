@@ -6,7 +6,7 @@ import { routes, realisationPath, serviceHref } from "@/lib/routes";
 import styles from "./GuideTendances2027.module.css";
 
 export const pageMeta = {
-  title: "Tendances web design 2027 : 8 signaux qui valent le budget",
+  title: "Tendances web design 2027 : 8 signaux à suivre",
   description:
     "Tendances web design et design graphique 2027 : huit signaux relevés sur des sites réels, de la typographie au logo. Ce qui change pour une PME.",
 };
