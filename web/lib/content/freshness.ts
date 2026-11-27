@@ -50,7 +50,7 @@ export const PAGE_UPDATED = {
   [routes.testerSonLogo]: "2026-11-22",
   [routes.testContraste]: "2026-11-18",
   [routes.guides]: "2026-11-15",
-  [routes.vtc]: "2026-11-12",
+  [routes.vtc]: "2026-11-27",
 } satisfies Record<(typeof routes)[keyof typeof routes], IsoDay>;
 
 /** Slug de service qui possède sa propre fiche dans `/services/`. */

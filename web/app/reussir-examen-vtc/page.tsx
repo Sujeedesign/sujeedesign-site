@@ -219,7 +219,18 @@ export default function Page() {
               price: "19.90",
               priceCurrency: "EUR",
               availability: "https://schema.org/InStock",
+              itemCondition: "https://schema.org/NewCondition",
               seller: { "@id": `${SITE_URL}/#studio` },
+              // Contenu numérique téléchargé : rien n'est expédié, donc aucun
+              // `shippingDetails`. Google le liste comme recommandé et non requis :
+              // mieux vaut l'absence qu'une valeur inventée.
+              // Rétractation écartée pour un contenu dématérialisé fourni
+              // immédiatement (art. L221-28, 13° du code de la consommation).
+              hasMerchantReturnPolicy: {
+                "@type": "MerchantReturnPolicy",
+                applicableCountry: "FR",
+                returnPolicyCategory: "https://schema.org/MerchantReturnNotPermitted",
+              },
             },
           },
           faqNode(PATH, faq.map((f) => ({ question: f.q, answer: f.a }))),

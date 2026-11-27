@@ -17,6 +17,15 @@
         ],
         "createdAt": "2026-11-25T23:45:39.963Z",
         "reason": "Bloc TL;DR du guide : filet d'accent 3px identique aux barres d'accent des h2 et des boutons du site (site.css). Pattern maison, choix de DA, pas un gabarit generatif."
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "web/public/assets/light.css"
+        ],
+        "createdAt": "2026-11-27T07:18:08.800Z",
+        "reason": "L171 = .hpack::before, bande haute 7px du packshot hero (maquette de packaging degradee), pas un filet lateral de carte. Element de la DA v5 de Sujee, finding anterieur a la session (attribution unknown) remonte parce que seule la feuille a ete touchee aujourd'hui."
       }
     ]
   }
