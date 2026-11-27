@@ -3,6 +3,7 @@ import { coverOf, getProject, type Project } from "@/content/projects";
 import { CoverPicture } from "@/components/CoverPicture";
 import { findProject } from "@/lib/content/catalogue";
 import { webpSrcSet } from "@/lib/images";
+import { routes } from "@/lib/routes";
 
 const arrow = (
   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -433,6 +434,13 @@ export function Services({ doc }: { doc: HomeContent }) {
             </a>
           ))}
         </div>
+
+        <p className="rl-svc__all rv">
+          <a className="btn-line" href={routes.services}>
+            Voir les cinq prestations, leur périmètre et leurs délais{" "}
+            <span aria-hidden="true">↗</span>
+          </a>
+        </p>
       </div>
     </section>
   );

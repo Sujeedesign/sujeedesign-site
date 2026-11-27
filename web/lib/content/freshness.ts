@@ -32,7 +32,7 @@ const NOON_UTC = "T12:00:00.000Z";
  * clé fantôme n'y traîne.
  */
 export const PAGE_UPDATED = {
-  [routes.home]: "2026-11-05",
+  [routes.home]: "2026-11-27",
   [routes.realisations]: "2026-11-02",
   [routes.services]: "2026-11-19",
   [routes.aPropos]: "2026-11-04",

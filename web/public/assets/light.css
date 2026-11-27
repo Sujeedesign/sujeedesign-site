@@ -1385,6 +1385,9 @@ body.has-dark-hero .nav.nav--open .brand__logo--light{display:none!important}
 .rl-svc__card p{margin:0;font-size:13px;line-height:1.5;color:var(--muted-2);max-width:24ch}
 .rl-svc__a{position:absolute;right:clamp(14px,1.6vw,22px);bottom:clamp(16px,2vw,24px);color:var(--accent);font-size:12px;transition:transform .3s}
 .rl-svc__card:hover .rl-svc__a{transform:translate(3px,-3px)}
+/* lien vers le sommaire /services, sous la grille des cinq métiers */
+.rl-svc__all{margin:clamp(20px,2.6vw,30px) 0 0}
+.rl-svc__all .btn-line{text-decoration:none}
 
 @media (max-width:1100px){
   .rl-svc__grid{grid-template-columns:repeat(2,1fr)}
