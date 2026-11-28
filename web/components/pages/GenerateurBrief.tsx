@@ -12,6 +12,12 @@ export const pageMeta = {
     "Brief créatif en dix questions : positionnement, cible, ton, contraintes. Un document imprimable en PDF, à envoyer à un studio ou à un graphiste.",
 };
 
+export const aeo = {
+  question: "Comment rédiger un brief créatif pour une identité de marque ?",
+  answer:
+    "Un brief créatif tient en une page : l'activité et la promesse, les clients visés, deux ou trois concurrents, le ton souhaité, les supports à couvrir, puis les contraintes de délai et de budget. Il se rédige avant le premier croquis, pas après. Ce qui compte n'est pas sa longueur mais sa précision : à qui l'on parle, ce que l'on veut faire retenir, et ce qui est hors sujet. Le brief décrit le besoin, jamais la solution graphique.",
+};
+
 export const faqItems = [
   {
     question: "Qu'est-ce qu'un brief créatif ?",
@@ -101,6 +107,18 @@ export function GenerateurBrief() {
           </div>
         </div>
       </header>
+
+      <section className="section">
+        <div className="wrap">
+          <div className="sec-head rv">
+            <div className="sec-num">En bref</div>
+            <div>
+              <h2>{aeo.question}</h2>
+              <p>{aeo.answer}</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section className="section" id="outil">
         <div className="wrap">

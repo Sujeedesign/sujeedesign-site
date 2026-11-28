@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { GenerateurBrief, faqItems, pageMeta } from "@/components/pages/GenerateurBrief";
+import { GenerateurBrief, aeo, faqItems, pageMeta } from "@/components/pages/GenerateurBrief";
 import { JsonLd } from "@/components/site/JsonLd";
 import { PageShell } from "@/components/site/PageShell";
 import { FloatingCta } from "@/components/site/FloatingCta";
@@ -24,7 +24,7 @@ export default function Page() {
         data={pageGraph([
           webPageNode(PATH, pageMeta.title, pageMeta.description),
           webApplicationNode(PATH, pageMeta.title, pageMeta.description),
-          faqNode(PATH, faqItems),
+          faqNode(PATH, [aeo, ...faqItems]),
           breadcrumbNode([
             { name: "Accueil", path: routes.home },
             { name: "Ressources", path: routes.ressources },

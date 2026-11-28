@@ -155,7 +155,7 @@ const PAGES: PageCase[] = [
   {
     label: "générateur de brief identité",
     path: routes.generateurBriefIdentite,
-    aeo: false,
+    aeo: true,
     load: () => BriefPage(),
   },
   {

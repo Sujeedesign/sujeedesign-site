@@ -46,7 +46,7 @@ export const PAGE_UPDATED = {
   [routes.guideAgenceFreelance]: "2026-11-12",
   [routes.modeleCahierDesCharges]: "2026-11-11",
   [routes.guideTendances2027]: "2026-11-25",
-  [routes.generateurBriefIdentite]: "2026-11-11",
+  [routes.generateurBriefIdentite]: "2026-11-28",
   [routes.testerSonLogo]: "2026-11-22",
   [routes.testContraste]: "2026-11-18",
   [routes.guides]: "2026-11-15",
