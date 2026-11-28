@@ -13,7 +13,7 @@ PAIRS = [
     ("/", "index.html"),
     ("/realisations", "realisations.html"),
     ("/realisations/vaasam", "projet.html"),
-    ("/services", "services.html"),
+    ("/prestations", "services.html"),
     ("/services/identite-de-marque", "service-identite.html"),
     ("/services/direction-artistique", "service-direction-artistique.html"),
     ("/services/site-ecommerce", "service-site-ecommerce.html"),

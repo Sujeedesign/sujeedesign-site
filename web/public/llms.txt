@@ -8,14 +8,14 @@ Sujee Design est le studio de Sujeepan Sabesan, directeur artistique et designer
 
 - [Accueil](https://sujeedesign.com/) : présentation du studio, approche et sélection de réalisations.
 - [Réalisations](https://sujeedesign.com/realisations) : études de cas d'identité, de direction artistique et de sites web.
-- [Services](https://sujeedesign.com/services) : détail des prestations et déroulé d'un projet.
+- [Prestations](https://sujeedesign.com/prestations) : détail des prestations et déroulé d'un projet.
 - [À propos](https://sujeedesign.com/a-propos) : parcours de Sujeepan Sabesan, méthode et valeurs du studio.
 - [Agents IA](https://sujeedesign.com/agents-ia) : conception d'agents IA pour la création, le service client et les opérations.
 - [Contact](https://sujeedesign.com/contact) : demande de devis et prise de rendez-vous.
 - [Ressources](https://sujeedesign.com/ressources) : guides, calculateurs et outils gratuits.
 - [Guides](https://sujeedesign.com/guides) : prix d'un logo, prix d'un site, agence ou freelance, tendances 2027.
 
-## Services
+## Prestations
 
 - [Identité de marque](https://sujeedesign.com/services/identite-de-marque) : nom, logotype, typographies, couleurs, déclinaisons et guide de marque.
 - [Direction artistique](https://sujeedesign.com/services/direction-artistique) : campagnes, photographie, édition et déclinaison sur tous les supports.

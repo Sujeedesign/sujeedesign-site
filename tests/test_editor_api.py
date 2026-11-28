@@ -72,7 +72,7 @@ def test_page_editer_arme_l_edition_ponctuellement(client: TestClient) -> None:
     login(client)
     response = client.get("/admin/editer?page=services", follow_redirects=False)
     assert response.status_code == 303
-    assert response.headers["location"].endswith("/services")
+    assert response.headers["location"].endswith("/prestations")
     cookies = response.headers.get_list("set-cookie")
     assert any(c.startswith("sjd_edit=1") for c in cookies)
     assert any("sjd_edit=1" in c and "HttpOnly" not in c for c in cookies)

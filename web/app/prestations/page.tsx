@@ -38,7 +38,7 @@ export default async function Page() {
           ...(faq.length ? [faqNode(routes.services, faq)] : []),
           breadcrumbNode([
             { name: "Accueil", path: routes.home },
-            { name: "Services", path: routes.services },
+            { name: "Prestations", path: routes.services },
           ]),
         ])}
       />

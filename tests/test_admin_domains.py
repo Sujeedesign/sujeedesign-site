@@ -6,7 +6,7 @@ deux points qui font le lien entre les deux hôtes :
 
 - les cookies de session sont posés avec `Domain=sujeedesign.com`, sinon la
   vitrine ne voit ni la session ni la demande d'édition ;
-- « Éditer en place » redirige vers l'URL publique absolue, sinon `/services`
+- « Éditer en place » redirige vers l'URL publique absolue, sinon `/prestations`
   renverrait à l'écran de connexion du back office.
 """
 
@@ -76,7 +76,7 @@ def test_editer_en_place_renvoie_vers_le_site_public(db_file, monkeypatch) -> No
         _login(client)
         response = client.get("/editer?page=services", follow_redirects=False)
         assert response.status_code == 303
-        assert response.headers["location"] == "https://sujeedesign.com/services"
+        assert response.headers["location"] == "https://sujeedesign.com/prestations"
         cookie = response.headers["set-cookie"]
         assert cookie.startswith(security.EDIT_MARKER_COOKIE + "=1")
         assert "Domain=.sujeedesign.com" in cookie

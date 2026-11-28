@@ -112,7 +112,7 @@ export default async function Page({ params }: Params) {
           ...(faq ? [faqNode(servicePath(slug as ServiceSlug), faq(doc))] : []),
           breadcrumbNode([
             { name: "Accueil", path: routes.home },
-            { name: "Services", path: routes.services },
+            { name: "Prestations", path: routes.services },
             { name: serviceCatalog[slug as ServiceSlug].name, path: servicePath(slug as ServiceSlug) },
           ]),
         ])}

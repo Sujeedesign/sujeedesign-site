@@ -17,7 +17,7 @@ function read(D: Dict) {
   };
 
   const hero = {
-    kicker: v("hero.kicker", "Services · Périmètre écrit"),
+    kicker: v("hero.kicker", "Prestations · Périmètre écrit"),
     title: arr("hero.title", ["Cinq métiers,", "un seul interlocuteur."]),
     lead: v("hero.lead", "Le périmètre est écrit avant de commencer."),
     meta: v("hero.meta", [] as { label: string; text: string }[]),
@@ -77,7 +77,7 @@ export const pageMeta = {
 /**
  * FAQ du sommaire, dans l'ordre affiché.
  *
- * Le `FAQPage` de `/services` est construit avec cette même source : le texte
+ * Le `FAQPage` de `/prestations` est construit avec cette même source : le texte
  * publié à l'écran et celui du JSON-LD restent identiques, y compris après une
  * retouche faite depuis le back office.
  */

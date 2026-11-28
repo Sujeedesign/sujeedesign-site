@@ -18,7 +18,7 @@ const pageToRoute = {
   "index.html": "/",
   "realisations.html": "/realisations",
   "projet.html": "/realisations/vaasam",
-  "services.html": "/services",
+  "services.html": "/prestations",
   "service-identite.html": "/services/identite-de-marque",
   "service-direction-artistique.html": "/services/direction-artistique",
   "service-site-ecommerce.html": "/services/site-ecommerce",
