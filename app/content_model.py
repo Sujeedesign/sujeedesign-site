@@ -213,7 +213,7 @@ def schema_home() -> list[dict[str, Any]]:
         },
         {
             "key": "services",
-            "label": "Services",
+            "label": "Prestations",
             "hint": "Les cinq métiers listés sur l'accueil.",
             "blocks": [
                 _block(
@@ -278,7 +278,7 @@ def schema_page(slug: str, title_lines: int, *, kicker: str = "", lead: str = ""
 PAGE_DEFAULTS: dict[str, dict[str, Any]] = {
     "services": {
         "hero": {
-            "kicker": "Services · Périmètre écrit",
+            "kicker": "Prestations · Périmètre écrit",
             "title": ["Cinq métiers,", "un seul interlocuteur."],
             "lead": "Le périmètre est écrit avant de commencer. Les allers-retours sont inclus, et vous repartez avec les sources et les accès à votre nom.",
             "meta": [

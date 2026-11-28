@@ -54,7 +54,7 @@ CONTENT_SLUG = "home"
 # gérées par l'admin projet, pas par l'éditeur de texte.
 PAGES: tuple[tuple[str, str, str], ...] = (
     ("home", "Accueil", "/"),
-    ("services", "Services", "/prestations"),
+    ("services", "Prestations", "/prestations"),
     ("realisations", "Réalisations", "/realisations"),
     ("a-propos", "À propos", "/a-propos"),
     ("agents-ia", "Agents IA", "/agents-ia"),

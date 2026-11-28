@@ -90,7 +90,7 @@ export function SiteNav({ solid = false, current }: { solid?: boolean; current?:
           </a>
           <div className="nav-drop">
             <a className="nav-drop__btn" href={routes.services} aria-current={active(routes.services)}>
-              Services
+              Prestations
               <svg viewBox="0 0 12 12" aria-hidden="true">
                 <path
                   d="M2.6 4.6 6 8l3.4-3.4"
@@ -144,7 +144,7 @@ export function SiteNav({ solid = false, current }: { solid?: boolean; current?:
           Réalisations
         </a>
         <a className="navpanel__l" href={routes.services}>
-          Services
+          Prestations
         </a>
         <div className="navpanel__sub">
           {serviceSlugs.map((slug, index) => (
@@ -205,7 +205,7 @@ export function SiteFooter() {
   const studio = [
     { href: routes.home, label: "Accueil" },
     { href: routes.realisations, label: "Réalisations" },
-    { href: routes.services, label: "Services" },
+    { href: routes.services, label: "Prestations" },
     { href: routes.aPropos, label: "À propos" },
     { href: routes.contact, label: "Contact" },
   ];
