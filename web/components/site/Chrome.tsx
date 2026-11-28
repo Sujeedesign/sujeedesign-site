@@ -110,7 +110,7 @@ export function SiteNav({ solid = false, current }: { solid?: boolean; current?:
                 </a>
               ))}
               <a className="nav-drop__all" href={routes.services}>
-                Les cinq services <span aria-hidden="true">↗</span>
+                Les cinq prestations <span aria-hidden="true">↗</span>
               </a>
             </div>
           </div>
