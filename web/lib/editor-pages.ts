@@ -11,7 +11,7 @@
  */
 const EDITABLE_PAGES: Record<string, string> = {
   "/": "home",
-  "/services": "services",
+  "/prestations": "services",
   "/realisations": "realisations",
   "/a-propos": "a-propos",
   "/agents-ia": "agents-ia",

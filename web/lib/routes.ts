@@ -8,7 +8,15 @@
 export const routes = {
   home: "/",
   realisations: "/realisations",
-  services: "/services",
+  /**
+   * Hub des prestations. Il vit sur `/prestations` et non sur `/services` :
+   * Google refusait d'indexer `/services` après une dizaine de demandes
+   * manuelles alors que la page était saine (200, canonical self, aucun
+   * noindex, 25 liens entrants). On repositionne le hub sur une URL neuve,
+   * avec un 301 depuis l'ancienne ; les fiches service, elles, restent sous
+   * `/services/<slug>` et ne bougent pas.
+   */
+  services: "/prestations",
   aPropos: "/a-propos",
   agentsIa: "/agents-ia",
   contact: "/contact",
@@ -50,8 +58,15 @@ export const serviceSlugs = [
 
 export type ServiceSlug = (typeof serviceSlugs)[number];
 
+/**
+ * Base des fiches service. Distincte de `routes.services` : le hub a déménagé
+ * sur `/prestations`, les fiches restent sous `/services/<slug>` parce qu'elles
+ * sont indexées et qu'un déménagement en bloc ferait perdre leur historique.
+ */
+export const SERVICES_BASE = "/services";
+
 export function servicePath(slug: ServiceSlug): string {
-  return `${routes.services}/${slug}`;
+  return `${SERVICES_BASE}/${slug}`;
 }
 
 /**

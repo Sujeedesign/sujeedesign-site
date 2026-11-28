@@ -49,7 +49,7 @@ export function ServiceDirectionArtistique({ doc, related = [] }: { doc: Doc; re
                 <p className="sp-hero__lead" data-field="hero.lead">{hero.lead}</p>
                 <div className="sp-hero__cta">
                   <a className="btn-fill" href={routes.contact}>Parler de mon projet <span aria-hidden="true">↗</span></a>
-                  <a className="btn-line" href="/services">Tous les services</a>
+                  <a className="btn-line" href={routes.services}>Tous les services</a>
                 </div>
               </div>
               <div className="sp-hero__fig">

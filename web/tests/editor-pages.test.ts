@@ -5,7 +5,7 @@ import { editableSlug, normalizePath, pageSlug } from "@/lib/editor-pages";
 describe("pages éditables en place", () => {
   it("reconnaît les cinq pages branchées sur le modèle de contenu", () => {
     expect(editableSlug("/")).toBe("home");
-    expect(editableSlug("/services")).toBe("services");
+    expect(editableSlug("/prestations")).toBe("services");
     expect(editableSlug("/realisations")).toBe("realisations");
     expect(editableSlug("/a-propos")).toBe("a-propos");
     expect(editableSlug("/agents-ia")).toBe("agents-ia");
@@ -27,14 +27,14 @@ describe("pages éditables en place", () => {
   });
 
   it("tolère la barre finale, les paramètres et le fragment", () => {
-    expect(editableSlug("/services/")).toBe("services");
-    expect(editableSlug("/services/?x=1")).toBe("services");
+    expect(editableSlug("/prestations/")).toBe("services");
+    expect(editableSlug("/prestations/?x=1")).toBe("services");
     expect(editableSlug("/a-propos#equipe")).toBe("a-propos");
     expect(normalizePath("///")).toBe("/");
   });
 
   it("replie sur home pour la sonde de session", () => {
     expect(pageSlug("/services/site-ecommerce")).toBe("site-ecommerce");
-    expect(pageSlug("/services")).toBe("services");
+    expect(pageSlug("/prestations")).toBe("services");
   });
 });

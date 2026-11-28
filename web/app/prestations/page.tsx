@@ -10,7 +10,8 @@ import { breadcrumbNode, faqNode, pageGraph, serviceNode, webPageNode } from "@/
 export const metadata: Metadata = pageMetadata(pageMeta, routes.services, "/assets/img/og/services.jpg");
 
 /**
- * Le sommaire liste les quatre prestations sous `/services` : on décrit chacune
+ * Le sommaire liste les quatre prestations sous `/services` (les fiches), le hub
+ * lui-même vit sur `/prestations` : on décrit chacune
  * ici pour que les moteurs relient le sommaire aux pages filles. `agents-ia` vit
  * à la racine et n'est donc pas listé.
  */

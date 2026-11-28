@@ -16,7 +16,7 @@ const legacyUrls: Array<{ source: string; destination: string }> = [
   // Site statique historique
   { source: "/index.html", destination: "/" },
   { source: "/realisations.html", destination: "/realisations" },
-  { source: "/services.html", destination: "/services" },
+  { source: "/services.html", destination: "/prestations" },
   { source: "/apropos.html", destination: "/a-propos" },
   { source: "/mentions-legales.html", destination: "/mentions-legales" },
   { source: "/identite.html", destination: "/services/identite-de-marque" },
@@ -77,6 +77,10 @@ const nextConfig: NextConfig = {
       // valide, /propositions/polyresine (sans accent).
       { source: "/propositions/polyrésine", destination: "/propositions/polyresine", permanent: true },
       { source: "/propositions/polyr%C3%A9sine", destination: "/propositions/polyresine", permanent: true },
+      // Hub des prestations déplacé sur /prestations : Google n'indexait pas
+      // /services malgré une dizaine de demandes manuelles. Les fiches
+      // /services/<slug>, elles, restent en place et ne sont pas concernées.
+      { source: "/services", destination: "/prestations", statusCode: 301 },
       // Préversion /v5 : chaque page rejoint son équivalent à la racine.
       { source: "/v5", destination: "/", statusCode: 301 },
       { source: "/v5/index.html", destination: "/", statusCode: 301 },
@@ -84,7 +88,7 @@ const nextConfig: NextConfig = {
       { source: "/v5/agents-ia.html", destination: "/agents-ia", statusCode: 301 },
       { source: "/v5/realisations.html", destination: "/realisations", statusCode: 301 },
       { source: "/v5/projet.html", destination: "/realisations", statusCode: 301 },
-      { source: "/v5/services.html", destination: "/services", statusCode: 301 },
+      { source: "/v5/services.html", destination: "/prestations", statusCode: 301 },
       {
         source: "/v5/service-identite.html",
         destination: "/services/identite-de-marque",

@@ -25,7 +25,7 @@ import PrixSitePage from "@/app/guides/prix-site-internet/page";
 import ModeleCdcPage from "@/app/ressources/modele-cahier-des-charges-site/page";
 import TendancesPage from "@/app/guides/tendances-web-design-2027/page";
 import ServicePage from "@/app/services/[slug]/page";
-import ServicesPage from "@/app/services/page";
+import ServicesPage from "@/app/prestations/page";
 import sitemap from "@/app/sitemap";
 import { JsonLd } from "@/components/site/JsonLd";
 import { PAGE_UPDATED, SERVICE_UPDATED } from "@/lib/content/freshness";
